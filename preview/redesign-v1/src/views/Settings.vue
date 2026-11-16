@@ -239,7 +239,7 @@ const { current: currentSec, scrollTo } = useSectionNav(() => NAV.value.map((n) 
           <div class="panel">
             <dl class="kv about-kv">
               <dt>{{ L('版本', 'バージョン') }}</dt>
-              <dd>{{ L('Design V1.1 原型', 'Design V1.1 プロトタイプ') }}</dd>
+              <dd>{{ L('Design V1.2 原型', 'Design V1.2 プロトタイプ') }}</dd>
               <dt>{{ L('数据', 'データ') }}</dt>
               <dd class="data-line">
                 <span class="tag tag-info"><Icon name="info" :size="12" />{{ L('原型', 'プロトタイプ') }}</span>
@@ -268,7 +268,7 @@ const { current: currentSec, scrollTo } = useSectionNav(() => NAV.value.map((n) 
       <p class="about-line">My Taiko, in one place.</p>
       <dl class="kv about-sheet-kv">
         <dt>{{ L('版本', 'バージョン') }}</dt>
-        <dd>{{ L('Design V1.1 原型', 'Design V1.1 プロトタイプ') }}</dd>
+        <dd>{{ L('Design V1.2 原型', 'Design V1.2 プロトタイプ') }}</dd>
         <dt>{{ L('技术栈', '技術スタック') }}</dt>
         <dd>Nuxt 3 · Vue 3 · Element Plus</dd>
       </dl>

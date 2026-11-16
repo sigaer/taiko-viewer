@@ -42,7 +42,8 @@ import { store } from '../store'
 }
 @media (max-width: 767px) {
   .toasts {
-    bottom: calc(var(--tab-h) + 20px + env(safe-area-inset-bottom));
+    /* F1.3：在外壳底部占用与页面固定条之上，不压住按钮 */
+    bottom: calc(var(--shell-bottom) + var(--dock-h) + 12px);
   }
 }
 </style>

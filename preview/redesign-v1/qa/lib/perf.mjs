@@ -6,7 +6,8 @@ import { paletteParts } from '../flows/palette.mjs'
 
 export const BUDGETS = {
   dataGenMs: { max: 150, label: 'data generation (ms)' },
-  paletteKeyP95: { max: 50, label: 'palette keystroke → results p95 (ms)' },
+  paletteFirstP95: { max: 100, label: 'palette first keystroke after open, p95 (ms)' },
+  paletteWarmP95: { max: 50, label: 'palette warm keystroke, p95 (ms)' },
   songsFilterP95: { max: 100, label: '/songs filter p95 (ms)' },
   songsSortP95: { max: 100, label: '/songs sort p95 (ms)' },
   routeSwitchP95: { max: 200, label: 'route switch → content p95, warm (ms)' },
@@ -62,34 +63,49 @@ export async function runPerf(browser, base, { findings, rapidNavMetrics, verifi
       m.datasetInfo = nav.tv.datasetInfo
     } else notes.push('window.__TV__.datasetInfo.generatedMs not exposed — dataGenMs unmeasured (FCP reported instead)')
 
-    // 2. palette keystrokes
+    // 2. palette keystrokes (F3): first keystroke after each open vs. warm keystrokes after it.
+    //    20 opens; each open types one query character by character, then closes with Esc.
     try {
-      await page.keyboard.press('Control+k')
-      const { dialog } = await paletteParts(page)
-      await dialog.waitFor({ state: 'visible', timeout: 3000 })
-      const seq = 'lisa qby oni sakura x'.split('')
-      const times = await page.evaluate(async (seq) => {
-        const inp = [...document.querySelectorAll('[role=dialog] input')].pop()
-        const d = inp.closest('[role=dialog]')
-        const out = []
-        let v = ''
-        for (const ch of seq.slice(0, 20)) {
-          v += ch
-          const r = await window.__qaMeasure(d, () => {
-            inp.value = v
-            inp.dispatchEvent(new Event('input', { bubbles: true }))
-          }, 800)
-          out.push(r.mut ? r.ms : null)
-          await new Promise((res) => setTimeout(res, 30))
-        }
-        return out
-      }, seq)
-      const ok = times.filter((x) => x != null)
-      m.paletteKeyMedian = round(median(ok))
-      m.paletteKeyP95 = round(pct(ok, 95))
-      m.paletteKeySamples = ok.length
-      if (ok.length < times.length) notes.push(`palette: ${times.length - ok.length}/${times.length} keystrokes produced no DOM change within 800ms (excluded)`)
-      await page.keyboard.press('Escape')
+      const QUERIES = ['lisa', 'qby', 'oni', 'sakura', 'senbon', 'night', 'tengu', '765', 'drive', 'kaka', 'mirage', 'ura', 'rapid', 'neon', 'gold', 'hime', 'star', 'don', 'ka', 'blue']
+      const first = []
+      const warm = []
+      let missed = 0
+      for (const q of QUERIES) {
+        await page.keyboard.press('Control+k')
+        const { dialog } = await paletteParts(page)
+        await dialog.waitFor({ state: 'visible', timeout: 3000 })
+        await page.waitForTimeout(120)
+        const times = await page.evaluate(async (q) => {
+          const inp = [...document.querySelectorAll('[role=dialog] input')].pop()
+          const d = inp.closest('[role=dialog]')
+          const out = []
+          let v = ''
+          for (const ch of q.split('')) {
+            v += ch
+            const r = await window.__qaMeasure(d, () => {
+              inp.value = v
+              inp.dispatchEvent(new Event('input', { bubbles: true }))
+            }, 800)
+            out.push(r.mut ? r.ms : null)
+            await new Promise((res) => setTimeout(res, 30))
+          }
+          return out
+        }, q)
+        times.forEach((t, k) => {
+          if (t == null) missed++
+          else (k === 0 ? first : warm).push(t)
+        })
+        await page.keyboard.press('Escape')
+        await page.waitForTimeout(150)
+      }
+      m.paletteFirstP95 = round(pct(first, 95))
+      m.paletteFirstMedian = round(median(first))
+      m.paletteFirstN = first.length
+      m.paletteWarmP95 = round(pct(warm, 95))
+      m.paletteWarmMedian = round(median(warm))
+      m.paletteWarmN = warm.length
+      m.paletteFirstMax = round(Math.max(...first))
+      if (missed) notes.push(`palette: ${missed} keystroke(s) produced no DOM change within 800ms (excluded)`)
     } catch (e) {
       notes.push('palette latency not measured: ' + String(e.message).slice(0, 120))
     }

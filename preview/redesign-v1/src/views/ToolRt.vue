@@ -587,7 +587,7 @@ const whatIfs = computed(() => {
   }
   .mbar {
     position: sticky;
-    bottom: calc(var(--tab-h) + env(safe-area-inset-bottom) + 8px);
+    bottom: calc(var(--shell-bottom) + 8px); /* F1.3 */
     z-index: 10;
     margin-top: 16px;
     padding: 10px 16px 12px;

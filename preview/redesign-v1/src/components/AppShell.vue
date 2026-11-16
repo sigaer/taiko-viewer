@@ -42,6 +42,23 @@ function focusMain() {
   mainEl.value?.focus({ preventScroll: false })
 }
 
+/* ---------- 手机底栏（F1）：自带固定底部操作区的详情页（meta.dock）与全屏页（meta.bareMobile）不显示 ---------- */
+const showTabbar = computed(() => !route.meta.bareMobile && !route.meta.dock)
+const dock = computed(() => !!route.meta.dock)
+// 只在手机宽度写根元素属性：根元素上的属性变化会让整页重算样式，桌面上没必要付这笔开销
+watch(
+  () => [showTabbar.value, viewport.phone],
+  ([v, phone]) => {
+    const de = document.documentElement
+    const want = phone ? (v ? 'on' : 'off') : undefined
+    if (de.dataset.tabbar === want) return
+    if (want) de.dataset.tabbar = want
+    else delete de.dataset.tabbar
+  },
+  { immediate: true },
+)
+onBeforeUnmount(() => delete document.documentElement.dataset.tabbar)
+
 /* ---------- 返回（R4） ---------- */
 const back = computed(() => (route.meta.back ? backTarget(route) : null))
 function onBack(e) {
@@ -154,7 +171,7 @@ function mobileActive(t) {
 </script>
 
 <template>
-  <div class="shell">
+  <div class="shell" :class="{ dock }">
     <a href="#main" class="skip" @click.prevent="focusMain">{{ L('跳到主要内容', 'メインコンテンツへ移動') }}</a>
     <div class="sr-only" role="status" aria-live="polite" aria-atomic="true">{{ routeAnnouncement }}</div>
 
@@ -197,6 +214,8 @@ function mobileActive(t) {
       </button>
 
       <div class="bar-right">
+        <!-- F1.2：没有底栏的手机详情页，搜索放进顶栏（打开与「咚」相同的全屏搜索） -->
+        <button v-if="dock" type="button" class="icon-btn only-mobile m-search" :aria-label="L('搜索', '検索')" @click="store.paletteOpen = true"><Icon name="search" /></button>
         <!-- 同步：手机是图标按钮（S2），平板 / 桌面是状态条（S4） -->
         <SyncButton variant="icon" class="only-mobile m-sync" />
         <SyncButton v-if="store.auth !== 'guest'" variant="chip" class="only-desktop" />
@@ -248,7 +267,7 @@ function mobileActive(t) {
     <main id="main" ref="mainEl" class="main" tabindex="-1"><slot /></main>
 
     <!-- ============ 移动：底部五格 ============ -->
-    <nav v-if="!route.meta.bareMobile" class="tabbar" :aria-label="L('底部导航', 'ボトムナビ')">
+    <nav v-if="showTabbar" class="tabbar" :aria-label="L('底部导航', 'ボトムナビ')">
       <template v-for="t in MOBILE_TABS" :key="t.key">
         <button v-if="t.key === 'search'" type="button" class="don-btn" :aria-label="L('搜索', '検索')" @click="store.paletteOpen = true">
           <span class="don-face"><Icon name="search" :size="24" /></span>
@@ -578,7 +597,11 @@ kbd {
 @media (max-width: 767px) {
   .shell {
     padding-left: 0;
-    padding-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom));
+    padding-bottom: var(--shell-bottom);
+  }
+  /* F1.3：有固定底部操作区的详情页，正文底部留出它的实际高度 + 16px，最后一行内容滚到底时完全露出 */
+  .shell.dock .main {
+    padding-bottom: calc(var(--dock-h) + 16px);
   }
   .rail {
     display: none;
@@ -593,6 +616,21 @@ kbd {
   }
   .bar-right {
     gap: 0;
+    flex: none;
+  }
+  /* F1.2：返回 · 标题 · 搜索 · 同步 · 通知，三个图标按钮 44×44、间距 ≥ 6px */
+  .shell.dock .bar-right {
+    gap: 6px;
+  }
+  /* F1.2：标题单行，放不下时截断，三个图标按钮始终完整可点 */
+  .bar-title {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .m-search {
+    display: inline-grid !important;
+    place-items: center;
   }
   .bar-right .icon-btn {
     width: 44px;

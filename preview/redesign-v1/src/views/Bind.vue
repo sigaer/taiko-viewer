@@ -445,10 +445,11 @@ function enter() {
   gap: 2px;
   margin-top: 6px;
 }
+/* F2：其他绑定方式是一列独立的行，每行可点高度 ≥ 44px */
 .alt .link {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  min-height: 32px;
+  min-height: var(--hit);
   font-size: var(--fs-14);
 }
 

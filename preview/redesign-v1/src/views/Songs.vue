@@ -72,8 +72,12 @@ const IDX = songs.map((s) => {
 
 // 关键词匹配与命令面板同一个函数（src/search.js 的 matchSongIds：NFKC、假名互通、拉丁词首规则），
 // 所以面板里「在曲库中查看全部 N 首」的 N 与这里 shelf=all 时的行数一致（I8）
-ensureSearch()
-const matched = computed(() => matchSongIds(f.q))
+// 索引在第一次有关键词时才建立，不压在首次进入页面上（R6）
+const matched = computed(() => {
+  if (!f.q.trim()) return null
+  ensureSearch()
+  return matchSongIds(f.q)
+})
 const toggleSet = (key, v) => (f[key] = f[key].includes(v) ? f[key].filter((x) => x !== v) : [...f[key], v])
 const activeCount = computed(() => f.genre.length + f.star.length + (f.ura ? 1 : 0) + (f.crown !== 'all' ? 1 : 0))
 function clear() {

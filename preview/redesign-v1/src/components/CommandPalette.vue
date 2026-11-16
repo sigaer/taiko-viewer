@@ -312,8 +312,6 @@ watch(
 
 /* ---------------- 行内容 ---------------- */
 const DS = [4, 5]
-// C12：预热用的一首歌（精选曲 615 在两套数据里都有）
-const warmSong = computed(() => songOf(615) || null)
 function chartOf(song, d) {
   return song.charts?.find((c) => c.d === d) || null
 }
@@ -359,21 +357,6 @@ const placeholder = computed(() => L('曲名、别名、帖子，或「16 oxxo 1
           </div>
 
           <div ref="body" class="pal-body" @touchmove.passive="onBodyTouchMove">
-            <!-- C12：打开时先挂载一行歌曲结果的结构（不可见、不进读屏），首次按键不再承担组件的首次创建 -->
-            <div v-if="warmSong" class="warm" aria-hidden="true" inert>
-              <div class="item song">
-                <Cover :song="warmSong" />
-                <span class="grow"><span class="t truncate">{{ songTitle(warmSong) }}</span><span class="s truncate">{{ warmSong.artist }}</span></span>
-                <span class="diffs">
-                  <span v-for="d in DS" :key="d" class="dcol">
-                    <template v-if="chartOf(warmSong, d)">
-                      <span class="dchip"><Diff :d="d" :star="chartOf(warmSong, d).star" :constant="chartOf(warmSong, d).constant" short /></span>
-                      <span class="my"><Crown :v="2" size="sm" /><Rank :v="8" /><span class="num sc">0</span></span>
-                    </template>
-                  </span>
-                </span>
-              </div>
-            </div>
             <div id="pal-list" role="listbox" :aria-label="L('搜索结果', '検索結果')">
               <div v-for="g in groups" :key="g.key" role="group" :aria-labelledby="`pal-g-${g.key}`" class="grp">
                 <div :id="`pal-g-${g.key}`" class="g-title">{{ g.title }}</div>
@@ -576,14 +559,6 @@ const placeholder = computed(() => L('曲名、别名、帖子，或「16 oxxo 1
 .q::placeholder {
   color: var(--ink-3);
   font-size: var(--fs-16);
-}
-.warm {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  overflow: hidden;
-  visibility: hidden;
-  pointer-events: none;
 }
 .pal-body {
   flex: 1;

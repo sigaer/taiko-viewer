@@ -8,6 +8,21 @@ html {
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
+/* ---------- 外壳底部占用（F1.3）----------
+   --shell-bottom：固定在底部的外壳占用高度。手机上底栏可见时 = 底栏高度 + 安全区，隐藏时 = 安全区（AppShell 写 data-tabbar）。
+   --dock-h：页面自己的固定底部操作区的实际高度（src/dock.js 写入，没有时 0）。
+   --kb-h：软键盘挡住的高度（src/dock.js，没有时 0）。
+   操作条、回复框、悬浮按钮、提示条都从这几个变量取位置，页面不再写死底栏高度。 */
+:root {
+  --shell-bottom: env(safe-area-inset-bottom, 0px);
+  --dock-h: 0px;
+  --kb-h: 0px;
+}
+@media (max-width: 767px) {
+  :root[data-tabbar='on'] {
+    --shell-bottom: calc(var(--tab-h) + env(safe-area-inset-bottom, 0px));
+  }
+}
 body {
   margin: 0;
   background: var(--bg);
@@ -707,6 +722,19 @@ button.chip:hover {
   :is(a.link, button.link, .nname, a.name, a.sec, a.an, .a-by, .mtext, .g-author, .lead-meta a, .la-line a, .ugc-who a, .t-small > a, .t-caption > a) {
     padding-block: 4px;
     margin-block: -4px;
+  }
+  /* F2：句子里的独立文字链接（不在列表行里）没有豁免：透明扩展区补到 44×44，版面不动 */
+  :is(p, .top, .foot) > :is(a.link, button.link) {
+    position: relative;
+  }
+  :is(p, .top, .foot) > :is(a.link, button.link)::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    width: max(100%, var(--hit));
+    height: var(--hit);
+    transform: translate(-50%, -50%);
   }
   /* 胶囊里的移除钮在胶囊自身扩展区之上 */
   .chip > .hit {

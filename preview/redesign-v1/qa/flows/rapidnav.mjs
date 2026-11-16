@@ -46,5 +46,47 @@ export const rapidNav = {
       await t.go('/songs')
       expect((await page.locator('main').innerText()).length > 20, '/songs main is empty after burst')
     })
+    await t.close()
+
+    // F1: phone list ↔ detail transitions — tab bar toggles must not leave stale padding / dock height
+    const ph = await t.open({ vp: '390x844', route: '/songs' })
+    const seq = ['/songs', '/songs/615', '/community', '/community/t/4017', '/songs/615', '/u/mochidon', '/community/t/4017', '/tools/rt', '/songs', '/community/t/4017', '/me', '/songs/615']
+    const errs0 = t.errors.length
+    await t.step('phone: 36 list ↔ detail changes in ~4 s', async () => {
+      await ph.evaluate(async (seq) => {
+        for (let i = 0; i < 36; i++) {
+          location.hash = '#' + seq[i % seq.length]
+          await new Promise((r) => setTimeout(r, 110))
+        }
+      }, seq)
+      await ph.waitForTimeout(1200)
+    })
+    for (const r of ['/songs', '/songs/615', '/community/t/4017', '/u/mochidon']) {
+      await t.step(`phone after the burst: ${r} has consistent tab bar / bottom inset`, async () => {
+        await t.go(r)
+        await ph.waitForTimeout(300)
+        const g = await ph.evaluate(() => {
+          const de = document.documentElement
+          const cs = getComputedStyle(de)
+          const shell = document.querySelector('.shell')
+          return {
+            tabbar: !!document.querySelector('nav.tabbar'),
+            attr: de.dataset.tabbar,
+            dockVar: cs.getPropertyValue('--dock-h').trim(),
+            dockEl: (document.querySelector('.mbar') || document.querySelector('form.composer'))?.getBoundingClientRect().height || 0,
+            pad: parseFloat(getComputedStyle(shell).paddingBottom),
+          }
+        })
+        const dock = r === '/songs/615' || r.startsWith('/community/t/')
+        expect(g.tabbar === !dock && g.attr === (dock ? 'off' : 'on'), `tab bar ${g.tabbar}, data-tabbar ${g.attr}`)
+        expect(dock ? Math.abs(parseFloat(g.dockVar) - g.dockEl) <= 1 : parseFloat(g.dockVar || '0') === 0, `--dock-h ${g.dockVar}, dock ${g.dockEl}`)
+        expect(dock ? g.pad <= 1 : g.pad >= 60, `shell padding-bottom ${g.pad}`)
+        return JSON.stringify(g)
+      })
+    }
+    await t.step('phone burst: no console errors', () => {
+      const errs = t.errors.slice(errs0).filter((e) => e.kind === 'console' || e.kind === 'pageerror')
+      expect(errs.length === 0, errs.map((e) => e.text).join(' | '))
+    })
   },
 }

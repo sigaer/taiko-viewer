@@ -38,12 +38,16 @@ const DOCS = [
   ['docs/01-product-audit.md', '现有产品的信息架构与设计问题'],
   ['docs/02-design-directions.md', '三个设计方向与取舍'],
   ['docs/03-ia-mapping.md', '新旧信息架构映射与功能覆盖清单'],
-  ['docs/04-design-system.md', 'Design System V1 规范'],
+  ['docs/04-design-system.md', 'Design System 规范'],
   ['docs/05-page-specs.md', '主要页面的设计说明'],
   ['docs/06-migration-plan.md', '实施建议与分阶段迁移方案'],
   ['docs/07-v1.1-design-decisions.md', '设计裁决'],
   ['docs/08-v1.1-fix-record.md', '逐项修复记录'],
-  ['docs/09-v1.1-qa-report.md', '浏览器验收报告'],
+  ['docs/09-v1.1-qa-report.md', '浏览器验收报告（V1.1）'],
+  ['docs/10-v1.2-design-decisions.md', '设计裁定 V1.2'],
+  ['docs/11-v1.2-quality-report.md', '质量与性能报告'],
+  ['docs/12-risks-and-integration-acceptance.md', '遗留风险与正式集成验收清单'],
+  ['docs/13-design-freeze.md', 'Design Freeze 决策'],
   ['qa/screenshots/index.html', '关键截图与浅深对照'],
 ]
 </script>
@@ -52,7 +56,7 @@ const DOCS = [
   <div class="hub">
     <header class="top">
       <Logo :size="34" />
-      <b class="grow">Taiko Viewer · Design V1.1</b>
+      <b class="grow">Taiko Viewer · Design V1.2</b>
       <div class="seg" role="group" aria-label="主题">
         <button v-for="t in THEMES" :key="t.v" type="button" :aria-pressed="store.theme === t.v" @click="store.theme = t.v">{{ t.t }}</button>
       </div>
@@ -62,7 +66,7 @@ const DOCS = [
       <section class="intro" aria-labelledby="hub-title">
         <div>
           <h1 id="hub-title">把每一次练习，画成一条谱面。</h1>
-          <p class="lead">Taiko Viewer 全站重新设计，方向名「<span lang="ja">譜面</span> Fumen」。V1.1 在第一版的基础上按设计裁决逐项修复：同步、搜索、路由状态、对比度与触控、真实规模数据和模块的视觉区分。产品能力全部保留；所有数据都是示例。</p>
+          <p class="lead">Taiko Viewer 全站重新设计，方向名「<span lang="ja">譜面</span> Fumen」。V1.1 与 V1.2 两轮按设计裁定逐项修复：同步、搜索、路由状态、对比度与触控、真实规模数据、模块的视觉区分和手机详情页导航。产品能力全部保留；所有数据都是示例。</p>
           <div class="row-wrap">
             <button type="button" class="btn btn-primary btn-lg" @click="open({ path: '/', auth: 'ready' })"><Icon name="desktop" :size="18" />打开桌面原型</button>
             <button type="button" class="btn btn-lg" @click="phone({ path: '/', auth: 'ready' })"><Icon name="phone" :size="18" />打开手机原型</button>
@@ -83,7 +87,7 @@ const DOCS = [
 
       <nav class="trio" aria-label="评审页">
         <RouterLink to="/review/directions"><Icon name="layers" :size="22" /><b>三个设计方向</b><span>譜面 / 祭 / 帖，以及为什么选第一个</span></RouterLink>
-        <RouterLink to="/review/system"><Icon name="grid" :size="22" /><b>Design System V1.1</b><span>Tokens、组件、图表、动效与模块语气的活样张</span></RouterLink>
+        <RouterLink to="/review/system"><Icon name="grid" :size="22" /><b>Design System V1.2</b><span>Tokens、组件、图表、动效与模块语气的活样张</span></RouterLink>
         <RouterLink to="/states"><Icon name="info" :size="22" /><b>状态页样例</b><span>加载、空、错误、权限引导</span></RouterLink>
       </nav>
 

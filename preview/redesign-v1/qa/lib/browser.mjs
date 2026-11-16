@@ -31,7 +31,10 @@ export function stateFor(c) {
 }
 
 export async function newContext(browser, { vp = '1440x900', state = {}, colorScheme, reducedMotion = 'no-preference', extraInit } = {}) {
-  const v = VIEWPORTS[vp] || VIEWPORTS['1440x900']
+  // matrix viewports by key; any other 'WxH' (e.g. the short-viewport keyboard proxies 390x480) is parsed,
+  // and widths ≤ 767 get the phone flags
+  const m = /^(\d+)x(\d+)$/.exec(vp)
+  const v = VIEWPORTS[vp] || (m ? { width: +m[1], height: +m[2], ...(+m[1] <= 767 ? { isMobile: true, hasTouch: true, deviceScaleFactor: 2 } : {}) } : VIEWPORTS['1440x900'])
   const st = stateFor(state)
   const ctx = await browser.newContext({
     viewport: { width: v.width, height: v.height },

@@ -63,7 +63,8 @@ const routes = [
 
   { path: '/songs', component: v('Songs'), meta: { title: { zh: '曲库', ja: '楽曲' }, module: 'songs' } },
   { path: '/songs/constants', component: v('Constants'), meta: { title: { zh: '定数表', ja: '定数表' }, module: 'songs' } },
-  { path: '/songs/:id', component: v('SongDetail'), meta: { title: { zh: '歌曲详情', ja: '楽曲詳細' }, module: 'songs', back: '/songs', detail: true } },
+  // dock：手机上自带固定底部操作区的详情页，不显示五格底栏，顶栏多一个搜索按钮（F1）
+  { path: '/songs/:id', component: v('SongDetail'), meta: { title: { zh: '歌曲详情', ja: '楽曲詳細' }, module: 'songs', back: '/songs', detail: true, dock: true } },
   { path: '/dan', component: v('Dan'), meta: { title: { zh: '段位道场', ja: '段位道場' }, module: 'songs' } },
   { path: '/guide', component: v('Guide'), meta: { title: { zh: '谱面攻略', ja: '譜面攻略' }, module: 'songs' } },
   { path: '/titles', component: v('Titles'), meta: { title: { zh: '称号', ja: '称号' }, module: 'songs' } },
@@ -78,7 +79,7 @@ const routes = [
   { path: '/growth/goals', component: v('Goals'), meta: { title: { zh: '目标', ja: '目標' }, module: 'growth', gate: true } },
 
   { path: '/community', component: v('Community'), meta: { title: { zh: '社区广场', ja: 'コミュニティ' }, module: 'community' } },
-  { path: '/community/t/:id', component: v('Thread'), meta: { title: { zh: '帖子', ja: '投稿' }, module: 'community', back: '/community', detail: true } },
+  { path: '/community/t/:id', component: v('Thread'), meta: { title: { zh: '帖子', ja: '投稿' }, module: 'community', back: '/community', detail: true, dock: true } },
   { path: '/community/new', component: v('Compose'), meta: { title: { zh: '发布新帖', ja: '新規投稿' }, module: 'community', back: '/community', detail: true, bareMobile: true } },
   { path: '/community/me', component: v('CommunityMe'), meta: { title: { zh: '我的社区', ja: 'マイ投稿' }, module: 'community' } },
   { path: '/notifications', component: v('Notifications'), meta: { title: { zh: '通知', ja: '通知' }, module: 'community' } },

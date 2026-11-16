@@ -1,6 +1,8 @@
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
+import { useDock, useKeyboardInset } from '../dock'
+import { isMobile } from '../breakpoints'
 import Icon from '../components/Icon.vue'
 import Cover from '../components/Cover.vue'
 import Diff from '../components/Diff.vue'
@@ -109,6 +111,31 @@ onMounted(() => {
 /* ---------- 回复 ---------- */
 const replyTo = ref(null)
 const draft = ref('')
+// F1.5：手机回复框贴底；收起一行，随输入增高到 5 行后框内滚动；软键盘弹出时贴在键盘上方
+const composerEl = ref(null)
+const replyEl = ref(null)
+useDock(composerEl)
+useKeyboardInset()
+function fitReply() {
+  const el = replyEl.value
+  if (!el) return
+  if (!isMobile.value) {
+    el.style.height = ''
+    el.style.overflowY = ''
+    return
+  }
+  const cs = getComputedStyle(el)
+  const lh = parseFloat(cs.lineHeight) || 21
+  const pad = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth)
+  const max = Math.round(lh * 5 + pad)
+  el.style.height = 'auto'
+  const h = Math.min(el.scrollHeight + parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth), max)
+  el.style.height = `${Math.max(Math.round(h), 44)}px`
+  el.style.overflowY = el.scrollHeight + 2 > max ? 'auto' : 'hidden'
+}
+watch(draft, () => nextTick(fitReply))
+watch(isMobile, () => nextTick(fitReply))
+onMounted(() => nextTick(fitReply))
 const trayOpen = ref(false)
 const imgs = ref([])
 let imgSeq = 0
@@ -329,7 +356,7 @@ const related = (() => {
           </nav>
         </section>
 
-        <form class="composer" @submit.prevent="send">
+        <form ref="composerEl" class="composer" @submit.prevent="send">
           <div v-if="replyTo" class="replying">
             <span>{{ L('回复', '返信先：') }} #{{ replyTo.floor }} {{ users[replyTo.author].name }}</span>
             <button type="button" class="icon-btn" :aria-label="L('取消回复', '返信をやめる')" @click="replyTo = null"><Icon name="close" :size="14" /></button>
@@ -345,7 +372,7 @@ const related = (() => {
           </div>
           <div class="crow">
             <label for="th-reply" class="sr-only">{{ L('回复内容', '返信の内容') }}</label>
-            <textarea id="th-reply" v-model="draft" class="textarea" rows="2" :disabled="!isAuthed" :placeholder="isAuthed ? L('写下你的回复', '返信を書く') : L('登录后参与讨论', 'ログインして返信')" />
+            <textarea id="th-reply" ref="replyEl" v-model="draft" class="textarea" :rows="isMobile ? 1 : 2" :disabled="!isAuthed" :placeholder="isAuthed ? L('写下你的回复', '返信を書く') : L('登录后参与讨论', 'ログインして返信')" />
             <div class="cbtns">
               <button type="button" class="icon-btn" :aria-label="L('添加图片（最多 4 张）', '画像を追加（4 枚まで）')" :aria-expanded="trayOpen" :disabled="!isAuthed" @click="toggleTray"><Icon name="image" /></button>
               <button v-if="isAuthed" type="submit" class="btn btn-primary" :disabled="!draft.trim()">{{ L('回复', '返信する') }}</button>
@@ -895,10 +922,39 @@ const related = (() => {
   .pager-bottom {
     margin-bottom: 20px;
   }
+  /* F1.5：回复框贴底（此页没有底栏），内部用安全区做下内边距；软键盘弹出时贴在键盘上方，不再叠加安全区 */
   .composer {
-    bottom: calc(var(--tab-h) + env(safe-area-inset-bottom));
-    margin: 20px calc(var(--gutter) * -1) 0;
-    padding: 10px var(--gutter);
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(var(--shell-bottom) - env(safe-area-inset-bottom, 0px));
+    z-index: var(--z-bar);
+    margin: 0;
+    padding: 8px var(--gutter) calc(8px + env(safe-area-inset-bottom, 0px));
+    background: color-mix(in srgb, var(--bg) 94%, transparent);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  :global(:root[data-kb]) .composer {
+    bottom: var(--kb-h);
+    padding-bottom: 8px;
+  }
+  .crow {
+    align-items: flex-end;
+  }
+  /* 一行 = 26px 行高 + 上下 8px + 边框 = 44px；最多 5 行 */
+  .composer .textarea {
+    min-height: var(--hit);
+    padding-top: 8px;
+    padding-bottom: 8px;
+    line-height: 26px;
+    resize: none;
+    overflow-y: hidden;
+  }
+  .cbtns .icon-btn,
+  .cbtns .btn {
+    min-width: var(--hit);
+    height: var(--hit);
   }
   .tile-rm {
     width: 26px;

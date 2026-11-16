@@ -203,6 +203,8 @@ export function installQA() {
   QA.truncation = function () {
     const out = []
     const info = []
+    const classes = []
+    const rng = document.createRange()
     const all = document.body.querySelectorAll('*')
     let n = 0
     for (const el of all) {
@@ -222,13 +224,43 @@ export function installQA() {
       if (!clampX && !clampY) continue
       const ell = cs.textOverflow === 'ellipsis'
       if (clampX && !ell && !lc) {
-        out.push({ selector: sel(el), text: txt(el), clipped: ox !== 'visible', sw: el.scrollWidth, cw: el.clientWidth })
+        // F4.3: scrollWidth also grows with absolutely positioned children and transparent ::after hit
+        // areas, so measure the TEXT itself against the content box and classify:
+        //   hit-area  — the text fits; the extra width is a hit-area pseudo-element / positioned child
+        //   metrics   — the text passes the content box by ≤ 3px (font side bearings; no visible effect)
+        //   digits    — same, numeric text (digit glyph overhang; no visible effect)
+        //   real      — passes by > 3px, or is clipped without an ellipsis → the only class reported
+        // union of the element's own text (not nested controls such as a chip's remove button)
+        const tr = { left: Infinity, right: -Infinity }
+        const tw2 = document.createTreeWalker(el, NodeFilter.SHOW_TEXT)
+        while (tw2.nextNode()) {
+          const tn = tw2.currentNode
+          if (!tn.textContent.trim() || tn.parentElement.closest('button, svg, .sr-only') !== el.closest('button, svg, .sr-only')) continue
+          rng.selectNodeContents(tn)
+          const b = rng.getBoundingClientRect()
+          if (b.width > 0) {
+            tr.left = Math.min(tr.left, b.left)
+            tr.right = Math.max(tr.right, b.right)
+          }
+        }
+        if (tr.right < tr.left) continue
+        const br = el.getBoundingClientRect()
+        const cl = br.left + parseFloat(cs.borderLeftWidth) + parseFloat(cs.paddingLeft)
+        const cr = br.right - parseFloat(cs.borderRightWidth) - parseFloat(cs.paddingRight)
+        const dx = Math.max(tr.right - cr, cl - tr.left)
+        const text = txt(el)
+        // a trailing full-width bracket / punctuation carries up to half an em of empty side bearing
+        const fs = parseFloat(cs.fontSize) || 14
+        const wideTail = /[）」』】〕〉》、。，：；！？]$/.test(text) && dx <= fs * 0.5
+        const kind = dx <= 0.5 ? 'hit-area' : dx <= 3 || wideTail ? (/^[\d\s.,:%+\-−\/×★]+$/.test(text) ? 'digits' : 'metrics') : 'real'
+        classes.push({ selector: sel(el), text, kind, dx: Math.round(dx * 10) / 10, clipped: ox !== 'visible' })
+        if (kind === 'real') out.push({ selector: sel(el), text, clipped: ox !== 'visible', sw: el.scrollWidth, cw: el.clientWidth, dx: Math.round(dx) })
       } else if (!el.closest('[title]')) {
         info.push({ selector: sel(el), text: txt(el) })
       }
       if (out.length > 30) break
     }
-    return { undeclared: out, ellipsisNoTitle: info.slice(0, 30), ellipsisNoTitleCount: info.length }
+    return { undeclared: out, ellipsisNoTitle: info.slice(0, 30), ellipsisNoTitleCount: info.length, classes: classes.slice(0, 60) }
   }
 
   // C14: text boxes of different elements that intersect (> 2px in both axes), and text blocks that
@@ -344,27 +376,48 @@ export function installQA() {
     return { nodes: n, collisions: hits, wraps: wraps.slice(0, 20) }
   }
 
+  // F2 (C10 in force): the ONLY exemption from 44×44 on phones is an inline text link — an author /
+  // section name inside a row, or a link inside a sentence. It must (1) have a hit height ≥ 24px,
+  // (2) sit in a row that is ≥ 44px tall, and (3) keep ≥ 8px from adjacent independent targets.
+  // Buttons, icon buttons, form controls, tabs, segments, chips, list rows and tab-bar items are never
+  // exempt. Small decorations inside the link (a section dot, a ≤ 28px avatar) do not change its kind.
+  // the row = the list item / card the link sits in (a floor, a thread row, a table row …)
+  const ROW = 'li, tr, article, [role=row], .post, .mrow, .fact, .rep, .tk, .th'
+  function inlineLink(el) {
+    if (!(el.tagName === 'A' || (el.tagName === 'BUTTON' && el.classList.contains('link')))) return false
+    if (el.matches('.btn, .chip, .tab, [role=tab], .icon-btn, .seg button, .fopt, .tile, .rowlink, .row-link, .mrow, .lamp, .slink, .songlink, .tile-link')) return false
+    if (el.closest('nav.tabbar, nav.m-tabs, .bar, .rail, h1, h2, h3')) return false
+    // a link that fills its row (a list row link) is a row, not an inline link
+    const pr = el.parentElement?.getBoundingClientRect()
+    if (pr && el.getBoundingClientRect().width >= pr.width * 0.8) return false
+    if (!el.parentElement?.closest(ROW)) return false
+    if (el.querySelector('.cover, .crown, .diff, .rank, .note, .lamp, .star-pip')) return false
+    const deco = [...el.querySelectorAll('img, svg, .avatar, .dot, i')]
+    if (!deco.every((x) => { const r = x.getBoundingClientRect(); return r.width <= 28 && r.height <= 28 })) return false
+    const t = (el.textContent || '').trim()
+    return t.length > 0 && t.length <= 40
+  }
+  function rowOf(el) {
+    return el.parentElement?.closest(ROW) || el.parentElement
+  }
+  function gapBetween(a, b) {
+    const dx = Math.max(0, Math.max(a.left, b.left) - Math.min(a.right, b.right))
+    const dy = Math.max(0, Math.max(a.top, b.top) - Math.min(a.bottom, b.bottom))
+    return { dx, dy }
+  }
+
   QA.tapTargets = async function () {
     const els = QA.interactive()
     const small = []
+    const inlineFails = []
+    let inlineN = 0
     let checked = 0
     for (const el of els) {
-      // C10: inline text links (an author / section name in a row, a link in a sentence, a text-styled
-      // button.link) need a hit HEIGHT ≥ 24px, not 44×44. Inline = a text-only a / button.link laid out
-      // inline (not flex / grid / block), with no media inside.
-      let need = 44
-      if (el.tagName === 'A' || (el.tagName === 'BUTTON' && el.classList.contains('link'))) {
-        const cs = getComputedStyle(el)
-        // text links that are not controls: an author / section / title-source name, a link in a sentence.
-        // (display may be block for truncation, e.g. .title-1l) — anything styled as a button / chip / tab is not
-        const control = el.matches('.btn, .chip, .tab, [role=tab], .icon-btn, .seg button, .fopt') || cs.display === 'flex' || cs.display === 'grid' || cs.display === 'inline-flex' || cs.display === 'inline-grid'
-        const textOnly = !el.querySelector('img, svg, .cover, .avatar, .crown, .diff, .note')
-        if (!control && textOnly && (el.textContent || '').trim().length <= 60) need = 24
-      }
       if (el.disabled) continue
+      const isInline = inlineLink(el)
       let r = el.getBoundingClientRect()
       checked++
-      if (need === 24 ? r.height >= 24 : r.width >= 44 && r.height >= 44) continue
+      if (!isInline && r.width >= 44 && r.height >= 44) continue
       el.scrollIntoView({ block: 'center', inline: 'nearest', behavior: 'instant' })
       if (!el.isConnected) continue
       r = el.getBoundingClientRect()
@@ -378,9 +431,30 @@ export function installQA() {
         if (h === el || el.contains(h)) return true
         return !!el.labels && [...el.labels].some((lb) => lb === h || lb.contains(h))
       }
-      if (need === 24) {
+      if (isInline) {
+        inlineN++
+        const why = []
         const h24 = r.height >= 24 || (own(cxp, cyp - 11.5) && own(cxp, cyp + 11.5)) ? 24 : Math.round(r.height)
-        if (h24 < 24) small.push({ selector: sel(el), text: txt(el, 24), w: Math.round(r.width), h: h24, area: h24 * 44, inline: true })
+        if (h24 < 24) why.push(`hit height ${h24}px < 24`)
+        const row = rowOf(el)
+        const rh = row ? row.getBoundingClientRect().height : 0
+        if (rh < 44) why.push(`row ${row ? sel(row) : '?'} is ${Math.round(rh)}px < 44`)
+        // the visual box already includes the ≥ 24px padding extension (C10 CSS); compare boxes
+        let near = null
+        for (const o of els) {
+          if (o === el || o.contains(el) || el.contains(o) || o.disabled) continue
+          const or = o.getBoundingClientRect()
+          if (or.width < 1 || or.height < 1) continue
+          const { dx, dy } = gapBetween(r, or)
+          const sameLine = dy === 0 && dx < 8
+          const stacked = dx === 0 && dy < 8
+          if (sameLine || stacked) {
+            near = { s: sel(o), d: Math.round(sameLine ? dx : dy) }
+            break
+          }
+        }
+        if (near) why.push(`${near.d}px from ${near.s} (< 8)`)
+        if (why.length) inlineFails.push({ selector: sel(el), text: txt(el, 24), why: why.join('; ') })
         continue
       }
       const w = r.width >= 44 || (own(cxp - 21.5, cyp) && own(cxp + 21.5, cyp)) ? 44 : Math.round(r.width)
@@ -389,7 +463,7 @@ export function installQA() {
     }
     window.scrollTo({ top: 0, left: 0, behavior: 'instant' })
     small.sort((a, b) => a.area - b.area)
-    return { checked, count: small.length, worst: small.slice(0, 10) }
+    return { checked, count: small.length, worst: small.slice(0, 10), inlineN, inlineFails: inlineFails.slice(0, 12), inlineFailCount: inlineFails.length }
   }
 
   QA.contrast = function (max = 400) {

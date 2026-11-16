@@ -505,4 +505,10 @@ a.mtext:hover {
     margin-left: 0;
   }
 }
+/* F2：里程碑标题链接是这一行的主目标，手机上点击高度 ≥ 44px */
+@media (max-width: 767px) {
+  a.mtext {
+    min-height: var(--hit);
+  }
+}
 </style>

@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Taiko Viewer 全站重新设计 Design V1.1 高保真原型（仅 Mock 数据，与生产实现隔离）",
+  "description": "Taiko Viewer 全站重新设计 Design V1.2 高保真原型（仅 Mock 数据，与生产实现隔离）",
   "scripts": {
     "dev": "vite --port 4310",
     "build": "vite build",

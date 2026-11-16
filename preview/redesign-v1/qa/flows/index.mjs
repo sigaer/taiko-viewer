@@ -6,6 +6,7 @@ import { rapidNav } from './rapidnav.mjs'
 import { toggles } from './toggles.mjs'
 import { forms } from './forms.mjs'
 import { screenReview } from './screenreview.mjs'
+import { detailNavPhone } from './detailnav.mjs'
 import { threadPaging, growthRanges, deepScroll, folds, density, paletteShowcase } from './rulings.mjs'
 
-export const FLOWS = [paletteDesktop, palettePhone, syncFlow('desktop'), syncFlow('phone'), overlayDesktop, overlayPhone, routeState, rapidNav, toggles, forms, threadPaging, growthRanges, deepScroll, folds, density, screenReview, paletteShowcase]
+export const FLOWS = [paletteDesktop, palettePhone, syncFlow('desktop'), syncFlow('phone'), overlayDesktop, overlayPhone, routeState, rapidNav, toggles, forms, threadPaging, growthRanges, deepScroll, folds, density, screenReview, detailNavPhone, paletteShowcase]

@@ -316,7 +316,8 @@ const ALIAS_LOG = [
   }
   .alog li {
     grid-template-columns: minmax(0, 1fr) auto;
-    gap: 4px 12px;
+    /* F2：作者名（行内链接）与上方歌曲链接之间留 ≥ 8px（作者名自带上下 4px 点击扩展） */
+    gap: 12px 12px;
     padding: 10px 0;
   }
   .a-by {

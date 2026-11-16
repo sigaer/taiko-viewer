@@ -37,7 +37,7 @@ import {
   ratingHistory, dimHistory, goals, threads, users, milestones, EDGE, datasetInfo, fmt, sections,
 } from '../../mock/data'
 
-// Design System V1.1：活的规范页。所有样本都直接渲染 tokens.css / base.css / domain.css 与 src/components，
+// Design System V1.2：活的规范页。所有样本都直接渲染 tokens.css / base.css / domain.css 与 src/components，
 // 颜色值与对比度在浏览器里实时读取，换主题后自动重算。
 
 /* ---------------- 页面骨架 ---------------- */
@@ -752,7 +752,7 @@ const MAPPING = [
       <div class="s-top-in">
         <RouterLink to="/review" class="s-brand" aria-label="设计总览">
           <Logo :size="30" />
-          <b>Design System V1.1</b>
+          <b>Design System V1.2</b>
         </RouterLink>
         <RouterLink to="/review" class="link s-back"><Icon name="chevL" :size="14" />设计总览</RouterLink>
         <span class="grow" />
@@ -779,7 +779,7 @@ const MAPPING = [
 
       <main class="s-doc">
         <header class="s-intro">
-          <h1 class="t-display">Design System V1.1</h1>
+          <h1 class="t-display">Design System V1.2</h1>
           <p class="s-lede">Taiko Viewer「<span lang="ja">譜面</span> Fumen」设计语言的规范。每个样本都由 tokens.css、base.css、domain.css 和组件源码直接渲染，切换主题和语言后看到的就是实际效果。条目后的编号（D11、S2、R3、V6…）对应 docs/07-v1.1-design-decisions.md 的裁决。</p>
           <div class="s-ctl s-ctl-page">
             <div class="seg" role="group" aria-label="主题">
@@ -2255,12 +2255,12 @@ const MAPPING = [
         <!-- ============ 12 与现有实现的映射 ============ -->
         <section id="ds-mapping" class="s-sec">
           <h2 class="t-h1"><span class="s-n num">12</span>与现有实现的映射</h2>
-          <p class="s-lede">迁移时按这张表逐项替换。Design V1.1 的 token 可以和现有的 --viewer-* 并存，一个页面一个页面地换。</p>
+          <p class="s-lede">迁移时按这张表逐项替换。Design V1.2 的 token 可以和现有的 --viewer-* 并存，一个页面一个页面地换。</p>
           <div class="panel scroll-x">
             <table class="dt s-w680">
-              <caption class="sr-only">现有实现与 Design V1.1 的对应</caption>
+              <caption class="sr-only">现有实现与 Design V1.2 的对应</caption>
               <thead>
-                <tr><th scope="col">现在</th><th scope="col">Design V1.1</th><th scope="col">用户得到什么</th></tr>
+                <tr><th scope="col">现在</th><th scope="col">Design V1.2</th><th scope="col">用户得到什么</th></tr>
               </thead>
               <tbody>
                 <tr v-for="m in MAPPING" :key="m.old">
@@ -2411,6 +2411,14 @@ const MAPPING = [
 }
 .s-toc button[aria-current='true'] .num {
   color: var(--don-ink);
+}
+/* F4.1：当前项的 inset 描边比 :focus-visible 更具体，焦点环要单独写回 */
+.s-toc button:focus-visible {
+  box-shadow: var(--focus);
+}
+/* F4.1：样张表格的排序钮点击高度 ≥ 24px */
+.dt th button {
+  min-height: 24px;
 }
 .s-doc {
   min-width: 0;

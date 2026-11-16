@@ -1,5 +1,6 @@
 <script setup>
 import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue'
+import { useDock } from '../dock'
 import { useRoute } from 'vue-router'
 import Icon from '../components/Icon.vue'
 import Cover from '../components/Cover.vue'
@@ -86,6 +87,10 @@ const sheetLabel = computed(() =>
 )
 // 同一首歌换难度：收起展开的谱面，位置不跳
 watch(d, () => (expanded.value = false))
+
+// ---------- 手机底部操作条（F1.3 / F1.4）：高度写进 --dock-h，外壳据此给正文留白 ----------
+const mbarEl = ref(null)
+useDock(mbarEl)
 
 // ---------- 难度切换条：左右键 ----------
 const tabRefs = ref([])
@@ -436,7 +441,7 @@ const agoText = (n) => (n === 0 ? L('今天', '今日') : L(`${n} 天前`, `${n}
     </div>
 
     <!-- 手机底部操作条 -->
-    <div class="mbar only-mobile">
+    <div ref="mbarEl" class="mbar only-mobile">
       <button class="btn btn-ink grow"><Icon name="playTri" :size="16" />{{ L('游玩练习', '練習プレイ') }}</button>
       <button class="btn btn-primary grow" @click="goalSheet = true"><Icon name="flag" :size="16" />{{ L('想练这首', '練習目標に') }}</button>
     </div>
@@ -984,8 +989,9 @@ const agoText = (n) => (n === 0 ? L('今天', '今日') : L(`${n} 天前`, `${n}
     margin-top: 14px;
     /* C5：这一行可横滑，右缘渐隐（留出 28px，不横滑时不压到最后一个难度） */
     padding-right: 28px;
-    -webkit-mask-image: linear-gradient(to left, transparent 0, black 24px);
-    mask-image: linear-gradient(to left, transparent 0, black 24px);
+    /* 两端渐隐：滚到当前难度后左端也不出现被硬切的半个标签（左侧留白 = 页边距 16px） */
+    -webkit-mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 24px), transparent 100%);
+    mask-image: linear-gradient(to right, transparent 0, black 16px, black calc(100% - 24px), transparent 100%);
   }
   .cols {
     grid-template-columns: minmax(0, 1fr);
@@ -1031,27 +1037,26 @@ const agoText = (n) => (n === 0 ? L('今天', '今日') : L(`${n} 天前`, `${n}
   .vote {
     min-height: var(--hit);
   }
+  /* F1.4：贴底（此页没有底栏），两个等宽按钮高 44px，上下内边距 12px，内部再加安全区 */
   .mbar {
     position: fixed;
     z-index: var(--z-bar);
     left: 0;
     right: 0;
-    bottom: calc(var(--tab-h) + env(safe-area-inset-bottom));
+    bottom: calc(var(--shell-bottom) - env(safe-area-inset-bottom, 0px));
     display: flex !important;
     gap: 8px;
-    padding: 8px var(--gutter);
+    padding: 12px var(--gutter) calc(12px + env(safe-area-inset-bottom, 0px));
     background: color-mix(in srgb, var(--surface) 94%, transparent);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
     border-top: 1px solid var(--line);
   }
   .mbar .btn {
+    flex: 1 1 0;
     min-width: 0;
+    height: var(--hit);
     white-space: nowrap;
-  }
-  /* 外壳已经为底栏留了位置；这里再留出操作条（8 + 46 + 8）与一点余量 */
-  .sd {
-    padding-bottom: calc(var(--ctl-h-lg) + 16px + var(--sp-8));
   }
 }
 </style>

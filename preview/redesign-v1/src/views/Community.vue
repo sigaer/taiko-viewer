@@ -28,11 +28,14 @@ const f = useQueryState({
   q: { type: 'string', default: '', debounce: 250 },
   n: { type: 'number', default: PAGE },
 })
-ensureSearch()
-
 const query = computed(() => f.q.trim())
-// 关键词与命令面板「在社区搜索」同一套匹配（标题、标签、版块、作者）
-const matched = computed(() => (query.value ? searchThreads(query.value, Infinity).items : threads))
+// 关键词与命令面板「在社区搜索」同一套匹配（标题、标签、版块、作者）。
+// 搜索索引在第一次有关键词时才建立（约 100ms），不压在首次进入页面上（R6：快速切换没有 > 200ms 的长任务）
+const matched = computed(() => {
+  if (!query.value) return threads
+  ensureSearch()
+  return searchThreads(query.value, Infinity).items
+})
 const filtered = computed(() => {
   let l = matched.value
   if (f.section !== 'all') l = l.filter((t) => t.section === f.section)
@@ -361,6 +364,7 @@ function setTag(name) {
   flex-wrap: wrap;
   align-items: center;
   gap: 8px;
+  padding-bottom: 4px; /* F2：版块链接（带上下 4px 点击扩展）与下面的标题链接之间 ≥ 8px */
   font-size: var(--fs-12);
   color: var(--ink-2);
 }
@@ -631,7 +635,7 @@ function setTag(name) {
   .fab {
     position: fixed;
     right: 16px;
-    bottom: calc(var(--tab-h) + 16px + env(safe-area-inset-bottom));
+    bottom: calc(var(--shell-bottom) + 16px); /* F1.3 */
     z-index: 10;
     display: grid !important;
     place-items: center;

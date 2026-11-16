@@ -1,6 +1,6 @@
-# Taiko Viewer Design V1.1 —— 譜面 Fumen
+# Taiko Viewer Design V1.2 —— 譜面 Fumen
 
-Taiko Viewer 全站重新设计的高保真原型（方向名「譜面 Fumen」），当前版本 V1.1。
+Taiko Viewer 全站重新设计的高保真原型（方向名「譜面 Fumen」），当前版本 V1.2（Design Freeze 轮；是否批准进入正式实现见 `docs/13-design-freeze.md`）。
 
 ## 边界
 
@@ -30,10 +30,20 @@ npm run dev
 | 地址 | 内容 |
 |---|---|
 | `#/review` | 设计总览：全部画面清单（可按桌面或手机尺寸打开）与文档列表 |
-| `#/review/system` | Design System V1.1 活样张：每个样本由 tokens、base、domain 样式与组件源码直接渲染；书面规范见 `docs/04-design-system.md` |
+| `#/review/system` | Design System V1.2 活样张：每个样本由 tokens、base、domain 样式与组件源码直接渲染；书面规范见 `docs/04-design-system.md` |
 | `#/review/directions` | 三个设计方向（譜面 / 祭 / 帖）的对照 |
 | `#/review/device?p=/songs/615` | 手机预览框（390 / 360 / 820） |
 | `#/states` | 加载、空、错误、未登录、未绑定、404、离线、同步样张等状态 |
+
+## V1.2 新增与修改
+
+逐项见 `docs/08-v1.1-fix-record.md` 第 13 节，裁定见 `docs/10-v1.2-design-decisions.md`，验收见 `docs/11-v1.2-quality-report.md`。
+
+- **手机详情页导航（F1）**：歌曲详情、帖子详情在手机上不显示底栏，顶栏为返回 · 标题 · 搜索 · 同步 · 通知；外壳提供 `--shell-bottom`，页面固定条写 `--dock-h`（`src/dock.js`），操作条、回复框、悬浮按钮、Toast 都从这些变量取位置；回复框 1–5 行并跟随软键盘（键盘跟随只有代码，未在真实键盘下验证）。
+- **触控豁免定稿（F2）**：只有满足三条的行内文字链接可以低于 44px，其余一律 ≥ 44×44。
+- **搜索面板性能（F3）**：首键与热态分开测（首键 p95 ≤ 100ms、热态 p95 ≤ 50ms）；删除结果行预挂载。
+- **剩余质量问题（F4）**：favicon（`public/favicon.svg`）、评审页焦点环、「文字超出盒子」提示分类、平板补看四页。
+- **个人主页（F5）**：代表成绩卡片等高；手机公开范围与数字区布局。
 
 ## V1.1 新增与修改
 
@@ -85,26 +95,30 @@ npm run qa:quick        # 快速子集（--quick）
 npm run qa:curate       # 把关键截图复制到 qa/screenshots 并生成 index.html
 node qa/run.mjs --suite checks --only songs-615
 node qa/run.mjs --suite flows --flows palette,sync
+node qa/compare.mjs capture before|after   # 手机详情页修改前后的定点截图
+node qa/compare.mjs combine                # 合成前后对比图
 ```
 
 常用参数：`--suite visual|checks|flows|perf|all`（可逗号分隔）、`--quick`、`--only <子串>`、`--flows a,b`、`--base URL`（对已有服务器运行，不构建）、`--no-build`、`--max-minutes 25`、`--concurrency 1|2`。
 
 - 原始输出：`qa/out/`（`results.json`、`summary.md`、`run.log`、`shots/`、`flows/`），不入库（`.gitignore`）。
-- 入库的精选截图：`qa/screenshots/`，用 `qa/screenshots/index.html` 浏览。
-- 最近一次结果：`docs/09-v1.1-qa-report.md`。
+- 入库的精选截图：`qa/screenshots/`，用 `qa/screenshots/index.html` 浏览；手机详情页修改前后的对比图在 `qa/screenshots/compare/`（390 与 360 宽，修改前 / 修改后并排）。
+- 最近一次结果（V1.2）：368 个用例、18 个流程全部通过，错误 0、警告 0，性能预算全部满足；详见 `docs/11-v1.2-quality-report.md`。V1.1 的结果见 `docs/09-v1.1-qa-report.md`。
+- 以上都在模拟数据上完成，不是生产验收。
 
 ## 目录
 
 ```text
 preview/redesign-v1/
-├─ index.html          首屏主题脚本（D10）、noindex
+├─ index.html          首屏主题脚本（D10）、favicon 引用、noindex
+├─ public/             favicon.svg
 ├─ vite.config.js
 ├─ docs/               设计文档（见下表）
 ├─ qa/                 浏览器验收脚本、精选截图
 └─ src/
    ├─ main.js · App.vue · router.js · store.js
    ├─ sync.js · search.js · routeState.js · motion.js · breakpoints.js
-   ├─ sectionNav.js · hscroll.js · focusTrap.js
+   ├─ sectionNav.js · hscroll.js · focusTrap.js · dock.js
    ├─ styles/          tokens.css · base.css · domain.css · contrast-check.mjs
    ├─ components/      框架、浮层、图表与业务组件
    ├─ views/           产品画面（每个路由一个文件）；review/ 为评审页
@@ -118,9 +132,13 @@ preview/redesign-v1/
 | `docs/01-product-audit.md` | 现有产品的信息架构与设计问题 |
 | `docs/02-design-directions.md` | 三个设计方向与取舍 |
 | `docs/03-ia-mapping.md` | 新旧信息架构映射与功能覆盖清单 |
-| `docs/04-design-system.md` | Design System V1.1 规范 |
+| `docs/04-design-system.md` | Design System V1.2 规范 |
 | `docs/05-page-specs.md` | 主要页面的设计说明 |
 | `docs/06-migration-plan.md` | 实施建议与分阶段迁移方案 |
 | `docs/07-v1.1-design-decisions.md` | V1.1 设计裁决（S / P / R / D / M / V / Q / C） |
-| `docs/08-v1.1-fix-record.md` | V1.1 逐项修复记录与验证级别 |
+| `docs/08-v1.1-fix-record.md` | V1.1 与 V1.2 逐项修复记录与验证级别 |
 | `docs/09-v1.1-qa-report.md` | V1.1 真实浏览器验收报告 |
+| `docs/10-v1.2-design-decisions.md` | V1.2 设计裁定（F1–F5，Design Freeze 轮） |
+| `docs/11-v1.2-quality-report.md` | V1.2 质量与性能报告 |
+| `docs/12-risks-and-integration-acceptance.md` | 遗留风险登记与正式集成验收清单 |
+| `docs/13-design-freeze.md` | Design Freeze 决策 |

@@ -382,6 +382,7 @@ function onTabKey(e) {
   gap: 14px;
   align-items: flex-start;
   min-width: 0;
+  flex: 1; /* F5.1：三张卡片等高（网格行拉伸），「更换」贴卡片底部 */
 }
 .rep-link:hover .rep-title {
   color: var(--ka-ink);
@@ -408,6 +409,7 @@ function onTabKey(e) {
 }
 .swap {
   align-self: flex-start;
+  margin-top: auto;
 }
 
 .cols {
@@ -518,11 +520,26 @@ function onTabKey(e) {
   .acts .btn {
     flex: 1;
   }
+  /* F5.2：说明文字在上，分段控件在下通栏 */
   .privacy {
     flex-wrap: wrap;
+    align-items: flex-start;
   }
+  .privacy .seg {
+    flex-basis: 100%;
+    display: flex;
+  }
+  .privacy .seg button {
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  /* F5.2：Rating 第一行通栏，下面 2×2（全良 / 全连 / 通关 / 极） */
   .medals {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .medal.rt {
+    order: -1;
+    grid-column: 1 / -1;
   }
   .medal {
     padding: 0;

@@ -31,7 +31,7 @@ const CRIT = [
     <header class="top">
       <RouterLink to="/review" class="row home"><Logo :size="30" /><b>设计总览</b></RouterLink>
       <span class="grow" />
-      <RouterLink to="/review/system" class="btn btn-sm">Design System V1.1</RouterLink>
+      <RouterLink to="/review/system" class="btn btn-sm">Design System V1.2</RouterLink>
     </header>
 
     <main class="wrap">

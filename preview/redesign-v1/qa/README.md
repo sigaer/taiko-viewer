@@ -81,9 +81,37 @@ A flow step that hits a missing feature fails with a message; it never crashes t
   growth time-stack labels were found by eye.
 - **char-wrap (C14)**: a text node with ≥ 3 CJK characters whose range is < 1.5 em wide and spans
   ≥ 3 line boxes (one character per line).
-- **Inline links (C10)**: a text-only `a` / `button.link` laid out inline needs a hit height ≥ 24 px
-  (probe ± 11.5 px) instead of 44 × 44. Whether its row is a ≥ 44 px primary target is not checked.
+- **Inline links (C10)**: superseded by F2 below.
 - **Skip link (C11)**: only expected on pages that have a `nav`.
+
+## V1.2 changes to the checks (docs/10)
+
+- **Tap targets (F2).** On phone viewports every interactive element must be ≥ 44×44 (probe ± 21.5px),
+  reported as an **error** on product pages (info on `/review*`). The only exemption is an *inline
+  text link*: an `a` / `button.link` that is not styled as a control (`.btn`, `.chip`, tab, segment,
+  row link …), not inside a heading / bar / tab bar, narrower than 80 % of its parent, carries only
+  small decorations (a section dot, a ≤ 28px avatar), and sits inside a list row (`li`, `tr`,
+  `article`, floor, fact …). Such a link must satisfy all three F2 conditions, else it is an
+  `inline-link` error: hit height ≥ 24px; its row ≥ 44px tall; ≥ 8px from any adjacent independent
+  target (same line or stacked; boxes include the C10 padding extension). Links in a sentence that are
+  not inside a row (e.g. a caption under a card) are NOT exempt and get a transparent 44×44 extension.
+- **Overflow hints (F4.3).** `scrollWidth > clientWidth` also fires for transparent `::after` hit
+  areas and positioned children. The check now measures the element's own text (text nodes, not
+  nested controls) against its content box and classifies every hit: `hit-area` (text fits — the
+  extra width is a pseudo-element / positioned child), `metrics` (text passes the box by ≤ 3px: font
+  side bearings, e.g. full-width brackets), `digits` (same, numeric text), `real` (> 3px or clipped
+  without an ellipsis). Only `real` is reported (warn); the classification of every case is kept in
+  `results.json` (`cases[].overflowClasses`). Ellipsized elements are still checked for a `title`.
+- **Palette perf (F3).** First keystroke after each open and warm keystrokes are measured separately
+  over 20 opens per run (`paletteFirstP95` budget 100 ms, `paletteWarmP95` budget 50 ms); the old
+  single 20-keystroke sample and the C12 pre-mount are gone.
+- **Flows.** `detail-nav-phone` (F1) — see `qa/flows/detailnav.mjs`; `rapid-nav` adds 36 phone
+  list ↔ detail changes and then checks that the tab bar, `data-tabbar`, `--dock-h` and the shell
+  padding agree on four routes. The short viewports 390×480 / 360×420 are a *layout proxy* for an open
+  soft keyboard: they prove the reply box, the header and a band of content fit at that height; they
+  do not exercise `visualViewport` (no real keyboard is opened in headless Chrome).
+- **Before / after (F6).** `node qa/compare.mjs capture before|after` and `node qa/compare.mjs combine`
+  write `qa/screenshots/compare/`; `qa/curate.mjs` keeps that folder and links it from the gallery.
 
 ## Ruling checks (flows in `qa/flows/rulings.mjs`)
 

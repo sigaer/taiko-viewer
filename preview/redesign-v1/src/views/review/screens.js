@@ -3,7 +3,7 @@
 // 带 .js 扩展名：QA 在 Node 里直接 import 这个文件。
 import { EDGE } from '../../mock/data.js'
 
-// V1.1 边界状态的歌曲 id 在载入时从 EDGE 解析；demo 数据集里没有生成曲时退回到 full 数据集里的固定 id。
+// 边界状态的歌曲 id 在载入时从 EDGE 解析；demo 数据集里没有生成曲时退回到 full 数据集里的固定 id。
 const edgeId = (key, fallback) => EDGE[key]?.[0] ?? fallback
 const NO_CONSTANT = edgeId('noConstant', 3)
 const NO_CHART_IMAGE = edgeId('noChartImage', 6)
@@ -11,7 +11,7 @@ const LONG_TITLE = edgeId('longJa', 12)
 
 export const SCREENS = [
   {
-    group: 'V1.1 重点状态',
+    group: '重点状态',
     items: [
       { path: `/songs/${NO_CONSTANT}`, name: '歌曲详情 · 缺定数', note: '定数位显示「—」，其余信息照常', auth: 'ready' },
       { path: `/songs/${NO_CHART_IMAGE}`, name: '歌曲详情 · 没有谱面图', note: '谱面图区域的缺失状态', auth: 'ready' },

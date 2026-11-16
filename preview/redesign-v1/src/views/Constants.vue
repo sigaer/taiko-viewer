@@ -18,6 +18,15 @@ import { isMobile, isWide } from '../breakpoints'
 
 // 定数表：每张带定数的谱面一行（一次性展开，之后只做筛选与排序）。
 let missing = 0
+const HAY = new Map()
+const hayOf = (s) => {
+  let h = HAY.get(s.id)
+  if (h == null) {
+    h = [s.zh, s.ja, s.artist, String(s.id), ...(s.aliases || [])].map(normalize).join('\u0001')
+    HAY.set(s.id, h)
+  }
+  return h
+}
 const ALL = []
 for (const s of songs) {
   for (const c of s.charts) {
@@ -29,7 +38,10 @@ for (const s of songs) {
       key: `${s.id}-${c.d}`,
       song: s,
       chart: c,
-      hay: [s.zh, s.ja, s.artist, String(s.id), ...(s.aliases || [])].map(normalize).join('\u0001'),
+      // 检索串按曲目懒计算并共用：第一次输入关键词时才规范化，首次进入页面不做 3,000 次规范化
+      get hay() {
+        return hayOf(s)
+      },
     })
   }
 }

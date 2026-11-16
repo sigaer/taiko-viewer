@@ -291,8 +291,9 @@ const entries = computed(() => allEntries.value.slice(0, shown.value))
 .stars {
   display: flex;
   gap: 6px;
-  margin: 0 calc(var(--gutter) * -1);
-  padding: 2px var(--gutter);
+  /* F2：横滑容器上下各留 3px，胶囊的 44px 扩展区不被裁掉 */
+  margin: -1px calc(var(--gutter) * -1);
+  padding: 3px var(--gutter);
   overflow-x: auto;
   scrollbar-width: none;
 }

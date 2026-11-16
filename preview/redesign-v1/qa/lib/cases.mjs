@@ -46,7 +46,9 @@ export async function runCase(browser, base, c, { visual = true, checks = true, 
       result.occlusionChecked = occ.checked
 
       const tr = await page.evaluate(() => window.__QA.truncation())
-      for (const t of tr.undeclared) add('truncation', t.clipped ? 'warn' : 'info', t.selector, `${t.clipped ? 'clipped' : 'spills'} without ellipsis (${t.sw}>${t.cw}) "${t.text}"`)
+      // F4.3: only the "real" class is reported; hit-area / metrics / digits are exempt (qa/README.md)
+      for (const t of tr.undeclared) add('truncation', 'warn', t.selector, `${t.clipped ? 'clipped' : 'spills'} ${t.dx}px past its box without ellipsis "${t.text}"`)
+      result.overflowClasses = tr.classes
       if (tr.ellipsisNoTitleCount) add('truncation-title', 'info', tr.ellipsisNoTitle[0]?.selector, `${tr.ellipsisNoTitleCount} truncated element(s) without title, e.g. ${tr.ellipsisNoTitle.slice(0, 3).map((x) => `"${x.text}"`).join(', ')}`)
 
       // C14: intersecting text boxes and one-character-per-line wrapping (whole page, scrollY 0)
@@ -56,10 +58,13 @@ export async function runCase(browser, base, c, { visual = true, checks = true, 
 
       if (phone) {
         const tt = await page.evaluate(() => window.__QA.tapTargets())
-        if (tt.count) {
-          add('tap-target', 'warn', null, `${tt.count} of ${tt.checked} interactive elements below 44×44`, { count: tt.count })
-          for (const w of tt.worst.slice(0, 6)) add('tap-target', 'info', w.selector, `${w.w}×${w.h}${w.inline ? ' (inline link, needs ≥24 high)' : ''} "${w.text}"`)
-        }
+        // F2: on product pages every non-inline control under 44×44 is an error (no other exemption);
+        // design-review pages (/review*) are reported as info
+        const review = c.route.startsWith('/review')
+        for (const w of tt.worst) add('tap-target', review ? 'info' : 'error', w.selector, `${w.w}×${w.h} "${w.text}"`)
+        if (tt.count > tt.worst.length) add('tap-target', review ? 'info' : 'error', null, `${tt.count - tt.worst.length} more element(s) below 44×44`)
+        for (const f of tt.inlineFails) add('inline-link', review ? 'info' : 'error', f.selector, `"${f.text}": ${f.why}`)
+        result.inlineLinks = tt.inlineN
       }
 
       const ct = await page.evaluate(() => window.__QA.contrast(400))

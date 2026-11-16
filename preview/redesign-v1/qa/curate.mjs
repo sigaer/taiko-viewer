@@ -13,16 +13,16 @@ import { caseId, EDGE_PAGES } from './matrix.mjs'
 
 const DEST = path.join(QA_DIR, 'screenshots')
 const TMP = ensureDir(path.join(OUT_DIR, 'curate-tmp'))
-const MAX_FILES = 70
-const MAX_BYTES = 12 * 1024 * 1024
+const COMPARE = path.join(DEST, 'compare') // F6 before / after set (qa/compare.mjs) — kept across curations
+const MAX_FILES = 80 // including compare/
+const MAX_BYTES = 14 * 1024 * 1024
 
 const def = (route, vp, o = {}) => ({ route, vp, theme: o.theme || 'light', locale: o.locale || 'zh', auth: o.auth || 'ready', dataset: o.dataset || 'full' })
 const shot = (route, vp, o) => path.join(SHOTS_DIR, caseId(def(route, vp, o)) + '.jpg')
 const flowShot = (name) => path.join(FLOW_SHOTS_DIR, name + '.jpg')
 
 const KEY_PAGES = [
-  ['/', '今日'], ['/songs', '曲库'], ['/songs/615', '歌曲详情'], ['/songs/constants', '定数表'], ['/play', 'Rating'],
-  ['/play/scores', '全部成绩'], ['/play/progress', '点灯进度'], ['/growth', '成长档案'], ['/growth/goals', '目标'],
+  ['/', '今日'], ['/songs', '曲库'], ['/songs/615', '歌曲详情'], ['/play/scores', '全部成绩'], ['/growth', '成长档案'],
   ['/community', '社区广场'], ['/community/t/4017', '帖子详情'], ['/u/mochidon', '个人主页'], ['/account', '账号与绑定'],
 ]
 
@@ -77,8 +77,9 @@ async function main() {
   })()
   const sections = plan()
   const missing = []
-  fs.rmSync(DEST, { recursive: true, force: true })
+  // clear everything except compare/
   ensureDir(DEST)
+  for (const f of fs.readdirSync(DEST)) if (f !== 'compare') fs.rmSync(path.join(DEST, f), { recursive: true, force: true })
   const { browser } = await launchBrowser()
   let q = quality
   try {
@@ -117,7 +118,7 @@ async function main() {
         await withTimeout(ctx.close(), 10_000, 'ctx.close').catch(() => {})
       }
       const s = dirSize(DEST)
-      log(`curated ${s.files} images at q${q}${attempt === 2 ? ' (80% scale)' : ''}: ${mb(s.total)}`)
+      log(`curated ${s.files} files incl. compare/ at q${q}${attempt === 2 ? ' (80% scale)' : ''}: ${mb(s.total)}`)
       if (s.total <= MAX_BYTES - 300_000 && s.files <= MAX_FILES - 1) break
       q = Math.max(45, q - 15)
     }
@@ -130,13 +131,17 @@ async function main() {
     const r = JSON.parse(fs.readFileSync(path.join(OUT_DIR, 'results.json'), 'utf8'))
     meta = { at: r.startedAt, target: r.target?.kind, browser: r.browser }
   } catch {}
-  fs.writeFileSync(path.join(DEST, 'index.html'), gallery(sections, meta, missing))
+  let compare = []
+  try {
+    compare = JSON.parse(fs.readFileSync(path.join(COMPARE, 'compare.json'), 'utf8'))
+  } catch {}
+  fs.writeFileSync(path.join(DEST, 'index.html'), gallery(sections, meta, missing, compare))
   const s = dirSize(DEST)
   log(`qa/screenshots: ${s.files} files, ${mb(s.total)}${missing.length ? ` · missing ${missing.length}: ${missing.join('; ')}` : ''}`)
 }
 
 const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c])
-function gallery(sections, meta, missing) {
+function gallery(sections, meta, missing, compare = []) {
   const fig = (x, sub) => (x.ok ? `<figure class="${x.phone ? 'ph' : 'dk'}${x.pairs ? ' pair' : ''}"><a href="${x.out}"><img loading="lazy" src="${x.out}" alt="${esc(x.caption)}"></a><figcaption>${esc(x.caption)}${sub ? `<span>${sub}</span>` : ''}</figcaption></figure>` : '')
   return `<!doctype html>
 <html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
@@ -160,6 +165,7 @@ figcaption{font-size:12px;color:var(--ink2);padding-top:4px;display:flex;justify
 ${sections
   .map((s) => `<h2>${esc(s.title)}</h2><div class="grid">${(s.pairs || []).map((p) => fig({ ...p, pairs: true }, '浅色 | 深色')).join('')}${(s.singles || []).map((x) => fig(x)).join('')}</div>`)
   .join('\n')}
+${compare.length ? `<h2>手机详情页导航：修改前 | 修改后（F1）</h2><p class="note">每张图从左到右：390×844 修改前、修改后，360×740 修改前、修改后。</p><div class="grid">${compare.map((c) => `<figure class="dk pair"><a href="compare/${c.out}"><img loading="lazy" src="compare/${c.out}" alt="${esc(c.caption)}"></a><figcaption>${esc(c.caption)}<span>修改前 | 修改后</span></figcaption></figure>`).join('')}</div>` : ''}
 ${missing.length ? `<p class="note">本次运行未生成：${esc(missing.join('；'))}</p>` : ''}
 </body></html>
 `

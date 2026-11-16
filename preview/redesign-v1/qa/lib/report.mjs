@@ -62,7 +62,7 @@ function summary(r) {
     L.push('', '## Performance (M6)', '', '| metric | budget | full | status | demo | status |', '|---|---:|---:|---|---:|---|')
     for (const p of r.perf.table) L.push(`| ${p.label} | ≤ ${p.budget} | ${p.value ?? '—'} | ${p.status} | ${demo[p.metric]?.value ?? '—'} | ${demo[p.metric]?.status ?? '—'} |`)
     const m = r.perf.metrics
-    L.push('', `FCP ${m.fcpMs ?? '—'}ms · DCL ${m.dclMs ?? '—'}ms · palette median ${m.paletteKeyMedian ?? '—'}ms · route switch median (warm) ${m.routeSwitchMedian ?? '—'}ms, p95 cold ${m.routeSwitchColdP95 ?? '—'}ms · max DOM nodes ${m.maxDomNodes ?? '—'} · JS heap ${m.jsHeapMB ?? '—'} MB`)
+    L.push('', `FCP ${m.fcpMs ?? '—'}ms · DCL ${m.dclMs ?? '—'}ms · palette first median ${m.paletteFirstMedian ?? "—"}ms (n ${m.paletteFirstN ?? 0}), warm median ${m.paletteWarmMedian ?? "—"}ms (n ${m.paletteWarmN ?? 0}) · route switch median (warm) ${m.routeSwitchMedian ?? '—'}ms, p95 cold ${m.routeSwitchColdP95 ?? '—'}ms · max DOM nodes ${m.maxDomNodes ?? '—'} · JS heap ${m.jsHeapMB ?? '—'} MB`)
     if (r.perf.notes.length) L.push('', ...r.perf.notes.map((n) => `- note: ${n}`))
   }
 
