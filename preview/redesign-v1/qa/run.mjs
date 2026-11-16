@@ -16,13 +16,15 @@ import { FLOWS } from './flows/index.mjs'
 import { ROOT, OUT_DIR, SHOTS_DIR, ensureDir, openLog, closeLog, log, dirSize, mb, withTimeout } from './lib/util.mjs'
 
 function parseArgs(argv) {
-  const a = { suite: 'all', base: null, quick: false, only: null, maxMinutes: 25, build: true, buildRetries: 3, buildWait: 60, flows: null, port: 4311, concurrency: 2 }
+  const a = { suite: 'all', base: null, quick: false, v13: false, variant: 'a', only: null, maxMinutes: 25, build: true, buildRetries: 3, buildWait: 60, flows: null, port: 4311, concurrency: 2 }
   for (let i = 0; i < argv.length; i++) {
     const k = argv[i]
     const v = () => argv[++i]
     if (k === '--suite') a.suite = v()
     else if (k === '--base') a.base = v()
     else if (k === '--quick') a.quick = true
+    else if (k === '--variant') a.variant = v() // perf suite only: run the budgets on variant b / c
+    else if (k === '--v13') a.v13 = true // V1.3 Phase A targeted checks: four pages, variants B / C, data=real
     else if (k === '--only') a.only = v()
     else if (k === '--max-minutes') a.maxMinutes = Number(v())
     else if (k === '--no-build') a.build = false
@@ -118,7 +120,7 @@ async function main() {
   const base = results.target.url
   log(`target: ${results.target.kind} ${base}`)
 
-  const { cases } = await buildMatrix({ quick: args.quick, only: args.only })
+  const { cases } = await buildMatrix({ quick: args.quick, only: args.only, v13: args.v13 })
   const full = await buildMatrix({ quick: false })
   results.plannedCases = cases.length
   results.fullMatrixCases = full.cases.length
@@ -177,7 +179,7 @@ async function main() {
       const r = await runFlow(browser, base, rf, { findings: [], quick: true })
       rapid = r.metrics || null
     }
-    results.perf = await runPerf(browser, base, { findings, rapidNavMetrics: rapid, verified, dataset: 'full' })
+    results.perf = await runPerf(browser, base, { findings, rapidNavMetrics: rapid, verified, dataset: 'full', variant: args.variant })
     if (!overDeadline()) results.perfDemo = await runPerf(browser, base, { findings, rapidNavMetrics: null, verified, dataset: 'demo' })
     if (!/production/.test(results.target.kind)) results.perf.notes.push(`measured against ${results.target.kind}, not the production build — budgets not meaningful`)
   }

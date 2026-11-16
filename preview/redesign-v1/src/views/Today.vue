@@ -95,7 +95,7 @@ const songLink = (id, d) => (d ? `/songs/${id}?d=${d}&from=today` : `/songs/${id
         <div class="who">
           <PlayerAvatar :user="me" :size="44" />
           <span class="who-name title-1l" :title="player.nickname">{{ player.nickname }}</span>
-          <TitlePlate :text="player.title" :rare="!!me.rare" />
+          <TitlePlate :text="player.title" :rare="!!me.rare" :game="player.gameTitle ?? null" :site="me.siteTitle" form="text" />
           <DanBadge :dan="player.dan" />
           <span class="t-caption num who-id">CN {{ player.taikoIdMasked }}</span>
         </div>
@@ -399,7 +399,7 @@ const songLink = (id, d) => (d ? `/songs/${id}?d=${d}&from=today` : `/songs/${id
   text-align: center;
 }
 .focus .dot {
-  color: var(--ka);
+  color: var(--series-focus);
 }
 .focus b {
   color: var(--ink);
@@ -525,7 +525,7 @@ const songLink = (id, d) => (d ? `/songs/${id}?d=${d}&from=today` : `/songs/${id
   border-bottom: 1px solid var(--line);
 }
 .rec:hover :deep(.t) {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .ev li {
   display: grid;

@@ -130,7 +130,7 @@ const desc = computed(() =>
   line-height: 1.45;
 }
 .th:not(.is-preview):hover .title {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .sum {
   margin-top: 4px;

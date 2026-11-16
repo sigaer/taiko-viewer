@@ -36,7 +36,7 @@ const rivets = computed(() => {
 .dial {
   position: relative;
   flex: none;
-  --tone: var(--don);
+  --tone: var(--series); /* 单一序列（Rating）：fumen = --don，teal = 品牌色 */
 }
 .dial.ka {
   --tone: var(--ka);

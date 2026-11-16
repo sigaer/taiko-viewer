@@ -372,6 +372,148 @@
   font-size: var(--fs-16);
 }
 
+/* ---------- 真实素材：难度 / 王冠 / 评价（data-assets="authentic"，docs/16 A2–A4）----------
+   素材原样显示：不用滤镜、混合模式、遮罩或透明度改色；容器中性，颜色由素材自己表现。 */
+.adiff {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 6px 0 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xs);
+  background: var(--surface);
+  font-size: var(--fs-14);
+  line-height: 1;
+  white-space: nowrap;
+  flex: none;
+}
+.adiff.lg {
+  height: 28px;
+  font-size: var(--fs-16);
+}
+.adiff-ico {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+}
+.adiff-ico img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.adiff-ura {
+  margin-left: -2px;
+  font-size: var(--fs-12);
+  font-weight: 700;
+  color: var(--ink-2);
+}
+.adiff .s {
+  font-weight: 700;
+  color: var(--ink);
+}
+.adiff .k {
+  color: var(--ink-2);
+}
+.adiff .k.na {
+  color: var(--ink-3);
+}
+.acrown {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  color: var(--ink-3);
+  font-size: var(--fs-14);
+  line-height: 1;
+}
+.acrown img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.acrown.none::after {
+  content: '—';
+}
+/* 已游玩：8px 空心圆环（不是王冠） */
+.acrown.played::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink-3);
+}
+.arank {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  overflow: visible;
+  color: var(--ink-3);
+  font-size: var(--fs-14);
+  line-height: 1;
+}
+.arank img {
+  width: var(--draw);
+  height: var(--draw);
+  max-width: none;
+  object-fit: contain;
+}
+.arank.txt {
+  width: auto !important;
+  font-size: var(--fs-12);
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+/* 难度页签（歌曲详情）：图标 + 难度名 + ★ + 定数；容器中性，选中靠 2px 描边、浅底与底部指示线，不靠图标颜色。
+   B（fumen）：该难度色描边、14% 浅底；C（teal）：--selected-line / --selected-bg。 */
+.dt-ico {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  flex: none;
+}
+:is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic) {
+  position: relative;
+  border-color: var(--line);
+  gap: 6px;
+}
+:is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic) .dn,
+:is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic) .dshort {
+  color: var(--ink);
+}
+:is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic):hover {
+  background: var(--bg-sunk);
+}
+:is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic)[aria-selected='true'] {
+  --on-line: var(--c);
+  border-color: var(--on-line);
+  box-shadow: inset 0 0 0 0.5px var(--on-line);
+  background: color-mix(in srgb, var(--c) 14%, var(--surface));
+  color: var(--ink);
+}
+:root[data-brand='teal'] :is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic)[aria-selected='true'] {
+  --on-line: var(--selected-line);
+  background: var(--selected-bg);
+}
+/* 选中态的内描边是 box-shadow，会盖掉 :focus-visible 的焦点环：两者叠在一起 */
+:is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic)[aria-selected='true']:focus-visible {
+  box-shadow: inset 0 0 0 0.5px var(--on-line), var(--focus);
+}
+:is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic)[aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 3px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--on-line);
+}
+:is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic)[aria-selected='true'] .dn,
+:is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic)[aria-selected='true'] .dk {
+  color: var(--ink);
+}
+
 /* ---------- 点灯格 Lamp（点灯进度、成绩格；D2）----------
    王冠模式：.lamp.none / .played / .clear / .fc / .dfc
    评价模式：.lamp.rk + 评价键（.iki1 … .miyabi3 / .kiwami / .none）
@@ -572,6 +714,80 @@ a.lamp.big:hover {
 }
 .cover.fill {
   width: 100%;
+}
+
+/* ---------- 真实曲绘（data-assets="authentic"，docs/16 A1）----------
+   与生成式封面同一套尺寸、圆角阶梯（.cover 的 .sm / .lg / .tile / .xl / .fill），只换内部画法：
+   加载前是 --bg-sunk 底；图片铺满、不加渐变或色罩；外圈 1px --line 内描边。
+   两种占位：.missing（真实曲目，加载失败）与 .sample（合成 / 未验证曲目，45° 细斜纹，≥ 96px 时写「示例」）。 */
+.cover.acov {
+  background: var(--bg-sunk);
+  color: var(--ink-3);
+  filter: none;
+  container-type: inline-size;
+}
+.cover.acov::before {
+  content: none;
+}
+.cover.acov::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: auto;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--line);
+  pointer-events: none;
+}
+.cover.acov.sample {
+  background:
+    repeating-linear-gradient(45deg, var(--line) 0 1px, transparent 1px 7px),
+    var(--bg-sunk);
+}
+.acov-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--dur-1) ease-out;
+}
+.acov-img.on {
+  opacity: 1;
+}
+:root[data-motion='reduce'] .acov-img {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .acov-img {
+    transition: none;
+  }
+}
+.cover.acov {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 4px;
+}
+.acov-ico {
+  width: 40%;
+  max-width: 40px;
+  height: auto;
+  aspect-ratio: 1;
+}
+.acov-lbl {
+  display: none;
+  font-size: var(--fs-12);
+  font-weight: 500;
+  line-height: 1;
+}
+@container (min-width: 96px) {
+  .acov-lbl {
+    display: block;
+  }
 }
 
 /* ---------- 判定条（良 / 可 / 不可） ---------- */

@@ -349,12 +349,12 @@ function mobileActive(t) {
   color: var(--ink);
 }
 .rail-item.on {
-  color: var(--ink);
+  color: var(--nav-active-text);
   font-weight: 700;
 }
 .rail-item.on .pill {
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--nav-active-bg);
+  color: var(--nav-active-ink);
 }
 .rail-item:focus-visible {
   box-shadow: none;
@@ -447,7 +447,7 @@ function mobileActive(t) {
   bottom: -1px;
   height: 3px;
   border-radius: 3px 3px 0 0;
-  background: var(--don);
+  background: var(--tab-line);
 }
 .searchbox {
   display: flex;
@@ -692,7 +692,7 @@ kbd {
     bottom: -1px;
     height: 3px;
     border-radius: 3px 3px 0 0;
-    background: var(--don);
+    background: var(--tab-line);
   }
   .menu {
     position: fixed;
@@ -726,7 +726,7 @@ kbd {
     color: var(--ink-3);
   }
   .tab.on {
-    color: var(--ink);
+    color: var(--nav-active-text);
     font-weight: 700;
   }
   .tab-dot {

@@ -9,7 +9,7 @@ const rivets = Array.from({ length: 12 }, (_, i) => {
 
 <template>
   <svg :width="size" :height="size" viewBox="0 0 40 40" aria-hidden="true">
-    <circle cx="20" cy="20" r="19" fill="var(--ka)" />
+    <circle cx="20" cy="20" r="19" fill="var(--brand-mark)" />
     <circle v-for="(r, i) in rivets" :key="i" :cx="r.x" :cy="r.y" r="1.15" fill="var(--note-outline)" opacity=".7" />
     <circle cx="20" cy="20" r="13" fill="var(--don)" stroke="var(--note-ring)" stroke-width="2" />
     <path d="M14.500 15.500h11M20 15.500V26" stroke="var(--note-ring)" stroke-width="3" stroke-linecap="round" fill="none" />

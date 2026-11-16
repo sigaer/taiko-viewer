@@ -12,7 +12,7 @@ const props = defineProps({
   focus: { type: String, default: null },
   size: { type: Number, default: 260 },
   domain: { type: Array, default: null }, // [min, max]
-  tone: { type: String, default: 'var(--don)' },
+  tone: { type: String, default: 'var(--series)' },
   label: { type: String, default: '' },
 })
 const C = 130
@@ -87,7 +87,7 @@ const ariaLabel = computed(() => {
   stroke-dasharray: 3 3;
 }
 .now {
-  fill: color-mix(in srgb, var(--tone) 16%, transparent);
+  fill: color-mix(in srgb, var(--tone) var(--series-fill), transparent);
   stroke: var(--tone);
   stroke-width: 2;
   stroke-linejoin: round;
@@ -98,7 +98,7 @@ const ariaLabel = computed(() => {
   stroke-width: 2;
 }
 .dot.focus {
-  fill: var(--ka);
+  fill: var(--series-focus);
   stroke: var(--surface);
 }
 .lab {
@@ -107,7 +107,7 @@ const ariaLabel = computed(() => {
   fill: var(--ink-2);
 }
 .lab.focus {
-  fill: var(--ka-ink);
+  fill: var(--series-focus-ink);
   font-weight: 700;
 }
 .val {

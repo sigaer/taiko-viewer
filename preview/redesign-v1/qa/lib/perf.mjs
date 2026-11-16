@@ -6,7 +6,7 @@ import { paletteParts } from '../flows/palette.mjs'
 
 export const BUDGETS = {
   dataGenMs: { max: 150, label: 'data generation (ms)' },
-  paletteFirstP95: { max: 100, label: 'palette first keystroke after open, p95 (ms)' },
+  paletteFirstP95: { max: 50, label: 'palette first keystroke after open, p95 (ms)' }, // V1.3：100 → 50（docs/15 B10）
   paletteWarmP95: { max: 50, label: 'palette warm keystroke, p95 (ms)' },
   songsFilterP95: { max: 100, label: '/songs filter p95 (ms)' },
   songsSortP95: { max: 100, label: '/songs sort p95 (ms)' },
@@ -39,10 +39,10 @@ window.__qaSettle = (root, quiet = 120, timeout = 4000) => new Promise((resolve)
   setTimeout(tick, 20)
 })`
 
-export async function runPerf(browser, base, { findings, rapidNavMetrics, verified, dataset = 'full' }) {
+export async function runPerf(browser, base, { findings, rapidNavMetrics, verified, dataset = 'full', variant = 'a' }) {
   const m = {}
   const notes = []
-  const ctx = await newContext(browser, { vp: '1440x900', state: { dataset, auth: 'ready' } })
+  const ctx = await newContext(browser, { vp: '1440x900', state: { dataset, auth: 'ready', variant } })
   try {
     const page = await ctx.newPage()
     const errs = collectErrors(page)

@@ -274,9 +274,9 @@ function go(to) {
 }
 .steps li.now .mark,
 .phases li.now .mark {
-  background: var(--ka-wash);
-  color: var(--ka-ink);
-  box-shadow: inset 0 0 0 1.5px var(--ka);
+  background: var(--info-wash);
+  color: var(--info-ink);
+  box-shadow: inset 0 0 0 1.5px var(--info-line);
 }
 .spin :deep(svg) {
   animation: sp-spin 0.9s linear infinite;

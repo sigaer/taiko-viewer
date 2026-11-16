@@ -172,7 +172,7 @@ onBeforeUnmount(() => listen(false))
   background: var(--ctl-border); /* 未到的阶段：非文字 ≥ 3:1 */
 }
 .pdots i.on {
-  background: var(--ka-ink);
+  background: var(--link);
 }
 
 /* ---------- 状态条 ---------- */
@@ -197,7 +197,7 @@ onBeforeUnmount(() => listen(false))
   color: var(--ink);
 }
 .syncchip.busy {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .syncchip.fresh {
   color: var(--ok);

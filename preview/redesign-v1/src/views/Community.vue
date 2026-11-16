@@ -154,7 +154,7 @@ function setTag(name) {
                       <DanBadge :dan="leadAuthor.dan" />
                     </div>
                     <div class="la-line">
-                      <TitlePlate :text="leadAuthor.title" :rare="leadAuthor.rare" />
+                      <TitlePlate :text="leadAuthor.title" :rare="leadAuthor.rare" :game="leadAuthor.gameTitle ?? null" :site="leadAuthor.siteTitle" form="plate" />
                       <span class="ago">{{ lead.ago }}</span>
                     </div>
                   </div>
@@ -310,7 +310,7 @@ function setTag(name) {
   color: var(--ink-3);
 }
 .search:focus-within {
-  border-color: var(--ka);
+  border-color: var(--input-focus-line);
   box-shadow: var(--focus);
 }
 .search input {
@@ -375,7 +375,7 @@ function setTag(name) {
   font-weight: 700;
 }
 .sec:hover {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .lead-body {
   display: flex;
@@ -389,7 +389,7 @@ function setTag(name) {
   line-height: 1.4;
 }
 .lead-title a:hover {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .lead-sum {
   margin-top: 10px;
@@ -431,7 +431,14 @@ function setTag(name) {
   white-space: nowrap;
 }
 .an:hover {
-  color: var(--ka-ink);
+  color: var(--link);
+}
+/* 手机：头条作者名的可点高度补到 44px（内边距 + 负外边距，版面不动） */
+@media (max-width: 767px) {
+  .lead-author .an {
+    padding-block: 11px;
+    margin-block: -11px;
+  }
 }
 .ago {
   font-size: var(--fs-12);
@@ -470,7 +477,7 @@ function setTag(name) {
   color: var(--ink-2);
 }
 .lead-song:hover .ls {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .more {
   display: flex;
@@ -509,14 +516,14 @@ function setTag(name) {
   font-weight: 500;
 }
 .top a:hover {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .pos {
   width: 18px;
   color: var(--ink-3);
 }
 .pos.first {
-  color: var(--don-ink);
+  color: var(--emph-num);
 }
 .top b {
   width: 44px;
@@ -543,7 +550,7 @@ function setTag(name) {
   font-weight: 700;
 }
 .ugc-song:hover .grow {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .ugc p {
   margin: 8px 0 6px;
@@ -561,7 +568,7 @@ function setTag(name) {
   font-weight: 500;
 }
 .ugc-who a:hover {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 @media (max-width: 1239px) {
   .layout {

@@ -11,6 +11,11 @@ const AUTH = [
   ['empty', '无成绩'],
   ['ready', '已同步'],
 ]
+const VARIANTS = [
+  ['a', 'A 基线', '生成式素材 · Fumen 配色'],
+  ['b', 'B 素材', '真实素材 · Fumen 配色'],
+  ['c', 'C Teal', '真实素材 · Viewer Teal'],
+]
 const OUTCOMES = [
   ['success', '成功'],
   ['partial', '部分成功'],
@@ -24,6 +29,12 @@ const OUTCOMES = [
       <div class="spread">
         <b>原型控制</b>
         <button class="icon-btn" aria-label="收起" @click="open = false"><Icon name="close" :size="18" /></button>
+      </div>
+      <div class="field">
+        <span class="field-label">对照版本</span>
+        <div class="seg" role="group" aria-label="对照版本">
+          <button v-for="v in VARIANTS" :key="v[0]" :aria-pressed="store.variant === v[0]" :title="v[2]" @click="store.variant = v[0]">{{ v[1] }}</button>
+        </div>
       </div>
       <div class="field">
         <span class="field-label">主题</span>
@@ -49,6 +60,7 @@ const OUTCOMES = [
         <div class="seg" role="group" aria-label="数据规模">
           <button :aria-pressed="store.dataset === 'full'" @click="store.dataset = 'full'">真实规模</button>
           <button :aria-pressed="store.dataset === 'demo'" @click="store.dataset = 'demo'">精选 30 首</button>
+          <button :aria-pressed="store.dataset === 'real'" @click="store.dataset = 'real'">真实曲目</button>
         </div>
       </div>
       <div class="field">

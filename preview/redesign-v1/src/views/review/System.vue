@@ -752,7 +752,7 @@ const MAPPING = [
       <div class="s-top-in">
         <RouterLink to="/review" class="s-brand" aria-label="设计总览">
           <Logo :size="30" />
-          <b>Design System V1.2</b>
+          <b>Design System · V1.3（Phase A）</b>
         </RouterLink>
         <RouterLink to="/review" class="link s-back"><Icon name="chevL" :size="14" />设计总览</RouterLink>
         <span class="grow" />
@@ -779,7 +779,7 @@ const MAPPING = [
 
       <main class="s-doc">
         <header class="s-intro">
-          <h1 class="t-display">Design System V1.2</h1>
+          <h1 class="t-display">Design System V1.3（Phase A）</h1>
           <p class="s-lede">Taiko Viewer「<span lang="ja">譜面</span> Fumen」设计语言的规范。每个样本都由 tokens.css、base.css、domain.css 和组件源码直接渲染，切换主题和语言后看到的就是实际效果。条目后的编号（D11、S2、R3、V6…）对应 docs/07-v1.1-design-decisions.md 的裁决。</p>
           <div class="s-ctl s-ctl-page">
             <div class="seg" role="group" aria-label="主题">

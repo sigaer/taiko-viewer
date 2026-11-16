@@ -197,7 +197,7 @@ function remove() {
           <span class="sep" aria-hidden="true" />
           <div class="cgroup" role="group" :aria-label="L('王冠', '王冠')">
             <button class="chip" :aria-pressed="f.crown === 'all'" @click="f.crown = 'all'">{{ L('全部王冠', '全王冠') }}</button>
-            <button v-for="c in ['2', '1', '0', '-1']" :key="c" class="chip" :aria-pressed="f.crown === c" @click="f.crown = c"><Crown :v="Number(c)" size="sm" />{{ L(CROWNS[c].zh, CROWNS[c].ja) }}</button>
+            <button v-for="c in ['2', '1', '0', '-1']" :key="c" class="chip" :aria-pressed="f.crown === c" @click="f.crown = c"><Crown :v="Number(c)" size="chip" />{{ L(CROWNS[c].zh, CROWNS[c].ja) }}</button>
           </div>
         </div>
         <div class="selects">
@@ -250,8 +250,8 @@ function remove() {
             <td class="r num c-ok">{{ s.ok }}</td>
             <td class="r num" :class="{ zero: s.ng === 0 }">{{ s.ng }}</td>
             <td class="r num c-combo">{{ s.combo }}</td>
-            <td class="c"><Crown :v="s.crown" /></td>
-            <td class="c"><Rank :v="s.rank" /></td>
+            <td class="c"><Crown :v="s.crown" size="table" /></td>
+            <td class="c"><Rank :v="s.rank" named /></td>
             <td class="r num c-plays">{{ s.plays }}</td>
             <td class="r when">{{ when(s.daysAgo) }}</td>
             <td class="r c-ops">
@@ -381,7 +381,7 @@ function remove() {
   flex: none;
 }
 .search:focus-within {
-  border-color: var(--ka);
+  border-color: var(--input-focus-line);
   box-shadow: var(--focus);
 }
 .sinput {
@@ -452,7 +452,7 @@ function remove() {
   min-width: 0;
 }
 .slink:hover :deep(.t) {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .sc {
   font-size: var(--fs-14);
@@ -638,6 +638,10 @@ tr.is-locked .lockbtn {
   }
   .mright b {
     font-size: var(--fs-18);
+  }
+  /* 真实素材的评价图按 28px 绘制在 24px 占位里：四周各留 2px，不贴右缘、不碰王冠与分数（版本 A 没有 .arank） */
+  .mright :deep(.arank) {
+    margin: 2px;
   }
 }
 </style>

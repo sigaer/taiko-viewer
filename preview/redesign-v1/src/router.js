@@ -106,6 +106,8 @@ const routes = [
   { path: '/review/directions', component: v('review/Directions'), meta: { title: { zh: '设计方向', ja: 'デザイン方向' }, bare: true } },
   { path: '/review/system', component: v('review/System'), meta: { title: { zh: 'Design System', ja: 'Design System' }, bare: true } },
   { path: '/review/device', component: v('review/Device'), meta: { title: { zh: '手机预览', ja: '端末プレビュー' }, bare: true } },
+  { path: '/review/assets', component: v('review/Assets'), meta: { title: { zh: '素材页', ja: '素材' }, bare: true } },
+  { path: '/review/compare', component: v('review/Compare'), meta: { title: { zh: '三版对照', ja: '3 案比較' }, bare: true } },
 
   { path: '/:rest(.*)*', component: v('NotFound'), meta: { title: { zh: '页面不存在', ja: 'ページが見つかりません' }, module: 'today' } },
 ]

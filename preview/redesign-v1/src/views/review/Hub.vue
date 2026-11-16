@@ -48,7 +48,13 @@ const DOCS = [
   ['docs/11-v1.2-quality-report.md', '质量与性能报告'],
   ['docs/12-risks-and-integration-acceptance.md', '遗留风险与正式集成验收清单'],
   ['docs/13-design-freeze.md', 'Design Freeze 决策'],
+  ['docs/14-v1.3-asset-audit.md', 'V1.3 素材盘点'],
+  ['docs/15-v1.3-brand-system.md', 'V1.3 品牌体系（Fumen × Viewer Teal）'],
+  ['docs/16-v1.3-component-specs.md', 'V1.3 组件规范（真实素材）'],
+  ['docs/17-v1.3-comparison.md', 'V1.3 三版对照结果'],
+  ['docs/18-v1.3-decisions-needed.md', 'V1.3 待裁定事项'],
   ['qa/screenshots/index.html', '关键截图与浅深对照'],
+  ['qa/screenshots/v13/index.html', 'V1.3 三版对照截图与颜色分析'],
 ]
 </script>
 
@@ -56,7 +62,7 @@ const DOCS = [
   <div class="hub">
     <header class="top">
       <Logo :size="34" />
-      <b class="grow">Taiko Viewer · Design V1.2</b>
+      <b class="grow">Taiko Viewer · Design V1.3（Phase A）</b>
       <div class="seg" role="group" aria-label="主题">
         <button v-for="t in THEMES" :key="t.v" type="button" :aria-pressed="store.theme === t.v" @click="store.theme = t.v">{{ t.t }}</button>
       </div>
@@ -66,7 +72,7 @@ const DOCS = [
       <section class="intro" aria-labelledby="hub-title">
         <div>
           <h1 id="hub-title">把每一次练习，画成一条谱面。</h1>
-          <p class="lead">Taiko Viewer 全站重新设计，方向名「<span lang="ja">譜面</span> Fumen」。V1.1 与 V1.2 两轮按设计裁定逐项修复：同步、搜索、路由状态、对比度与触控、真实规模数据、模块的视觉区分和手机详情页导航。产品能力全部保留；所有数据都是示例。</p>
+          <p class="lead">Taiko Viewer 全站重新设计，方向名「<span lang="ja">譜面</span> Fumen」。V1.1 与 V1.2 两轮按设计裁定逐项修复：同步、搜索、路由状态、对比度与触控、真实规模数据、模块的视觉区分和手机详情页导航。V1.3 Phase A 增加三个可切换的对照版本：A（V1.2 基线）、B（真实游戏素材）、C（真实素材 + Viewer Teal），在原型面板里切换。产品能力全部保留；所有数据都是示例。</p>
           <div class="row-wrap">
             <button type="button" class="btn btn-primary btn-lg" @click="open({ path: '/', auth: 'ready' })"><Icon name="desktop" :size="18" />打开桌面原型</button>
             <button type="button" class="btn btn-lg" @click="phone({ path: '/', auth: 'ready' })"><Icon name="phone" :size="18" />打开手机原型</button>
@@ -87,8 +93,10 @@ const DOCS = [
 
       <nav class="trio" aria-label="评审页">
         <RouterLink to="/review/directions"><Icon name="layers" :size="22" /><b>三个设计方向</b><span>譜面 / 祭 / 帖，以及为什么选第一个</span></RouterLink>
-        <RouterLink to="/review/system"><Icon name="grid" :size="22" /><b>Design System V1.2</b><span>Tokens、组件、图表、动效与模块语气的活样张</span></RouterLink>
+        <RouterLink to="/review/system"><Icon name="grid" :size="22" /><b>Design System</b><span>Tokens、组件、图表、动效与模块语气的活样张</span></RouterLink>
         <RouterLink to="/states"><Icon name="info" :size="22" /><b>状态页样例</b><span>加载、空、错误、权限引导</span></RouterLink>
+        <RouterLink to="/review/compare"><Icon name="layers" :size="22" /><b>三版对照</b><span>A / B / C 并排：今日、歌曲详情、全部成绩、社区，桌面与手机</span></RouterLink>
+        <RouterLink to="/review/assets"><Icon name="image" :size="22" /><b>素材页</b><span>曲绘、难度、王冠、评价、称号、头像的每个尺寸与表面</span></RouterLink>
       </nav>
 
       <section aria-labelledby="hub-screens">

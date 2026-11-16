@@ -40,12 +40,17 @@ function decls(body) {
   return m
 }
 const blocks = topLevelBlocks(css).filter((b) => !b.selector.startsWith('@'))
-function themeVars(theme) {
+// brand：'fumen'（版本 A、B）| 'teal'（版本 C，读取 [data-brand='teal'] 的覆盖块）
+function themeVars(theme, brand = 'fumen') {
   const vars = {}
+  const ok = new Set([':root', `:root[data-theme='${theme}']`])
+  if (brand === 'teal') {
+    ok.add(":root[data-brand='teal']")
+    ok.add(theme === 'dark' ? ":root[data-brand='teal'][data-theme='dark']" : ":root[data-brand='teal']:not([data-theme='dark'])")
+  }
   for (const b of blocks) {
     const sels = b.selector.split(',').map((s) => s.trim())
-    const applies = sels.some((s) => s === ':root' || s === `:root[data-theme='${theme}']`)
-    if (applies) Object.assign(vars, decls(b.body))
+    if (sels.some((s) => ok.has(s))) Object.assign(vars, decls(b.body))
   }
   return vars
 }
@@ -187,33 +192,71 @@ add('舞台非文字', '--stage-ctl-border', '--stage-bg', UI)
 add('舞台非文字', '--stage-ctl-border', '--stage-surface', UI)
 add('舞台非文字', '--stage-focus', '--stage-bg', UI)
 add('舞台非文字', '--stage-focus', '--stage-surface', UI)
+// 角色 token（V1.3 B3）：两套品牌都检查；fumen 下与 V1.2 的同名检查等值
+add('角色', '--action-ink', '--action-bg')
+add('角色', '--action-ink', '--action-bg-hover')
+for (const bg of ['--surface', '--bg', '--bg-sunk']) add('角色', '--link', bg)
+add('角色', '--selected-ink', '--selected-bg')
+add('角色', '--seg-on-ink', '--seg-on-bg')
+add('角色', '--nav-active-ink', '--nav-active-bg')
+for (const bg of ['--surface', '--bg']) add('角色', '--nav-active-text', bg)
+add('角色', '--info-ink', '--info-wash')
+add('角色', '--btn-ink-ink', '--btn-ink-bg')
+add('角色', '--tag-don-ink', '--tag-don-bg')
+add('角色', '--tag-info-ink', '--tag-info-bg')
+for (const bg of ['--surface', '--bg']) add('角色', '--emph-num', bg)
+add('角色非文字', '--selected-line', '--surface', UI)
+add('角色非文字', '--tab-line', '--surface', UI)
+add('角色非文字', '--series', '--surface', UI)
+// 搜索框聚焦边框与第二序列在 fumen 浅色下沿用 V1.2 的 --ka（2.94:1，V1.2 遗留，Phase B 处理），只对 teal 检查
+const TEAL_ONLY = [
+  { group: '角色非文字', fg: '--input-focus-line', bg: '--surface', min: UI },
+  { group: '角色非文字', fg: '--series-alt', bg: '--surface', min: UI },
+]
 // 版块色（I4）：色点 / 色条，非文字，在 --surface 与 --bg 上 ≥ 3:1
 const SECTIONS = ['official', 'events', 'beginner-help', 'score-guides', 'dojo', 'achievements', 'arcade', 'general', 'creative']
 for (const s of SECTIONS) for (const bg of ['--surface', '--bg']) add('版块色', `--section-${s}`, bg, UI)
 
-function run(theme) {
-  const vars = themeVars(theme)
-  return checks.map((c) => {
+const TEAL_STAGE = { '--brand-primary': '#86d9dc', '--brand-on-primary': '#0b2a2d', '--brand-soft': '#244b4e' }
+function run(theme, brand = 'fumen') {
+  const vars = themeVars(theme, brand)
+  const extra =
+    brand === 'teal'
+      ? [
+          // 舞台面上的品牌色（tokens.css 的 :root[data-brand='teal'] .stage 用深色主题的值）
+          { group: '舞台品牌', fg: TEAL_STAGE['--brand-primary'], bg: '--stage-bg', min: TEXT },
+          { group: '舞台品牌', fg: TEAL_STAGE['--brand-primary'], bg: '--stage-surface', min: TEXT },
+          { group: '舞台品牌', fg: TEAL_STAGE['--brand-on-primary'], bg: TEAL_STAGE['--brand-primary'], min: TEXT },
+          { group: '舞台品牌', fg: TEAL_STAGE['--brand-primary'], bg: TEAL_STAGE['--brand-soft'], min: TEXT },
+          { group: '谱面带', fg: '--lane-ka', bg: '--lane', min: UI },
+          ...TEAL_ONLY,
+        ]
+      : []
+  return [...checks, ...extra].map((c) => {
     const bg = color(c.bg, vars, color('--bg', vars))
     const fg = color(c.fg, vars, bg)
     const r = ratio(fg, bg)
-    return { ...c, theme, fgHex: hex(fg), bgHex: hex(bg), ratio: r, pass: r >= c.min }
+    return { ...c, theme, brand, fgHex: hex(fg), bgHex: hex(bg), ratio: r, pass: r >= c.min }
   })
 }
 
 const isMain = process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]
 if (isMain) {
-  const rows = [...run('light'), ...run('dark')]
+  // 四套：fumen 浅 / 深（版本 A、B）与 teal 浅 / 深（版本 C）
+  const light = run('light')
+  const dark = run('dark')
+  const tLight = run('light', 'teal')
+  const tDark = run('dark', 'teal')
+  const rows = [...light, ...dark, ...tLight, ...tDark]
   if (process.argv.includes('--json')) console.log(JSON.stringify(rows, null, 2))
   else {
-    const light = rows.filter((r) => r.theme === 'light')
-    const dark = rows.filter((r) => r.theme === 'dark')
     const short = (s) => (s.startsWith('color-mix') ? s.replace(/color-mix\(in srgb, var\((--[\w-]+)\) (\d+)%, var\((--[\w-]+)\)\)/, '$1@$2%/$3') : s)
-    console.log('组'.padEnd(8) + '前景'.padEnd(18) + '背景'.padEnd(26) + '浅色'.padStart(8) + '深色'.padStart(8) + '  min')
-    light.forEach((l, i) => {
+    console.log('组'.padEnd(8) + '前景'.padEnd(18) + '背景'.padEnd(26) + '浅色'.padStart(8) + '深色'.padStart(8) + 'C浅'.padStart(8) + 'C深'.padStart(8) + '  min')
+    const f = (r) => (!r ? '' : (r.pass ? '' : '✗') + r.ratio.toFixed(2))
+    tLight.forEach((t, i) => {
+      const l = light[i]
       const d = dark[i]
-      const f = (r) => (r.pass ? '' : '✗') + r.ratio.toFixed(2)
-      console.log(l.group.padEnd(8) + l.fg.padEnd(18) + short(l.bg).padEnd(26) + f(l).padStart(8) + f(d).padStart(8) + '  ' + l.min)
+      console.log(t.group.padEnd(8) + t.fg.padEnd(18) + short(t.bg).padEnd(26) + f(l).padStart(8) + f(d).padStart(8) + f(t).padStart(8) + f(tDark[i]).padStart(8) + '  ' + t.min)
     })
     const bad = rows.filter((r) => !r.pass)
     console.log(bad.length ? `\n${bad.length} 项未达标` : `\n全部 ${rows.length} 项达标`)

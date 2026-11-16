@@ -224,7 +224,7 @@ const related = (() => {
                 <DanBadge :dan="author.dan" />
               </div>
               <div class="by-line">
-                <TitlePlate :text="author.title" :rare="author.rare" />
+                <TitlePlate :text="author.title" :rare="author.rare" :game="author.gameTitle ?? null" :site="author.siteTitle" form="plate" />
                 <span class="t-caption">{{ first?.ago || thread.ago }}</span>
               </div>
             </div>
@@ -302,7 +302,7 @@ const related = (() => {
                     <span v-if="users[p.author].role !== 'user'" class="role" :class="users[p.author].role">{{ roleName(users[p.author].role) }}</span>
                     <span v-if="p.author === thread.author" class="tag tag-info">{{ L('楼主', '投稿者') }}</span>
                     <DanBadge :dan="users[p.author].dan" />
-                    <TitlePlate class="only-desktop" :text="users[p.author].title" :rare="users[p.author].rare" />
+                    <TitlePlate class="only-desktop" :text="users[p.author].title" :rare="users[p.author].rare" :game="users[p.author].gameTitle ?? null" :site="users[p.author].siteTitle" form="text" />
                     <span class="t-caption ago">{{ p.ago }}</span>
                     <span class="floor num">#{{ p.floor }}</span>
                   </div>

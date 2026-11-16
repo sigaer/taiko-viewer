@@ -145,7 +145,7 @@ function apply(a) {
             <span v-if="asMod" class="role moderator">{{ L(ROLE.moderator.zh, ROLE.moderator.ja) }}</span>
           </h1>
           <p class="id-line">
-            <TitlePlate :text="player.title" :rare="me.rare" />
+            <TitlePlate :text="player.title" :rare="me.rare" :game="player.gameTitle ?? null" :site="me.siteTitle" form="text" />
             <DanBadge :dan="player.dan" />
             <span class="t-caption">CN <span class="num">{{ player.taikoIdMasked }}</span></span>
           </p>
@@ -210,7 +210,7 @@ function apply(a) {
                   <PlayerAvatar :user="users[u]" :size="44" />
                   <span class="grow">
                     <span class="uname"><b class="title-1l" :title="users[u].name">{{ users[u].name }}</b><span v-if="ROLE[users[u].role]" class="role" :class="users[u].role">{{ L(ROLE[users[u].role].zh, ROLE[users[u].role].ja) }}</span><DanBadge :dan="users[u].dan" /></span>
-                    <TitlePlate :text="users[u].title" :rare="users[u].rare" />
+                    <TitlePlate :text="users[u].title" :rare="users[u].rare" :game="users[u].gameTitle ?? null" :site="users[u].siteTitle" form="text" />
                   </span>
                 </RouterLink>
                 <button type="button" class="btn btn-sm" @click="unfollow(u)">{{ L('取消关注', 'フォロー解除') }}</button>

@@ -130,7 +130,7 @@ table {
   color: var(--stage-ink);
 }
 ::selection {
-  background: color-mix(in srgb, var(--ka) 30%, transparent);
+  background: var(--selection);
 }
 /* 减少动效（D13）：系统设置与原型开关（根元素 data-motion="reduce"）效果相同 */
 @media (prefers-reduced-motion: reduce) {
@@ -349,7 +349,7 @@ table {
 }
 .section-head .more {
   font-size: var(--fs-13);
-  color: var(--ka-ink);
+  color: var(--link);
   font-weight: 500;
 }
 .section-head .more:hover {
@@ -430,13 +430,13 @@ table {
   transform: scale(0.97);
 }
 .btn-primary {
-  background: var(--don-solid);
-  border-color: var(--don-solid);
-  color: var(--ink-on-solid);
+  background: var(--action-bg);
+  border-color: var(--action-bg);
+  color: var(--action-ink);
   font-weight: 700;
 }
 .btn-primary:hover {
-  background: color-mix(in srgb, var(--don-solid) 88%, var(--note-outline));
+  background: var(--action-bg-hover);
   border-color: transparent;
 }
 /* 破坏性操作：用「描边」与主按钮区分，而不是换一种实色 */
@@ -452,14 +452,25 @@ table {
   color: var(--danger);
 }
 .btn-ink {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--bg);
+  background: var(--btn-ink-bg);
+  border-color: var(--btn-ink-line);
+  color: var(--btn-ink-ink);
   font-weight: 700;
 }
 .btn-ink:hover {
-  background: color-mix(in srgb, var(--ink) 86%, var(--bg));
-  border-color: transparent;
+  background: var(--btn-ink-hover);
+  border-color: var(--btn-ink-hover-line);
+}
+/* teal（版本 C）：.btn-ink 与 .btn-primary 都是品牌主按钮；同一区域已有主按钮时，用 .c-secondary 把 .btn-ink 降为次要按钮。
+   fumen（版本 A、B）不受影响。 */
+:root[data-brand='teal'] .btn-ink.c-secondary {
+  background: var(--surface);
+  border-color: var(--ctl-border);
+  color: var(--ink);
+}
+:root[data-brand='teal'] .btn-ink.c-secondary:hover {
+  background: var(--bg-sunk);
+  border-color: var(--ctl-border);
 }
 .btn-ghost {
   border-color: transparent;
@@ -615,10 +626,10 @@ table {
 }
 .seg button[aria-pressed='true'],
 .seg button[aria-selected='true'] {
-  background: var(--surface);
-  color: var(--ink);
+  background: var(--seg-on-bg);
+  color: var(--seg-on-ink);
   font-weight: 700;
-  box-shadow: inset 0 0 0 1px var(--ctl-border), 0 1px 2px color-mix(in srgb, var(--note-outline) 12%, transparent);
+  box-shadow: inset 0 0 0 1px var(--seg-on-ring), 0 1px 2px color-mix(in srgb, var(--note-outline) 12%, transparent);
 }
 /* 选中态的 box-shadow 比 :focus-visible 更具体，会把焦点环盖掉（D6：焦点环在所有底色上可见） */
 .seg button:focus-visible,
@@ -662,7 +673,7 @@ table {
   bottom: -1px;
   height: 3px;
   border-radius: 3px 3px 0 0;
-  background: var(--don);
+  background: var(--tab-line);
 }
 
 /* ---------- Chips / Tags ---------- */
@@ -686,9 +697,9 @@ button.chip:hover {
   color: var(--ink);
 }
 .chip[aria-pressed='true'] {
-  background: var(--ink);
-  border-color: var(--ink);
-  color: var(--bg);
+  background: var(--selected-bg);
+  border-color: var(--selected-line);
+  color: var(--selected-ink);
   font-weight: 500;
 }
 /* 触控（D7）：手机上筛选胶囊与分段内钮视觉高 38px（--ctl-h），透明扩展区补到 --hit（44px）。
@@ -778,13 +789,13 @@ button.chip:hover {
   white-space: nowrap;
 }
 .tag-don {
-  background: var(--don-wash);
-  color: var(--don-ink);
+  background: var(--tag-don-bg);
+  color: var(--tag-don-ink);
 }
 .tag-ka,
 .tag-info {
-  background: var(--ka-wash);
-  color: var(--ka-ink);
+  background: var(--tag-info-bg);
+  color: var(--tag-info-ink);
 }
 .tag-roll {
   background: var(--roll-wash);
@@ -988,7 +999,7 @@ button.chip:hover {
 
 /* ---------- Link ---------- */
 .link {
-  color: var(--ka-ink);
+  color: var(--link);
   font-weight: 500;
 }
 .link:hover {

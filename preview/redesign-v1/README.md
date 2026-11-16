@@ -1,11 +1,22 @@
-# Taiko Viewer Design V1.2 —— 譜面 Fumen
+# Taiko Viewer Design V1.3（Phase A）—— 譜面 Fumen
 
-Taiko Viewer 全站重新设计的高保真原型（方向名「譜面 Fumen」），当前版本 V1.2（Design Freeze 轮；是否批准进入正式实现见 `docs/13-design-freeze.md`）。
+Taiko Viewer 全站重新设计的高保真原型（方向名「譜面 Fumen」）。
+
+- **默认状态是 V1.2**（Design Freeze Candidate，尚未批准，见 `docs/13-design-freeze.md`）。
+- **V1.3 Phase A** 在它之上加了三个可切换的对照版本：A（V1.2 基线）、B（真实游戏素材）、C（真实素材 + 青绿品牌）。方向尚未选定，见 `docs/18-v1.3-design-decision.md`。
+
+## V1.3 Phase A
+
+- 实时对照：`#/review/compare`。素材页：`#/review/assets`。
+- 任意页面的地址在 `#` 之前加 `?variant=a|b|c`、`?theme=light|dark`、`?data=full|demo|real`，只对这次加载生效；原型面板里也可以切换。
+- 对照截图在 `qa/screenshots/v13/`（入口 `index.html`）。
+- 真实图标在 `public/game/`，从正式站 `main` 原样取出。**曲绘不在仓库里**：版本 B、C 运行时从 `static.sakura-bot.cn` 加载白名单内曲目的曲绘，离线时显示占位。
+- C 目前只整理了今日、歌曲详情、全部成绩、社区四个页面和外壳，其余页面在 C 下颜色是混的。
 
 ## 边界
 
 - 独立的 Vite + Vue 3 工程（纯 CSS），只使用 `src/mock/` 生成的模拟数据。
-- 不引用、不修改 `taiko_viewer/` 生产工程；不连接后端、数据库或任何 API；不改变 API 契约。
+- 不引用、不修改 `taiko_viewer/` 生产工程；不连接后端、数据库或任何 API；不改变 API 契约。唯一的外部请求是版本 B、C 下的曲绘图片（只带曲目 ID）。
 - 不参与部署。同步、提交、删除等操作只在前端模拟。
 - 管理后台不在范围内；年度回顾只做了入口页。
 - 原型里的测试结果（包括 `qa/` 的浏览器验收）都基于模拟数据，**不是生产验收**。
@@ -142,3 +153,8 @@ preview/redesign-v1/
 | `docs/11-v1.2-quality-report.md` | V1.2 质量与性能报告 |
 | `docs/12-risks-and-integration-acceptance.md` | 遗留风险登记与正式集成验收清单 |
 | `docs/13-design-freeze.md` | Design Freeze 决策 |
+| `docs/14-v1.3-asset-audit.md` | V1.3 素材盘点与业务映射 |
+| `docs/15-v1.3-brand-system.md` | V1.3 品牌配色与使用规则（Fumen × Viewer Teal） |
+| `docs/16-v1.3-component-specs.md` | V1.3 组件规范：曲绘、难度、王冠、评价、称号、头像 |
+| `docs/17-v1.3-visual-comparison.md` | V1.3 三版本视觉对照、性能与验证程度 |
+| `docs/18-v1.3-design-decision.md` | V1.3 推荐方向与待裁定事项 |

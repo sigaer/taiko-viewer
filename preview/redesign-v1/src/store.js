@@ -3,10 +3,10 @@ import { sync, startSync, openSyncPanel, configureSync, reset as resetSync } fro
 import { setData as setSearchData } from './search'
 import * as mock from './mock/data'
 
-// 原型状态：主题 / 语言 / 登录态 / 数据规模 / 下一次同步结果 / 减少动效。
+// 原型状态：主题 / 语言 / 登录态 / 数据规模 / 下一次同步结果 / 减少动效 / 对照版本。
 // 写入 localStorage（同一个 JSON 对象），iframe 手机预览通过 storage 事件与外层保持一致。
 const KEY = 'tv-design-v1'
-const PERSISTED = ['theme', 'locale', 'auth', 'dataset', 'syncOutcome', 'motion', 'density']
+const PERSISTED = ['theme', 'locale', 'auth', 'dataset', 'syncOutcome', 'motion', 'density', 'variant']
 const saved = (() => {
   try {
     return JSON.parse(localStorage.getItem(KEY) || '{}') || {}
@@ -15,28 +15,39 @@ const saved = (() => {
   }
 })()
 
-// ?data=full|demo（地址参数优先于本地设置，见裁决 M1）
-const urlDataset = (() => {
-  try {
-    const fromSearch = new URLSearchParams(location.search).get('data')
-    const hq = location.hash.includes('?') ? location.hash.slice(location.hash.indexOf('?') + 1) : ''
-    const v = fromSearch || new URLSearchParams(hq).get('data')
-    return v === 'demo' || v === 'full' ? v : null
-  } catch {
-    return null
-  }
-})()
-
 const oneOf = (v, list, def) => (list.includes(v) ? v : def)
 
+// 地址参数（# 之前）：?variant=a|b|c、?theme=light|dark、?data=full|demo|real。
+// 只作用于这一次页面载入，不写入本地设置（对照页的 iframe 靠它固定版本，不影响外层与别的标签页）。
+// ?data= 也接受 hash 里 ? 之后的写法（V1.2 的旧链接）。
+const urlOverride = (() => {
+  const out = {}
+  try {
+    const q = new URLSearchParams(location.search)
+    const hq = location.hash.includes('?') ? new URLSearchParams(location.hash.slice(location.hash.indexOf('?') + 1)) : new URLSearchParams()
+    const v = q.get('variant')
+    if (['a', 'b', 'c'].includes(v)) out.variant = v
+    const t = q.get('theme')
+    if (t === 'light' || t === 'dark') out.theme = t
+    const d = q.get('data') || hq.get('data')
+    if (['full', 'demo', 'real'].includes(d)) out.dataset = d
+  } catch {
+    /* ignore */
+  }
+  return out
+})()
+const URL_PARAM = { variant: 'variant', theme: 'theme', dataset: 'data' }
+
 export const store = reactive({
-  theme: oneOf(saved.theme, ['system', 'light', 'dark'], 'system'),
+  theme: urlOverride.theme || oneOf(saved.theme, ['system', 'light', 'dark'], 'system'),
   locale: oneOf(saved.locale, ['zh', 'ja'], 'zh'),
   auth: oneOf(saved.auth, ['guest', 'unbound', 'empty', 'ready'], 'ready'),
-  dataset: urlDataset || oneOf(saved.dataset, ['full', 'demo'], 'full'),
+  dataset: urlOverride.dataset || oneOf(saved.dataset, ['full', 'demo', 'real'], 'full'),
   syncOutcome: oneOf(saved.syncOutcome, ['success', 'partial', 'failed'], 'success'),
   motion: oneOf(saved.motion, ['system', 'reduce'], 'system'),
   density: oneOf(saved.density, ['comfortable', 'compact'], 'comfortable'), // 列表密度（V11），设置页绑定
+  // 对照版本（V1.3）：a = 生成式素材 + Fumen 配色（默认，即 V1.2）；b = 真实素材 + Fumen；c = 真实素材 + Viewer Teal
+  variant: urlOverride.variant || oneOf(saved.variant, ['a', 'b', 'c'], 'a'),
   paletteOpen: false,
   syncing: false, // 兼容旧页面：等于 sync.state === 'running'
   toasts: [],
@@ -61,6 +72,11 @@ mqMotion.addEventListener('change', (e) => (mqReduce.value = e.matches))
 /** 减少动效：系统设置或原型开关（根元素 data-motion="reduce"） */
 export const reducedMotion = computed(() => mqReduce.value || store.motion === 'reduce')
 
+/** 真实素材（版本 B、C）：组件按这个值切换画法；版本 A 保持 V1.2 的生成式画法。 */
+export const authentic = computed(() => store.variant !== 'a')
+/** 品牌配色：版本 C 为 teal，其余为 fumen */
+export const brand = computed(() => (store.variant === 'c' ? 'teal' : 'fumen'))
+
 function apply() {
   const root = document.documentElement
   root.dataset.theme = resolvedTheme.value
@@ -68,14 +84,21 @@ function apply() {
   if (store.motion === 'reduce') root.dataset.motion = 'reduce'
   else delete root.dataset.motion
   root.dataset.density = store.density
+  // 只在值变化时写：根元素属性的每次写入都会让整页重新计算样式
+  const assets = authentic.value ? 'authentic' : 'generated'
+  if (root.dataset.assets !== assets) root.dataset.assets = assets
+  if (root.dataset.brand !== brand.value) root.dataset.brand = brand.value
 }
-watch([() => store.theme, () => store.locale, () => store.motion, () => store.density, () => mqDark.value], apply, { immediate: true })
+watch([() => store.theme, () => store.locale, () => store.motion, () => store.density, () => store.variant, () => mqDark.value], apply, { immediate: true })
+
+/** 这个键当前的值是否只来自地址参数（还没被原型面板改过）。 */
+const fromUrl = (k) => k in urlOverride && store[k] === urlOverride[k]
 
 function persist() {
   try {
     const prev = JSON.parse(localStorage.getItem(KEY) || '{}') || {}
     const next = { ...prev }
-    for (const k of PERSISTED) next[k] = store[k]
+    for (const k of PERSISTED) if (!fromUrl(k)) next[k] = store[k]
     localStorage.setItem(KEY, JSON.stringify(next))
   } catch {
     /* 隐私模式下忽略 */
@@ -83,8 +106,23 @@ function persist() {
 }
 watch(() => PERSISTED.map((k) => store[k]), persist)
 
-// 地址参数带来的数据规模也写入本地，之后去掉参数也保持一致
-if (urlDataset && urlDataset !== saved.dataset) persist()
+// 在原型面板里改了被地址参数固定的值：去掉那个参数，之后刷新以本地设置为准
+watch(
+  () => [store.variant, store.theme],
+  () => {
+    for (const k of ['variant', 'theme']) {
+      if (!(k in urlOverride) || store[k] === urlOverride[k]) continue
+      delete urlOverride[k]
+      try {
+        const url = new URL(location.href)
+        url.searchParams.delete(URL_PARAM[k])
+        if (url.href !== location.href) history.replaceState(history.state, '', url.href)
+      } catch {
+        /* ignore */
+      }
+    }
+  },
+)
 
 // 切换数据规模：写入后刷新（数据在模块加载时生成）。地址里的 ?data= 一并去掉，避免刷新后又被改回。
 watch(
@@ -112,7 +150,7 @@ window.addEventListener('storage', (e) => {
   if (e.key !== KEY || !e.newValue) return
   try {
     const v = JSON.parse(e.newValue) || {}
-    for (const k of PERSISTED) if (v[k] != null && v[k] !== store[k]) store[k] = v[k]
+    for (const k of PERSISTED) if (!fromUrl(k) && v[k] != null && v[k] !== store[k]) store[k] = v[k]
   } catch {
     /* ignore */
   }

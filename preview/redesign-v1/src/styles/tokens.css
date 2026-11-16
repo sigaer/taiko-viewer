@@ -276,6 +276,52 @@
   --stage-roll-wash: #38301a;
 }
 
+/* ============ Role：交互角色（V1.3 B3） ============
+   组件表达「按钮 / 链接 / 选中 / 导航 / 焦点 / 信息」时只引用这里，不再直接引用音符色（--don* / --ka* 只表示游戏数据）。
+   fumen（版本 A、B）解析为 V1.2 的实际值；teal（版本 C）在下面的 [data-brand='teal'] 里改到品牌色。
+   这些 token 的值引用别的 token，自定义属性在声明它的元素上计算，所以 .stage（局部重映射了 --ink / --ka-ink 等）要再声明一遍。 */
+:root,
+.stage {
+  --action-bg: var(--don-solid);
+  --action-bg-hover: color-mix(in srgb, var(--don-solid) 88%, var(--note-outline));
+  --action-ink: var(--ink-on-solid);
+  --link: var(--ka-ink);
+  --selected-bg: var(--ink);          /* 选中的筛选胶囊 */
+  --selected-ink: var(--bg);
+  --selected-line: var(--ink);
+  --seg-on-bg: var(--surface);        /* 分段控件的选中项 */
+  --seg-on-ink: var(--ink);
+  --seg-on-ring: var(--ctl-border);
+  --tab-line: var(--don);             /* 页签指示线 */
+  --nav-active-bg: var(--ink);        /* 桌面窄轨的选中胶囊 */
+  --nav-active-ink: var(--bg);
+  --nav-active-text: var(--ink);      /* 选中导航项的文字（窄轨、手机底栏） */
+  --info-wash: var(--ka-wash);        /* 信息条、进行中的步骤 */
+  --info-ink: var(--ka-ink);
+  --brand-mark: var(--ka);            /* 标志的鼓缘 */
+  --btn-ink-bg: var(--ink);           /* .btn-ink：fumen 是藍墨实色，teal 里按次要按钮显示 */
+  --btn-ink-line: var(--ink);
+  --btn-ink-ink: var(--bg);
+  --btn-ink-hover: color-mix(in srgb, var(--ink) 86%, var(--bg));
+  --btn-ink-hover-line: transparent;
+  --tag-don-bg: var(--don-wash);      /* .tag-don（置顶、报名中等强调） */
+  --tag-don-ink: var(--don-ink);
+  --tag-info-bg: var(--ka-wash);      /* .tag-info / .tag-ka */
+  --tag-info-ink: var(--ka-ink);
+  --emph-num: var(--don-ink);         /* Rating 等大数字的强调色 */
+  --series: var(--don);               /* 单一序列图表（Rating 走势、六维雷达） */
+  --series-alt: var(--ka);            /* 第二种单序列图表（谱面能力分布） */
+  --series-fill: 16%;                 /* 雷达填充 */
+  --vote-on: var(--don);              /* 歌曲详情「有帮助」投票的按下态 */
+  --vote-on-wash: var(--don-wash);
+  --vote-on-ink: var(--don-ink);
+  --input-focus-line: var(--ka);      /* 搜索框等聚焦时的边框 */
+  --info-line: var(--ka);             /* 信息类按下态 / 当前步骤的描边 */
+  --series-focus: var(--ka);          /* 雷达上「当前重点」维度的点与标签 */
+  --series-focus-ink: var(--ka-ink);
+  --selection: color-mix(in srgb, var(--ka) 30%, transparent);
+}
+
 /* ============ Domain：游戏语义色（两套主题共用色相，亮度各自校准） ============ */
 :root {
   /* 判定 */
@@ -318,6 +364,12 @@
   --rank-miyabi1-ink: #9a6000;
   --rank-miyabi2-ink: #b83b6c;
   --rank-miyabi3-ink: #804acb;
+
+  /* 称号（V1.3，docs/16 A5）：游戏称号牌面上的文字（深色 + 白色描边，游戏里的写法），深浅主题相同；
+     站内称号左侧的彩虹竖条 */
+  --plate-ink: #2b1d14;
+  --plate-ink-outline: #ffffff;
+  --site-title-bar: linear-gradient(#ff5a5a, #ffb13d, #f6e24b, #58d68d, #4cc6d8, #7a7cf0, #d05be0);
 
   /* 流派 Genre：只作色点 / 封面底色，不作文字 */
   --genre-pops: #2d9fb8;
@@ -373,6 +425,169 @@
   --section-arcade: #6aa8d6;
   --section-general: #5cb2ea;
   --section-creative: #e57fa8;
+}
+
+/* ============ Brand：Viewer Teal（版本 C，data-brand="teal"；docs/15 B3–B7） ============
+   浅色、深色各一套 Semantic 覆盖；版本 A、B 不经过这里。
+   选择器写成 :not([data-theme='dark']) / [data-theme='dark']，避免与 :root[data-theme='dark'] 同优先级时互相覆盖。 */
+:root[data-brand='teal']:not([data-theme='dark']) {
+  --brand-primary: #006c76;
+  --brand-hover: #005860;
+  --brand-soft: #d7ece9;
+  --brand-on-primary: #ffffff;
+  --brand-focus: #006c76;
+
+  --bg: #eaf6f5;
+  --bg-sunk: #def0ee;
+  --surface: #f9fdfc;
+  --surface-2: #f2f9f8;
+  --line: #ccdfdc;
+  --line-strong: #b4cecb;
+  --ink: #203f43;
+  --ink-2: #3d5a5e;
+  --ink-3: #4d696c;
+  --ctl-border: #6e8c8e;
+  --ok: #26724e;
+  --ok-wash: #e4f3ea;
+  --toast-bg: #24494d;
+  --toast-ink: #f1fbf9;
+  /* B5：咔向蓝偏移，与品牌青绿分开 */
+  --ka: #2b9bcf;
+  --ka-ink: #0f6a96;
+  --ka-wash: #ddeff8;
+  --lane: #17353a;
+  --lane-line: #2f5257;
+  --shadow-pop: 0 18px 50px -12px rgb(22 43 48 / 0.28), 0 2px 6px rgb(22 43 48 / 0.08);
+  --shadow-lift: 0 6px 18px -8px rgb(22 43 48 / 0.22);
+  --scrim: rgb(15 27 33 / 0.46);
+  /* contrast-check 在 teal 浅色下不达标的游戏数据文字色，同色相内调暗（V1.2 值在注释里） */
+  --rank-iki2-ink: #955922;  /* #995b23 */
+  --crown-fc-ink: #925b00;   /* #975e00 */
+}
+:root[data-brand='teal'][data-theme='dark'] {
+  --brand-primary: #86d9dc;
+  --brand-hover: #a0e3e5;
+  --brand-soft: #244b4e;
+  --brand-on-primary: #0b2a2d;
+  --brand-focus: #86d9dc;
+
+  --bg: #10282b;
+  --bg-sunk: #0b1e21;
+  --surface: #193338;
+  --surface-2: #234247;
+  --line: #2e4e52;
+  --line-strong: #3d6165;
+  --ink: #e4f4f1;
+  --ink-2: #accbca;
+  --ink-3: #8fb0b0;
+  --ink-inv: #10282b;
+  --ctl-border: #719b9d;
+  --toast-bg: #31565b;
+  --toast-ink: #f1fbf9;
+  --ka: #5cc4ef;
+  --ka-ink: #8ad4f4;
+  --ka-wash: #16344a;
+  --lane: #0b1e21;
+  --lane-line: #2e4e52;
+  --shadow-pop: 0 24px 60px -12px rgb(0 0 0 / 0.6), 0 0 0 1px #3d6165;
+  --scrim: rgb(5 14 16 / 0.62);
+  /* teal 深色的表面比夜藍亮，以下数据文字色在 14% 浅底上不足 4.5:1，同色相内调亮（V1.2 值在注释里） */
+  --diff-easy-ink: #ff8664;     /* #ff7a55 */
+  --diff-hard-ink: #6cb2ec;     /* #5aa9ea */
+  --diff-oni-ink: #ff7ab4;      /* #ff66a8 */
+  --diff-ura-ink: #b497f8;      /* #b192f8 */
+  --rank-iki1-ink: #a2a8b6;     /* #9198a8 */
+  --rank-iki2-ink: #cf976a;     /* #c6844f */
+  --rank-iki3-ink: #9eacc2;     /* #8e9fb8 */
+  --rank-miyabi1-ink: #dc9e00;  /* #d79a00 */
+  --rank-miyabi2-ink: #ee80a7;  /* #eb6997 */
+  --rank-miyabi3-ink: #b68afc;  /* #aa76fb */
+}
+/* 两套主题共用：谱面带的咔、舞台面（深青）、版块色点改为中性 */
+:root[data-brand='teal'] {
+  --lane-ka: #56c1ee;
+  --lane-focus: #86d9dc;
+  --stage-bg: #1d3d42;
+  --stage-sunk: #17353a;
+  --stage-surface: #27494e;
+  --stage-ink: #e4f4f1;
+  --stage-ink-2: #c0dad8;
+  --stage-ink-3: #a3c2c1;
+  --stage-line: #3a5d62;
+  --stage-line-strong: #4d7277;
+  --stage-ctl-border: #82a8aa;
+  --stage-focus: #86d9dc;
+  --stage-ka: #5cc4ef;
+  --stage-ka-ink: #8ad4f4;
+  --stage-ka-wash: #16344a;
+  --section-official: var(--ink-3);
+  --section-events: var(--ink-3);
+  --section-beginner-help: var(--ink-3);
+  --section-score-guides: var(--ink-3);
+  --section-dojo: var(--ink-3);
+  --section-achievements: var(--ink-3);
+  --section-arcade: var(--ink-3);
+  --section-general: var(--ink-3);
+  --section-creative: var(--ink-3);
+}
+/* 舞台面是深色面：品牌色在其上用深色主题的值 */
+:root[data-brand='teal'] .stage {
+  --brand-primary: #86d9dc;
+  --brand-hover: #a0e3e5;
+  --brand-soft: #244b4e;
+  --brand-on-primary: #0b2a2d;
+  --brand-focus: #86d9dc;
+}
+/* 角色 → 品牌 */
+:root[data-brand='teal'],
+:root[data-brand='teal'] .stage {
+  --action-bg: var(--brand-primary);
+  --action-bg-hover: var(--brand-hover);
+  --action-ink: var(--brand-on-primary);
+  --link: var(--brand-primary);
+  --selected-bg: var(--brand-soft);
+  --selected-ink: var(--brand-primary);
+  --selected-line: var(--brand-primary);
+  --seg-on-bg: var(--brand-soft);
+  --seg-on-ink: var(--brand-primary);
+  --seg-on-ring: var(--brand-primary);
+  --tab-line: var(--brand-primary);
+  --nav-active-bg: var(--brand-primary);
+  --nav-active-ink: var(--brand-on-primary);
+  --nav-active-text: var(--brand-primary);
+  --focus-ring: var(--brand-focus);
+  --info-wash: var(--brand-soft);
+  --info-ink: var(--brand-primary);
+  --brand-mark: var(--brand-primary);
+  /* .btn-ink 在 teal 里也是品牌主按钮；同一区域出现两个实色按钮时，页面给其中一个加 .c-secondary 降级 */
+  --btn-ink-bg: var(--brand-primary);
+  --btn-ink-line: var(--brand-primary);
+  --btn-ink-ink: var(--brand-on-primary);
+  --btn-ink-hover: var(--brand-hover);
+  --btn-ink-hover-line: transparent;
+  --tag-don-bg: var(--bg-sunk);
+  --tag-don-ink: var(--ink-2);
+  --tag-info-bg: var(--bg-sunk);
+  --tag-info-ink: var(--ink-2);
+  --emph-num: var(--ink);
+  --series: var(--brand-primary);
+  --series-alt: var(--brand-primary);
+  --series-fill: 12%;
+  --vote-on: var(--brand-primary);
+  --vote-on-wash: var(--brand-soft);
+  --vote-on-ink: var(--brand-primary);
+  --input-focus-line: var(--brand-primary);
+  --info-line: var(--brand-primary);
+  --series-focus: var(--ink);
+  --series-focus-ink: var(--ink);
+  --selection: color-mix(in srgb, var(--brand-primary) 30%, transparent);
+}
+/* focus 在 :root 已按 fumen 的 --focus-ring 解析成整条阴影，这里要整条重写 */
+:root[data-brand='teal'] {
+  --focus: 0 0 0 2px var(--focus-gap), 0 0 0 4px var(--brand-focus);
+}
+:root[data-brand='teal'] .stage {
+  --focus: 0 0 0 2px var(--stage-bg), 0 0 0 4px var(--brand-focus);
 }
 
 @media (max-width: 767px) {

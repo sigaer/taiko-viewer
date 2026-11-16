@@ -34,10 +34,33 @@ function defaultAuth(screens, p) {
 }
 
 export function caseId(c) {
-  return [slugRoute(c.route), c.vp, c.theme, c.locale, c.auth, c.dataset].join('__')
+  return [slugRoute(c.route), c.vp, c.theme, c.locale, c.auth, c.dataset, ...(c.variant && c.variant !== 'a' ? [c.variant] : [])].join('__')
 }
 
-export async function buildMatrix({ quick = false, only = null } = {}) {
+// V1.3 Phase A targeted set (--v13): the four comparison pages × 5 viewports × light / dark × variants B and C on data=real,
+// plus ja once (four pages × 1440 / 390, light, B and C).
+export const V13_PAGES = ['/', '/songs/615', '/play/scores', '/community']
+function v13Matrix() {
+  const out = []
+  const mk = (route, vp, o) => {
+    const c = { route, vp, theme: o.theme || 'light', locale: o.locale || 'zh', auth: 'ready', dataset: 'real', variant: o.variant, core: false, tags: [o.tag] }
+    c.id = caseId(c)
+    out.push(c)
+  }
+  for (const v of ['b', 'c'])
+    for (const p of V13_PAGES) {
+      for (const vp of Object.keys(VIEWPORTS)) for (const theme of ['light', 'dark']) mk(p, vp, { theme, variant: v, tag: 'v13' })
+      for (const vp of ['1440x900', '390x844']) mk(p, vp, { locale: 'ja', variant: v, tag: 'v13-ja' })
+    }
+  return out
+}
+
+export async function buildMatrix({ quick = false, only = null, v13 = false } = {}) {
+  if (v13) {
+    let list = v13Matrix()
+    if (only) list = list.filter((c) => c.id.includes(only) || c.route.includes(only))
+    return { cases: list, pages: V13_PAGES }
+  }
   const screens = await loadScreens()
   const routerPaths = loadRouterPaths().map((r) => r.path)
   const pages = [...new Set([...screens.map((s) => s.path), ...EXTRA_PAGES])]

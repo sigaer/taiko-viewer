@@ -134,7 +134,7 @@ function onTabKey(e) {
             <span v-if="roleText" class="role" :class="u.role">{{ roleText }}</span>
           </div>
           <div class="id-row">
-            <TitlePlate :text="u.title" :rare="u.rare" />
+            <TitlePlate :text="u.title" :rare="u.rare" :game="u.gameTitle ?? null" :site="u.siteTitle" form="plate" />
             <DanBadge :dan="u.dan" />
           </div>
           <p class="t-small loc">{{ L(city[0], city[1]) }} · {{ L(`${joined.y} 年 ${joined.m} 月加入`, `${joined.y}年${joined.m}月登録`) }}</p>

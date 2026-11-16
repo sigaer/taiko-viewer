@@ -27,6 +27,7 @@ export function stateFor(c) {
     syncOutcome: c.syncOutcome || 'success',
     motion: c.motion || 'system',
     density: c.density || 'comfortable',
+    variant: c.variant || 'a',
   }
 }
 

@@ -87,7 +87,7 @@ const dim = computed(() => DIMS.find((d) => d.key === props.goal.dim))
   line-height: 1.3;
 }
 .song:hover .t {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .track {
   position: relative;

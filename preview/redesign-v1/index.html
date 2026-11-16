@@ -6,7 +6,8 @@
     <meta name="robots" content="noindex" />
     <meta name="color-scheme" content="light dark" />
     <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
-    <!-- D10：在任何样式加载前写入主题、语言与减少动效，深色用户首屏不闪白 -->
+    <!-- D10：在任何样式加载前写入主题、语言与减少动效，深色用户首屏不闪白。
+         V1.3：同时写入对照版本（?variant= 地址参数优先，其次本地设置），版本 C 的深色首屏不先闪藍墨 -->
     <script>
       ;(function () {
         var d = document.documentElement
@@ -14,7 +15,13 @@
         try {
           s = JSON.parse(localStorage.getItem('tv-design-v1') || '{}') || {}
         } catch (e) {}
-        var t = s.theme === 'light' || s.theme === 'dark' ? s.theme : null
+        var q = {}
+        try {
+          var u = new URLSearchParams(location.search)
+          q.variant = u.get('variant')
+          q.theme = u.get('theme')
+        } catch (e) {}
+        var t = q.theme === 'light' || q.theme === 'dark' ? q.theme : s.theme === 'light' || s.theme === 'dark' ? s.theme : null
         if (!t) {
           try {
             t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
@@ -25,6 +32,9 @@
         d.dataset.theme = t
         d.lang = s.locale === 'ja' ? 'ja' : 'zh-CN'
         if (s.motion === 'reduce') d.dataset.motion = 'reduce'
+        var v = /^[abc]$/.test(q.variant || '') ? q.variant : /^[abc]$/.test(s.variant || '') ? s.variant : 'a'
+        d.dataset.assets = v === 'a' ? 'generated' : 'authentic'
+        d.dataset.brand = v === 'c' ? 'teal' : 'fumen'
       })()
     </script>
     <!-- 关键底色：与 tokens.css 的 --bg 一致（浅 --ai-50，深 --ai-900） -->
@@ -39,8 +49,17 @@
         background: #101728;
         color: #e9edf7;
       }
+      /* 版本 C（Viewer Teal）：与 tokens.css 的 teal --bg / --ink 一致 */
+      html[data-brand='teal'] {
+        background: #eaf6f5;
+        color: #203f43;
+      }
+      html[data-brand='teal'][data-theme='dark'] {
+        background: #10282b;
+        color: #e4f4f1;
+      }
     </style>
-    <title>Taiko Viewer · Design V1.2</title>
+    <title>Taiko Viewer · Design V1.3 (Phase A)</title>
   </head>
   <body>
     <div id="app"></div>

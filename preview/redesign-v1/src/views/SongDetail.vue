@@ -16,7 +16,7 @@ import ThreadRow from '../components/ThreadRow.vue'
 import EmptyLane from '../components/EmptyLane.vue'
 import PlayerAvatar from '../components/PlayerAvatar.vue'
 import { songById, DIFFS, GENRES, CHART_AXES, scoreOf, chartUgc, users, threads, GOAL_TYPES, UGC_TAGS, fmt } from '../mock/data'
-import { L, isReady, isAuthed, songTitle, songSub, subLang, toast, store, recordRecent } from '../store'
+import { L, isReady, isAuthed, songTitle, songSub, subLang, toast, store, recordRecent, authentic } from '../store'
 import { useQueryState } from '../routeState'
 
 // 歌曲详情。一个难度 = 一个视角：切换难度后，谱面、数据、我的成绩、玩家体感全部跟着换。
@@ -174,7 +174,7 @@ const agoText = (n) => (n === 0 ? L('今天', '今日') : L(`${n} 天前`, `${n}
   <div v-else class="page sd">
     <!-- ============ 头部 ============ -->
     <header class="head">
-      <Cover :song="song" size="lg" class="hcover" />
+      <Cover :song="song" size="lg" class="hcover" priority />
       <div class="grow hbody">
         <div class="meta">
           <span class="genre"><i class="dot" :style="{ color: GENRES[song.genre].color }" />{{ L(GENRES[song.genre].zh, GENRES[song.genre].ja) }}</span>
@@ -215,6 +215,7 @@ const agoText = (n) => (n === 0 ? L('今天', '今日') : L(`${n} 天前`, `${n}
         @click="pick(c.d)"
         @keydown="onTabKey($event, i)"
       >
+        <img v-if="authentic" class="dt-ico" :src="`game/diff/${c.d}.png`" alt="" width="26" height="26" decoding="async" />
         <span class="dn">{{ L(DIFFS[c.d].zh, DIFFS[c.d].ja) }}</span>
         <span class="dshort" aria-hidden="true">{{ L(DIFFS[c.d].short, DIFFS[c.d].shortJa) }}</span>
         <span class="ds num">★{{ c.star }}</span>
@@ -235,7 +236,7 @@ const agoText = (n) => (n === 0 ? L('今天', '今日') : L(`${n} 天前`, `${n}
                 <b class="num score">{{ fmt(mine.score) }}</b>
                 <span class="t-caption">{{ L('最好成绩', '自己ベスト') }} · <span class="num">{{ mine.acc.toFixed(2) }}%</span></span>
               </div>
-              <Rank :v="mine.rank" lg />
+              <Rank :v="mine.rank" lg named />
             </div>
             <div class="judge" aria-hidden="true">
               <i class="g" :style="{ flex: mine.good }" /><i class="o" :style="{ flex: mine.ok }" /><i class="n" :style="{ flex: mine.ng }" />
@@ -320,7 +321,7 @@ const agoText = (n) => (n === 0 ? L('今天', '今日') : L(`${n} 天前`, `${n}
               <div class="stat"><div class="v">{{ chart.balloon }}</div><div class="k">{{ L('气球', '風船') }}</div></div>
             </div>
             <div class="radarbox">
-              <Radar :axes="axes" :domain="[0, 15.5]" :size="260" tone="var(--ka)" :label="L('谱面能力分布', '譜面の能力分布')" />
+              <Radar :axes="axes" :domain="[0, 15.5]" :size="260" tone="var(--series-alt)" :label="L('谱面能力分布', '譜面の能力分布')" />
             </div>
           </div>
         </section>
@@ -411,7 +412,7 @@ const agoText = (n) => (n === 0 ? L('今天', '今日') : L(`${n} 天前`, `${n}
               <div><dt>{{ L('单曲 RT', '単曲 RT') }}</dt><dd class="num">{{ mine.rt.toFixed(2) }}</dd></div>
               <div><dt>{{ L('游玩次数', 'プレイ回数') }}</dt><dd class="num">{{ mine.plays }}</dd></div>
               <div><dt>{{ L('最好成绩于', '達成日') }}</dt><dd>{{ agoText(mine.daysAgo) }}</dd></div>
-              <div class="trend"><dt>{{ L('变化', '推移') }}</dt><dd><Spark :values="history" :w="96" :h="22" tone="var(--don)" /></dd></div>
+              <div class="trend"><dt>{{ L('变化', '推移') }}</dt><dd><Spark :values="history" :w="96" :h="22" tone="var(--series)" /></dd></div>
             </dl>
             <button class="btn btn-primary btn-block" @click="goalSheet = true"><Icon name="flag" :size="16" />{{ L('设为这次想练', '今回の練習に設定') }}</button>
           </template>
@@ -442,7 +443,7 @@ const agoText = (n) => (n === 0 ? L('今天', '今日') : L(`${n} 天前`, `${n}
 
     <!-- 手机底部操作条 -->
     <div ref="mbarEl" class="mbar only-mobile">
-      <button class="btn btn-ink grow"><Icon name="playTri" :size="16" />{{ L('游玩练习', '練習プレイ') }}</button>
+      <button class="btn btn-ink grow c-secondary"><Icon name="playTri" :size="16" />{{ L('游玩练习', '練習プレイ') }}</button>
       <button class="btn btn-primary grow" @click="goalSheet = true"><Icon name="flag" :size="16" />{{ L('想练这首', '練習目標に') }}</button>
     </div>
 
@@ -625,7 +626,7 @@ const agoText = (n) => (n === 0 ? L('今天', '今日') : L(`${n} 天前`, `${n}
   align-items: center;
   gap: 6px;
   margin-bottom: 8px;
-  color: var(--ka-ink);
+  color: var(--info-ink);
   font-weight: 500;
 }
 .sheet-foot {
@@ -654,7 +655,7 @@ const agoText = (n) => (n === 0 ? L('今天', '今日') : L(`${n} 天前`, `${n}
 }
 .stat.main .v {
   font-size: var(--fs-48);
-  color: var(--don-ink);
+  color: var(--emph-num);
 }
 .stat .v small {
   font-size: var(--fs-14);
@@ -716,9 +717,9 @@ const agoText = (n) => (n === 0 ? L('今天', '今日') : L(`${n} 天前`, `${n}
   background: var(--bg-sunk);
 }
 .vote[aria-pressed='true'] {
-  border-color: var(--don);
-  background: var(--don-wash);
-  color: var(--don-ink);
+  border-color: var(--vote-on);
+  background: var(--vote-on-wash);
+  color: var(--vote-on-ink);
 }
 .vbar {
   display: flex;
@@ -758,7 +759,7 @@ const agoText = (n) => (n === 0 ? L('今天', '今日') : L(`${n} 天前`, `${n}
   display: block;
   height: 100%;
   border-radius: var(--r-xs);
-  background: var(--ka);
+  background: var(--series-alt);
 }
 .tagbars b {
   text-align: right;
@@ -793,9 +794,9 @@ const agoText = (n) => (n === 0 ? L('今天', '今日') : L(`${n} 天前`, `${n}
   flex: none;
 }
 .help[aria-pressed='true'] {
-  border-color: var(--ka);
-  background: var(--ka-wash);
-  color: var(--ka-ink);
+  border-color: var(--info-line);
+  background: var(--info-wash);
+  color: var(--info-ink);
 }
 .tipform {
   display: flex;

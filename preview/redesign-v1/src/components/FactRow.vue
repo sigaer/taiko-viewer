@@ -46,7 +46,7 @@ const noteClass = computed(() => ({ don: '', ka: 'ka', fc: 'big fc', dfc: 'big d
     <span class="chg">
       <template v-if="fact.type === 'df'"><Crown :v="2" /><b class="num">{{ fmt(fact.after) }}</b></template>
       <template v-else-if="fact.type === 'fc'"><Crown :v="1" /><b class="num">{{ fmt(fact.after) }}</b></template>
-      <template v-else-if="fact.type === 'rank-upgrade'"><Rank :v="fact.rankFrom" /><span class="arrow">→</span><Rank :v="fact.rankTo" /></template>
+      <template v-else-if="fact.type === 'rank-upgrade'"><Rank :v="fact.rankFrom" :px="24" /><span class="arrow">→</span><Rank :v="fact.rankTo" :px="30" /></template>
       <template v-else-if="fact.type === 'ng-reduced' || fact.type === 'goal-completed'">
         <span class="lbl">{{ L('不可', '不可') }}</span><span class="num was">{{ fact.before }}</span><span class="arrow">→</span><b class="num">{{ fact.after }}</b>
       </template>
@@ -72,7 +72,7 @@ const noteClass = computed(() => ({ don: '', ka: 'ka', fc: 'big fc', dfc: 'big d
   border-bottom: 0;
 }
 .fact:hover .t {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .fact .note {
   width: 14px;

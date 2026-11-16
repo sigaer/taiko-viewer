@@ -1,7 +1,8 @@
 // Design V1.1 原型 Mock 数据 · 装配与导出。
 // 精选内容在 catalog.js（手写），生成器在 generate.js（确定性，无 Math.random / Date.now，「今天」= 2026-11-16）。
 // 数据集（M1）：full（默认）= 30 首精选 + 生成曲，共 ≥ 1,500 首；demo = 只有 30 首精选。
-//   解析顺序：地址 ?data=full|demo（location.search 或 hash 中 ? 之后）→ localStorage['tv-design-v1'].dataset → 'full'。
+//   real（V1.3 对照用，docs/16 A8）= 50 首真实曲号与曲名（real.js），其余数值仍是模拟数据。
+//   解析顺序：地址 ?data=full|demo|real（location.search 或 hash 中 ? 之后）→ localStorage['tv-design-v1'].dataset → 'full'。
 //
 // 原型字段 → 真实模型字段（taiko_viewer/types/*）
 // | 原型                         | 真实模型                                                    |
@@ -35,15 +36,17 @@
 import {
   GENRES, DIFFS, RANKS, CROWNS, DIMS, CHART_AXES, UGC_TAGS, FACT, GOAL_TYPES, THREAD_TYPES,
   SONG_ROWS, CURATED_ALIASES, PLAYER_BASE, GOALS_BASE, WEEKLY_BASE, USERS_BASE, THREADS_BASE,
-  POSTS_4017_BASE, NOTIFICATIONS_BASE, sections, recommendations, chartUgc, danGrades, danCourse, events, devApps,
+  POSTS_4017_BASE, NOTIFICATIONS_BASE, sections, recommendations as RECOMMENDATIONS_BASE, chartUgc, danGrades, danCourse as DAN_COURSE_BASE, events, devApps,
 } from './catalog.js'
+import { REAL_PAIRS, VERIFIED_CURATED, REAL_REMAP, REAL_SHORT_NAMES } from './real.js'
+import { BASE_GAME_TITLES, EXTRA_GAME_TITLES, SITE_TITLE, SITE_TITLE_HOLDER } from './titles.js'
 import {
   buildCuratedSongs, genSongs, curatedScores, generatedScores, genRatingHistory, genDimHistory, genLaneDays,
   genWeeklies, genGoalHistory, genUsers, genThreads, genLongThreadPosts, genShortPosts, genNotifications,
   makeFinders, normalize, parseConfig, round,
 } from './generate.js'
 
-export { GENRES, DIFFS, RANKS, CROWNS, DIMS, CHART_AXES, UGC_TAGS, FACT, GOAL_TYPES, THREAD_TYPES, sections, recommendations, chartUgc, danGrades, danCourse, events, devApps }
+export { GENRES, DIFFS, RANKS, CROWNS, DIMS, CHART_AXES, UGC_TAGS, FACT, GOAL_TYPES, THREAD_TYPES, sections, chartUgc, danGrades, events, devApps }
 export { normalize, parseConfig }
 
 const now = () => (typeof performance !== 'undefined' ? performance.now() : 0)
@@ -51,7 +54,7 @@ const T0 = now()
 
 /* ---------------- 数据集 ---------------- */
 function resolveDataset() {
-  const ok = (v) => (v === 'full' || v === 'demo' ? v : null)
+  const ok = (v) => (v === 'full' || v === 'demo' || v === 'real' ? v : null)
   try {
     if (typeof location !== 'undefined' && location) {
       const parts = [location.search || '', (location.hash || '').split('?')[1] || '']
@@ -76,17 +79,84 @@ function resolveDataset() {
 
 export const datasetName = resolveDataset()
 const FULL = datasetName === 'full'
+const REAL = datasetName === 'real'
 const GENERATED_SONGS = 1490
 const SCORE_TARGET = 880
 
 export const fmt = (n) => (n == null ? '—' : Number(n).toLocaleString('en-US'))
 export const fx = (n, d = 2) => (n == null ? '—' : Number(n).toFixed(d))
 
-/* ---------------- 曲库 ---------------- */
-const curated = buildCuratedSongs(SONG_ROWS, CURATED_ALIASES)
-const generated = FULL ? genSongs(GENERATED_SONGS, curated.map((s) => s.id)) : { songs: [], edge: null }
+/* ---------------- real 数据集：曲目身份替换 ---------------- */
+const PAIR = new Map(REAL_PAIRS.map(([id, ja, zh]) => [id, { ja, zh }]))
+const VERIFIED = new Set(VERIFIED_CURATED)
+/** 旧 ID → 本数据集里的 ID（full / demo 原样返回） */
+const rid = (id) => (REAL && REAL_REMAP[id] != null ? REAL_REMAP[id] : id)
+// 手写文字里的曲名：按原行的日文名 / 中文名与 real.js 的简写表替换成借用的那首（只在 real 数据集）
+const NAME_SWAP = (() => {
+  if (!REAL) return []
+  const skip = new Set(['ありがとう', '谢谢', 'そばかす', '雀斑']) // 同时是常用词，替换会误伤正文
+  const out = []
+  for (const row of SONG_ROWS) {
+    const to = REAL_REMAP[row[0]]
+    if (to == null) continue
+    const p = PAIR.get(to)
+    if (!skip.has(row[1])) out.push([row[1], p.ja])
+    if (row[2] !== row[1] && !skip.has(row[2])) out.push([row[2], p.zh])
+  }
+  for (const [from, tpl] of REAL_SHORT_NAMES)
+    out.push([from, tpl.replace(/\{(\d+)(zh)?\}/g, (_, id, zh) => PAIR.get(REAL_REMAP[id])[zh ? 'zh' : 'ja'])])
+  return out.sort((a, b) => b[0].length - a[0].length)
+})()
+const swapText = (t) => {
+  for (const [a, b] of NAME_SWAP) if (t.includes(a)) t = t.split(a).join(b)
+  return t
+}
+/** 深拷贝并替换曲目引用：songId / song.id 换成新 ID，字符串里的曲名换成新曲名。full / demo 原样返回同一对象。 */
+function realize(v, key) {
+  if (!REAL) return v
+  if (typeof v === 'string') return swapText(v)
+  if (typeof v === 'number') return key === 'songId' ? rid(v) : v
+  if (Array.isArray(v)) return v.map((x) => realize(x))
+  if (v && typeof v === 'object') {
+    if (v instanceof Date) return v
+    const o = {}
+    for (const [k, x] of Object.entries(v)) o[k] = k === 'id' && key === 'song' ? rid(x) : realize(x, k)
+    return o
+  }
+  return v
+}
 
-export const songs = [...curated, ...generated.songs]
+/* ---------------- 曲库 ---------------- */
+// real：12 首已验证精选曲保留原行；18 首未验证的借用真实曲号与曲名（原行的星级、定数等模拟值不变）；其余 20 首真实曲号补齐。
+const realRows = () =>
+  SONG_ROWS.map((row) => {
+    const id = VERIFIED.has(row[0]) ? row[0] : REAL_REMAP[row[0]]
+    const p = PAIR.get(id)
+    const r = [...row]
+    r[0] = id
+    r[1] = p.ja
+    r[2] = p.zh
+    if (!VERIFIED.has(row[0])) r[11] = '' // 原行的作者属于原曲，不能挂到借用的曲目上
+    return r
+  })
+const realAliases = () => Object.fromEntries(VERIFIED_CURATED.map((id) => [id, CURATED_ALIASES[id] || []]))
+const curated = REAL ? buildCuratedSongs(realRows(), realAliases()) : buildCuratedSongs(SONG_ROWS, CURATED_ALIASES)
+const generated = FULL ? genSongs(GENERATED_SONGS, curated.map((s) => s.id)) : { songs: [], edge: null }
+const realExtra = (() => {
+  if (!REAL) return []
+  const have = new Set(curated.map((s) => s.id))
+  const ids = REAL_PAIRS.map((p) => p[0]).filter((id) => !have.has(id))
+  // 星级、定数、谱面等模拟值借用生成器（取第 20 首起，避开边界用例），身份换成真实曲号与曲名
+  return genSongs(20 + ids.length, []).songs.slice(20).map((s, i) => {
+    const p = PAIR.get(ids[i])
+    const { legacyIds, ...rest } = s
+    return { ...rest, id: ids[i], ja: p.ja, zh: p.zh, artist: '', aliases: [], generated: false }
+  })
+})()
+
+export const songs = [...curated, ...realExtra, ...generated.songs]
+// 曲绘白名单（docs/16 A1）：real 数据集的曲目全部有依据；full / demo 只有已验证的精选曲。合成曲一律不请求图片。
+for (const s of songs) s.coverOk = REAL || (!s.generated && VERIFIED.has(s.id))
 export const songById = Object.fromEntries(songs.map((s) => [s.id, s]))
 
 const chartMap = new Map()
@@ -110,7 +180,7 @@ const CURATED_EDGE = {
 export const EDGE = Object.fromEntries(
   ['longJa', 'longZh', 'special', 'sameTitle', 'noUra', 'oniOnly', 'noConstant', 'noChartImage', 'noAudio', 'noArtist', 'unlisted', 'otherPlatform', 'manyAliases', 'bpmRange'].map((k) => [
     k,
-    [...(CURATED_EDGE[k] || []), ...(generated.edge?.[k] || [])].filter((id) => songById[id]),
+    [...(CURATED_EDGE[k] || []).map(rid), ...(generated.edge?.[k] || [])].filter((id) => songById[id]),
   ]),
 )
 
@@ -122,13 +192,13 @@ export const searchDocs = songs.map((s) => ({
 }))
 
 /* ---------------- 成绩（M3） ---------------- */
-const cScores = curatedScores(curated, RANKS)
+const cScores = curatedScores([...curated, ...realExtra], RANKS)
 const fix = (songId, d, patch) => {
-  const s = cScores.find((x) => x.songId === songId && x.d === d)
+  const s = cScores.find((x) => x.songId === rid(songId) && x.d === d)
   if (s) Object.assign(s, patch)
 }
 fix(615, 4, { ng: 3, ok: 41, good: 688, crown: 0, score: 968440, rank: 7, acc: 96.79, combo: 402, daysAgo: 1, plays: 23 })
-fix(233, 5, { ng: 0, ok: 0, good: chartOf(233, 5).notes, crown: 2, score: 1004290, rank: 8, acc: 100, combo: chartOf(233, 5).notes, daysAgo: 0, plays: 31 })
+fix(233, 5, { ng: 0, ok: 0, good: chartOf(rid(233), 5).notes, crown: 2, score: 1004290, rank: 8, acc: 100, combo: chartOf(rid(233), 5).notes, daysAgo: 0, plays: 31 })
 fix(278, 5, { locked: true })
 
 export const scores = FULL ? [...cScores, ...generatedScores(generated.songs, SCORE_TARGET - cScores.length, RANKS)] : cScores
@@ -162,6 +232,7 @@ export const player = {
   rankCounts,
   plays,
   scoredCharts: scores.length,
+  gameTitle: BASE_GAME_TITLES.mochidon,
 }
 
 /* ---------------- 成长（M4） ---------------- */
@@ -169,14 +240,14 @@ export const ratingHistory = genRatingHistory(player.rating)
 const DIM_KEYS = DIMS.map((d) => d.key)
 export const dimHistory = genDimHistory(player.dims, WEEKLY_BASE.dimDeltas, DIM_KEYS)
 
-const laneSongs = [615, 233, 278, 512, 88, 345, 179, 100126, 971, 1351, 1412, 702, 1053, 816]
+const laneSongs = [615, 233, 278, 512, 88, 345, 179, 100126, 971, 1351, 1412, 702, 1053, 816].map(rid)
 export const laneDays = (() => {
   const days = genLaneDays(songById, laneSongs, 120)
   const set = (ago, facts) => {
     const d = days.find((x) => x.daysAgo === ago)
     d.played = true
     d.charts = Math.max(d.charts, 9)
-    d.facts = facts
+    d.facts = realize(facts)
   }
   set(0, [
     { type: 'df', songId: 233, d: 5, before: 998120, after: 1004290, time: '20:41' },
@@ -195,20 +266,20 @@ export const laneDays = (() => {
   return days
 })()
 
-const goalSongPool = curated.filter((s) => s.charts.some((c) => c.d === 4 && c.constant != null)).map((s) => s.id)
+const goalSongPool = [...curated, ...realExtra].filter((s) => s.charts.some((c) => c.d === 4 && c.constant != null)).map((s) => s.id)
 export const goals = genGoalHistory(
-  GOALS_BASE.map((g) => JSON.parse(JSON.stringify(g))),
+  GOALS_BASE.map((g) => realize(JSON.parse(JSON.stringify(g)))),
   goalSongPool,
   chartOf,
   RANKS,
   25, // 1 个进行中 + 24 条历史
 )
 
-export const weeklies = genWeeklies({ base: WEEKLY_BASE, laneDays, ratingHistory, dimHistory, goals, songById, FACT, DIFFS, keys: DIM_KEYS })
+export const weeklies = genWeeklies({ base: realize(WEEKLY_BASE), laneDays, ratingHistory, dimHistory, goals, songById, FACT, DIFFS, keys: DIM_KEYS })
 export const weekly = weeklies[0]
 
 const crossAgo = (th) => ratingHistory.find((p) => p.v >= th)?.daysAgo
-export const milestones = [
+export const milestones = realize([
   { ago: 0, type: 'df', songId: 233, d: 5, text: '千本桜（里）全良', textJa: '千本桜（裏）全良' },
   { ago: crossAgo(11.8), type: 'rating', text: 'Rating 越过 11.8', textJa: 'Rating 11.8 到達' },
   { ago: 36, type: 'fc', songId: 179, d: 4, text: 'はたラク2000 全连', textJa: 'はたラク2000 フルコンボ' },
@@ -224,11 +295,22 @@ export const milestones = [
   { ago: crossAgo(10.0), type: 'rating', text: 'Rating 越过 10.0', textJa: 'Rating 10.0 到達' },
   { ago: 336, type: 'dan', text: '通过七段', textJa: '七段合格' },
   { ago: 391, type: 'fc', songId: 233, d: 4, text: '千本桜 全连', textJa: '千本桜 フルコンボ' },
-].sort((a, b) => a.ago - b.ago)
+]).sort((a, b) => a.ago - b.ago)
+
+export const recommendations = realize(RECOMMENDATIONS_BASE)
+export const danCourse = realize(DAN_COURSE_BASE)
 
 /* ---------------- 社区（M5） ---------------- */
 export const sectionBySlug = Object.fromEntries(sections.map((s) => [s.slug, s]))
 export const users = genUsers(USERS_BASE, danGrades, player.rating)
+// V1.3：真实游戏称号（版本 B、C 用；版本 A 仍读 V1.2 的 title）与站内称号
+{
+  let i = 0
+  for (const [k, u] of Object.entries(users)) {
+    u.gameTitle = k in BASE_GAME_TITLES ? BASE_GAME_TITLES[k] : EXTRA_GAME_TITLES[i++ % EXTRA_GAME_TITLES.length]
+    if (k === SITE_TITLE_HOLDER) u.siteTitle = SITE_TITLE
+  }
+}
 const userKeys = Object.keys(users)
 export const leaderboard = Object.entries(users)
   .filter(([, u]) => u.rating != null)
@@ -236,11 +318,11 @@ export const leaderboard = Object.entries(users)
   .slice(0, 20)
   .map(([key, u], i) => ({ rank: i + 1, key, ...u }))
 
-const threadSongPool = curated.map((s) => s.id)
-export const threads = genThreads(THREADS_BASE, 240, { userKeys, songPool: threadSongPool, songById, DIFFS, danGrades })
+const threadSongPool = [...curated, ...realExtra].map((s) => s.id)
+export const threads = genThreads(realize(THREADS_BASE), 240, { userKeys, songPool: threadSongPool, songById, DIFFS, danGrades })
 export const threadById = Object.fromEntries(threads.map((t) => [t.id, t]))
 
-export const threadPosts = genLongThreadPosts(POSTS_4017_BASE, userKeys, 'hayate')
+export const threadPosts = genLongThreadPosts(realize(POSTS_4017_BASE), userKeys, 'hayate')
 // 与楼层数保持一致：回复数 = 楼层（除 1 楼）+ 楼中楼
 threadById[4017].replies = threadPosts.length - 1 + threadPosts.reduce((a, p) => a + (p.replies?.length || 0), 0)
 
@@ -255,16 +337,17 @@ export function postsOf(threadId) {
   return posts
 }
 
-export const notifications = genNotifications(NOTIFICATIONS_BASE, 60, threads, userKeys)
+export const notifications = genNotifications(realize(NOTIFICATIONS_BASE), 60, threads, userKeys)
 
 /* ---------------- 查谱（P3 / P4）与最近看过（P10） ---------------- */
 export const { findByConfig, findByNotes } = makeFinders(songs)
-export const RECENT_DEFAULT = [615, 233, 100140, 512]
+export const RECENT_DEFAULT = [615, 233, 100140, 512].map(rid)
 
 /* ---------------- 数据集信息 ---------------- */
 export const datasetInfo = {
   name: datasetName,
   songs: songs.length,
+  coverAllowlist: songs.filter((s) => s.coverOk).length,
   charts: chartMap.size,
   scores: scores.length,
   threads: threads.length,

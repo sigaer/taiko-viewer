@@ -89,7 +89,7 @@ function logout() {
       <span class="grow who-t">
         <span class="who-name title-wrap-2">{{ player.nickname }}</span>
         <span class="who-meta">
-          <TitlePlate :text="player.title" :rare="!!me.rare" />
+          <TitlePlate :text="player.title" :rare="!!me.rare" :game="player.gameTitle ?? null" :site="me?.siteTitle" form="text" />
           <DanBadge :dan="player.dan" />
         </span>
         <span class="t-caption num">CN {{ player.taikoIdMasked }}</span>

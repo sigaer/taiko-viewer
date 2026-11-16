@@ -13,7 +13,7 @@ const props = defineProps({
   height: { type: Number, default: 220 },
   marks: { type: Array, default: () => [] }, // [{ index, text }]
   digits: { type: Number, default: 2 },
-  tone: { type: String, default: 'var(--don)' },
+  tone: { type: String, default: 'var(--series)' },
   label: { type: String, default: '' }, // 读屏用的图表说明；不传时自动概括首尾数值
 })
 const ariaLabel = computed(() => {
