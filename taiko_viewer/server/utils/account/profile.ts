@@ -36,9 +36,9 @@ export const getAccountProfile = (userId: number) => withViewerCurrentSource(use
   else if (rows[0]) throw createError({ statusCode: 409, statusMessage: "profile-changed" });
   const bindings = rows.map(sanitizeBinding);
   const baseCurrentBinding = bindings[0] || null;
-  const currentBinding = baseCurrentBinding
+  const currentBinding = baseCurrentBinding && !baseCurrentBinding.requiresReverification
     ? await enrichAuthorizedCurrentTitle(baseCurrentBinding)
-    : null;
+    : baseCurrentBinding;
   const pendingBinding = await getPendingBinding(userId, db);
   const qqBinding = await getQqBinding(userId, db);
   const titles = await getAccountTitlesMap([userId]);
@@ -50,10 +50,10 @@ export const getAccountProfile = (userId: number) => withViewerCurrentSource(use
     qqBinding,
     verificationStatus: {
       emailVerified: Boolean(user.email_verified),
-      taikoVerified: Boolean(currentBinding)
+      taikoVerified: Boolean(currentBinding && !currentBinding.requiresReverification)
     }
   };
-}, { bindingRequired: false });
+}, { bindingRequired: false, legacyMetadataOnly: true });
 
 export const uploadAvatarForUser = async (userId: number, file: MultiPartData) => {
   await ensureAccountSchema();

@@ -26,7 +26,10 @@ test('real cookie issue/status/revoke/reload/re-login preserve existing healthy 
  assert.equal((await c.request('GET','/profile',null,'')).status,401);
  const legacyProfile=await frozen(c,'profile'),legacySync=await frozen(c,'sync');
  c.route('get','/frozen-sync',event=>legacySync.getAccountSyncOverview(event));
- assert.deepEqual(await c.read('/profile'),await legacyProfile.getAccountProfile(c.user));
+ const expectedProfile=await legacyProfile.getAccountProfile(c.user);
+ // Account titles were added after this frozen source baseline.
+ expectedProfile.user.titles=[];
+ assert.deepEqual(await c.read('/profile'),expectedProfile);
  assert.deepEqual(await c.read('/sync'),await c.read('/frozen-sync'));
  const first=await http(c,'POST','/token',{action:'issue',taikoId:'123',userid:'123'});
  assert.match(first.token,/^[a-f0-9]{48}$/);assert.equal(first.status.taikoId,c.taikoId);

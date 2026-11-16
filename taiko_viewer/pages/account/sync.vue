@@ -17,6 +17,7 @@ type BindingSummary = {
   displayName: string;
   isManual: boolean;
   canExternalSync: boolean;
+  requiresReverification?: boolean;
 };
 
 type SyncResult = {
@@ -131,6 +132,7 @@ const copy = computed(() =>
         title: "多端同期",
         intro: "ドンダーひろば ID を連携した後、「同期開始」でサーバーが鼓衆広場から最新の `userdata` を取得し、選択した送信先へ圧縮配信します。追加のログイン設定は不要です。送信後は 30 分のクールダウンに入ります。",
         serviceUnavailable: "サーバー側の鼓衆広場アクセス設定が未構成のため、現在同期できません。",
+        reverifyBinding: "アカウント設定で連携を再認証してください。",
         manualSaved: "手動入力データはすでに中央に保存されています。外部サービスから取得する必要はありません。",
         currentBinding: "現在の連携 ID",
         currentTitle: "現在の称号",
@@ -198,6 +200,7 @@ const copy = computed(() =>
         title: "多端同步",
         intro: "绑定鼓众 ID 后，点击「开始同步」会由服务端从鼓众广场拉取最新 userdata，并压缩分发到所选目标；无需额外配置账号密码。提交后进入 30 分钟冷却。",
         serviceUnavailable: "服务端暂未配置鼓众广场访问凭据，暂时无法同步，请联系管理员。",
+        reverifyBinding: "请前往账号资料重新验证绑定后再同步。",
         manualSaved: "手动录入内容已经保存在中心，不关联鼓众广场或 Hiroba，无需从外部拉取。",
         currentBinding: "当前绑定 ID",
         currentTitle: "当前称号",
@@ -601,9 +604,12 @@ const copyIssuedScoreToken = async () => {
           :type="overview.currentBinding.isManual ? 'info' : 'warning'"
           :closable="false"
           show-icon
-          :title="overview.currentBinding.isManual ? copy.manualSaved : copy.serviceUnavailable"
+          :title="overview.currentBinding.requiresReverification ? copy.reverifyBinding : overview.currentBinding.isManual ? copy.manualSaved : copy.serviceUnavailable"
           class="userdata-alert"
         />
+        <NuxtLink v-if="overview.currentBinding?.requiresReverification" :to="localePath('/account/profile')">
+          {{ locale === 'ja' ? 'アカウント設定へ' : '前往账号资料' }}
+        </NuxtLink>
       </el-card>
 
       <el-card class="panel-card score-token-panel">

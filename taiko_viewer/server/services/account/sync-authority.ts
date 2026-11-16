@@ -10,6 +10,7 @@ import { withDomainScoreRead } from "../taiko-domain/publication.ts";
 import { PublicationUnavailableError } from "../../infrastructure/taiko-publication/client.ts";
 import { currentScoreScope } from "../taiko-domain/publication.ts";
 import type { SyncLogRow } from "../../internal/account/shared";
+import { requiresBindingReverification } from "../../internal/account/legacy-binding.ts";
 
 export async function captureAccountSyncOwner(userId: number) {
   try {
@@ -20,6 +21,8 @@ export async function captureAccountSyncOwner(userId: number) {
     const loadedBinding = await readViewerCurrentBinding(db, userId);
     const binding = loadedBinding && Object.freeze({ ...loadedBinding });
     if (!binding) throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID 后再同步" });
+    if (requiresBindingReverification(binding)) throw createError({ statusCode: 409,
+      statusMessage: "请先前往账号资料重新验证鼓众 ID 或昵称" });
     if (binding.source === "manual" || binding.manual_account_id || MANUAL_SOURCE_ID.test(binding.taiko_id)) {
       throw createError({ statusCode: 400, statusMessage: "手动账号不关联外部平台，手录内容已经保存在中心，无需拉取同步" });
     }

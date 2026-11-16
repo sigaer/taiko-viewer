@@ -55,6 +55,7 @@ type ProfilePayload = {
     displayName: string;
     isManual: boolean;
     canExternalSync: boolean;
+    requiresReverification?: boolean;
     isCurrent: boolean;
     verifiedTitle: string | null;
     verifiedTitleplateId: number | null;
@@ -68,6 +69,7 @@ type ProfilePayload = {
     displayName: string;
     isManual: boolean;
     canExternalSync: boolean;
+    requiresReverification?: boolean;
     isCurrent: boolean;
     verifiedTitle: string | null;
     verifiedTitleplateId: number | null;
@@ -181,7 +183,9 @@ const copy = computed(() =>
         unbound: "未連携",
         bindTitle: "ドンダーひろば ID を連携",
         bindDesc: "新しい ID を入力すると現在の称号を記録します。称号変更後に確認すると連携が完了します。",
-        bindPlaceholder: "ドンダーひろば ID を入力",
+        bindPlaceholder: "鼓衆広場の ID またはニックネーム",
+        bindInputLabel: "鼓衆広場の ID またはニックネーム",
+        legacyBindingNotice: "連携を再認証してください。ID または現在のニックネームを入力して認証を開始できます。",
         manualTitle: "手動スコアアカウント",
         manualDesc: "外部サービスと連携せず、Viewer と Bot から成績を手入力できます。",
         manualNickname: "ニックネーム",
@@ -299,7 +303,9 @@ const copy = computed(() =>
         unbound: "未绑定",
         bindTitle: "绑定鼓众广场 ID",
         bindDesc: "输入新的鼓众 ID 后，系统会记录你当前的称号，修改称号后再确认即可完成绑定。",
-        bindPlaceholder: "输入鼓众广场 ID",
+        bindPlaceholder: "输入鼓众 ID 或昵称",
+        bindInputLabel: "鼓众 ID 或昵称",
+        legacyBindingNotice: "此绑定需要重新验证，请输入鼓众 ID 或当前昵称开始验证。",
         manualTitle: "手动成绩账号",
         manualDesc: "不关联鼓众广场或 Hiroba，可在 viewer 与 bot 中自行录入成绩。",
         manualNickname: "账号昵称",
@@ -1156,7 +1162,15 @@ const removeQqBinding = async () => {
               <h3>{{ copy.bindTitle }}</h3>
               <p>{{ copy.bindDesc }}</p>
             </div>
-            <label class="binding-field-label" for="binding-taiko-id">{{ copy.taikoIdLabel }}</label>
+            <el-alert
+              v-if="profile.currentBinding?.requiresReverification"
+              :title="copy.legacyBindingNotice"
+              type="warning"
+              :closable="false"
+              show-icon
+              role="status"
+            />
+            <label class="binding-field-label" for="binding-taiko-id">{{ copy.bindInputLabel }}</label>
             <div class="bind-input-row">
               <el-input id="binding-taiko-id" ref="bindingInputRef" v-model="bindingInput" @focus="beta.track('binding_start')" :placeholder="copy.bindPlaceholder" />
               <el-button type="primary" :loading="preparing" @click="prepareBinding">{{ copy.startVerify }}</el-button>

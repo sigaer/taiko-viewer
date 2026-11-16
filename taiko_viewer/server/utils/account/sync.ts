@@ -28,6 +28,7 @@ import { canManageExternalScoreToken, readViewerScoreTokenStatus } from "../../s
 import { readGoalSnapshot } from '../../services/goals/snapshot';
 import { evaluateCurrentGoalForBinding } from '../../services/goals/evaluation';
 import { withDomainScoreRead } from '../../services/taiko-domain/publication';
+import { requiresBindingReverification } from '../../internal/account/legacy-binding.ts';
 
 export const getAccountSyncOverview = async (event: H3Event) => {
   const user = await requireAccountUser(event);
@@ -39,9 +40,10 @@ export const getAccountSyncOverview = async (event: H3Event) => {
     ]);
     const targets = await loadSyncTargets();
     const taikoId = currentBinding?.taiko_id || "";
-    const hasUserdata = taikoId ? await userdataFileExists(taikoId) : false;
+    const legacy = requiresBindingReverification(currentBinding);
+    const hasUserdata = taikoId && !legacy ? await userdataFileExists(taikoId) : false;
     const canSyncFromWahlap =
-      currentBinding?.source !== "manual" && Boolean(String(wahlapCookie || "").trim());
+      !legacy && currentBinding?.source !== "manual" && Boolean(String(wahlapCookie || "").trim());
     const scoreTokenResult = canManageExternalScoreToken(currentBinding)
       ? await readViewerScoreTokenStatus(db, taikoId).catch(() => null)
       : null;
@@ -56,7 +58,7 @@ export const getAccountSyncOverview = async (event: H3Event) => {
       cooldownUntil: cooldown.availableAt,
       lastSync: toPublicSyncLog(lastLogRow)
     };
-  }, { bindingRequired: false });
+  }, { bindingRequired: false, legacyMetadataOnly: true });
 };
 
 export const submitAccountSync = async (event: H3Event, payload: Record<string, unknown>) => {

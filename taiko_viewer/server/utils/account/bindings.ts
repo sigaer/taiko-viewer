@@ -20,9 +20,13 @@ export const listBindings = async (userId: number) => {
 
 const readBindingTitle = async (taikoId: string) => extractBindTitleInfo(await fetchBindPlayerProfile(taikoId));
 
-export const startBindingVerification = (userId: number, taikoIdInput: unknown) => {
+export const startBindingVerification = async (userId: number, taikoIdInput: unknown) => {
   const taikoId = normalizeTaikoId(taikoIdInput);
   ensureNonEmpty(taikoId, "请输入鼓众广场 ID");
+  if (!/^[0-9]{1,25}$/.test(taikoId)) {
+    const profile = await fetchBindPlayerProfile(taikoId, true);
+    return prepareViewerBindingVerification(userId, String(profile.userid), async () => extractBindTitleInfo(profile), BIND_VERIFY_TTL_MS);
+  }
   return prepareViewerBindingVerification(userId, taikoId, readBindingTitle, BIND_VERIFY_TTL_MS);
 };
 

@@ -6,13 +6,14 @@ import { assertBindingIdentity, captureBindingIdentity } from "../../internal/ac
 import { sourceLifecycleFailure } from "../../internal/account/source-lifecycle.ts";
 import { currentScoreScope, withDomainScoreRead, withDomainScoreWrite } from "../taiko-domain/publication.ts";
 import { PublicationUnavailableError } from "../../infrastructure/taiko-publication/client.ts";
+import { requiresBindingReverification } from "../../internal/account/legacy-binding.ts";
 
 /** Capture the pool and scalar source identity before waiting. All source
  * consumers run inside the same lease, with live ownership proved at both ends.
  * Empty-profile callers never consume source files or tokens.
  */
 export async function withViewerCurrentSource<T>(userId: number, mode: "read" | "write",
-  task: (binding: BindingRow | null, db: Pool) => Promise<T>, { bindingRequired = true } = {}) {
+  task: (binding: BindingRow | null, db: Pool) => Promise<T>, { bindingRequired = true, legacyMetadataOnly = false } = {}) {
   if (!Number.isSafeInteger(userId) || userId <= 0) throw createError({ statusCode: 403, statusMessage: "账号归属无效" });
   try {
     await ensureAccountSchema();
@@ -21,8 +22,11 @@ export async function withViewerCurrentSource<T>(userId: number, mode: "read" | 
     const binding = await readViewerCurrentBinding(db, userId);
     if (!binding && bindingRequired) throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
     const expected = binding && captureBindingIdentity(binding);
+    const legacy = requiresBindingReverification(binding);
+    if (legacy && (mode !== "read" || !legacyMetadataOnly)) throw createError({ statusCode: 409,
+      statusMessage: "请先前往账号资料重新验证鼓众 ID 或昵称" });
     const requireLiveScope = () => {
-      if (expected && !currentScoreScope(expected.taiko_id)?.lease.alive()) throw new PublicationUnavailableError();
+      if (expected && !legacy && !currentScoreScope(expected.taiko_id)?.lease.alive()) throw new PublicationUnavailableError();
     };
     const prove = async () => {
       requireLiveScope();
@@ -38,6 +42,6 @@ export async function withViewerCurrentSource<T>(userId: number, mode: "read" | 
       await prove();
       return result;
     };
-    return binding ? await (mode === "read" ? withDomainScoreRead : withDomainScoreWrite)(binding.taiko_id, run) : await run();
+    return binding && !legacy ? await (mode === "read" ? withDomainScoreRead : withDomainScoreWrite)(binding.taiko_id, run) : await run();
   } catch (error) { throw sourceLifecycleFailure(error); }
 }

@@ -7,6 +7,7 @@ import { sourceLifecycleFailure } from "../../internal/account/source-lifecycle"
 import { PublicationUnavailableError } from "../../infrastructure/taiko-publication/client";
 import { currentScoreScope, withDomainScoreWrite } from "../taiko-domain/publication";
 import { deleteBindingsAndGoalsInTransaction } from "../goals/lifecycle";
+import { requiresBindingReverification } from "../../internal/account/legacy-binding.ts";
 
 import { BINDING_AUTHORITY_COLUMNS, lockViewerBindingAuthority as lockOwner, rollbackViewerBindingTransaction as rollback, selectViewerCurrentBinding as selectCurrent, type ViewerBindingAuthority as Binding } from "../../internal/account/binding-authority";
 type Receipt = RowDataPacket & { operation_id: string; user_id: number; binding_id: number;
@@ -26,7 +27,8 @@ function assertOrdinary(binding: BindingIdentity) {
 }
 function validateReceipt(row: Receipt, userId: number, bindingId: number) {
   if (!/^[a-f0-9]{32}$/.test(row.operation_id) || Number(row.user_id) !== userId || Number(row.binding_id) !== bindingId ||
-    !/^[A-Za-z0-9_-]{1,64}$/.test(row.taiko_id) || !Number.isSafeInteger(Number(row.remaining_count)) ||
+    !(typeof row.taiko_id === "string" && (/^[A-Za-z0-9_-]{1,64}$/.test(row.taiko_id) ||
+      (row.taiko_id.length > 0 && row.taiko_id.length <= 25 && requiresBindingReverification(row)))) || !Number.isSafeInteger(Number(row.remaining_count)) ||
     Number(row.remaining_count) < 0 || Number(row.remaining_count) > 128 ||
     (row.source !== null && (typeof row.source !== "string" || row.source.length > 16 || row.source === "manual"))) throw new PublicationUnavailableError();
   return row;
@@ -56,7 +58,10 @@ export async function removeViewerBinding(userId: number, bindingIdInput: unknow
     }
     assertOrdinary(initial[0]);
     const expected = captureBindingIdentity(initial[0]);
-    return await withDomainScoreWrite(expected.taiko_id, async () => {
+    // Unsupported legacy names can no longer enter score storage. Revoking
+    // their SQL metadata needs owner locks only; never open/move their files.
+    const metadataOnly = requiresBindingReverification(initial[0]) && !/^[A-Za-z0-9_-]{1,128}$/.test(expected.taiko_id);
+    const revoke = async () => {
       const operationId = randomUUID().replaceAll("-", "");
       let prepared: Receipt | undefined;
       const connection = await db.getConnection();
@@ -85,7 +90,7 @@ export async function removeViewerBinding(userId: number, bindingIdInput: unknow
           await connection.execute(`INSERT INTO web_taiko_binding_revocations
             (operation_id,user_id,binding_id,taiko_id,source,remaining_count) VALUES (?,?,?,?,?,?)`,
             [operationId,userId,bindingId,binding.taiko_id,binding.source,remaining.length]);
-          assertRevocationScope(expected.taiko_id);
+          if (!metadataOnly) assertRevocationScope(expected.taiko_id);
           await connection.commit();
         } catch (error) { await rollback(connection); throw error; }
         finally { connection.release(); }
@@ -98,7 +103,8 @@ export async function removeViewerBinding(userId: number, bindingIdInput: unknow
         throw error;
       }
       return removed(prepared!);
-    });
+    };
+    return await (metadataOnly ? revoke() : withDomainScoreWrite(expected.taiko_id, revoke));
   } catch (error) { throw sourceLifecycleFailure(error); }
 }
 

@@ -1,5 +1,7 @@
 export { formatLocalTimestamp, writeUserdataWithHistory } from "../../infrastructure/taiko-publication/writer.ts";
 import { getRuntimePaths } from "../../infrastructure/runtime-paths.ts";
+import { requiresBindingReverification } from "./legacy-binding.ts";
+import { selectBindingPlayer } from "./binding-player.ts";
 import { readViewerCurrentBinding, type BindingRow, type BindingReadDb } from "./binding-read.ts";
 export type { BindingRow } from "./binding-read.ts";
 export { getRuntimePaths } from "../../infrastructure/runtime-paths.ts";
@@ -144,6 +146,7 @@ export type BindingSummary = {
   displayName: string;
   isManual: boolean;
   canExternalSync: boolean;
+  requiresReverification?: boolean;
   isCurrent: boolean;
   verifiedTitle: string | null;
   verifiedTitleplateId: number | null;
@@ -301,7 +304,8 @@ export const sanitizeBinding = (row: BindingRow): BindingSummary => ({
       ? String(row.display_name || row.verified_title || "手动账号")
       : row.taiko_id,
   isManual: row.source === "manual",
-  canExternalSync: row.source !== "manual",
+  canExternalSync: row.source !== "manual" && !requiresBindingReverification(row),
+  ...(requiresBindingReverification(row) ? { requiresReverification: true } : {}),
   isCurrent: Boolean(row.is_current),
   verifiedTitle: row.verified_title,
   verifiedTitleplateId: row.verified_titleplate_id,
@@ -442,9 +446,12 @@ export const loadWahlapCookie = async () => {
   return String(config.cookie || "").trim();
 };
 
-export const fetchBindPlayerProfile = async (taikoIdInput: unknown) => {
+export const fetchBindPlayerProfile = async (taikoIdInput: unknown, allowNickname = false) => {
   const taikoId = normalizeTaikoId(taikoIdInput);
   ensureNonEmpty(taikoId, "请输入鼓众广场 ID");
+  if (taikoId.length > 128 || /[\p{Cc}]/u.test(taikoId)) {
+    throw createError({ statusCode: 400, statusMessage: "请输入有效的鼓众 ID 或昵称" });
+  }
 
   const auth = await loadWahlapCookie();
   if (!auth) {
@@ -481,24 +488,17 @@ export const fetchBindPlayerProfile = async (taikoIdInput: unknown) => {
     });
   }
   const players = Array.isArray(data?.data?.players) ? data.data.players : [];
-  const exact = players.find((item: unknown) => {
-    if (!item || typeof item !== "object") return false;
-    const id = (item as Record<string, unknown>).userid;
-    return typeof id === "string" ? id.trim() === taikoId
-      : typeof id === "number" && Number.isSafeInteger(id) && String(id) === taikoId;
-  });
-  const player = exact;
-  if (!player) {
-    throw createError({ statusCode: 404, statusMessage: "未找到该鼓众ID，请确认输入是否正确" });
+  if (allowNickname && !/^[0-9]{1,25}$/.test(taikoId) && players.length >= 10) {
+    throw createError({ statusCode: 409, statusMessage: "搜索结果较多，请使用数字鼓众 ID 验证" });
   }
-  return player as Record<string, unknown>;
+  return selectBindingPlayer(players, taikoId, allowNickname);
 };
 
 export const extractBindTitleInfo = (profile: Record<string, unknown>) => {
   const costume = (profile.gameCostume || {}) as Record<string, unknown>;
   return {
     title: String(costume.title || "").trim(),
-    titleplateId: Number(costume.titleplate_id || -1)
+    titleplateId: Number(costume.titleplate_id ?? -1)
   };
 };
 
