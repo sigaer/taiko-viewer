@@ -1,0 +1,783 @@
+/* ---------- Reset ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-ui);
+  font-size: var(--fs-14);
+  line-height: var(--lh-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+:lang(ja) {
+  --font-ui: 'Barlow', var(--font-cjk-jp);
+  --font-num: 'Barlow Condensed', 'Barlow', var(--font-cjk-jp);
+}
+/* 日文曲名即使出现在中文界面里，也用日文字形 */
+[lang='ja'] {
+  font-family: 'Barlow', var(--font-cjk-jp);
+}
+h1,
+h2,
+h3,
+h4,
+p,
+ul,
+ol,
+figure,
+dl,
+dd {
+  margin: 0;
+  padding: 0;
+}
+ul,
+ol {
+  list-style: none;
+}
+a {
+  color: inherit;
+  text-decoration: none;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+button {
+  background: none;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+img,
+svg {
+  display: block;
+  max-width: 100%;
+}
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+:focus {
+  outline: none;
+}
+:focus-visible {
+  box-shadow: var(--focus);
+  border-radius: var(--r-ctl);
+}
+::selection {
+  background: color-mix(in srgb, var(--ka) 30%, transparent);
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Type roles ---------- */
+.t-display {
+  font-size: var(--fs-36);
+  font-weight: 900;
+  line-height: var(--lh-tight);
+  letter-spacing: -0.01em;
+}
+.t-h1 {
+  font-size: var(--fs-28);
+  font-weight: 900;
+  line-height: var(--lh-tight);
+}
+.t-h2 {
+  font-size: var(--fs-18);
+  font-weight: 700;
+  line-height: var(--lh-snug);
+}
+.t-h3 {
+  font-size: var(--fs-14);
+  font-weight: 700;
+  line-height: var(--lh-snug);
+}
+.t-body {
+  font-size: var(--fs-14);
+}
+.t-small {
+  font-size: var(--fs-13);
+  color: var(--ink-2);
+}
+.t-caption {
+  font-size: var(--fs-12);
+  color: var(--ink-3);
+}
+.num {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums lining-nums;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.muted {
+  color: var(--ink-2);
+}
+.faint {
+  color: var(--ink-3);
+}
+.up {
+  color: var(--ok);
+}
+.down {
+  color: var(--danger);
+}
+.truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Layout helpers ---------- */
+.row {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+}
+.row-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-2);
+}
+.col {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-3);
+}
+.spread {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+}
+.grow {
+  flex: 1;
+  min-width: 0;
+}
+.page {
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: var(--sp-6) var(--gutter) var(--sp-16);
+}
+.page-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sp-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--sp-6);
+}
+.section {
+  margin-top: var(--sp-10);
+}
+.section-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-2) var(--sp-3);
+  margin-bottom: var(--sp-4);
+}
+.section-head > :is(h1, h2, h3, h4) {
+  white-space: nowrap;
+}
+.section-head > :not(:is(h1, h2, h3, h4)) {
+  min-width: 0;
+  max-width: 100%;
+}
+.section-head > .row-wrap {
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.section-head > .row-wrap::-webkit-scrollbar {
+  display: none;
+}
+.section-head .more {
+  font-size: var(--fs-13);
+  color: var(--ka-ink);
+  font-weight: 500;
+}
+.section-head .more:hover {
+  text-decoration: underline;
+}
+@media (max-width: 767px) {
+  .page {
+    padding: var(--sp-4) var(--gutter) var(--sp-12);
+  }
+  .section {
+    margin-top: var(--sp-8);
+  }
+  .t-display {
+    font-size: var(--fs-28);
+  }
+  .t-h1 {
+    font-size: var(--fs-22);
+  }
+}
+.only-mobile {
+  display: none !important;
+}
+@media (max-width: 767px) {
+  .only-mobile {
+    display: revert !important;
+  }
+  .only-desktop {
+    display: none !important;
+  }
+}
+
+/* ---------- Panel：平面 + 细线。阴影只属于浮层 ---------- */
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+}
+.panel-pad {
+  padding: var(--sp-5);
+}
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3);
+  padding: var(--sp-4) var(--sp-5);
+  border-bottom: 1px solid var(--line);
+}
+.rule {
+  height: 1px;
+  background: var(--line);
+  border: 0;
+  margin: 0;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 38px;
+  padding: 0 14px;
+  border-radius: var(--r-ctl);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  color: var(--ink);
+  font-size: var(--fs-14);
+  font-weight: 500;
+  white-space: nowrap;
+  transition: background var(--dur-1), border-color var(--dur-1), transform var(--dur-1);
+}
+.btn:hover {
+  background: var(--surface-2);
+  border-color: var(--ink-3);
+}
+.btn:active {
+  transform: scale(0.97);
+}
+.btn-primary {
+  background: var(--don-solid);
+  border-color: var(--don-solid);
+  color: var(--ink-on-solid);
+  font-weight: 700;
+}
+.btn-primary:hover {
+  background: color-mix(in srgb, var(--don-solid) 88%, var(--lane-outline));
+  border-color: transparent;
+}
+/* 破坏性操作：用「描边」与主按钮区分，而不是换一种实色 */
+.btn-danger {
+  background: var(--surface);
+  border-color: var(--danger);
+  color: var(--danger);
+  font-weight: 700;
+}
+.btn-danger:hover {
+  background: var(--don-wash);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+.btn-ink {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+  font-weight: 700;
+}
+.btn-ink:hover {
+  background: color-mix(in srgb, var(--ink) 86%, var(--bg));
+  border-color: transparent;
+}
+.btn-ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--ink-2);
+}
+.btn-ghost:hover {
+  background: var(--bg-sunk);
+  border-color: transparent;
+  color: var(--ink);
+}
+.btn-sm {
+  height: 30px;
+  padding: 0 10px;
+  font-size: var(--fs-13);
+}
+.btn-lg {
+  height: 46px;
+  padding: 0 20px;
+  font-size: var(--fs-16);
+}
+.btn-block {
+  width: 100%;
+}
+.btn[disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+.icon-btn {
+  display: inline-grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: var(--r-ctl);
+  color: var(--ink-2);
+}
+.icon-btn:hover {
+  background: var(--bg-sunk);
+  color: var(--ink);
+}
+@media (max-width: 767px) {
+  .btn {
+    height: 44px;
+  }
+  .btn-sm {
+    height: 36px;
+  }
+  .icon-btn {
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* ---------- Inputs ---------- */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.field > label,
+.field-label {
+  font-size: var(--fs-13);
+  font-weight: 500;
+  color: var(--ink-2);
+}
+.input,
+.select,
+.textarea {
+  width: 100%;
+  height: 40px;
+  padding: 0 12px;
+  background: var(--surface);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-ctl);
+  transition: border-color var(--dur-1), box-shadow var(--dur-1);
+}
+.textarea {
+  height: auto;
+  padding: 10px 12px;
+  resize: vertical;
+  line-height: var(--lh-body);
+}
+.input::placeholder,
+.textarea::placeholder {
+  color: var(--ink-3);
+}
+.input:hover,
+.select:hover,
+.textarea:hover {
+  border-color: var(--ink-3);
+}
+.input:focus,
+.select:focus,
+.textarea:focus {
+  border-color: var(--ka);
+  box-shadow: var(--focus);
+}
+.input.is-error {
+  border-color: var(--danger);
+}
+.field-hint {
+  font-size: var(--fs-12);
+  color: var(--ink-3);
+}
+.field-error {
+  font-size: var(--fs-12);
+  color: var(--danger);
+}
+@media (max-width: 767px) {
+  .input,
+  .select {
+    height: 46px;
+    font-size: 16px; /* 防止 iOS 聚焦缩放 */
+  }
+  .textarea {
+    font-size: 16px;
+  }
+}
+
+/* ---------- Segmented / Tabs ---------- */
+.seg {
+  display: inline-flex;
+  padding: 3px;
+  background: var(--bg-sunk);
+  border-radius: calc(var(--r-ctl) + 2px);
+  gap: 2px;
+}
+.seg button {
+  height: 30px;
+  padding: 0 12px;
+  border-radius: var(--r-xs);
+  font-size: var(--fs-13);
+  font-weight: 500;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.seg button:hover {
+  color: var(--ink);
+}
+.seg button[aria-pressed='true'],
+.seg button[aria-selected='true'] {
+  background: var(--surface);
+  color: var(--ink);
+  font-weight: 700;
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--lane-outline) 12%, transparent);
+}
+@media (max-width: 767px) {
+  .seg button {
+    height: 36px;
+  }
+}
+.tabs {
+  display: flex;
+  gap: var(--sp-5);
+  border-bottom: 1px solid var(--line);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.tabs::-webkit-scrollbar {
+  display: none;
+}
+.tabs button,
+.tabs a {
+  position: relative;
+  padding: 10px 0 12px;
+  font-size: var(--fs-14);
+  font-weight: 500;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.tabs button:hover,
+.tabs a:hover {
+  color: var(--ink);
+}
+.tabs [aria-selected='true'],
+.tabs .router-link-exact-active {
+  color: var(--ink);
+  font-weight: 700;
+}
+.tabs [aria-selected='true']::after,
+.tabs .router-link-exact-active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -1px;
+  height: 3px;
+  border-radius: 3px 3px 0 0;
+  background: var(--don);
+}
+
+/* ---------- Chips / Tags ---------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  padding: 0 11px;
+  border-radius: var(--r-note);
+  border: 1px solid var(--line-strong);
+  background: var(--surface);
+  font-size: var(--fs-13);
+  color: var(--ink-2);
+  white-space: nowrap;
+  transition: background var(--dur-1), color var(--dur-1), border-color var(--dur-1);
+}
+button.chip:hover {
+  border-color: var(--ink-3);
+  color: var(--ink);
+}
+.chip[aria-pressed='true'] {
+  background: var(--ink);
+  border-color: var(--ink);
+  color: var(--bg);
+  font-weight: 500;
+}
+@media (max-width: 767px) {
+  .chip {
+    height: 34px;
+    padding: 0 13px;
+  }
+}
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 20px;
+  padding: 0 7px;
+  border-radius: var(--r-xs);
+  background: var(--bg-sunk);
+  font-size: var(--fs-11);
+  font-weight: 500;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.tag-don {
+  background: var(--don-wash);
+  color: var(--don-ink);
+}
+.tag-ka {
+  background: var(--ka-wash);
+  color: var(--ka-ink);
+}
+.tag-roll {
+  background: var(--roll-wash);
+  color: var(--roll-ink);
+}
+.tag-ok {
+  background: var(--ok-wash);
+  color: var(--ok);
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: currentColor;
+  flex: none;
+}
+
+/* ---------- Data table：行高按密度切换 ---------- */
+.dt {
+  font-size: var(--fs-13);
+}
+.dt th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 9px 12px;
+  background: var(--surface);
+  border-bottom: 1px solid var(--line-strong);
+  font-size: var(--fs-12);
+  font-weight: 500;
+  color: var(--ink-3);
+  text-align: left;
+  white-space: nowrap;
+}
+.dt th.r,
+.dt td.r {
+  text-align: right;
+}
+.dt th.c,
+.dt td.c {
+  text-align: center;
+}
+.dt td {
+  padding: 9px 12px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+}
+.dt tbody tr:last-child td {
+  border-bottom: 0;
+}
+.dt tbody tr {
+  transition: background var(--dur-1);
+}
+.dt tbody tr:hover {
+  background: var(--surface-2);
+}
+.dt tbody tr.is-link {
+  cursor: pointer;
+}
+.dt th button {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-weight: inherit;
+  color: inherit;
+}
+.dt th button:hover,
+.dt th[aria-sort] button {
+  color: var(--ink);
+}
+.dt-compact td {
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+/* ---------- Key-value ---------- */
+.kv {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px 16px;
+  font-size: var(--fs-13);
+}
+.kv dt {
+  color: var(--ink-3);
+}
+.kv dd {
+  text-align: right;
+  font-weight: 500;
+}
+
+/* ---------- Stat：数字是主角，标签在下方小字 ---------- */
+.stat .v {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  font-size: var(--fs-28);
+  line-height: 1;
+}
+.stat .k {
+  margin-top: 6px;
+  font-size: var(--fs-12);
+  color: var(--ink-3);
+}
+.stat .d {
+  margin-left: 6px;
+  font-family: var(--font-num);
+  font-size: var(--fs-14);
+  font-weight: 600;
+}
+
+/* ---------- Skeleton：音符流过的加载态 ---------- */
+.sk {
+  position: relative;
+  overflow: hidden;
+  background: var(--bg-sunk);
+  border-radius: var(--r-xs);
+  min-height: 12px;
+}
+.sk::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--surface) 70%, transparent), transparent);
+  transform: translateX(-100%);
+  animation: sk-sweep 1.4s infinite;
+}
+@keyframes sk-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* ---------- Avatar ---------- */
+.avatar {
+  display: inline-grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--avatar-bg);
+  color: var(--avatar-ink);
+  font-size: var(--fs-13);
+  font-weight: 700;
+  flex: none;
+  overflow: hidden;
+}
+.avatar.lg {
+  width: 72px;
+  height: 72px;
+  font-size: var(--fs-28);
+}
+.avatar.sm {
+  width: 24px;
+  height: 24px;
+  font-size: var(--fs-11);
+}
+
+/* ---------- Link ---------- */
+.link {
+  color: var(--ka-ink);
+  font-weight: 500;
+}
+.link:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Scrollbar ---------- */
+.scroll-x {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+/* ---------- Transitions ---------- */
+.fade-enter-active,
+.fade-leave-active {
+  transition: opacity var(--dur-2);
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+}
+.pop-enter-active {
+  transition: opacity var(--dur-2), transform var(--dur-2) var(--ease-out);
+}
+.pop-leave-active {
+  transition: opacity var(--dur-1), transform var(--dur-1);
+}
+.pop-enter-from,
+.pop-leave-to {
+  opacity: 0;
+  transform: translateY(8px) scale(0.98);
+}
+.sheet-enter-active,
+.sheet-leave-active {
+  transition: transform var(--dur-3) var(--ease-out);
+}
+.sheet-enter-from,
+.sheet-leave-to {
+  transform: translateY(100%);
+}
+
+[lang='zh-CN'] {
+  font-family: 'Barlow', var(--font-cjk-sc);
+}

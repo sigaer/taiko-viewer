@@ -1,0 +1,264 @@
+/*
+ * Taiko Viewer — Design V1「譜面 Fumen」Design Tokens
+ * 三层结构：Primitive（原始色）→ Semantic（语义）→ Domain（游戏语义）
+ * 生产实现时可原样迁入 taiko_viewer/assets，Element Plus 变量从 Semantic 层映射。
+ */
+
+:root {
+  /* ---------- Primitive：藍（Indigo ink）---------- */
+  --ai-950: #0b1120;
+  --ai-900: #101728;
+  --ai-850: #151e35;
+  --ai-800: #1a2440;
+  --ai-750: #212d4e;
+  --ai-700: #2b3860;
+  --ai-600: #3f4d78;
+  --ai-500: #5a6790;
+  --ai-400: #7f8aaa;
+  --ai-300: #a7afc6;
+  --ai-200: #cdd2e0;
+  --ai-150: #dfe3ec;
+  --ai-100: #eaedf3;
+  --ai-50: #f3f5f8;
+  --ai-0: #ffffff;
+
+  /* ---------- Primitive：音符三色 ---------- */
+  /* 朱 = ドン（面）  浅葱 = カッ（缘）  山吹 = 連打 */
+  --shu-700: #b62a17;
+  --shu-600: #d23a22;
+  --shu-500: #e8482e;
+  --shu-400: #ff6a4d;
+  --shu-100: #fde4de;
+  --asagi-700: #0b6f82;
+  --asagi-600: #128a9f;
+  --asagi-500: #1fa5ba;
+  --asagi-400: #4cc6d8;
+  --asagi-100: #d9f1f5;
+  --yamabuki-700: #9a6a00;
+  --yamabuki-500: #f2b51d;
+  --yamabuki-400: #ffcb45;
+  --yamabuki-100: #fdf0c8;
+
+  /* ---------- Typography ---------- */
+  --font-cjk-sc: 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif;
+  --font-cjk-jp: 'Noto Sans JP Variable', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif;
+  --font-ui: 'Barlow', var(--font-cjk-sc);
+  --font-num: 'Barlow Condensed', 'Barlow', var(--font-cjk-sc);
+
+  --fs-11: 0.6875rem;
+  --fs-12: 0.75rem;
+  --fs-13: 0.8125rem;
+  --fs-14: 0.875rem;
+  --fs-16: 1rem;
+  --fs-18: 1.125rem;
+  --fs-22: 1.375rem;
+  --fs-28: 1.75rem;
+  --fs-36: 2.25rem;
+  --fs-48: 3rem;
+  --fs-64: 4rem;
+
+  --lh-tight: 1.15;
+  --lh-snug: 1.35;
+  --lh-body: 1.6;
+
+  /* ---------- Space（4px 基准）---------- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* ---------- Radius：按层级区分，而不是全站一个圆角 ---------- */
+  --r-ctl: 8px;      /* 输入框、按钮、标签 */
+  --r-panel: 14px;   /* 面板、对话框 */
+  --r-sheet: 22px;   /* 移动端底部抽屉顶角 */
+  --r-note: 999px;   /* 音符、胶囊、头像 */
+  --r-xs: 6px;       /* 标签、星级点、小号内嵌控件 */
+  --r-lg: 18px;      /* 命令面板 */
+
+  /* ---------- Layout ---------- */
+  --rail-w: 84px;
+  --bar-h: 60px;
+  --tab-h: 62px;
+  --content-max: 1480px;
+  --gutter: 28px;
+
+  /* ---------- Motion ---------- */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-hit: cubic-bezier(0.3, 1.6, 0.5, 1);   /* 击打回弹：只用于「确认/达成」 */
+  --dur-1: 120ms;
+  --dur-2: 220ms;
+  --dur-3: 420ms;
+
+  /* ---------- Z ---------- */
+  --z-rail: 20;
+  --z-bar: 30;
+  --z-sheet: 60;
+  --z-palette: 80;
+  --z-toast: 90;
+  --z-proto: 100;
+}
+
+/* ============ Semantic：Light（紙） ============ */
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: var(--ai-50);
+  --bg-sunk: var(--ai-100);
+  --surface: var(--ai-0);
+  --surface-2: #f8f9fb;
+  --line: var(--ai-150);
+  --line-strong: var(--ai-200);
+  --ink: #17203a;
+  --ink-2: #47526f;
+  --ink-3: #78829d;
+  --ink-inv: #ffffff;
+
+  --don: var(--shu-500);           /* 音符、指示、图形 */
+  --don-solid: var(--shu-600);     /* 主按钮填充：白字 ≥ 4.5:1 */
+  --ink-on-solid: var(--ai-0);     /* 实色填充（主按钮、难度标签）上的文字 */
+  --don-ink: var(--shu-600);       /* 文字级红：对白底 ≥ 4.5:1 */
+  --don-wash: var(--shu-100);
+  --ka: var(--asagi-500);
+  --ka-ink: var(--asagi-700);
+  --ka-wash: var(--asagi-100);
+  --roll: var(--yamabuki-500);
+  --roll-ink: var(--yamabuki-700);
+  --roll-wash: var(--yamabuki-100);
+
+  --ok: #1d8a54;
+  --ok-wash: #dcf3e6;
+  --warn: var(--yamabuki-700);
+  --danger: var(--shu-600);
+
+  --lane: #232d4b;                /* 譜面レーン底色：浅色模式下也是深色带 */
+  --lane-line: #3a466b;
+  --lane-ink: #e9edf7;
+
+  --focus: 0 0 0 3px color-mix(in srgb, var(--ka) 45%, transparent);
+  --shadow-pop: 0 18px 50px -12px rgb(16 23 40 / 0.28), 0 2px 6px rgb(16 23 40 / 0.08);
+  --shadow-lift: 0 6px 18px -8px rgb(16 23 40 / 0.22);
+  --scrim: rgb(16 23 40 / 0.46);
+}
+
+/* ============ Semantic：Dark（夜藍） ============ */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: var(--ai-900);
+  --bg-sunk: var(--ai-950);
+  --surface: var(--ai-850);
+  --surface-2: var(--ai-800);
+  --line: #26314f;
+  --line-strong: #34416a;
+  --ink: #e9edf7;
+  --ink-2: #b1b9d0;
+  --ink-3: #7d88a8;
+  --ink-inv: #101728;
+
+  --don: var(--shu-400);
+  --don-solid: var(--shu-400);
+  --ink-on-solid: var(--ai-950);
+  --don-ink: #ff8266;
+  --don-wash: #3b1f24;
+  --ka: var(--asagi-400);
+  --ka-ink: #6fd6e6;
+  --ka-wash: #12303f;
+  --roll: var(--yamabuki-400);
+  --roll-ink: #ffd568;
+  --roll-wash: #38301a;
+
+  --ok: #4ccb8a;
+  --ok-wash: #153527;
+  --warn: #ffd568;
+  --danger: #ff8266;
+
+  --lane: var(--ai-750);          /* 与 --bg（ai-900）、--surface（ai-850）拉开层次 */
+  --lane-line: #34416a;
+  --lane-ink: #e9edf7;
+
+  --shadow-pop: 0 24px 60px -12px rgb(0 0 0 / 0.6), 0 0 0 1px #34416a;
+  --shadow-lift: 0 8px 22px -8px rgb(0 0 0 / 0.5);
+  --scrim: rgb(5 8 16 / 0.62);
+}
+
+/* ============ Semantic：两套主题共用 ============ */
+:root {
+  /* 譜面レーン：两套主题里都是深色带，音符颜色固定 */
+  --lane-don: var(--shu-400);
+  --lane-ka: var(--asagi-400);
+  --lane-roll: var(--yamabuki-500);
+  --lane-fc: #ffd75a;                /* 全连音符的金色内环 */
+  --lane-ring: var(--ai-0);          /* 音符白色内环 */
+  --lane-outline: var(--ai-950);     /* 音符深色外轮廓 */
+  --lane-ghost: var(--ai-500);
+  --lane-ghost-ring: var(--ai-300);
+  --lane-measure: var(--ai-400);     /* 谱面图里更醒目的小节线 */
+
+  --avatar-bg: var(--ai-700);
+  --avatar-ink: var(--ai-0);
+}
+
+/* ============ Domain：游戏语义色（两套主题共用色相，亮度各自校准） ============ */
+:root {
+  /* 判定 */
+  --judge-good: var(--don);
+  --judge-ok: var(--ink-3);
+  --judge-ng: #7648c8;
+
+  /* 难度 */
+  --diff-easy: #e0502a;
+  --diff-normal: #5f9e2f;
+  --diff-hard: #2f7fc2;
+  --diff-oni: #d6337f;
+  --diff-ura: #7648c8;
+
+  /* 王冠 */
+  --crown-none: var(--ai-300);
+  --crown-clear: #9aa5b8;      /* 银 */
+  --crown-fc: #e0a400;         /* 金 */
+  --crown-dfc: conic-gradient(from 210deg, #ff5a5a, #ffb13d, #f6e24b, #58d68d, #4cc6d8, #7a7cf0, #d05be0, #ff5a5a);
+
+  /* 评价（粋・雅・極） */
+  --rank-iki1: #8c93a3;        /* 白粋 */
+  --rank-iki2: #b0703a;        /* 铜粋 */
+  --rank-iki3: #8e9fb8;        /* 银粋 */
+  --rank-miyabi1: #d79a00;     /* 金雅 */
+  --rank-miyabi2: #e2618f;     /* 桜雅 */
+  --rank-miyabi3: #8650d2;     /* 紫雅 */
+  --rank-kiwami: #17203a;      /* 極（配虹边） */
+  --rank-kiwami-ring: #c9a227;
+
+  /* 流派 Genre */
+  --genre-pops: #2d9fb8;
+  --genre-anime: #f08a24;
+  --genre-kids: #f0508c;
+  --genre-vocaloid: #9aa7b8;
+  --genre-game: #a865d8;
+  --genre-variety: #5db33a;
+  --genre-classic: #c9a227;
+  --genre-namco: #e8482e;
+}
+
+:root[data-theme='dark'] {
+  --diff-easy: #ff7a55;
+  --diff-normal: #8fcb5a;
+  --diff-hard: #5aa9ea;
+  --diff-oni: #ff66a8;
+  --diff-ura: #a583f5;
+  --judge-ng: #a583f5;
+  --crown-none: #3f4d78;
+  --crown-clear: #b9c3d6;
+  --crown-fc: #ffc93a;
+  --rank-kiwami: #e9edf7;
+}
+
+@media (max-width: 767px) {
+  :root {
+    --gutter: 16px;
+  }
+}
