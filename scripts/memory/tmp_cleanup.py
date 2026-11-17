@@ -198,10 +198,10 @@ def process_refs(budget, proc_root=Path('/proc'), root=ROOT):
     return refs
 
 
-def retained_refs(budget, root=ROOT):
+def retained_refs(budget, root=ROOT, excluded=()):
     refs = set()
     # Service configuration and regression fixtures may refer to idle artifacts.
-    for base in (Path('/etc/systemd/system'), Path('/etc/nginx'), Path('/etc/cron.d'),
+    for base in (Path('/etc/systemd/system'), Path('/run/systemd/transient'), Path('/usr/lib/systemd/system'), Path('/etc/nginx'), Path('/etc/cron.d'),
                  REPO / 'scripts', REPO / 'taiko_viewer/tests'):
         for current, dirs, files in os.walk(base, followlinks=False):
             dirs[:] = [d for d in dirs if d not in PRUNE | GENERATED and not (Path(current) / d).is_symlink()]
@@ -215,10 +215,10 @@ def retained_refs(budget, root=ROOT):
                         refs |= extract_refs(stream.read(256 * 1024 + 1), root)
     # Stable scratch-container names in launcher code do not pin every old job.
     refs -= {root / name for name in ('taiko-build', 'taiko-development', 'taiko-bounded-qa')}
-    return refs | symlink_refs(budget, (root, Path('/home/sigaer/taiko')), root)
+    return refs | symlink_refs(budget, (root, Path('/home/sigaer/taiko')), root, excluded)
 
 
-def symlink_refs(budget, bases, root=ROOT):
+def symlink_refs(budget, bases, root=ROOT, excluded=()):
     refs = set()
     # Retained source symlinks can consume another tree's generated artifacts.
     # Stream directory entries using their d_type: regular source files need no
@@ -228,18 +228,24 @@ def symlink_refs(budget, bases, root=ROOT):
         stack = [(base, 0)]
         while stack:
             here, depth = stack.pop()
+            if any(within(here, path) for path in excluded):continue
             budget.tick()
-            with os.scandir(here) as entries:
-                for entry in entries:
-                    if time.monotonic() > budget.deadline:
-                        raise Unsafe('symlink discovery deadline exceeded')
-                    if entry.is_symlink():
-                        budget.tick()
-                        target = Path(entry.path).resolve()
-                        if within(target, root):
-                            refs.add(target)
-                    elif depth < 7 and entry.name not in PRUNE | GENERATED and entry.is_dir(follow_symlinks=False):
-                        stack.append((Path(entry.path), depth + 1))
+            try:
+                with os.scandir(here) as entries:
+                    for entry in entries:
+                        if time.monotonic() > budget.deadline:
+                            raise Unsafe('symlink discovery deadline exceeded')
+                        if entry.is_symlink():
+                            budget.tick()
+                            target = Path(entry.path).resolve()
+                            if within(target, root):
+                                refs.add(target)
+                        elif depth < 7 and entry.name not in PRUNE | GENERATED and entry.is_dir(follow_symlinks=False):
+                            stack.append((Path(entry.path), depth + 1))
+            except FileNotFoundError:
+                # Another creator can finish and remove only its own task while
+                # this read-only reference scan runs. Permission errors still fail.
+                continue
     return refs
 
 
@@ -268,6 +274,52 @@ def remove(item, root, now, budget, refs, protected):
     return allocated
 
 
+def managed_candidates(root, now, budget):
+    """Only creator-owned, completed/expired task roots; no legacy age inference."""
+    result = []
+    boot = Path('/proc/sys/kernel/random/boot_id').read_text().strip()
+    for path in root.glob('viewer-task-qa-*'):
+        budget.tick()
+        if not re.fullmatch(r'viewer-task-qa-[0-9a-f]{12}', path.name):
+            continue
+        info = identity(path)
+        if not stat.S_ISDIR(info.st_mode) or info.st_uid != os.geteuid():
+            continue
+        try:
+            meta_info = (path/'task.json').lstat()
+            if not stat.S_ISREG(meta_info.st_mode) or meta_info.st_size > 4096:
+                continue
+            meta = json.loads((path/'task.json').read_text())
+            if meta.get('task_id') != path.name.removeprefix('viewer-task-') or meta.get('owner') != info.st_uid:
+                continue
+            pid = int(meta['pid'])
+            try:
+                start = Path(f'/proc/{pid}/stat').read_text().rsplit(')', 1)[1].split()[19]
+            except FileNotFoundError:
+                start = None
+            if meta.get('boot_id') == boot and start == meta.get('pid_start'):
+                continue
+            unit = 'taiko-' + meta['task_id'] + '.service'
+            active = False
+            for events in Path('/sys/fs/cgroup/development.slice').glob('**/'+unit+'/cgroup.events'):
+                active |= 'populated 1' in events.read_text()
+            if active:
+                continue
+            expiry = meta.get('finished', meta['expiry'])
+            if now < float(expiry) + DAY:
+                continue
+            current, latest, allocated, signature = tree_info(path, budget)
+            # Preserve an accidentally nested checkout, even inside a task root.
+            if any(p.name == '.git' for p in path.rglob('.git')):
+                continue
+            result.append(dict(path=str(path), kind='owned-task', ageSeconds=0,
+                dev=current.st_dev, ino=current.st_ino, latest=latest,
+                allocatedBytes=allocated, signature=signature))
+        except (FileNotFoundError, ValueError, KeyError, TypeError):
+            continue
+    return result
+
+
 def run(root, apply=False, protected=PROTECTED, budget=None):
     budget = budget or Budget()
     root_info = identity(root)
@@ -276,21 +328,24 @@ def run(root, apply=False, protected=PROTECTED, budget=None):
     if not stat.S_ISDIR(root_info.st_mode):
         raise Unsafe('invalid /var/tmp root')
     now = time.time()
-    items = candidates(root, now, budget, protected)
-    refs = process_refs(budget) | retained_refs(budget)
+    legacy = candidates(root, now, budget, protected)
+    items = managed_candidates(root, now, budget)
+    refs = process_refs(budget) | retained_refs(budget, excluded=tuple(Path(item['path']) for item in items))
     selected = [item for item in items if not referenced(Path(item['path']), refs)]
     report = {'schema': 1, 'at': now, 'mode': 'apply' if apply else 'dry-run',
-              'candidates': len(items), 'retainedByReference': len(items) - len(selected),
+              'legacyRetainedUnknownOwner': len(legacy), 'candidates': len(items), 'retainedByReference': len(items) - len(selected),
               'removed': [], 'selected': selected, 'allocatedBytesRemoved': 0}
     report['status'] = 'PASS'
     if apply:
-        # Re-read live consumers after discovery, before any mutation.
-        refs |= process_refs(budget)
         for item in selected:
-            if referenced(Path(item['path']), refs):
-                report['retainedByReference'] += 1
-                continue
             try:
+                # Re-check live consumers and newly installed idle service/fixture
+                # references per directory. Preserve partial deletion evidence if
+                # the scan budget expires after an earlier successful deletion.
+                refs |= process_refs(budget) | retained_refs(budget, excluded=(Path(item['path']),))
+                if referenced(Path(item['path']), refs):
+                    report['retainedByReference'] += 1
+                    continue
                 report['allocatedBytesRemoved'] += remove(item, root, now, budget, refs, protected)
                 report['removed'].append(item['path'])
             except (Unsafe, OSError) as error:

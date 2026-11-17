@@ -20,7 +20,7 @@ async function main(){
   const datadir=await realpath(configured);
   const run=await realpath(process.env.QA_RUN_DIR||'');const scratch=await realpath(process.env.QA_RUN_TMPDIR||'');
   assert.match(run,/^\/home\/sigaer\/taiko\/qa-vault\/runs\/qa-[0-9a-f]{12}$/);
-  assert.equal(scratch,resolve(run,'scratch'),'Scratch must belong to the admitted QA run');
+  assert.ok([resolve(run,'scratch'),resolve('/var/tmp','viewer-task-'+process.env.QA_RUN_ID,'scratch')].includes(scratch),'Scratch must belong to the admitted QA run');
   const beneath=relative(scratch,datadir);
   assert.match(beneath,/^sql-[a-zA-Z0-9]+\/mysql$/,'Datadir must be this QA run own SQL scratch directory');
   const db=await mysql.createConnection({host:'127.0.0.1',port,user:process.env.TAIKO_DB_USER,

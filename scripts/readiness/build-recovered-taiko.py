@@ -19,7 +19,7 @@ def main():
     if str(vault).startswith(('/tmp/','/var/tmp/')) or not vault.is_dir() or vault.stat().st_mode&0o077: p.error('private persistent vault required')
     if sha(a.builder_wheel)!=helper.BUILDER_SHA: p.error('exact builder required')
     scratch=Path(os.environ['QA_RUN_TMPDIR']).resolve()
-    if scratch != Path(os.environ['QA_RUN_DIR']).resolve()/'scratch' or not scratch.is_dir() or not scratch.is_relative_to(vault/'runs'): p.error('owned QA scratch required')
+    if scratch not in [Path(os.environ['QA_RUN_DIR']).resolve()/'scratch', Path('/var/tmp')/('viewer-task-'+os.environ['QA_RUN_ID'])/'scratch'] or not scratch.is_dir(): p.error('owned QA scratch required')
     work=Path(tempfile.mkdtemp(prefix='taiko-build-',dir=scratch))
     root=Path(tempfile.mkdtemp(prefix='taiko-rebuild-',dir=vault)); source=work/'source'; source.mkdir()
     report={'status':'FAIL','sourceCommit':REVISION,'historicalWheelSha256':EXPECTED,'productionAccess':False,'workspace':str(root),'temporaryWorkspace':str(work),'logs':{}}

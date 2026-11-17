@@ -22,6 +22,7 @@ import uuid
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import admission
+import tmp_cleanup
 
 GIB = 1024 ** 3
 DEFAULT_ROOT = Path('/home/sigaer/taiko/qa-vault')
@@ -65,17 +66,27 @@ def identity(path):
 
 
 class Run:
-    def __init__(self, root):
+    def __init__(self, root, seconds=14400):
         self.root = private_directory(root, create=True)
         self.run_id = 'qa-' + uuid.uuid4().hex[:12]
         runs = private_directory(self.root / 'runs', create=True)
         self.path = runs / self.run_id
         self.path.mkdir(mode=0o700)
-        self.scratch = self.path / 'scratch'
+        self.task_root = None
+        if self.root == DEFAULT_ROOT:
+            self.task_root = Path('/var/tmp') / ('viewer-task-' + self.run_id)
+            self.task_root.mkdir(mode=0o700)
+        self.scratch = (self.task_root or self.path) / 'scratch'
         self.evidence = self.path / 'evidence'
         self.scratch.mkdir(mode=0o700)
         self.evidence.mkdir(mode=0o700)
         self.identities = {p: identity(p) for p in [self.root, runs, self.path, self.scratch, self.evidence]}
+        if self.task_root:
+            self.identities[self.task_root] = identity(self.task_root)
+            metadata = dict(schema=1, task_id=self.run_id, owner=os.geteuid(), pid=os.getpid(),
+                pid_start=admission.pid_identity(os.getpid()), boot_id=Path('/proc/sys/kernel/random/boot_id').read_text().strip(),
+                created=time.time(), expiry=time.time()+seconds+60, status='active', vault=str(self.path))
+            (self.task_root/'task.json').write_text(json.dumps(metadata))
 
     def verify(self):
         for path, expected in self.identities.items():
@@ -86,11 +97,33 @@ class Run:
         if not children_stopped:
             return 'RETAINED_CHILD_EXIT_UNPROVEN'
         self.verify()
+        if getattr(self, 'task_root', None):
+            metadata_path = self.task_root/'task.json'
+            fd = os.open(metadata_path, os.O_RDWR | os.O_NOFOLLOW)
+            with os.fdopen(fd, 'r+') as stream:
+                info = os.fstat(stream.fileno())
+                if not stat.S_ISREG(info.st_mode) or info.st_nlink != 1 or info.st_uid != os.geteuid() or info.st_size > 4096:
+                    raise UnsafePath('unsafe task metadata')
+                metadata = json.load(stream)
+                if metadata.get('task_id') != self.run_id:
+                    raise UnsafePath('task identity changed')
+                metadata.update(status='completed', finished=time.time())
+                stream.seek(0); json.dump(metadata, stream); stream.truncate(); stream.flush(); os.fsync(stream.fileno())
+            # Other owners (including host scanners) can still have an fd open
+            # after this cgroup exits. Retain just this task for the fallback GC.
+            budget = tmp_cleanup.Budget(seconds=30)
+            refs = tmp_cleanup.process_refs(budget) | tmp_cleanup.retained_refs(budget, excluded=(self.task_root,))
+            if tmp_cleanup.referenced(self.task_root, refs):
+                return 'RETAINED_EXTERNAL_REFERENCE'
         # shutil uses fd-based symlink-attack-resistant removal on supported Linux.
         if not shutil.rmtree.avoids_symlink_attacks:
             raise UnsafePath('fd-safe cleanup unavailable')
         shutil.rmtree(self.scratch)
         del self.identities[self.scratch]
+        if getattr(self, 'task_root', None):
+            (self.task_root/'task.json').unlink()
+            self.task_root.rmdir()
+            del self.identities[self.task_root]
         return 'REMOVED_OWNED_SCRATCH_ONLY'
 
     def atomic_json(self, name, value):
@@ -160,9 +193,13 @@ def attach_active_run(path):
     run.root = private_directory(DEFAULT_ROOT)
     run.path = private_directory(path)
     run.run_id = path.name
-    run.scratch = private_directory(path / 'scratch')
+    managed = Path('/var/tmp')/('viewer-task-'+run.run_id)
+    run.task_root = private_directory(managed) if managed.exists() else None
+    run.scratch = private_directory((run.task_root or path) / 'scratch')
     run.evidence = private_directory(path / 'evidence')
     run.identities = {p: identity(p) for p in [run.root, path.parent, path, run.scratch, run.evidence]}
+    if run.task_root:
+        run.identities[run.task_root] = identity(run.task_root)
     state = subprocess.run(['systemctl', 'show', 'taiko-' + run.run_id + '.service', '-p', 'ActiveState', '--value'], capture_output=True, text=True, timeout=5)
     if state.returncode or state.stdout.strip() not in {'active', 'activating'}:
         raise UnsafePath('abort requires this run unit to be active')
@@ -481,7 +518,7 @@ def main():
     # Reason must be a nonsecret identifier, never free-form command/credential text.
     if not args.budget_reason.replace('-', '').replace('_', '').isalnum() or len(args.budget_reason) > 80:
         parser.error('budget reason must be a short nonsecret identifier')
-    run = Run(args.vault_root)
+    run = Run(args.vault_root, admission.PROFILES[args.profile]['seconds'])
     print(json.dumps({'QA_RUN_DIR': str(run.path), 'QA_EVIDENCE_DIR': str(run.evidence), 'QA_RUN_TMPDIR': str(run.scratch)}), flush=True)
     unit = 'taiko-' + run.run_id
     record = {'schema': 1, 'runId': run.run_id, 'unit': unit, 'startedNs': time.time_ns(),

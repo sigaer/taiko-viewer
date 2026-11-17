@@ -49,7 +49,7 @@ try{
  cgroupRoot='/sys/fs/cgroup'+cgroup;await sampleMemory();sampleTimer=setInterval(()=>{void sampleMemory();},500);
  const scratch=await realpath(process.env.QA_RUN_TMPDIR),evidence=await realpath(process.env.QA_EVIDENCE_DIR);
  assert.match(process.env.QA_RUN_ID||'',/^qa-[0-9a-f]{12}$/);
- assert.equal(scratch,resolve('/home/sigaer/taiko/qa-vault/runs',process.env.QA_RUN_ID,'scratch'));
+ assert.ok([resolve('/home/sigaer/taiko/qa-vault/runs',process.env.QA_RUN_ID,'scratch'),resolve('/var/tmp','viewer-task-'+process.env.QA_RUN_ID,'scratch')].includes(scratch));
  assert.equal(process.env.TAIKO_DB_HOST,'127.0.0.1');assert.notEqual(Number(process.env.TAIKO_DB_PORT),3306);
  db=await mysql.createConnection({host:'127.0.0.1',port:Number(process.env.TAIKO_DB_PORT),user:process.env.TAIKO_DB_USER,password:process.env.TAIKO_DB_PASSWORD,database:process.env.TAIKO_DB_NAME});
  const [[proof]]=await db.query('SELECT DATABASE() name,@@datadir datadir');

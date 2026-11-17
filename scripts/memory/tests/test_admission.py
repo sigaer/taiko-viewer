@@ -46,6 +46,14 @@ class AdmissionTests(unittest.TestCase):
 
 if __name__=='__main__':unittest.main()
 
+class ScratchCapacityTests(unittest.TestCase):
+    setUp = AdmissionTests.setUp
+    request = AdmissionTests.request
+    def test_aggregate_scratch_budget(self):
+        request=self.request()
+        request['scratch_budget']=9*a.GIB
+        self.assertIn('scratch aggregate reservation exceeds 8 GiB',a.reasons(request,[],self.host))
+
 class ReclaimableCacheTests(unittest.TestCase):
     setUp = AdmissionTests.setUp
     request = AdmissionTests.request

@@ -168,6 +168,8 @@ def reasons(request, rows, host):
         out.append('development CPU reservations exceed host minus two CPUs')
     disk_reserved = sum(r['scratch_budget'] for r in rows) + request['scratch_budget']
     # Current 315 GiB volume: retain 5% (~15.7 GiB), above old 5 GiB floor.
+    if disk_reserved > 8*GIB:
+        out.append('scratch aggregate reservation exceeds 8 GiB')
     floor = max(5*GIB, host['disk_total']//20)
     if host['free'] - disk_reserved < floor:
         out.append(f'disk available={host["free"]} reserved={disk_reserved} floor={floor}')

@@ -20,7 +20,7 @@ from taiko_store.publication import PublicationStore, PublicationError, _atomic_
 
 signal.alarm(60)
 scratch = Path(os.environ['QA_RUN_TMPDIR']).resolve()
-assert '/qa-vault/runs/qa-' in str(scratch) and scratch.name == 'scratch'
+assert scratch in [Path(os.environ['QA_RUN_DIR'])/'scratch', Path('/var/tmp')/('viewer-task-'+os.environ['QA_RUN_ID'])/'scratch']
 assert '/development.slice/development-qa.slice/' in Path('/proc/self/cgroup').read_text()
 out = Path('/home/sigaer/taiko/qa-vault/evidence/viewer-source-stability-20261026')
 work = scratch / 'source-repair-synthetic'

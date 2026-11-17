@@ -138,3 +138,17 @@ class VaultTests(unittest.TestCase):
             with self.assertRaises(qa.UnsafePath): qa.artifact_manifest(self.run)
 
 if __name__=='__main__': unittest.main()
+
+class ManagedScratchTests(unittest.TestCase):
+    setUp = VaultTests.setUp
+    tearDown = VaultTests.tearDown
+    def test_external_fd_retains_task_until_reference_closes(self):
+        with patch.object(qa,'DEFAULT_ROOT',self.base/'managed-vault'):
+            managed=qa.Run(qa.DEFAULT_ROOT)
+            task_root=managed.task_root
+            (managed.scratch/'held').write_text('fixture')
+            with (managed.scratch/'held').open() as held:
+                self.assertEqual(managed.clean_scratch(True),'RETAINED_EXTERNAL_REFERENCE')
+                self.assertTrue(task_root.exists())
+            self.assertEqual(managed.clean_scratch(True),'REMOVED_OWNED_SCRATCH_ONLY')
+            self.assertFalse(task_root.exists())

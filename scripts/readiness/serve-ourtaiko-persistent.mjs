@@ -31,7 +31,7 @@ try{
  assert.equal(process.env.TAIKO_ALLOW_TEST_DB_MUTATION,'1');assert.equal(process.env.TAIKO_OURTAIKO_REAL_LINK,'1');
  assert.ok((await readFile('/proc/self/cgroup','utf8')).includes('/development.slice/development-qa.slice/'));
  const scratch=await realpath(process.env.QA_RUN_TMPDIR),run=await realpath(process.env.QA_RUN_DIR);
- assert.equal(scratch,resolve(run,'scratch'));assert.match(run,/\/qa-[0-9a-f]{12}$/);
+ assert.ok([resolve(run,'scratch'),resolve('/var/tmp','viewer-task-'+process.env.QA_RUN_ID,'scratch')].includes(scratch));assert.match(run,/\/qa-[0-9a-f]{12}$/);
  lock=await open(persistent+'/private/real-link.lock','wx',0o600);
  const db=await privateJson(persistent+'/private/database.json'),pin=await privateJson(persistent+'/admission.json'),client=await privateJson(priv+'/client.json');
  await privateJson(priv+'/test-account.json');

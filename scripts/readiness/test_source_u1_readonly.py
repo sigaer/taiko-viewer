@@ -301,7 +301,7 @@ class BoundaryTests(unittest.TestCase):
 
 if __name__ == '__main__':
     root = Path(os.environ['QA_RUN_TMPDIR']).resolve()
-    assert '/qa-vault/runs/qa-' in str(root) and root.name == 'scratch'
+    assert root in [Path(os.environ['QA_RUN_DIR'])/'scratch', Path('/var/tmp')/('viewer-task-'+os.environ['QA_RUN_ID'])/'scratch']
     ROOT = root / 'u1-offline'
     ROOT.mkdir(mode=0o700)
     try:

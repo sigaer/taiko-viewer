@@ -100,7 +100,7 @@ cleanup_current_build() {
 
 cleanup_build_root() {
   if [[ -n "$BUILD_ROOT" && -d "$BUILD_ROOT" ]]; then
-    rm -rf -- "$BUILD_ROOT"
+    printf '%s\n' "$BUILD_ROOT" | /usr/bin/python3 "$ROOT_DIR/scripts/memory/release_scratch.py" cleanup --creator-pid "$$" || true
   fi
   BUILD_ROOT=""
 }
@@ -189,7 +189,7 @@ run_nuxt_build() {
   local build_web_dir
   local build_workspace
 
-  BUILD_ROOT="$(mktemp -d /tmp/taiko-viewer-release.XXXXXX)"
+  BUILD_ROOT="$(/usr/bin/python3 "$ROOT_DIR/scripts/memory/release_scratch.py" create --creator-pid "$$")"
   build_workspace="$BUILD_ROOT/workspace"
   mkdir -p "$build_workspace/taiko-forum"
   git archive --format=tar HEAD | tar -xf - -C "$build_workspace/taiko-forum"
@@ -198,7 +198,7 @@ run_nuxt_build() {
   ln -s "$WEB_DIR/node_modules" "$build_web_dir/node_modules"
   local build_artifact="$build_web_dir/.output/server/index.mjs"
 
-  build_log="$(mktemp)"
+  build_log="$BUILD_ROOT/build.log"
   build_start_epoch="$(date +%s)"
   build_deadline=$((SECONDS + BUILD_TIMEOUT))
 
@@ -253,13 +253,13 @@ run_nuxt_build() {
   if [[ "$build_exit" -ne 0 ]]; then
     echo "  - 构建失败，最后日志如下："
     tail -n 120 "$build_log"
-    rm -f "$build_log"
+    # Preserve the bounded build log until creator/runner evidence cleanup.
     clear_build_pidfile "$build_pid"
     CURRENT_BUILD_PID=""
     return "$build_exit"
   fi
 
-  rm -f "$build_log"
+  # Preserve the build log until creator/runner evidence cleanup.
   clear_build_pidfile "$build_pid"
   CURRENT_BUILD_PID=""
   rm -rf -- "$STAGED_OUTPUT"

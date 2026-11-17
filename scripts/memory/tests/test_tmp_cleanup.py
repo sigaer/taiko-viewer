@@ -176,6 +176,41 @@ class CleanupTests(unittest.TestCase):
         with self.assertRaises(clean.Unsafe):
             clean.run(self.root, apply=True)
 
+    def test_new_service_reference_skips_only_its_directory(self):
+        artifact = self.artifact()
+        items = self.selected()
+        items[0]['ageSeconds'] = 0
+        with patch.object(clean, 'ROOT', self.root), patch.object(clean, 'candidates', return_value=[]), patch.object(clean, 'managed_candidates', return_value=items), patch.object(clean, 'process_refs', return_value=set()), patch.object(clean, 'retained_refs', side_effect=[set(), {artifact}]):
+            result = clean.run(self.root, apply=True, protected=())
+        self.assertEqual(result['removed'], [])
+        self.assertEqual(result['retainedByReference'], 1)
+        self.assertTrue(artifact.exists())
+
+    def test_late_budget_failure_preserves_completed_deletion_record(self):
+        first = self.artifact()
+        second = self.artifact('taiko-other/web/.output')
+        items = self.selected()
+        for item in items: item['ageSeconds'] = 0
+        with patch.object(clean, 'ROOT', self.root), patch.object(clean, 'candidates', return_value=[]), patch.object(clean, 'managed_candidates', return_value=items), patch.object(clean, 'process_refs', side_effect=[set(), set(), clean.Unsafe('budget')]), patch.object(clean, 'retained_refs', return_value=set()):
+            result = clean.run(self.root, apply=True, protected=())
+        self.assertEqual(result['status'], 'FAILED')
+        self.assertEqual(len(result['removed']), 1)
+        self.assertGreater(result['allocatedBytesRemoved'], 0)
+        self.assertEqual(sum(p.exists() for p in [first,second]), 1)
+
+    def test_disappeared_reference_root_skips_but_permission_error_fails(self):
+        self.assertEqual(clean.symlink_refs(clean.Budget(),(self.root/'gone',),self.root),set())
+        with patch.object(clean.os,'scandir',side_effect=PermissionError('denied')):
+            with self.assertRaises(PermissionError):clean.symlink_refs(clean.Budget(),(self.root,),self.root)
+
+    def test_internal_scratch_links_do_not_pin_their_own_task(self):
+        task=self.root/'viewer-task';task.mkdir();(task/'internal').symlink_to(task/'data')
+        outside=self.root/'consumer';outside.mkdir();(outside/'external').symlink_to(task/'data')
+        refs=clean.symlink_refs(clean.Budget(),(self.root,),self.root,excluded=(task,))
+        self.assertIn(task/'data',refs)
+        (outside/'external').unlink()
+        self.assertEqual(clean.symlink_refs(clean.Budget(),(self.root,),self.root,excluded=(task,)),set())
+
 
 if __name__ == '__main__':
     unittest.main()

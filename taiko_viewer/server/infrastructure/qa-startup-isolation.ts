@@ -19,7 +19,8 @@ export function useOwnedQaStartupIsolation():boolean{
   const env=process.env,id=env.QA_RUN_ID;
   check(/^qa-[0-9a-f]{12}$/.test(id||'')&&env.TAIKO_ALLOW_TEST_DB_MUTATION==='1'&&env.NITRO_HOST==='127.0.0.1');
   const run=resolve('/home/sigaer/taiko/qa-vault/runs',id!);
-  check(env.QA_RUN_DIR===run&&env.QA_RUN_TMPDIR===resolve(run,'scratch'));
+  check(env.QA_RUN_DIR===run&&[resolve(run,'scratch'),resolve('/var/tmp','viewer-task-'+id,'scratch')].includes(String(env.QA_RUN_TMPDIR)));
+  const taskParent=statSync(resolve(env.QA_RUN_TMPDIR!,'..'));check(taskParent.uid===process.getuid?.()&&!(taskParent.mode&0o077));
   const scratch=realpathSync(env.QA_RUN_TMPDIR!);check(scratch===env.QA_RUN_TMPDIR);
   check(readFileSync('/proc/self/cgroup','utf8').includes('/development.slice/development-qa.slice/'));
   stage="paths";const paths=getRuntimePaths();
