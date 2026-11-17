@@ -1,6 +1,6 @@
 # 阶段 0 验收记录（Design System V1.3 落地生产代码）
 
-> 当前结论：**实现成果获认可，Linux 最终验收阻塞，未通过**。第 1–10 节的历史运行结果仅为 Windows 开发自检；2026-11-17 Linux 尝试在隔离准入阶段返回 75，未启动构建或浏览器，见第 11 节。D0-4 已正式裁定为方案 B。仅批准 Linux 验收，未批准合并 main、生产发布或阶段 1 正式页面替换。
+> 当前结论：**实现成果获认可，Linux 最终验收阻塞，未通过**。第 1–10 节的历史运行结果仅为 Windows 开发自检。2026-11-17 首次 Linux 尝试被维护锁阻塞（第 11 节）；本次重试已通过隔离准入和依赖安装，但原始 main 与阶段 0 的标准构建均因缺失外部 Annual schema 返回 1，尚未进入 Nuxt/Nitro 构建（第 12 节）。D0-4 已正式裁定为方案 B。仅批准 Linux 验收，未批准合并 main、生产发布或阶段 1 正式页面替换。
 
 ## 1. 环境与范围
 
@@ -218,7 +218,7 @@ FOUT = 字体全部到达时间 − 首次内容绘制时间（`font-display: sw
 
 ### 7.2 记为未验证的项
 
-- Linux 隔离环境下的一切：验收构建、浏览器 QA、内存记录（`23` 0-D7）。
+- Linux 最终运行验收仍未完成；第 12 节补充了隔离安装、标准构建失败及内存记录，浏览器 QA 仍阻塞（`23` 0-D7）。
 - 生产形态（`nuxt build` 后的 Nitro 服务）下的样张页与现有页面；测试构建里 `useI18n` 显式导入的运行表现（本机只能做构建产物检查，见第 5 节）。
 - 需要登录或测试库的现有页面（4.6 列表）。
 - 真机：字体观感、软键盘、真实网络下的曲绘与字体。
@@ -267,7 +267,7 @@ FOUT = 字体全部到达时间 − 首次内容绘制时间（`font-display: sw
 
 ## 10. 验收清单（`23` §5）
 
-三档：**已在 Linux 隔离环境验证**（目前没有任何一项）· **Windows 开发自检** · **未验证**。
+三档：**Linux 隔离验证通过** · **仅 Windows 开发自检** · **未验证或阻塞**。本表产品验收项尚无 Linux 通过项；隔离入口和安装通过仅为前置检查，见第 12 节。
 
 | 项 | 陈述 | 档 | 依据 |
 |---|---|---|---|
@@ -296,7 +296,7 @@ FOUT = 字体全部到达时间 − 首次内容绘制时间（`font-display: sw
 | 0-D4 | 文案来自 locale、中日对应、无规格语言 | Windows 开发自检 | `check-ds-copy.mjs` + 4.8 |
 | 0-D5 | 曲名 `lang`、截断带 `title` | Windows 开发自检 | 原子组件浏览器自检（SongCell） |
 | 0-D6 | scoped 检查上线、新代码 0、规则写进约定 | Windows 开发自检 | 4、`viewer-ds.md` §4.1 |
-| 0-D7 | 浏览器 QA 通过内存隔离脚本运行 | 未验证或阻塞 | Linux runner 准入返回 75（其他 QA 占用维护锁），未启动浏览器，见第 11 节 |
+| 0-D7 | 浏览器 QA 通过内存隔离脚本运行 | 未验证或阻塞 | 首次准入返回 75；本次准入成功但标准构建缺失 schema，未启动浏览器，见第 12 节 |
 | 0-E1 | 样张页 SSR / 客户端无水合警告与错误、深色首屏不闪 | Windows 开发自检 | 矩阵 457/457（`nuxt dev`） |
 | 0-E2 | 样张页按 D0-1 可达，正常构建不可达 | Windows 开发自检 | 第 5 节；生产服务的 404 未在运行中验证 |
 | 0-E3 | 预缓存、PWA 清单、`theme-color` 不变 | Windows 开发自检（预缓存不完整） | 第 5 节；7.1 |
@@ -304,7 +304,7 @@ FOUT = 字体全部到达时间 − 首次内容绘制时间（`font-display: sw
 | 0-E5 | 现有路由 JS / CSS 依赖与入口 CSS 不变，增量有记录 | Windows 开发自检 | 第 5 节 |
 | 0-E6 | 现有页面没有新字体或图片请求 | Windows 开发自检（18 页） | 4.6 |
 | 0-E7 | 现有 `test:*` 与 `perf:route-assets` 通过 | 未验证 | 本轮只跑了 `test:version`、`difficultyPresentation`；`perf:route-assets` 读取的清单名已不存在（第 8 节） |
-| 0-F1 | 回退演练做过 | Windows 开发自检 | 第 6 节 |
+| 0-F1 | 回退演练做过 | 仅 Windows 开发自检（运行部分） | 第 6 节；Linux 源码回退与 main tree 相同，但重建失败，运行回退仍阻塞（12.2） |
 | 0-F2 | 合并与发布得到确认、只用部署脚本 | 未验证或阻塞（未授权） | 本轮明确禁止合并 main 与生产发布 |
 | 0-F3 | 上线后正式站抽查无变化 | 未验证 | 尚未发布 |
 
@@ -358,7 +358,7 @@ FOUT = 字体全部到达时间 − 首次内容绘制时间（`font-display: sw
 7.2 的全部条目；第 8 节的生产观察项（都没有改）；端口 3527 上图表代理遗留的开发服务器进程（PID 21500）与 `viewer-ds-phase0-charts` 工作树的清理，等项目负责人处理。合并 `main` 与发布不在本次授权内。
 
 
-## 11. Linux 最终验收尝试（2026-11-17，Asia/Shanghai）
+## 11. Linux 最终验收首次尝试（2026-11-17，Asia/Shanghai；历史记录）
 
 ### 11.1 结论与授权
 
@@ -429,3 +429,92 @@ Another bounded QA task is running
 本轮没有启动开发服务器、Nitro 或浏览器，故无本轮服务需停止。历史 Windows PID `21500` 在当前 Linux 主机不存在，端口 `3527` 无监听；当前 Git 工作树列表不存在 `viewer-ds-phase0-charts`。这不能证明 Windows 主机上的进程或工作树已清理；不对同号 PID、其他任务工作树或服务执行删除/终止。
 
 验收文档提交并推送实施分支后，核对本轮工作树无未提交改动、无进程使用，再以非强制 `git worktree remove` 清理本轮工作树；证据目录保留供最终审查。主工作树已有的关系数据生成时间更新、`docs/random-dan/` 与 `scripts/dojo/` 保留原样。
+
+
+## 12. Linux 最终验收重试（2026-11-17，Asia/Shanghai）
+
+### 12.1 当前结论
+
+**未验证或阻塞：标准构建缺少仓库外的 Annual schema，原始 main 和阶段 0 均可复现。最终验收未通过。** 隔离入口现已可用，不能继续把首次维护锁占用当作当前阻塞；本次没有任何产品运行验收项升级为通过。
+
+实施工作树 `/var/tmp/ds-phase0-linux-retry` 从 `4679ad00` 检出（相对审核目标 `3d9a7b8c` 仅有上一轮文档记录），开始时状态与 diff 均为空。回退基线工作树为 `/var/tmp/ds-phase0-linux-basis`。两者均为独立工作树，主工作树已有改动未动。系统仍为 Linux 5.10.0-16-amd64，Node 24.13.0。
+
+所有安装和构建均经过 `scripts/memory/run_qa.sh`，使用 `development.slice/development-qa.slice`、MemoryHigh 2 GiB / MemoryMax 3 GiB、SwapMax 256 MiB、15 分钟上限。未加载 `.env` 或测试/生产库凭据，未连接数据库、未操作用户数据。构建设置两个数据库 host 为 `invalid.invalid` 并加载 `no-egress.mjs`；未启动应用服务。没有执行合并、发布、阶段 1 替换、旧问题修复或版本升级。
+
+D0-4 保持正式方案 B：中日文系统字体，按需自托管 Barlow / Barlow Condensed；首屏 ≤150 KiB、≤12 请求；不引入完整自托管 Noto Sans SC / JP。正式页面首次集成时复验字体加载与 FOUT，本轮未取得 Linux 字体运行证据。
+
+### 12.2 标准构建失败与原始 main 对照
+
+按第 9 节先建立回退树：在审核目标的 detached worktree 依次 `git revert --no-commit 3d9a7b8c`、`git revert --no-commit -m 1 460d5fa4`、`git revert --no-commit e9335faf`、`git revert --no-commit ca157761`、`git revert --no-commit 38f70c4d`。临时 detached 提交为 `97ad21a09d7b7d950d3a9f08de7e03b14adc9963`；其 tree 与原始 main `f9b39e6` 都是 `ef30c8af458f52fd5f3978201900ee27e3b4d949`，`git diff f9b39e6` 为空。**这只证明源码回退一致，不是运行回退通过。**
+
+依赖使用 `npm install --no-save --no-audit --no-fund`（读取现有锁文件，不保存依赖或锁文件改动），成功安装 1189 个包，`nuxt prepare` 成功。基线按手册复用实施树的 `node_modules` 符号链接；两树 `package.json` / `package-lock.json` 未改。
+
+标准命令为 `npm run build`，没有用 `npx nuxt build` 跳过检查。执行入口与日志均保存在 `/var/tmp/ds-phase0/linux-retry-20261117/`：
+
+```sh
+bash scripts/memory/run_qa.sh /usr/bin/python3 /var/tmp/ds-phase0/linux-retry-20261117/build-probe.py build-baseline /var/tmp/ds-phase0-linux-basis/taiko_viewer
+bash scripts/memory/run_qa.sh /usr/bin/python3 /var/tmp/ds-phase0/linux-retry-20261117/build-probe.py build-final /var/tmp/ds-phase0-linux-retry/taiko_viewer
+```
+
+`build-probe.py` 只负责环境隔离参数、调用原始 npm 命令、日志和资源采样，不修改源码或构建步骤。
+
+两树均通过 `prebuild` 的 TJA pinned source 校验，随后在同一行失败并退出 1：
+
+```text
+> node ./scripts/generate_annual_types.mjs --check && nuxt build
+Error: ENOENT: no such file or directory, open '/var/schemas/annual-summary-v4.schema.json'
+.../scripts/generate_annual_types.mjs:16:27
+```
+
+脚本还尝试 `/var/tmp/schemas/annual-summary-v4.schema.json`，该位置也不存在。`generate_annual_types.mjs`、隔离 runner 和 vault 在原始 main 与阶段 0 无差异。基线额外出现 `.nuxt/tsconfig.json` 不存在的 prebuild 警告（复用依赖但未单独 prepare），没有阻断 TJA 步骤；最终树已 prepare，仍出现相同 schema 致命错误。因此可确认此独立工作树环境的标准构建前置问题在原始 main 同样存在，不能归因于阶段 0，也不能据此声称其他 Linux 构建步骤通过。
+
+依用户要求，在确认对照后停止后续运行验收。没有补造 schema、从生产复制文件、修改脚本、绕过检查或扩大修复范围。恢复前需要明确可用于隔离构建的正式 schema 来源和布置方式，再重新从标准构建开始。
+
+### 12.3 资源与证据
+
+| 任务 | 隔离 run | 退出码 | 工作负载秒数 | cgroup 采样峰值 MiB | 进程树 RSS 合计采样峰值 MiB | OS child max RSS MiB |
+|---|---|---:|---:|---:|---:|---:|
+| 读取锁文件的依赖安装 | `qa-c5b3281a29d2` | 0 | 38.105 | 1630.78 | 1305.38 | 952.55 |
+| 原始 main / 回退树标准构建 | `qa-f948800b9aeb` | 1 | 0.472 | 70.60 | 169.33 | 66.09 |
+| 阶段 0 标准构建 | `qa-0faefd8a0520` | 1 | 0.452 | 69.35 | 172.15 | 65.69 |
+
+以上每 20 ms 读取 cgroup `memory.current` 和进程 RSS；采样可能漏掉瞬时峰值，OS 数字来自 `getrusage(RUSAGE_CHILDREN).ru_maxrss`，不是进程树总量。RSS 合计会重复计算共享页；既有共享页的 cgroup 归属也可能不同，两列不直接比较。三项 `memory.events` 的 high/max/oom/oom_kill 最后观测值均为 0。构建数值仅覆盖失败前的短暂 prebuild / schema 检查，**不是完整 Nuxt 构建内存峰值**。runner manifest 确认子进程清理，三个 unit 已 inactive、ControlGroup 为空。
+
+完整证据目录：`/var/tmp/ds-phase0/linux-retry-20261117/`。
+
+- `build-baseline.log` / `build-final.log`：标准构建完整输出；对应 `*-runner.log` 含隔离 run 和指标。
+- `install-locked.log`、`install-locked-runner.log`、三个 `*-metrics.json`：有效安装和构建资源记录。
+- `build-probe.py`：本次受控执行和采样脚本。
+- 持久 runner 证据：`/home/sigaer/taiko/qa-vault/runs/<run>/evidence/manifest.json` 与 `output.log`。
+- 随文提交的小型 [retry-summary.json](linux-final-20261117/retry-summary.json) 包含指标、证据路径和 SHA-256；不提交 node_modules、构建输出或日志目录。
+
+另有两次执行准备错误，明确排除出验收：初次安装错误使用 `--package-lock=false`，发现会忽略锁文件后用 vault 的 owner-abort 正式停止（`qa-288acc463347`，原因 `INSTALL_LOCKFILE_POLICY_CORRECTION`，退出 125）；其记录保留于 `install.log` / `install-memory.json`，不得当作依赖安装通过。随后尝试调用主机不存在的 `/usr/bin/time`（`qa-e52db850feb0`，退出 127，npm 未启动）；改用 Python 资源采样后才得到表中有效结果。没有把重跑或主动停止伪记为通过。
+
+### 12.4 分项验收状态
+
+| 项目 | 状态 | 当前证据与限制 |
+|---|---|---|
+| 隔离入口、依赖安装（前置） | Linux 隔离验证通过 | 真正启动受限 cgroup；有效安装退出 0，锁文件不变；不代表产品通过 |
+| 原始 main / 阶段 0 标准构建 | 未验证或阻塞 | 两树均退出 1；缺外部 schema；尚未执行 Nuxt/Nitro build |
+| 正常产物路由、依赖/CSS/体积差异 | 仅 Windows 开发自检 | 本次无产物可比，Linux 差异未知，不能写成 0 |
+| 测试构建 | 未验证或阻塞 | 未运行 `TAIKO_DS_SAMPLES=1 npm run build` |
+| 样张浏览器矩阵、弹层、SSR、水合、图表 | 仅 Windows 开发自检 | 本次没有启动浏览器，无 Linux 结果或截图 |
+| 字体加载、预算、FOUT | 仅 Windows 开发自检 | 方案已正式确认；Linux 运行验证未完成 |
+| 公开旧页可见行为、截图、请求对照 | 仅 Windows 开发自检 | 历史 18 页 / 72 状态；本次未复采 |
+| 登录账号页、社区帖子与通知、个人主页、后台代表页 | 未验证或阻塞 | 未连接测试库，未执行 `SELECT DATABASE()`，未取得认证状态下的行为或响应对照；不能宣称与 main 一致 |
+| 生产形态 Nitro、正常产物样张 404 | 未验证或阻塞 | 没有 `.output/server/index.mjs` 或生产形态服务 |
+| PWA 预缓存、manifest、theme-color | 仅 Windows 开发自检（不完整） | 历史三项预缓存不升级；Linux 文件类型、条目数、缓存行为与样张排除未验证 |
+| `test:ds`、`check:ds` 和其他回归 | 仅 Windows 开发自检 | 本次标准构建阻塞后未继续运行 |
+| 回退源码与运行 | 未验证或阻塞（运行部分） | Linux 源码 tree 与 main 一致；重建失败，运行回退仍仅有 Windows 开发自检 |
+| 完整构建 / 浏览器内存峰值 | 未验证或阻塞 | 只记录到安装及失败前置步骤；完整构建、浏览器 N/A |
+| 合并 main、生产部署、阶段 1 | 未验证或阻塞（未授权） | 未执行 |
+
+本轮无法证明阶段 0 没有改变全部旧站页面的可见行为和请求结果。第 8 节与 11.4 的旧问题继续单独登记：npm 锁文件、Keepalive + Teleport、设置水合、chart-ugc 深色 CSS、route-assets、公开产物中的绝对路径均未修复、未补充 Linux 运行结论。**Keepalive + Teleport 仍必须在阶段 1 替换导航框架前完成针对性修复与回归。** 外部 schema 缺失现在已有 Linux/main 对照证据，Windows Nitro 失败仍未在 Linux 重现或排除。
+
+### 12.5 收尾
+
+本次没有启动开发服务器、Nitro 或浏览器；已核对隔离任务退出。Linux 上没有历史 Windows PID `21500`、端口 `3527` 监听或图表工作树，不能据此断言 Windows 端已经清理。
+
+清理前检查未提交内容与其他进程引用。回退树与原始 main 无差异、无其他进程引用，已用非强制 `git worktree remove` 删除 `/var/tmp/ds-phase0-linux-basis`。实施树暂保留：宿主 `YDService`（PID 3926598，`/usr/local/qcloud/YunJing/YDEyes/YDService`）仍打开本轮 `node_modules` 下 5230 个文件；未停止该服务、未强制删除其仍在读取的目录。这是清理保留项，不是验收通过条件。待引用释放并确认工作树已提交且无其他任务使用后，再非强制移除 `/var/tmp/ds-phase0-linux-retry`。检查依据为 `cleanup-process-check.json`、`cleanup-fd-check.json`；大型依赖未提交。
+
+文档与小型证据提交到 `feature/viewer-ds-phase0` 并推送，停止等待最终审查；原始 main、主工作树已有改动、版本与生产服务均保持原状。
