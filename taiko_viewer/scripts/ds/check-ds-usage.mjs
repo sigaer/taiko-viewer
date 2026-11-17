@@ -28,7 +28,8 @@ const DOMAIN = "assets/css/ds/domain.css";
 /** Which files may read a domain / note token family. */
 export const FAMILY_RULES = [
   { family: /--diff-[\w-]+/g, name: "--diff-*", allow: [/^components\/ds\/(Diff|DiffTabs|SongCell)\w*\.vue$/, /^components\/ds\/charts\//] },
-  { family: /--crown-[\w-]+/g, name: "--crown-*", allow: [/^components\/ds\/Crown\w*\.vue$/, /^components\/ds\/charts\//] },
+  // Note: the all-perfect note marker is the --crown-dfc rainbow ring (04 V1.2 §9.12 `.note.dfc`)
+  { family: /--crown-[\w-]+/g, name: "--crown-*", allow: [/^components\/ds\/(Crown|Note)\w*\.vue$/, /^components\/ds\/charts\//] },
   { family: /--rank-[\w-]+/g, name: "--rank-*", allow: [/^components\/ds\/Rank\w*\.vue$/, /^components\/ds\/charts\//] },
   { family: /--judge-[\w-]+/g, name: "--judge-*", allow: [/^components\/ds\/(JudgeBar|Note)\w*\.vue$/, /^components\/ds\/charts\//] },
   {

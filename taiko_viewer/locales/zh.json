@@ -2082,6 +2082,79 @@
       "themeLight": "浅色",
       "themeDark": "深色"
     },
+    "note": {
+      "don": "咚",
+      "ka": "咔",
+      "roll": "连打",
+      "bigDon": "大咚",
+      "bigKa": "大咔",
+      "bigRoll": "大连打",
+      "ghost": "打了一次",
+      "fc": "全连",
+      "dfc": "全良"
+    },
+    "judgeBar": {
+      "name": "判定",
+      "good": "良",
+      "ok": "可",
+      "ng": "不可"
+    },
+    "chart": {
+      "empty": "暂无数据",
+      "summary": {
+        "series": "{name}：{count} 个点，从 {from} 到 {to}",
+        "point": "{name}：{value}",
+        "empty": "{name}：暂无数据"
+      },
+      "line": {
+        "name": "走势"
+      },
+      "spark": {
+        "name": "变化"
+      },
+      "radar": {
+        "name": "能力分布",
+        "item": "{label} {value}",
+        "separator": "，",
+        "summary": "{name}：{items}"
+      },
+      "dial": {
+        "name": "进度",
+        "summary": "{name}：{value} / {max}"
+      },
+      "density": {
+        "name": "每小节音符密度",
+        "summary": "{name}：共 {count} 小节，{hot} 个高密度小节"
+      },
+      "lane": {
+        "name": "最近的练习谱面",
+        "overview": "{name}：{days} 天里打了 {played} 天",
+        "today": "今天",
+        "rest": "{date} 没有游玩",
+        "played": "{date} 有游玩",
+        "facts": "{date} {fact}，共 {count} 条进展",
+        "weekday": {
+          "sun": "日",
+          "mon": "一",
+          "tue": "二",
+          "wed": "三",
+          "thu": "四",
+          "fri": "五",
+          "sat": "六"
+        },
+        "fact": {
+          "df": "新全良",
+          "fc": "新全连",
+          "goal-completed": "练成了目标",
+          "rank-upgrade": "评价升级",
+          "score-pb": "刷新最好成绩",
+          "clear": "首次通关",
+          "ng-reduced": "不可变少了",
+          "combo-improved": "连击更长了",
+          "played": "打了一次"
+        }
+      }
+    },
     "crown": {
       "dondaful": "全良",
       "full": "全连",
