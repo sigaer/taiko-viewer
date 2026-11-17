@@ -1,0 +1,113 @@
+# Viewer Design System V1.3 · 工程约定（阶段 0）
+
+给开发者看的约定，不进入界面。规格以设计分支 `preview/redesign-v1/docs/04-design-system.md`（V1.3）、`16`、`19`、`22` 为准；任务清单是 `23-phase-0-implementation-tasks.md`。本文写的是这些规格在生产代码里落在哪里、怎么写、怎么检查。
+
+## 1. 阶段 0 的边界
+
+- 现有页面不能有任何可见变化。新 token、Element Plus 映射、字体和共用样式**只在 `html.ds-preview` 下生效**；没有这个类的页面一概拿不到。不能把「样式表只被样张页懒加载」当作隔离手段：客户端从样张页跳走后，样式表仍留在文档里，靠的是作用域选择器。
+- 不改现有 `--viewer-*`，不给它们做别名；不改全局 `--el-color-primary`（生产主按钮仍是朱色）。新旧对照见 `viewer-token-mapping.md`（脚本生成），别名在阶段 1 做。
+- 不移植原型的路由、store、模拟数据、登录与同步状态机。原型是规格，不是要搬的代码。
+- 允许改动的现有文件只有：`nuxt.config.ts`（注册样张路由的钩子）、`package.json` / `package-lock.json`（脚本；发布时的版本号）、`locales/zh.json` / `ja.json`（顶层 `ds` 键）。`app.vue` 不改。其他现有文件一律不改。
+
+## 2. 目录与命名
+
+| 内容 | 位置 |
+|---|---|
+| token | `assets/css/ds/tokens.css` |
+| Element Plus 映射 | `assets/css/ds/element-plus.css` |
+| 字体声明 / 字体文件 | `assets/css/ds/fonts.css` / `assets/font/ds/` |
+| 共用元素样式（`.ds-root`、`.stage`、`.num`） | `assets/css/ds/base.css` |
+| 领域样式（音符、判定等，组件任务按需新建） | `assets/css/ds/domain.css` |
+| 组件 | `components/ds/`，自动注册为 `Ds*`（`components/ds/Crown.vue` → `<DsCrown>`）；图表放 `components/ds/charts/` |
+| 共享工具 | `utils/ds/`（嵌套目录不会被自动导入，用 `~/utils/ds/xxx` 显式导入；测试里用相对路径加 `.ts`） |
+| 样张页 | `ds-samples/`（不在 `pages/` 下） |
+| 文案 | `locales/zh.json`、`locales/ja.json` 的顶层 `ds` 键 |
+| 测试 | `tests/ds*.test.{mjs,ts}`，`npm run test:ds` |
+| 检查与生成脚本 | `scripts/ds/` |
+| 小尺寸素材 | `public/icons/rank/{56,80}/`、`public/icons/crown/{36,60,96}/`；字节表 `scripts/ds/spec/small-icons.json` |
+
+## 3. 作用域规则（D0-2、D0-3）
+
+- `assets/css/ds/` 下所有规则都以 `html.ds-preview` 开头：浅色 `html.ds-preview:not([data-theme="dark"])`，深色 `html.ds-preview[data-theme="dark"]`，舞台面 `html.ds-preview .stage`。`tokens.css` 里只有自定义属性，`check-tokens.mjs` 会拒绝 `:root`、元素样式和别的选择器。
+- 主题沿用生产的 `html[data-theme]`（`plugins/theme.ts`、`taiko_theme` cookie），不实现「跟随系统」。
+- Element Plus 映射写在 `html.ds-preview:root …` 下（特异度 0,2,1 起），保证压过生产 `tokens.css` 的 `html:root`（0,1,1）和 `main.css` 的组件覆盖，与样式表加载顺序无关。弹层（对话框、下拉、Tooltip、消息）挂在 `<body>`，在 `<html>` 之内，所以跟着同一个类走。
+- 主色 = 品牌青绿（Role token `--action-bg` 等）；info = 中性（`--ink-2`，浅底 `--bg-sunk`）；success / warning / danger = 状态 token；破坏性按钮是危险色描边。Element Plus 变量里不出现音符色（`--don*`、`--ka*`、`--roll*`）。
+- Tooltip（含 `effect="dark"`）、Popover、下拉、对话框、抽屉、消息都按 `04` §5 / §9 走浮层一级：`--overlay-bg` + `--overlay-line`。浮层里的选中行用 `--bg-sunk`。
+- `ds-preview` 类只由 `ds-samples/_shared/useDsPreviewScope.ts` 通过 `useHead` 设置：SSR 首屏就有；页面卸载时移除；`<NuxtPage keepalive>` 停用时由 `@unhead/vue` 清空、再激活时恢复。阶段 1 的新外壳接管时，再决定这个类放在哪里。
+
+## 4. 组件写法
+
+- 只引用 Semantic / Role / Domain token，不引用 Primitive（`--ai-*`、`--shu-*`、`--asagi-*`、`--yamabuki-*`），不写十六进制色或 `rgb()` 字面量。例外只有 `assets/css/ds/tokens.css`。
+- 表达按钮、链接、选中、导航、焦点、信息时只用 Role token。音符色只表示游戏数据：`--don*`、`--ka*`、`--roll*` 只出现在音符、判定条、图表和谱面带组件与 `domain.css`；`--diff-*`、`--crown-*`、`--rank-*`、`--judge-*` 只出现在对应组件、图表与 `domain.css`。
+- 真实素材原样使用：只等比缩小；不对素材用 `filter`、`mix-blend-mode`、`mask`、`opacity`；不在素材上叠加文字或图形。难度图标只用 `/icons/diff/`，不用 `/icons/difficulty/`。不渲染段位。
+- 素材路径、换算一律走 `utils/ds/`：`gameAssets.ts`（难度、评价、王冠、称号牌、`smallSrc`）、`crown.ts`（成绩计数 → 王冠状态，全站唯一一处）、`avatar.ts`（服务端默认头像 `https://viewer.sakura-bot.cn/miku.png` 视为没有头像，D0-7）。评价名称从 `utils/scoreRank.ts` 取，难度从 `utils/difficulty.ts` 取，曲绘地址从 `utils/songCover.ts` 取，不另写一份。
+- 文案只来自 locale 文件；新组件不写行内双语（`locale === 'ja' ? … : …`、`{ zh, ja }` 字面量）。新键放在 `ds.*` 下，中日一一对应；可以复用现有键（例如 `difficulty.1–5`）。界面上只写名称、状态和必要的说明，不写规格语言或设计理由（`AGENTS.md`「UI Copy and Specification Leakage」）。
+- 缺失值统一显示「—」（U+2014）。
+- `setup` 里不访问 `window`、`document`；浏览器对象只在 `onMounted` 及之后使用。随视口变化的布局用 CSS 媒体查询（断点 767 / 1099 / 1239，见 `utils/ds/breakpoints.ts`），不用 JS 断点决定渲染结构。现有页面的 720 / 960 等断点不动。
+- 图片固定宽高，加载前后不改变布局。可点元素的触控目标 ≥ 44×44（透明扩展区写法）。减少动效时没有淡入和动画。
+- 新代码里不出现 `DanBadge` 或段位字段。
+
+### 4.1 scoped 样式与根元素属性（P0-28）
+
+- **不要**在 `<style scoped>` 里写 `:global(<根选择器>) .x { … }`。Vue 只保留 `:global()` 里面的部分，`.x` 被丢掉，规则落到根元素上（`:global(:root[data-kb]) .composer` 编译成 `:root[data-kb]`）。
+- 需要随 `<html>` / `<body>` 属性变化的样式，二选一：写在 `assets/css/ds/` 的全局样式表里（仍以 `html.ds-preview` 开头）；或在 scoped 样式里直接写普通选择器加根属性，例如 `html[data-kb] .composer { … }`，编译结果是 `html[data-kb] .composer[data-v-…]`。样张 `/_ds/root-attribute` 是可运行的例子。
+- `npm run check:scoped-css` 编译每个 scoped 样式块比对；`components/ds/`、`ds-samples/` 出现即失败，仓库其余部分只出报告。已知的 `pages/admin/taiko/chart-ugc.vue:212` 在报告里，阶段 0 不修。
+- 软键盘避让（社区阶段实现）的验收必须包括：查看编译后的样式确认选择器命中；iOS Safari 与 Android Chrome 真机通过。模拟的矮视口不算。
+
+## 5. 字体（D0-4 = B）
+
+- 自托管 Barlow（400 / 500 / 600 / 700）与 Barlow Condensed（500 / 600 / 700），latin + latin-ext 两个 unicode-range 分片，woff2，`font-display: swap`。文件原样取自 `@fontsource/barlow` 5.3.0 与 `@fontsource/barlow-condensed` 5.3.0（npm），SIL Open Font License 1.1，许可文本 `assets/font/ds/OFL-Barlow.txt`、`OFL-Barlow-Condensed.txt`。没有加 npm 依赖。
+- 中日文用系统字体。token 的字体栈保持规格原样，`'Noto Sans SC Variable'` / `'Noto Sans JP Variable'` 排在系统字体前面；方案 B 不声明这两个字体，浏览器直接落到系统字体。
+- 只有 `ds-samples/_shared/DsSampleShell.vue` 导入 `fonts.css`；正常生产构建里没有这些字体文件，现有页面也不请求它们。
+- 为 P0-10 的 A / B 对比预留：方案 A 另建 `assets/css/ds/fonts-cjk.css`，声明 `'Noto Sans SC Variable'` / `'Noto Sans JP Variable'`（按 unicode-range 分片），只由测量用的样张子页导入。token 不用改。
+
+## 6. 样张页（D0-1 = A，P0-26）
+
+- 只在 `nuxt dev`（`NODE_ENV=development`）或显式 `TAIKO_DS_SAMPLES=1` 的构建里注册：`nuxt.config.ts` 的 `pages:extend` 钩子调用 `ds-samples/routes.ts`。正常生产构建里既没有路由也没有代码；页面不在 `pages/` 下，所以不进 `viewerPageRoutePatterns`（流量统计）；站点地图是固定列表，也不会收录。`TAIKO_DS_SAMPLES=1` 的测试构建里，样张代码可能进入 Service Worker 预缓存，这类构建不能部署。
+- 路由：`/_ds`（`ds-samples/index.vue`）与 `/_ds/<slug>`，日文 `/ja/_ds/...`（i18n 自动加前缀）。页面 `layout: false`（由钩子写进路由 meta），`robots: noindex,nofollow`。
+- 主题与语言切换用生产机制：`useViewerTheme()`（cookie + `html[data-theme]`）与 `useSwitchLocalePath()`。
+- **组件任务怎么加样张，不改任何共享文件：**
+  1. 新建 `ds-samples/sections/<NN>-<slug>.vue`（`NN` 只决定排序，`slug` 为小写短横线，例如 `60-crown.vue` → `/_ds/crown`）。重启 `nuxt dev` 后自动注册，并出现在 `/_ds` 索引和顶栏里。
+  2. 文件里用 `DsSampleShell`（必用：它负责作用域、样式表、noindex、主题与语言）和 `DsSampleBlock`：
+
+     ```vue
+     <script setup lang="ts">
+     import DsSampleShell from "../_shared/DsSampleShell.vue";
+     import DsSampleBlock from "../_shared/DsSampleBlock.vue";
+     defineOptions({ name: "DsSampleCrown" });
+     </script>
+     <template>
+       <DsSampleShell title="crown">
+         <DsSampleBlock name="dondaful / full / clear / played / none"> … </DsSampleBlock>
+       </DsSampleShell>
+     </template>
+     ```
+  3. 样张上的标签只写组件名、token 名、状态名（ASCII 标识即可），不写说明文字。需要展示中日文字形时，把元素标上 `data-ds-specimen`（文案检查会放过它）。
+  4. `DsSampleShell` 在离开路由时卸载样张内容、再激活时重新挂载：Element Plus 的弹层（select、tooltip、dropdown）会在 `<body>` 留下常驻节点，若随停用的 keepalive 页面一起被销毁，Vue 会报 `Cannot read properties of null (reading 'nextSibling')`，下一页的 head 也不会更新。所以样张状态在返回时会重置，这是有意的。
+- 组件自身的文案键：加在 `locales/zh.json` 与 `ja.json` 的 `ds.<组件>.*` 下，两边同时加；`npm run check:ds` 会核对。
+- 组件测试：新建 `tests/ds<Component>.test.{ts,mjs}`，并把文件加进 `package.json` 的 `test:ds`（这是唯一需要改的共享行；如需完全避免，可以把用例写进各自的新文件，由集成人员合并进脚本）。
+
+## 7. 检查与脚本
+
+| 命令 | 内容 |
+|---|---|
+| `npm run test:ds` | 工具函数（断点、王冠、选图、头像）、素材校验和、各检查脚本的正反例 |
+| `npm run check:ds` | 下面所有静态检查依次运行，任一失败即失败 |
+| `node scripts/ds/check-tokens.mjs [--prototype <redesign-v1>]` | token 文件的结构规则；与提交的 C+ 快照 `scripts/ds/spec/tokens-v1.3-cplus.json` 逐项比对；给出原型目录时，再直接解析原型的级联（teal / authentic）与 `04` §2.2–§2.5 的表格比对，`--write-snapshot` 更新快照 |
+| `node scripts/ds/check-token-collisions.mjs` | P0-04 同名读取检查 |
+| `npm run check:ds-contrast` | P0-07 对比度（浅、深、舞台面，含 Element Plus 映射用到的配对） |
+| `node scripts/ds/token-mapping.mjs [--write]` | P0-05 新旧对照表 `docs/design-system/viewer-token-mapping.md` 是否最新 |
+| `npm run check:scoped-css` | P0-28 |
+| `node scripts/ds/check-ds-usage.mjs` | P0-29 颜色与素材用法 |
+| `node scripts/ds/check-ds-copy.mjs [--list]` | P0-30 文案；`--list` 列出全部 `ds.*` 文字供人工审查 |
+| `npm run ds:icons` / `node scripts/ds/generate_small_game_icons.mjs --check [--sheets <dir>]` | P0-12 小尺寸素材：生成、核对（不写文件）、输出 1× / 2× 对照图 |
+| `npm run ds:build-report -- --out a.json` / `--compare base.json cur.json [--expect-samples]` | P0-33 / P0-35 构建产物报告与对比（`_nuxt` 字节、各路由 JS / CSS 依赖、入口 CSS、预缓存、web manifest 与 theme-color、注册路由、字体、locale） |
+| `npm run ds:browser-check -- --base http://127.0.0.1:<port>` | 浏览器检查：进入 / 离开 / keepalive 往返时的 `ds-preview`、现有页面计算样式前后一致、弹层映射、根属性样例 |
+
+浏览器检查、构建、内存相关检查的**验收**必须在 Linux 服务器上用 `scripts/memory/run_qa.sh`、`run_dev.sh`、`run_build.sh` 运行（先读 `docs/memory-engineering-guidelines.md`）；其他环境里跑的只算开发自检。开发服务器不连数据库：自检时可把 `TAIKO_DB_HOST` 设成不可解析的 `invalid.invalid`，保证任何后台任务都连不上库。
+
+## 8. 小尺寸素材（D0-5 = A）
+
+- `sharp` 从原图等比缩小（`lanczos3`），WebP 无损（带透明）+ 同尺寸 PNG；原图不动；输出只由原图、sharp 版本和脚本里固定的参数决定。评价 2–8 → 56 / 80，王冠 clear / full / dondaful → 36 / 60 / 96。难度图标不做缩小版。
+- `smallSrc(dir, name, draw)`：1× 取不小于绘制尺寸的最小档，2× 取不小于两倍绘制尺寸的最小档。
+- 重新生成后跑 `--check` 与 `npm run test:ds`；素材被改动或重新压缩时测试失败。

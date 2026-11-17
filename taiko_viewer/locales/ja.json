@@ -2021,5 +2021,19 @@
     "contentLoadFailed": "コンテンツの読み込みに失敗しました",
     "imageUploadFailed": "画像のアップロードに失敗しました",
     "pleaseLogin": "先にログインしてください"
+  },
+  "ds": {
+    "sample": {
+      "theme": "テーマ",
+      "themeLight": "ライト",
+      "themeDark": "ダーク"
+    },
+    "crown": {
+      "dondaful": "全良",
+      "full": "フルコンボ",
+      "clear": "クリア",
+      "played": "プレイ済み",
+      "none": "未プレイ"
+    }
   }
 }

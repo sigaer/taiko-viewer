@@ -2075,5 +2075,19 @@
     "contentLoadFailed": "内容加载失败",
     "imageUploadFailed": "图片上传失败",
     "pleaseLogin": "请先登录"
+  },
+  "ds": {
+    "sample": {
+      "theme": "主题",
+      "themeLight": "浅色",
+      "themeDark": "深色"
+    },
+    "crown": {
+      "dondaful": "全良",
+      "full": "全连",
+      "clear": "通关",
+      "played": "已游玩",
+      "none": "未游玩"
+    }
   }
 }
