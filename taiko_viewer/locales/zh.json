@@ -2087,7 +2087,37 @@
       "full": "全连",
       "clear": "通关",
       "played": "已游玩",
-      "none": "未游玩"
+      "none": "未游玩",
+      "short": {
+        "dondaful": "全良",
+        "full": "全连",
+        "clear": "通关",
+        "played": "已玩",
+        "none": "未玩"
+      }
+    },
+    "cover": {
+      "missing": "没有曲绘"
+    },
+    "rank": {
+      "upgrade": "{from}升到{to}"
+    },
+    "diff": {
+      "ura": "里",
+      "star": "星级 {n}",
+      "constant": "定数 {value}",
+      "noConstant": "没有定数",
+      "tabs": "难度",
+      "short": {
+        "1": "简",
+        "2": "普",
+        "3": "难",
+        "4": "鬼",
+        "5": "里"
+      }
+    },
+    "siteTitle": {
+      "kind": "站内称号"
     }
   }
 }

@@ -2033,7 +2033,37 @@
       "full": "フルコンボ",
       "clear": "クリア",
       "played": "プレイ済み",
-      "none": "未プレイ"
+      "none": "未プレイ",
+      "short": {
+        "dondaful": "全良",
+        "full": "フルコン",
+        "clear": "クリア",
+        "played": "プレイ済",
+        "none": "未プレイ"
+      }
+    },
+    "cover": {
+      "missing": "ジャケットなし"
+    },
+    "rank": {
+      "upgrade": "{from}から{to}へ"
+    },
+    "diff": {
+      "ura": "裏",
+      "star": "星{n}",
+      "constant": "定数 {value}",
+      "noConstant": "定数なし",
+      "tabs": "難易度",
+      "short": {
+        "1": "易",
+        "2": "普",
+        "3": "難",
+        "4": "鬼",
+        "5": "裏"
+      }
+    },
+    "siteTitle": {
+      "kind": "サイト称号"
     }
   }
 }

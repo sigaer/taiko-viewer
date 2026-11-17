@@ -111,3 +111,21 @@
 - `sharp` 从原图等比缩小（`lanczos3`），WebP 无损（带透明）+ 同尺寸 PNG；原图不动；输出只由原图、sharp 版本和脚本里固定的参数决定。评价 2–8 → 56 / 80，王冠 clear / full / dondaful → 36 / 60 / 96。难度图标不做缩小版。
 - `smallSrc(dir, name, draw)`：1× 取不小于绘制尺寸的最小档，2× 取不小于两倍绘制尺寸的最小档。
 - 重新生成后跑 `--check` 与 `npm run test:ds`；素材被改动或重新压缩时测试失败。
+
+## 9. 真实素材原子组件（P0-16 – P0-24）
+
+| 组件 | 输入 | 要点 |
+|---|---|---|
+| `DsCover` | `songId`、`size`（sm 32 / md 44 / lg 72 / tile 96 / xl 168 / fill）、`priority`、`label` | 同曲缩略图 → 同曲原图（带生产的 `?v=` 绕缓存）→ 占位；不用 `fallbackSongId`。图片地址只在挂载后设置；全站一个 IntersectionObserver（320px）。淡入用盖在图上的底色层渐隐，素材本身不加透明度 |
+| `DsCrown` | `state`（`utils/ds/crown.ts`）、`size`（chip / table / sm / md / lg / xl）、`text`（off / short / full，默认 off） | 文字在素材旁边；显示文字时素材对读屏隐藏，短名与全名不同时读屏读全名 |
+| `DsRank` | `value` 0–8、`variant`（default / detail / compact / table / upgrade）、`previous`（upgrade）、`slotPx` | 名称取自 `utils/scoreRank.ts` |
+| `DsDiff` | `difficulty`、`star`、`constant`、`size`（md / lg） | 星级走 `utils/difficulty.ts` 的 `resolveChartStarLevel` |
+| `DsPlayerAvatar` | `src`（avatarUrl）、`size`（24 / 32 / 44 / 72 / 96）、`label` | 服务端默认地址视为没有头像；挂载时检查水合前已失败的图片 |
+| `DsTitlePlate` | `name`、`plate`（编号或自定义键）/ `plateStyle`、`form`（plate / text）、`lang` | 只按明确映射取牌面；12px → 10px → 文字形式 |
+| `DsSiteTitle` | `name` | 与牌面同排时由父级 `flex-wrap` 换行 |
+| `DsDiffTabs` | `charts`、`v-model`（难度 1–5） | 只发出所选难度，不读写地址 |
+| `DsSongCell` | `songId`、`title` / `titleLang`、`subtitle` / `subtitleLang`、难度三项、`coverSize` | 与页面语言不同的曲名才加 `lang` |
+
+- **王冠短名是暂定的**：`ds.crown.short.*`（中文两字、日文紧凑写法）只为 D0-6 的「短名」模式先占位，最终文字与排版在阶段 2 设计成绩组件时定。方向：王冠旁加文字，桌面全名、手机短名。
+- 组件的纯逻辑（选图、换算、退回顺序）写在各组件的普通 `<script>` 块里并导出，测试通过 `tests/dsHarness.mjs` 编译组件后直接调用；同一个 harness 用 `vue/server-renderer` 与真实 locale 做 SSR 渲染断言。
+- 样张数据放在 `ds-samples/data/atoms.json`（曲号与曲名来自 `tests/fixtures/annual-summary.sample.json`，称号来自 `assets/data/title_song_relations.json`；自定义称号是编的），不放进模板或脚本字面量。
