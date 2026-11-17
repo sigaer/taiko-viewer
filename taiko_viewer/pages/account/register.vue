@@ -11,7 +11,6 @@ const apiFetch = useViewerApiFetch();
 const { accountUser, accountAuthError, fetchCurrentUser } = useAccountState();
 const sendingCode = ref(false);
 const submitting = ref(false);
-const beta = useAnnualBeta();
 const cooldown = ref(0);
 let timer: ReturnType<typeof setInterval> | null = null;
 
@@ -147,7 +146,7 @@ const submit = async () => {
   submitting.value = true; completionError.value = "";
   try {
     if (!registered.value) {
-      beta.track("auth_start", {auth_method: "register"});
+
       await apiFetch("/api/account/auth/register", {method: "POST", body: {username: form.username, email: form.email, code: form.code, password: form.password}});
       if (!authScope.current(ticket)) return;
       registered.value = true;

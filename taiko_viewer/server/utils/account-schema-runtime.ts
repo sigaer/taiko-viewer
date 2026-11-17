@@ -1,7 +1,7 @@
 import type { Pool, RowDataPacket } from "mysql2/promise";
 import { createError } from "h3";
 import { CREATE_TABLES } from "./account-schema-definition";
-import { BETA_TABLES } from "../services/annual-beta/schema";
+import { BETA_TABLES } from "./retired-annual-schema";
 import { GOAL_TABLE_SQL } from "../services/goals/schema";
 import { GROWTH_MEASUREMENT_TABLE_SQL } from "../services/growth-history/schema";
 import { GROWTH_RECENT_CURSOR_TABLE_SQL } from "../services/growth-recent/schema";

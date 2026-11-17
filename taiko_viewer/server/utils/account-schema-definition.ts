@@ -1,4 +1,4 @@
-import { BETA_TABLES, BETA_MIGRATIONS } from "~/server/services/annual-beta/schema";
+import { BETA_TABLES, BETA_MIGRATIONS } from "~/server/utils/retired-annual-schema";
 import { SOURCE_LIFECYCLE_TABLE_SQL } from "../infrastructure/taiko-publication/lifecycle-schema";
 import { MANUAL_GRANT_RECEIPT_TABLE_SQL } from "../infrastructure/taiko-publication/grant-schema";
 import { MANUAL_CREATION_TABLE_SQL } from "../infrastructure/taiko-publication/creation-schema";

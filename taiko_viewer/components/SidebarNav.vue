@@ -3,7 +3,6 @@ import { computed, ref, watch, useId, onMounted } from "vue";
 import type { MenuInstance } from "element-plus";
 import { handleSidebarMenuKeydown } from "~/utils/sidebarKeyboard";
 import { GUIDE_DIFFICULTY_OPTIONS } from "~/utils/guide";
-import { primeAnnualBgm, releasePrimedAnnualBgm } from "~/utils/annualBgm.client";
 
 const emit = defineEmits<{ navigate: [] }>();
 const navId = useId();
@@ -76,17 +75,7 @@ const goTo = async (path: string) => {
   if (!target || target === router.currentRoute.value.fullPath) {
     return;
   }
-  const enteringAnnual = path === "/account/version-summary";
-  if (enteringAnnual) void primeAnnualBgm();
-  try {
-    await navigateTo(target);
-  } finally {
-    if (enteringAnnual) {
-      window.setTimeout(() => {
-        if (!window.location.pathname.includes("/account/version-summary")) releasePrimedAnnualBgm();
-      }, 1000);
-    }
-  }
+  await navigateTo(target);
 };
 
 const isDeveloperReviewer = computed(
@@ -144,9 +133,6 @@ const groups = computed(() => [
       { key: "/tools/recommend", label: t("tools.recommend"), icon: "music" },
       { key: "/tools/progress", label: t("tools.progress"), icon: "trophy" },
       { key: "/tools/word-cloud", label: t("tools.wordCloud"), icon: "badge" },
-      ...(accountUser.value?.annualSummaryAccess
-        ? [{ key: "/account/version-summary", label: t("account.versionSummary"), icon: "trophy" }]
-        : [])
     ]
   },
   {
@@ -228,7 +214,6 @@ const activePath = computed(() => {
   if (normalizedPath.startsWith("/account/profile")) return "/account/profile";
   if (normalizedPath.startsWith("/account/songs")) return "/account/songs";
   if (normalizedPath.startsWith("/account/sync")) return "/account/sync";
-  if (normalizedPath.startsWith("/account/version-summary")) return "/account/version-summary";
   if (normalizedPath.startsWith("/account/developer/review")) return "/account/developer/review";
   if (normalizedPath.startsWith("/account/support/review")) return "/account/support/review";
   if (normalizedPath.startsWith("/account/developer")) return "/account/developer";

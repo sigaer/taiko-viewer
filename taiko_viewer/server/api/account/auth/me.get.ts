@@ -2,7 +2,6 @@ import {enabled as developerApiEnabled} from '../../../services/developer-api-v1
 import {setHeader,type H3Event} from 'h3';
 import {captureMyTaikoAdmission} from '../../../services/my-taiko/admission';
 import { getCurrentAccountSummary } from "~/server/utils/account";
-import { hasAccountAnnualSummaryAccess } from "~/server/services/account/annual-summary/access";
 import { getAccountTitlesMap } from "~/server/utils/account-titles";
 
 export default defineEventHandler(async (event:H3Event) => {
@@ -13,7 +12,7 @@ export default defineEventHandler(async (event:H3Event) => {
   return {
     authenticated: Boolean(user),
     user: user
-      ? { ...user, titles: titles?.get(user.id) || [], annualSummaryAccess: await hasAccountAnnualSummaryAccess(user.id), myTaikoReadModelAccess: Boolean(await captureMyTaikoAdmission(user.id)), developerApiV1Access: await developerApiEnabled() }
+      ? { ...user, titles: titles?.get(user.id) || [], annualSummaryAccess: false, myTaikoReadModelAccess: Boolean(await captureMyTaikoAdmission(user.id)), developerApiV1Access: await developerApiEnabled() }
       : null
   };
 });

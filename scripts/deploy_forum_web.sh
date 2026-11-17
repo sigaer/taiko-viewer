@@ -193,7 +193,6 @@ run_nuxt_build() {
   build_workspace="$BUILD_ROOT/workspace"
   mkdir -p "$build_workspace/taiko-forum"
   git archive --format=tar HEAD | tar -xf - -C "$build_workspace/taiko-forum"
-  cp -a "$ROOT_DIR/../schemas" "$build_workspace/schemas"
   build_web_dir="$build_workspace/taiko-forum/taiko_viewer"
   ln -s "$WEB_DIR/node_modules" "$build_web_dir/node_modules"
   local build_artifact="$build_web_dir/.output/server/index.mjs"

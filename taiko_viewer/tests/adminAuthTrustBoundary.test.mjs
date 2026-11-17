@@ -55,9 +55,6 @@ test("Taiko Admin authorization delegates authenticity to the trusted backend", 
   assert.doesNotMatch(authSource, /decodeJwtSegment|parseTaikoAdminToken/);
   assert.match(authSource, /\/taiko\/manage\/auth\/me/);
   assert.match(ugcSource, /requireModerator/);
-  const betaSource = await readProjectFile("server/services/annual-beta/admin.ts");
-  assert.match(betaSource, /await requireTaikoAdminSession\(event\)/);
-  assert.match(betaSource, /isAnnualReportOperator\(session.user.username\)/);
   const adminRoutes = (await readdir(new URL("server/api/admin", projectRoot), { recursive: true }))
     .filter((path) => path.endsWith(".ts"));
   for (const route of adminRoutes) {

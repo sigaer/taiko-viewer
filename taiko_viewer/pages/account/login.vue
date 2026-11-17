@@ -11,7 +11,6 @@ const apiFetch = useViewerApiFetch();
 const { accountUser, accountAuthError, fetchCurrentUser } = useAccountState();
 const { loadRememberedIdentifier, saveRememberedIdentifier } = useRememberedAccountIdentifier();
 const submitting = ref(false);
-const beta = useAnnualBeta();
 const form = reactive({
   identifier: "",
   password: "",
@@ -114,7 +113,7 @@ const submit = async () => {
   submitting.value = true; completionError.value = "";
   try {
     if (!authenticatedUserId.value) {
-      beta.track("auth_start", {auth_method: "login"});
+
       const result = await apiFetch<{user: {id: number}}>("/api/account/auth/login", {method: "POST", body: {identifier: form.identifier, password: form.password}});
       if (!authScope.current(ticket)) return;
       authenticatedUserId.value = result.user.id;

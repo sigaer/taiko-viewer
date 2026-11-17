@@ -120,7 +120,6 @@ type MyDonShowcasePayload = {
 
 const myDonTick = ref(0);
 const myDonErrored = ref(false);
-const beta = useAnnualBeta();
 const bindingInput = ref("");
 const preparing = ref(false);
 const confirming = ref(false);
@@ -141,7 +140,7 @@ const revealElement = (element: HTMLElement | null, focusTarget?: HTMLElement | 
 };
 
 const focusBindingForm = () => {
-  beta.track("binding_entry_click");
+
   revealElement(bindingCardRef.value, bindingCardRef.value);
   window.setTimeout(() => bindingInputRef.value?.focus?.(), 360);
 };
@@ -487,18 +486,6 @@ watch(bindingGeneration, (generation) => {
   }
 }, { flush: "sync" });
 onBeforeUnmount(() => { bindingDisposed = true; cancelBindingAction(); });
-
-let betaBindingObserver: IntersectionObserver | null = null;
-onMounted(()=>{
-  const stop=watch(()=>[profile.value?.pendingBinding?.taikoId,profile.value?.currentBinding?.id],async()=>{
-    await nextTick();betaBindingObserver?.disconnect();
-    betaBindingObserver=new IntersectionObserver(entries=>{for(const entry of entries){if(!entry.isIntersecting)continue;beta.track(entry.target.classList.contains('pending-box')?'binding_verification_instruction_view':'binding_entry_impression');betaBindingObserver?.unobserve(entry.target);}},{threshold:.5});
-    for(const selector of ['.bind-input-row','.pending-box']){const el=document.querySelector(selector);if(el)betaBindingObserver.observe(el);}
-  },{immediate:true});
-  betaBindingStop=stop;
-});
-let betaBindingStop: (()=>void)|null=null;
-onBeforeUnmount(()=>{betaBindingObserver?.disconnect();betaBindingStop?.();});
 
 // P2: 未绑定用户首屏要能直接看到「绑定鼓众广场 ID」这一步。
 const needsBindingOnboarding = computed(
@@ -887,8 +874,8 @@ const permanentlyDeleteManual = async (binding: ProfilePayload["bindings"][numbe
 
 const prepareBinding = async () => {
   if (!bindingInput.value.trim() || preparing.value) return;
-  beta.track("binding_start");
-  beta.track("binding_id_submitted");
+
+
   const action = beginBindingAction("prepare");
   try {
     const result = await apiFetch<{ message: string }>("/api/account/bindings/prepare", {
@@ -913,7 +900,7 @@ const prepareBinding = async () => {
 const confirmBinding = async (taikoId?: string | null) => {
   const target = taikoId || profile.value?.pendingBinding?.taikoId;
   if (!target || confirming.value) return;
-  beta.track("binding_verify_start");
+
   const action = beginBindingAction("confirm");
   try {
     await apiFetch("/api/account/bindings/confirm", {
@@ -1146,7 +1133,6 @@ const removeQqBinding = async () => {
         </div>
       </el-card>
 
-      <AnnualBetaContinue />
       <el-card v-if="needsBindingOnboarding" class="panel-card onboarding-card" role="region" :aria-label="copy.onboardTitle">
         <div class="onboarding-copy">
           <h3>{{ copy.onboardTitle }}</h3>
@@ -1172,7 +1158,7 @@ const removeQqBinding = async () => {
             />
             <label class="binding-field-label" for="binding-taiko-id">{{ copy.bindInputLabel }}</label>
             <div class="bind-input-row">
-              <el-input id="binding-taiko-id" ref="bindingInputRef" v-model="bindingInput" @focus="beta.track('binding_start')" :placeholder="copy.bindPlaceholder" />
+              <el-input id="binding-taiko-id" ref="bindingInputRef" v-model="bindingInput" :placeholder="copy.bindPlaceholder" />
               <el-button type="primary" :loading="preparing" @click="prepareBinding">{{ copy.startVerify }}</el-button>
             </div>
             <div v-if="profile.pendingBinding" ref="pendingBoxRef" class="pending-box" tabindex="-1">

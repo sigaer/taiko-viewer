@@ -14,7 +14,6 @@ export function installGoalSqlRuntime(db, runtime, { withProfile = false, withPe
   [new URL('server/services/content.ts',root).href,`export const getSongCatalog=async()=>[100,101,102].map(id=>({id,song_name:'SQL Song '+id,level_4:9,shelf_status:0}));export const getSongCoverUrl=id=>'/synthetic-cover/'+id;export const getRatingEntries=async()=>[];`],
   [new URL('server/services/account/personal.ts',root).href,`export const runGrowthPythonJson=async()=>{globalThis.__goalSqlRuntime.pythonCalls++;await globalThis.__goalSqlRuntime.onPython?.();return ({playerState:{dimensions:['accuracy_power','stamina','rhythm','speed','complex','big_song'].map(key=>({key,value:key==='accuracy_power'?9:10})),sampleCount:30,overallRating:10},todayPlan:{items:[100,101,102].map(songId=>({songId,level:4,title:'SQL Song '+songId,isUnplayed:false})),usedFallback:false}});};`],
   [new URL('server/services/growth-history/model-revision.ts',root).href,`export const getGrowthModelRevision=async()=> 'synthetic-domain-source';`],
-  [new URL('server/services/annual-beta/events.ts',root).href,`export const trackBetaServer=async()=>{};`]
  ]);
  if (withAccountSource) overrides.set(new URL('server/infrastructure/account/sync-worker.ts',root).href,`
   import {createAccountSyncWorkerRunner} from '${new URL('server/infrastructure/account/sync-worker-runner.ts',root).href}';

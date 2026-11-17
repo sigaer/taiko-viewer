@@ -1,7 +1,4 @@
-// Node module resolution hook so the test suite can load the real Nuxt aliases
-// (`~/...`) used by `utils/annualSummary.ts`. Without it the module can only be
-// checked through a hand-written replica, which is exactly how a silent
-// `calendarParts(new Date())` regression slipped through once already.
+// Resolve real Nuxt aliases for Node tests of shared Viewer modules.
 import { access } from "node:fs/promises";
 import { resolve as resolvePath } from "node:path";
 import { pathToFileURL } from "node:url";

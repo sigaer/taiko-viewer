@@ -5,7 +5,7 @@ import { GROWTH_RECENT_CURSOR_TABLE_SQL } from "../services/growth-recent/schema
 import type { RowDataPacket } from "mysql2/promise";
 import { getAccountDb } from "./account-db";
 import { CREATE_TABLES, MIGRATIONS, BIND_TABLE_CREATE_SQL } from "./account-schema-definition";
-import { BETA_TABLES, BETA_MIGRATIONS } from "../services/annual-beta/schema";
+import { BETA_TABLES, BETA_MIGRATIONS } from "./retired-annual-schema";
 const runMigration = async (statement: string) => {
   const db = getAccountDb();
   try {

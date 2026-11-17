@@ -1,0 +1,463 @@
+{
+  "baseline": "f9b39e640061663170b103a926f9b5774c4c8916",
+  "phase0": {
+    "accepted": false,
+    "normalBuildCompare": "PASS qa-3ba569909702",
+    "sampleBuildCompare": "FAIL 6 differences qa-19a84971dd1f",
+    "unitTests": 85,
+    "unitRun": "qa-f7f06191dd66",
+    "sampleUniqueChecks": 457,
+    "atomsChecks": 72,
+    "chartChecks": 350,
+    "fontRequests": 6,
+    "fontBytes": 135684,
+    "pageStates": 100,
+    "computedStylesIdentical": true,
+    "apiResponsesIdentical": true,
+    "strictPageComparison": "FAIL; differences also reproduce in same-version recapture and rollback",
+    "comparisonRuns": [
+      "qa-61b58539b57f",
+      "qa-32a7b3530466",
+      "qa-9ecee7f8ccce"
+    ]
+  },
+  "deployed": false,
+  "mergedMain": false,
+  "productionDataAccess": false,
+  "builds": {
+    "build-baseline": {
+      "label": "build-baseline",
+      "command": [
+        "/www/server/nvm/versions/node/v24.13.0/bin/npm",
+        "run",
+        "build"
+      ],
+      "cwd": "/var/tmp/viewer-task-build-recovery-20261117/baseline/checkout/taiko_viewer",
+      "cgroup": "/sys/fs/cgroup/development.slice/development-build.slice/taiko-qa-d9a1150668ba.service",
+      "runId": "qa-d9a1150668ba",
+      "sampleIntervalSeconds": 0.2,
+      "observedMemoryPeakBytes": 4272214016,
+      "observedRssSumPeakKiB": 4141112,
+      "memoryEvents": [
+        "low 0",
+        "high 0",
+        "max 0",
+        "oom 0",
+        "oom_kill 0"
+      ],
+      "durationSeconds": 166.499,
+      "exitCode": 0,
+      "childMaxRssKiB": 3969436,
+      "nitroEntryExists": true
+    },
+    "build-final": {
+      "label": "build-final",
+      "command": [
+        "/www/server/nvm/versions/node/v24.13.0/bin/npm",
+        "run",
+        "build"
+      ],
+      "cwd": "/var/tmp/viewer-task-build-recovery-20261117/final/checkout/taiko_viewer",
+      "cgroup": "/sys/fs/cgroup/development.slice/development-build.slice/taiko-qa-7303a32507fb.service",
+      "runId": "qa-7303a32507fb",
+      "sampleIntervalSeconds": 0.2,
+      "observedMemoryPeakBytes": 4269772800,
+      "observedRssSumPeakKiB": 4171600,
+      "memoryEvents": [
+        "low 0",
+        "high 0",
+        "max 0",
+        "oom 0",
+        "oom_kill 0"
+      ],
+      "durationSeconds": 169.639,
+      "exitCode": 0,
+      "childMaxRssKiB": 3957380,
+      "nitroEntryExists": true
+    },
+    "build-samples": {
+      "label": "build-samples",
+      "command": [
+        "/www/server/nvm/versions/node/v24.13.0/bin/npm",
+        "run",
+        "build"
+      ],
+      "cwd": "/var/tmp/viewer-task-build-recovery-20261117/final/checkout/taiko_viewer",
+      "cgroup": "/sys/fs/cgroup/development.slice/development-build.slice/taiko-qa-24652456955f.service",
+      "runId": "qa-24652456955f",
+      "sampleIntervalSeconds": 0.2,
+      "observedMemoryPeakBytes": 4272132096,
+      "observedRssSumPeakKiB": 4193140,
+      "memoryEvents": [
+        "low 0",
+        "high 0",
+        "max 0",
+        "oom 0",
+        "oom_kill 0"
+      ],
+      "durationSeconds": 179.035,
+      "exitCode": 0,
+      "childMaxRssKiB": 4062508,
+      "nitroEntryExists": true
+    },
+    "build-retired-final": {
+      "label": "build-retired-final",
+      "command": [
+        "/www/server/nvm/versions/node/v24.13.0/bin/npm",
+        "run",
+        "build"
+      ],
+      "cwd": "/var/tmp/viewer-task-infra-v2-20261117/checkout/taiko_viewer",
+      "cgroup": "/sys/fs/cgroup/development.slice/development-build.slice/taiko-qa-f42b9d4bec4b.service",
+      "runId": "qa-f42b9d4bec4b",
+      "sampleIntervalSeconds": 0.2,
+      "observedMemoryPeakBytes": 4270882816,
+      "observedRssSumPeakKiB": 4183952,
+      "memoryEvents": [
+        "low 0",
+        "high 0",
+        "max 0",
+        "oom 0",
+        "oom_kill 0"
+      ],
+      "durationSeconds": 151.024,
+      "exitCode": 0,
+      "childMaxRssKiB": 4068120,
+      "nitroEntryExists": true
+    }
+  },
+  "retirementRuntime": {
+    "database": "viewer1_security_test",
+    "privateDatadir": true,
+    "productionNetwork": false,
+    "results": [
+      {
+        "label": "retired sample HTTP",
+        "status": 404
+      },
+      {
+        "label": "retired real HTTPS login and Secure cookie",
+        "pass": true
+      },
+      {
+        "label": "retired requests",
+        "requests": [
+          {
+            "path": "/api/account/auth/me",
+            "status": 200,
+            "bytes": 390,
+            "sha256": "72e90312d7e3e7d769b2dbff9df14f1a1ce242a4a57485c7117b4e1b77e7f90f"
+          },
+          {
+            "path": "/api/account/profile",
+            "status": 200,
+            "bytes": 422,
+            "sha256": "43c31fe9cbf8929ee509e762fe62c377f36b7d54e1f589eaebb1e75593b253d4"
+          },
+          {
+            "path": "/api/forum/notifications",
+            "status": 200,
+            "bytes": 530,
+            "sha256": "5d144b46ccd529a76420acbcbc11b5dc2edd6c9d12829976bc1571cfd227d4c6"
+          },
+          {
+            "path": "/api/forum/threads/990881",
+            "status": 200,
+            "bytes": 912,
+            "sha256": "11c1db01debae29a84bf45bacb27953bbc0cc135fed7bef5617aee5651945cb5"
+          },
+          {
+            "path": "/api/admin/auth/me",
+            "status": 200,
+            "bytes": 128,
+            "sha256": "c6c6611512d851b058bf3d465a7a8b304a8aa1c9c31b915ca15b9af540f0b88a"
+          }
+        ]
+      },
+      {
+        "label": "retired PWA",
+        "registrations": [],
+        "caches": []
+      },
+      {
+        "label": "retired offline",
+        "manifest": 0,
+        "navigation": 0
+      },
+      {
+        "label": "retirement GET /annual",
+        "status": 410
+      },
+      {
+        "label": "retirement POST /annual",
+        "status": 410
+      },
+      {
+        "label": "retirement GET /ja/annual/share/synthetic",
+        "status": 410
+      },
+      {
+        "label": "retirement POST /ja/annual/share/synthetic",
+        "status": 410
+      },
+      {
+        "label": "retirement GET /account/version-summary",
+        "status": 410
+      },
+      {
+        "label": "retirement POST /account/version-summary",
+        "status": 410
+      },
+      {
+        "label": "retirement GET /api/annual/shares/synthetic",
+        "status": 410
+      },
+      {
+        "label": "retirement POST /api/annual/shares/synthetic",
+        "status": 410
+      },
+      {
+        "label": "retirement GET /api/account/annual-summaries/annual_2026/build",
+        "status": 410
+      },
+      {
+        "label": "retirement POST /api/account/annual-summaries/annual_2026/build",
+        "status": 410
+      },
+      {
+        "label": "retirement GET /api/admin/annual-beta/invites",
+        "status": 410
+      },
+      {
+        "label": "retirement POST /api/admin/annual-beta/invites",
+        "status": 410
+      },
+      {
+        "label": "retirement GET /api/internal/annual-posters/synthetic",
+        "status": 410
+      },
+      {
+        "label": "retirement POST /api/internal/annual-posters/synthetic",
+        "status": 410
+      },
+      {
+        "label": "retirement GET /api/taiko/internal/annual-card",
+        "status": 410
+      },
+      {
+        "label": "retirement POST /api/taiko/internal/annual-card",
+        "status": 410
+      },
+      {
+        "label": "earned reward retained",
+        "pass": true
+      }
+    ],
+    "resources": {
+      "sampleIntervalMs": 500,
+      "cgroupPeakBytes": 803139584,
+      "processTreeRssPeakKiB": 1190376,
+      "kernelMemoryPeakAvailable": false,
+      "events": [
+        "low 0",
+        "high 0",
+        "max 0",
+        "oom 0",
+        "oom_kill 0"
+      ]
+    },
+    "transport": "isolated HTTPS proxy with ephemeral local certificate",
+    "browserVersion": "149.0.7827.55"
+  },
+  "infrastructureTests": {
+    "unitRun": "qa-9dc7a68c796d",
+    "unitTests": 58,
+    "realAdmission": "qa-dbc5115200bb",
+    "realDev": "qa-4984566c9345",
+    "oidcAccountSql": "qa-e8d82e74af95",
+    "forumTitlesSql": "qa-29192f40dc98",
+    "retirementAccountState": "qa-520ed51617b3",
+    "retirementAccountStateTests": 58
+  },
+  "rawEvidenceRoot": "/home/sigaer/taiko/qa-vault/runs/qa-1160a6030e71/evidence/delivery/evidence",
+  "pwa": {
+    "database": "viewer1_security_test",
+    "privateDatadir": true,
+    "productionNetwork": false,
+    "results": [
+      {
+        "label": "baseline sample HTTP",
+        "status": 404
+      },
+      {
+        "label": "baseline PWA",
+        "registrations": [
+          {
+            "scope": "/",
+            "active": true
+          }
+        ],
+        "caches": [
+          {
+            "name": "workbox-precache-v2-http://127.0.0.1:35251/",
+            "urls": [
+              "/_nuxt/builds/latest.json",
+              "/_nuxt/builds/meta/5379b5ef-0cc9-49a5-b1e8-b77a3f96e5c9.json",
+              "/manifest.webmanifest"
+            ]
+          }
+        ]
+      },
+      {
+        "label": "baseline offline",
+        "manifest": 200,
+        "navigation": 0
+      },
+      {
+        "label": "final sample HTTP",
+        "status": 404
+      },
+      {
+        "label": "final PWA",
+        "registrations": [
+          {
+            "scope": "/",
+            "active": true
+          }
+        ],
+        "caches": [
+          {
+            "name": "workbox-precache-v2-http://127.0.0.1:35251/",
+            "urls": [
+              "/_nuxt/builds/latest.json",
+              "/_nuxt/builds/meta/87edff4a-8fc7-4f12-a2e5-745ec1c9f3af.json",
+              "/manifest.webmanifest"
+            ]
+          }
+        ]
+      },
+      {
+        "label": "final offline",
+        "manifest": 200,
+        "navigation": 0
+      },
+      {
+        "label": "retired sample HTTP",
+        "status": 404
+      },
+      {
+        "label": "retired PWA",
+        "registrations": [
+          {
+            "scope": "/",
+            "active": true
+          }
+        ],
+        "caches": [
+          {
+            "name": "workbox-precache-v2-http://127.0.0.1:35251/",
+            "urls": [
+              "/_nuxt/builds/latest.json",
+              "/_nuxt/builds/meta/2f6b0c9a-2e45-46b0-8748-22ed2ac49c4e.json",
+              "/manifest.webmanifest"
+            ]
+          }
+        ]
+      },
+      {
+        "label": "retired offline",
+        "manifest": 200,
+        "navigation": 0
+      },
+      {
+        "label": "rollback sample HTTP",
+        "status": 404
+      },
+      {
+        "label": "rollback PWA",
+        "registrations": [
+          {
+            "scope": "/",
+            "active": true
+          }
+        ],
+        "caches": [
+          {
+            "name": "workbox-precache-v2-http://127.0.0.1:35251/",
+            "urls": [
+              "/_nuxt/builds/latest.json",
+              "/_nuxt/builds/meta/5379b5ef-0cc9-49a5-b1e8-b77a3f96e5c9.json",
+              "/manifest.webmanifest"
+            ]
+          }
+        ]
+      },
+      {
+        "label": "rollback offline",
+        "manifest": 200,
+        "navigation": 0
+      }
+    ],
+    "resources": {
+      "sampleIntervalMs": 500,
+      "cgroupPeakBytes": 866222080,
+      "processTreeRssPeakKiB": 1237812,
+      "kernelMemoryPeakAvailable": false,
+      "events": [
+        "low 0",
+        "high 0",
+        "max 0",
+        "oom 0",
+        "oom_kill 0"
+      ]
+    },
+    "browserVersion": "149.0.7827.55"
+  },
+  "pwaRun": "qa-d479273600c5",
+  "archive": {
+    "run": "qa-1160a6030e71",
+    "files": 652,
+    "bytes": 70289601,
+    "manifest": "/home/sigaer/taiko/qa-vault/runs/qa-1160a6030e71/evidence/delivery/manifest.json"
+  },
+  "inventory": {
+    "run": "qa-e7f4129b41f4",
+    "existingPaths": 217,
+    "allocatedGiB": 11.9073257446,
+    "historicalDeletedBytes": 0,
+    "unknownOwnership": "BLOCKED_UNKNOWN_OWNER"
+  },
+  "cleanup": {
+    "apply": true,
+    "archiveVerifiedFiles": 652,
+    "freeBefore": 34004312064,
+    "targets": [
+      {
+        "path": "/var/tmp/viewer-task-build-recovery-20261117",
+        "allocatedBytes": 1082785792,
+        "references": [],
+        "status": "REMOVED_OWNED_ARCHIVED"
+      },
+      {
+        "path": "/var/tmp/viewer-task-infra-v2-20261117/checkout/taiko_viewer/.output",
+        "allocatedBytes": 112984064,
+        "references": [],
+        "status": "REMOVED_OWNED_ARCHIVED"
+      },
+      {
+        "path": "/var/tmp/viewer-task-infra-v2-20261117/checkout/taiko_viewer/.nuxt",
+        "allocatedBytes": 38985728,
+        "references": [],
+        "status": "REMOVED_OWNED_ARCHIVED"
+      }
+    ],
+    "freeAfter": 35239546880,
+    "allocatedRemoved": 1234755584
+  },
+  "finalRuntimeState": {
+    "leases": 0,
+    "runningQaUnits": 0,
+    "testListeners": 0,
+    "productionServicesModified": false
+  }
+}

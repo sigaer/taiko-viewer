@@ -20,7 +20,7 @@ test('isolated account title campaign rejects roster changes and grants once wit
   db=await pool.getConnection();
   const [[identity]]=await db.query('SELECT DATABASE() AS name');assert.match(identity.name,/_test$/);
   const {CREATE_TABLES}=await import('../server/utils/account-schema-definition.ts');
-  const {BETA_TABLES,BETA_MIGRATIONS}=await import('../server/services/annual-beta/schema.ts');
+  const {BETA_TABLES,BETA_MIGRATIONS}=await import('../server/utils/retired-annual-schema.ts');
   const {ACCOUNT_TITLE_TABLE_SQL}=await import('../server/services/account-titles/schema.ts');
   const {schemaRequirement,validateSchemaTables}=await import('../server/utils/account-schema-runtime.ts');
   const {readAccountTitles,ANNUAL_BETA_TITLE}=await import('../server/services/account-titles/repository.ts');

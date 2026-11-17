@@ -27,12 +27,11 @@ function fixture(route,configured='synthetic-service-key'){
  const handler=compile(source('server/api/taiko/internal/'+route+'.post.ts'),globals,{
   h3:{readBody:async event=>{state.bodyReads++;return event.body;},setHeader:()=>{}},
   '~/server/utils/account':business,'~/server/utils/account/manual':business,
-  '~/server/services/account/annual-summary/bot':business,
   '~/server/utils/rate-limit':{createMemoryRateLimiter:()=>()=>{state.limits++;}}
  }).default;
  return {state,ask:(headers={},body={action:'create',identityKey:'onebot_v11:12345'})=>handler({headers,body})};
 }
-for(const route of ['manual','annual-card']){
+for(const route of ['manual']){
  test(route+' rejects anonymous, developer/session impersonation and wrong service keys before body or effects',async()=>{
   for(const headers of [{},{authorization:'Bearer synthetic-developer'},{cookie:'synthetic-session'},
    {'x-taiko-bot-token':'wrong'},{'x-taiko-bot-token':'synthetic-service-kez'}]){
@@ -47,7 +46,7 @@ for(const route of ['manual','annual-card']){
  test(route+' configured service reaches only the intended business adapter',async()=>{
   const c=fixture(route);await c.ask({'x-taiko-bot-token':'synthetic-service-key'});
   assert.equal(c.state.bodyReads,1);assert.equal(c.state.effects.length,1);
-  assert.equal(c.state.effects[0].name,route==='manual'?'createManualAccount':'getBotAnnualCard');
+  assert.equal(c.state.effects[0].name,'createManualAccount');
  });
 }
 test('authenticated manual unknown action cannot mutate business state',async()=>{

@@ -555,7 +555,7 @@ const copyIssuedScoreToken = async () => {
 
 <template>
   <div class="sync-page">
-    <AnnualBetaContinue />
+
     <section v-if="goalEvaluation || route.query.from === 'goal'" class="panel-card goal-sync-result" aria-live="polite">
         <h2>{{ goalCopy.title }}</h2>
         <p v-if="goalContextChanged" role="alert">{{ goalCopy.changed }}</p>

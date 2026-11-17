@@ -25,7 +25,7 @@ export async function bindingVerificationBrowser(c,other,nativeFetch) {
  globalThis.useState=(key,init)=>{if(!state.has(key))state.set(key,ref(init()));return state.get(key)};
  globalThis.$fetch=ofetch;globalThis.useViewerApiFetch=useViewerApiFetch;
  globalThis.useI18n=()=>({locale:ref('zh'),t:key=>key});globalThis.useLocalePath=()=>path=>path;
- globalThis.useViewerDateTime=()=>({formatDateTime:value=>value||''});globalThis.definePageMeta=()=>{};globalThis.useViewerSeo=()=>{};globalThis.useAnnualBeta=()=>({track(){}});
+ globalThis.useViewerDateTime=()=>({formatDateTime:value=>value||''});globalThis.definePageMeta=()=>{};globalThis.useViewerSeo=()=>{};
  const fetchCurrentUser=async()=>{user.value=(await ofetch('/api/account/auth/me')).user;return user.value};
  globalThis.useAccountState=()=>({accountUser:user,fetchCurrentUser});
  globalThis.useAsyncData=(key,handler,options)=>{
@@ -33,7 +33,7 @@ export async function bindingVerificationBrowser(c,other,nativeFetch) {
   entry.refresh=async()=>{const serial=++entry.serial;entry.pending.value=true;try{if(key==='account-profile')profileReads++;const value=await handler();if(serial===entry.serial)entry.data.value=value}catch(e){if(serial===entry.serial)entry.error.value=e}finally{if(serial===entry.serial)entry.pending.value=false}};
   onMounted(entry.refresh);return entry;
  };
- function mount(){app=vueApp({render:()=>h(Suspense,null,{default:()=>h(Page)})});for(const [name,component] of Object.entries({ElButton,ElInput,ElCard,ElAvatar,ElAlert,ElEmpty,ElOption,ElRadioButton,ElRadioGroup,ElSelect,ElSkeleton,ElUpload}))app.component(name,component);for(const name of ['AnnualBetaContinue','AccountAvatarCropperDialog'])app.component(name,{render:()=>null});app.component('NuxtLink',{props:['to'],setup:props=>()=>h('a',{href:props.to})});app.mount('#app')}
+ function mount(){app=vueApp({render:()=>h(Suspense,null,{default:()=>h(Page)})});for(const [name,component] of Object.entries({ElButton,ElInput,ElCard,ElAvatar,ElAlert,ElEmpty,ElOption,ElRadioButton,ElRadioGroup,ElSelect,ElSkeleton,ElUpload}))app.component(name,component);for(const name of ['AccountAvatarCropperDialog'])app.component(name,{render:()=>null});app.component('NuxtLink',{props:['to'],setup:props=>()=>h('a',{href:props.to})});app.mount('#app')}
  window.qa={mount,leave(){app.unmount();ElMessage.closeAll()},async refresh(){await asyncState.get('account-profile').refresh()},async identity(){await fetchCurrentUser();await this.refresh()},generation(){return state.get('account-binding-generation')?.value||0},reads(){return profileReads},clearMessages(){ElMessage.closeAll()}};mount();
  `;
  let script;

@@ -1,4 +1,3 @@
-import {trackBetaServer} from "~/server/services/annual-beta/events";
 import { readBody } from "h3";
 import { registerAccount } from "~/server/utils/account";
 
@@ -12,5 +11,5 @@ export default defineEventHandler(async (event) => {
     code: body?.code
   });
   return { ok: true, userId: result.userId };
-  }catch(error){await trackBetaServer(event,null,"auth_failure",{reason:"register_failed"});throw error;}
+  }catch(error){throw error;}
 });

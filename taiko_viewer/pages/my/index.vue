@@ -40,9 +40,6 @@ const linkGroups = computed(() => [
     { path: "/tools/word-cloud", label: "tools.wordCloud", icon: "M7 18H6a4 4 0 0 1-.7-7.9 7 7 0 0 1 13.4 0A4 4 0 0 1 18 18h-1 M9 18h6m-5-4h4" }
   ] }
 ]);
-const annualLink = computed(() => accountUser.value?.annualSummaryAccess
-  ? { path: '/account/version-summary', label: 'account.versionSummary' }
-  : null);
 const useDefaultAvatar = (event: Event) => {
   const image = event.target as HTMLImageElement;
   if (image.getAttribute('src') !== '/default-avatar.svg') image.src = '/default-avatar.svg';
@@ -84,11 +81,6 @@ const useDefaultAvatar = (event: Event) => {
         </div>
       </nav>
     </div>
-    <NuxtLink v-if="annualLink" :to="localePath(annualLink.path)" class="my-annual">
-      <svg class="my-annual-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v17H5z M8 2v4m8-4v4 M8 10h8m-8 4h5" /></svg>
-      <span>{{ t(annualLink.label) }}</span>
-      <svg class="my-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
-    </NuxtLink>
   </div>
 </template>
 

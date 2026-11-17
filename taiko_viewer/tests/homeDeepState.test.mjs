@@ -12,18 +12,18 @@ test('actual My page rechecks prerendered guest cache and recovers the active se
  const page=await mounted.model;await settle();assert.equal(auth.accountAuthStatus.value,'authenticated');assert.equal(page.accountUser.value.id,7);
  assert.equal(page.linkGroups.value.flatMap(g=>g.items).length,9);assert.equal(requests.length,0);
 }));
-test('actual My navigation reacts to login, annual access grants/revocation and logout',async()=>fixture(async({auth,states,load,attach})=>{
+test('actual My navigation reacts to login/logout and ignores retired annual access flags',async()=>fixture(async({auth,states,load,attach})=>{
  const View=await load('pages/my/index.vue',true);const page=await attach(()=>View.setup({}, {expose(){}})).model;
  const paths=()=>page.linkGroups.value.flatMap(group=>group.items.map(item=>item.path));
  const original=['/account/songs','/my/growth','/tools/recommend','/my/weekly','/tools/b30','/tools/trend','/tools/progress','/tools/word-cloud'];
- assert.deepEqual(paths(),['/account/sync',...original]);assert.equal(page.annualLink.value,null);
+ assert.deepEqual(paths(),['/account/sync',...original]);assert.equal(page.annualLink,undefined);
  states.get('account-user').value.annualSummaryAccess=true;
- assert.deepEqual(paths(),['/account/sync',...original]);assert.equal(page.annualLink.value.path,'/account/version-summary');
+ assert.deepEqual(paths(),['/account/sync',...original]);assert.equal(page.annualLink,undefined);
  states.get('account-user').value.annualSummaryAccess=false;
- assert.deepEqual(paths(),['/account/sync',...original]);assert.equal(page.annualLink.value,null);
- auth.clearResolvedAccountUser();assert.deepEqual(paths(),original);assert.equal(page.annualLink.value,null);
+ assert.deepEqual(paths(),['/account/sync',...original]);assert.equal(page.annualLink,undefined);
+ auth.clearResolvedAccountUser();assert.deepEqual(paths(),original);assert.equal(page.annualLink,undefined);
  states.get('account-user').value={id:2,annualSummaryAccess:true};
- assert.deepEqual(paths(),['/account/sync',...original]);assert.equal(page.annualLink.value.path,'/account/version-summary');
+ assert.deepEqual(paths(),['/account/sync',...original]);assert.equal(page.annualLink,undefined);
 }));
 test('actual My template never mounts Overview or starts its read on login, access grants or account switches',async()=>fixture(async({auth,states,load,mount,controlled,requests})=>{
  let reads=0,unmounts=0;
