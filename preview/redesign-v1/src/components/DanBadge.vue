@@ -2,6 +2,7 @@
 import { computed } from 'vue'
 import { danTier } from './identity'
 import { L } from '../store'
+import { useAuthentic } from './assets'
 
 /**
  * DanBadge —— 段位徽章（V6）。紧凑的文字徽章，档次颜色与 PlayerAvatar 的鼓缘一致：
@@ -11,9 +12,13 @@ import { L } from '../store'
  *   dan  string  段位文字，如「九段」「达人」；为空或「—」时不渲染
  *
  * 例：<DanBadge :dan="user.dan" />
+ *
+ * 真实素材模式（C+，docs/19 G7）：不渲染。正式站的论坛与账号数据里都查不到段位字段的来源；
+ * 模拟数据里的 dan 字段保留，只是不显示（缺口记在风险清单）。段位道场页不用这个组件，保留。
  */
 const props = defineProps({ dan: { type: String, default: '' } })
-const tier = computed(() => danTier(props.dan))
+const authentic = useAuthentic()
+const tier = computed(() => (authentic.value ? null : danTier(props.dan)))
 </script>
 
 <template>

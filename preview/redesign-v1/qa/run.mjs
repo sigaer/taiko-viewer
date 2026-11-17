@@ -16,15 +16,19 @@ import { FLOWS } from './flows/index.mjs'
 import { ROOT, OUT_DIR, SHOTS_DIR, ensureDir, openLog, closeLog, log, dirSize, mb, withTimeout } from './lib/util.mjs'
 
 function parseArgs(argv) {
-  const a = { suite: 'all', base: null, quick: false, v13: false, variant: 'a', only: null, maxMinutes: 25, build: true, buildRetries: 3, buildWait: 60, flows: null, port: 4311, concurrency: 2 }
+  const a = { suite: 'all', base: null, quick: false, v13: false, variant: 'c', only: null, maxMinutes: 25, build: true, buildRetries: 3, buildWait: 60, flows: null, port: 4311, concurrency: 2 }
   for (let i = 0; i < argv.length; i++) {
     const k = argv[i]
     const v = () => argv[++i]
     if (k === '--suite') a.suite = v()
     else if (k === '--base') a.base = v()
     else if (k === '--quick') a.quick = true
-    else if (k === '--variant') a.variant = v() // perf suite only: run the budgets on variant b / c
-    else if (k === '--v13') a.v13 = true // V1.3 Phase A targeted checks: four pages, variants B / C, data=real
+    else if (k === '--variant') a.variant = v() // perf suite only; default 'c' (C+, the Phase B default). 'a' / 'b' measure the history variants
+    else if (k === '--v13') a.v13 = true
+    else if (k === '--blocked') {
+      a.blocked = true // G12：缺失素材用例，屏蔽曲绘域名（browser.mjs 读 QA_BLOCK_COVERS）
+      process.env.QA_BLOCK_COVERS = '1'
+    } // V1.3 Phase A targeted checks: four pages, variants B / C, data=real
     else if (k === '--only') a.only = v()
     else if (k === '--max-minutes') a.maxMinutes = Number(v())
     else if (k === '--no-build') a.build = false
@@ -120,7 +124,7 @@ async function main() {
   const base = results.target.url
   log(`target: ${results.target.kind} ${base}`)
 
-  const { cases } = await buildMatrix({ quick: args.quick, only: args.only, v13: args.v13 })
+  const { cases } = await buildMatrix({ quick: args.quick, only: args.only, v13: args.v13, blocked: args.blocked })
   const full = await buildMatrix({ quick: false })
   results.plannedCases = cases.length
   results.fullMatrixCases = full.cases.length
@@ -154,7 +158,8 @@ async function main() {
     if (doChecks) {
       verified.push('per page: console errors / pageerror / failed requests, horizontal overflow + offending elements, occlusion of ≤60 interactive elements, undeclared truncation, contrast (≤400 text nodes), a11y basics (names, labels, dup ids, main, html[lang])')
       verified.push('phone viewports: tap targets with ±22px elementFromPoint probes; 1440 & 390: 20-stop Tab focus visibility walk')
-      if (!overDeadline()) results.special = { themeFlash: await themeFlash(browser, base, findings, verified), reducedMotion: await reducedMotion(browser, base, findings, verified) }
+      // --blocked 只跑缺失素材的页面用例；主题首屏与减少动效的专项检查不属于这组
+      if (!overDeadline() && !args.blocked) results.special = { themeFlash: await themeFlash(browser, base, findings, verified), reducedMotion: await reducedMotion(browser, base, findings, verified) }
     }
   }
 
@@ -180,7 +185,7 @@ async function main() {
       rapid = r.metrics || null
     }
     results.perf = await runPerf(browser, base, { findings, rapidNavMetrics: rapid, verified, dataset: 'full', variant: args.variant })
-    if (!overDeadline()) results.perfDemo = await runPerf(browser, base, { findings, rapidNavMetrics: null, verified, dataset: 'demo' })
+    if (!overDeadline()) results.perfDemo = await runPerf(browser, base, { findings, rapidNavMetrics: null, verified, dataset: 'demo', variant: args.variant })
     if (!/production/.test(results.target.kind)) results.perf.notes.push(`measured against ${results.target.kind}, not the production build — budgets not meaningful`)
   }
 }

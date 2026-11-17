@@ -257,7 +257,7 @@ const ENTRIES = [
 }
 .songlink:hover :deep(.t),
 .nrow:hover :deep(.t) {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .res td {
   white-space: nowrap;

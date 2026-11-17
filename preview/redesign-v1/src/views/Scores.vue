@@ -285,13 +285,13 @@ function remove() {
             <b class="title-1l mt" :title="songTitle(songById[s.songId])">{{ songTitle(songById[s.songId]) }}</b>
             <span class="row" style="gap: 8px; margin-top: 4px">
               <Diff :d="s.d" :star="s.star" short />
-              <span class="t-caption num">{{ s.good }} / {{ s.ok }} / {{ s.ng }}</span>
+              <span class="t-caption num mjudge">{{ s.good }} / {{ s.ok }} / {{ s.ng }}</span>
               <Icon v-if="s.locked" name="lock" :size="12" />
             </span>
           </span>
           <span class="mright">
             <b class="num">{{ fmt(s.score) }}</b>
-            <span class="row" style="gap: 6px"><Crown :v="s.crown" size="sm" /><Rank :v="s.rank" /></span>
+            <span class="row" style="gap: 6px"><Crown :v="s.crown" size="sm" /><Rank :v="s.rank" compact /></span>
           </span>
         </button>
       </VirtualList>
@@ -488,12 +488,12 @@ tr.is-locked .lockbtn {
   opacity: 1;
 }
 tr.is-locked .lockbtn {
-  color: var(--roll-ink);
+  color: var(--lock-ink);
 }
 .lk {
   margin-right: 4px;
   vertical-align: middle;
-  color: var(--roll-ink);
+  color: var(--lock-ink);
 }
 @media (hover: none) {
   .ob {
@@ -569,7 +569,7 @@ tr.is-locked .lockbtn {
 .check input {
   width: 16px;
   height: 16px;
-  accent-color: var(--don);
+  accent-color: var(--accent);
 }
 @media (max-width: 767px) {
   .summary {
@@ -642,6 +642,13 @@ tr.is-locked .lockbtn {
   /* 真实素材的评价图按 28px 绘制在 24px 占位里：四周各留 2px，不贴右缘、不碰王冠与分数（版本 A 没有 .arank） */
   .mright :deep(.arank) {
     margin: 2px;
+  }
+  /* Stage 3 R2：375 宽以下与 390 同一种排法（评价图标 + 两字名称、王冠在旁、分数与曲名同一行），
+     腾出的宽度来自隐藏判定三元组（816 / 0 / 0）；判定数在 ≥ 375 与歌曲详情里仍可见 */
+  @media (max-width: 374px) {
+    .mjudge {
+      display: none;
+    }
   }
 }
 </style>

@@ -257,7 +257,7 @@ function dayLabel(d) {
   font-weight: 700;
 }
 .deltas li.top .dbar i {
-  background: var(--ka);
+  background: var(--series-focus);
 }
 .deltas b {
   text-align: right;

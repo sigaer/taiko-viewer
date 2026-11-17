@@ -441,7 +441,7 @@ const chars = computed(() => form.blocks.reduce((n, b) => n + (b.text?.length ||
   box-shadow: none;
   outline: none;
   border-radius: 0;
-  border-left-color: var(--ka);
+  border-left-color: var(--input-focus-line);
   padding-left: 12px;
 }
 .imgblock {
@@ -479,7 +479,7 @@ const chars = computed(() => form.blocks.reduce((n, b) => n + (b.text?.length ||
   border-radius: var(--ctl-radius);
 }
 .tagbox:focus-within {
-  border-color: var(--ka);
+  border-color: var(--input-focus-line);
   box-shadow: var(--focus);
 }
 .tagbox .chip button {
@@ -546,7 +546,7 @@ const chars = computed(() => form.blocks.reduce((n, b) => n + (b.text?.length ||
 }
 .sopt.on {
   background: var(--bg-sunk);
-  box-shadow: inset 3px 0 0 var(--ka);
+  box-shadow: inset 3px 0 0 var(--row-sel-line);
 }
 .empty,
 .more {

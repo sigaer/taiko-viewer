@@ -240,8 +240,8 @@ function go(to) {
   color: var(--ok);
 }
 .result.warn .mark {
-  background: var(--roll-wash);
-  color: var(--roll-ink);
+  background: var(--warn-wash);
+  color: var(--warn);
 }
 .result.bad .mark {
   background: var(--surface);

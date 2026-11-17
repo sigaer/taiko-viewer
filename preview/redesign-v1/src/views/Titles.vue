@@ -5,70 +5,51 @@ import Cover from '../components/Cover.vue'
 import EmptyLane from '../components/EmptyLane.vue'
 import TitlePlate from '../components/TitlePlate.vue'
 import { songById, users, normalize } from '../mock/data'
+import { TITLE_CATALOG, TITLE_REQ, TITLE_SCOPE } from '../mock/titles'
 import { L, isReady, songTitle } from '../store'
 import { useQueryState } from '../routeState'
 
-const CATS = [
-  { key: 'dan', zh: '段位', ja: '段位' },
-  { key: 'event', zh: '活动', ja: 'イベント' },
-  { key: 'achv', zh: '成就', ja: '実績' },
-  { key: 'custom', zh: '自定义', ja: 'カスタム' },
-]
-const RARITY = {
-  common: ['普通', 'ノーマル'],
-  rare: ['稀有', 'レア'],
-  limited: ['期间限定', '期間限定'],
-  rainbow: ['虹', '虹'],
-}
-const TITLES = [
-  { id: 1, name: '精度调律师', ja: '精度の調律師', cat: 'achv', rarity: 'rare', owned: true, using: true, how: '累计 100 张谱面取得全良', howJa: '累計 100 譜面で全良を達成' },
-  { id: 2, name: '九段', ja: '九段', cat: 'dan', rarity: 'common', owned: true, how: '通过虹 2026 段位道场九段', howJa: '虹 2026 段位道場 九段に合格' },
-  { id: 3, name: '十段', ja: '十段', cat: 'dan', rarity: 'rare', owned: false, how: '通过虹 2026 段位道场十段', howJa: '虹 2026 段位道場 十段に合格' },
-  { id: 4, name: '达人', ja: '達人', cat: 'dan', rarity: 'rainbow', owned: false, how: '通过虹 2026 段位道场达人', howJa: '虹 2026 段位道場 達人に合格' },
-  { id: 5, name: '金合格的证明', ja: '金合格の証', cat: 'dan', rarity: 'rare', owned: true, how: '任意段位取得金合格', howJa: 'いずれかの段位で金合格' },
-  { id: 6, name: '全良猎人', ja: '全良ハンター', cat: 'achv', rarity: 'rainbow', owned: false, how: '累计 500 张谱面取得全良', howJa: '累計 500 譜面で全良を達成' },
-  { id: 7, name: '连打之鬼', ja: '連打の鬼', cat: 'achv', rarity: 'rare', owned: false, how: '单曲连打数达到 300', howJa: '1 曲で連打数 300 に到達' },
-  { id: 8, name: '体力怪兽', ja: '体力モンスター', cat: 'achv', rarity: 'common', owned: true, how: '单日游玩 60 首', howJa: '1 日に 60 曲プレイ' },
-  { id: 9, name: '节奏旅人', ja: 'リズムの旅人', cat: 'achv', rarity: 'common', owned: true, how: '游玩过全部 8 个流派的曲目', howJa: '全 8 ジャンルの楽曲をプレイ' },
-  { id: 10, name: '太鼓新人', ja: '太鼓ルーキー', cat: 'achv', rarity: 'common', owned: true, how: '完成第一次游玩', howJa: 'はじめてプレイする' },
-  { id: 11, name: '2026 秋季挑战者', ja: '2026 秋の挑戦者', cat: 'event', rarity: 'limited', owned: true, how: '参加 2026 秋季线上段位挑战赛', howJa: '2026 秋季オンライン段位チャレンジに参加' },
-  { id: 12, name: '虹色的一年', ja: '虹色の一年', cat: 'event', rarity: 'rainbow', owned: false, how: '生成虹 2026 太鼓回顾，12 月 1 日起', howJa: '虹 2026 ふりかえりを作成（12月1日から）' },
-  { id: 13, name: '新曲尝鲜', ja: '新曲いちばん乗り', cat: 'event', rarity: 'limited', owned: false, how: '新曲上线 7 天内通关虹 2026 第三期任意一首', howJa: '虹 2026 第 3 弾の新曲を公開 7 日以内にクリア' },
-  { id: 14, name: '年糕不加糖', ja: '年糕不加糖', cat: 'custom', rarity: 'common', owned: true, how: '在鼓众广场用称号券自己设定', howJa: '称号チケットで自分で設定' },
-]
+// G8：去掉自造的「稀有 / 限定 / 虹」分类；按正式数据的两个维度分组：达成类型 × 难度范围（mock/titles.js）
+const TITLES = TITLE_CATALOG
 
-// R2：关键词、分类、只看已获得写进地址
+// R2：关键词、达成类型、难度范围、只看已获得写进地址
 const f = useQueryState({
   q: { type: 'string', default: '', debounce: 250 },
-  cat: { type: 'string', default: '', values: ['', ...CATS.map((c) => c.key)] },
+  req: { type: 'string', default: '', values: ['', ...TITLE_REQ.map((c) => c.key)] },
+  scope: { type: 'string', default: '', values: ['', ...TITLE_SCOPE.map((c) => c.key)] },
   owned: { type: 'boolean', default: false },
 })
-const CAT_N = Object.fromEntries(CATS.map((c) => [c.key, TITLES.filter((t) => t.cat === c.key).length]))
+const REQ_N = Object.fromEntries(TITLE_REQ.map((c) => [c.key, TITLES.filter((t) => t.req === c.key).length]))
+const SCOPES = TITLE_SCOPE.filter((c) => TITLES.some((t) => t.scope === c.key))
+const SCOPE_N = Object.fromEntries(SCOPES.map((c) => [c.key, TITLES.filter((t) => t.scope === c.key).length]))
 const ownedCount = TITLES.filter((t) => t.owned).length
-const HAY = new Map(TITLES.map((t) => [t.id, [t.name, t.ja, t.how, t.howJa].map(normalize).join('|')]))
+const HAY = new Map(TITLES.map((t) => [t.id, [t.name, t.how].map(normalize).join('|')]))
 const list = computed(() => {
   const terms = f.q.trim().split(/\s+/).map(normalize).filter(Boolean)
   return TITLES.filter((t) => {
     if (terms.length && !terms.every((w) => HAY.get(t.id).includes(w))) return false
-    if (f.cat && t.cat !== f.cat) return false
+    if (f.req && t.req !== f.req) return false
+    if (f.scope && t.scope !== f.scope) return false
     if (f.owned && isReady.value && !t.owned) return false
     return true
   })
 })
-const filtered = computed(() => !!f.q.trim() || !!f.cat || f.owned)
+const filtered = computed(() => !!f.q.trim() || !!f.req || !!f.scope || f.owned)
 function reset() {
   f.q = ''
-  f.cat = ''
+  f.req = ''
+  f.scope = ''
   f.owned = false
 }
-const catOf = (k) => CATS.find((c) => c.key === k)
+const reqOf = (k) => TITLE_REQ.find((c) => c.key === k)
+const scopeOf = (k) => TITLE_SCOPE.find((c) => c.key === k)
 
 // 别名修改日志：最近 5 条
 const ALIAS_LOG = [
   { id: 1, songId: 615, op: 'add', alias: '天狗', by: 'hayate', ago: '2 小时前', agoJa: '2 時間前' },
-  { id: 2, songId: 233, op: 'add', alias: '千本', by: 'uta', ago: '昨天', agoJa: '昨日' },
-  { id: 3, songId: 960, op: 'remove', alias: '幽玄', by: 'sakura', ago: '2 天前', agoJa: '2 日前' },
-  { id: 4, songId: 512, op: 'add', alias: '骑士之夜', by: 'kumo', ago: '3 天前', agoJa: '3 日前' },
+  { id: 2, songId: 413, op: 'add', alias: 'badapple', by: 'uta', ago: '昨天', agoJa: '昨日' },
+  { id: 3, songId: 504, op: 'remove', alias: 'abyss', by: 'sakura', ago: '2 天前', agoJa: '2 日前' },
+  { id: 4, songId: 1308, op: 'add', alias: 'gigalo', by: 'kumo', ago: '3 天前', agoJa: '3 日前' },
   { id: 5, songId: 179, op: 'add', alias: '打工两千', by: 'rin', ago: '5 天前', agoJa: '5 日前' },
 ]
 </script>
@@ -85,29 +66,34 @@ const ALIAS_LOG = [
       </p>
     </div>
 
-    <div class="filters" role="group" :aria-label="L('筛选', '絞り込み')">
-      <button class="chip" :aria-pressed="!f.cat" @click="f.cat = ''">{{ L('全部', 'すべて') }}<span class="num n">{{ TITLES.length }}</span></button>
-      <button v-for="c in CATS" :key="c.key" class="chip" :aria-pressed="f.cat === c.key" @click="f.cat = f.cat === c.key ? '' : c.key">
-        {{ L(c.zh, c.ja) }}<span class="num n">{{ CAT_N[c.key] }}</span>
+    <div class="filters" role="group" :aria-label="L('达成类型', '達成条件')">
+      <button class="chip" :aria-pressed="!f.req" @click="f.req = ''">{{ L('全部', 'すべて') }}<span class="num n">{{ TITLES.length }}</span></button>
+      <button v-for="c in TITLE_REQ" :key="c.key" class="chip" :aria-pressed="f.req === c.key" @click="f.req = f.req === c.key ? '' : c.key">
+        {{ L(c.zh, c.ja) }}<span class="num n">{{ REQ_N[c.key] }}</span>
       </button>
       <template v-if="isReady">
         <span class="sep" aria-hidden="true" />
         <button class="chip" :aria-pressed="f.owned" @click="f.owned = !f.owned">{{ L('只看已获得', '獲得済みのみ') }}</button>
       </template>
     </div>
+    <div class="filters scopes" role="group" :aria-label="L('难度范围', '難易度')">
+      <button class="chip" :aria-pressed="!f.scope" @click="f.scope = ''">{{ L('所有难度', 'すべての難易度') }}</button>
+      <button v-for="c in SCOPES" :key="c.key" class="chip" :aria-pressed="f.scope === c.key" @click="f.scope = f.scope === c.key ? '' : c.key">
+        {{ L(c.zh, c.ja) }}<span class="num n">{{ SCOPE_N[c.key] }}</span>
+      </button>
+    </div>
 
     <ul v-if="list.length" class="tlist">
       <li v-for="t in list" :key="t.id" :class="{ dim: isReady && !t.owned }">
         <div class="grow">
           <p class="name">
-            <TitlePlate :text="L(t.name, t.ja)" :rare="t.rarity !== 'common'" />
-            <span class="tag">{{ L(catOf(t.cat).zh, catOf(t.cat).ja) }}</span>
-            <span v-if="isReady && t.using" class="tag tag-roll">{{ L('使用中', '使用中') }}</span>
+            <TitlePlate :text="t.name" :game="{ name: t.name, plate: t.plate }" form="plate" />
+            <span class="tag">{{ L(reqOf(t.req).zh, reqOf(t.req).ja) }} · {{ L(scopeOf(t.scope).zh, scopeOf(t.scope).ja) }}</span>
+            <span v-if="isReady && t.using" class="tag tag-info">{{ L('使用中', '使用中') }}</span>
           </p>
-          <p class="t-small how">{{ L(t.how, t.howJa) }}</p>
+          <p class="t-small how">{{ t.how }}</p>
         </div>
         <div class="state">
-          <span class="t-caption">{{ L(...RARITY[t.rarity]) }}</span>
           <template v-if="isReady">
             <span v-if="t.owned" class="own yes"><Icon name="check" :size="14" />{{ L('已获得', '獲得済み') }}</span>
             <span v-else class="own">{{ L('未获得', '未獲得') }}</span>
@@ -177,6 +163,9 @@ const ALIAS_LOG = [
 .owned-sum b {
   font-size: var(--fs-22);
   color: var(--ink);
+}
+.filters.scopes {
+  margin-top: -8px;
 }
 .filters {
   display: flex;
@@ -279,7 +268,7 @@ const ALIAS_LOG = [
 }
 .a-song:hover,
 .a-by:hover {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .a-change {
   display: flex;

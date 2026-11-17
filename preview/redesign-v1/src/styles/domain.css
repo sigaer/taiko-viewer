@@ -375,6 +375,7 @@
 /* ---------- 真实素材：难度 / 王冠 / 评价（data-assets="authentic"，docs/16 A2–A4）----------
    素材原样显示：不用滤镜、混合模式、遮罩或透明度改色；容器中性，颜色由素材自己表现。 */
 .adiff {
+  position: relative; /* 读屏文字（.sr-only，绝对定位）留在徽章里，不在横滑容器外撑出页面 */
   display: inline-flex;
   align-items: center;
   gap: 4px;
@@ -425,6 +426,10 @@
   color: var(--ink-3);
   font-size: var(--fs-14);
   line-height: 1;
+}
+.acrown picture,
+.arank picture {
+  display: contents;
 }
 .acrown img {
   width: 100%;
@@ -793,7 +798,7 @@ a.lamp.big:hover {
 /* ---------- 判定条（良 / 可 / 不可） ---------- */
 .judge {
   display: flex;
-  height: 8px;
+  height: var(--judge-h);
   border-radius: var(--r-xs);
   overflow: hidden;
   background: var(--bg-sunk);
@@ -836,10 +841,10 @@ a.lamp.big:hover {
   font-weight: 700;
 }
 .role.moderator {
-  background: var(--ka-wash);
-  color: var(--ka-ink);
+  background: var(--role-mod-bg);
+  color: var(--role-mod-ink);
 }
 .role.admin {
-  background: var(--don-wash);
-  color: var(--don-ink);
+  background: var(--role-admin-bg);
+  color: var(--role-admin-ink);
 }

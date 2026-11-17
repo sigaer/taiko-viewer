@@ -265,8 +265,8 @@ function download() {
 }
 .drop:hover,
 .drop.over {
-  border-color: var(--ka);
-  background: color-mix(in srgb, var(--ka) 7%, var(--surface));
+  border-color: var(--input-focus-line);
+  background: var(--row-sel-bg);
 }
 .drop:focus-visible {
   border-radius: var(--r-panel);
@@ -364,7 +364,7 @@ function download() {
   white-space: nowrap;
 }
 .stat.main .v {
-  color: var(--don-ink);
+  color: var(--emph-num);
 }
 .radar {
   display: grid;

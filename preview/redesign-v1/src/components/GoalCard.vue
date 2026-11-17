@@ -78,7 +78,7 @@ const dim = computed(() => DIMS.find((d) => d.key === props.goal.dim))
   display: block;
   font-size: var(--fs-13);
   font-weight: 700;
-  color: var(--don-ink);
+  color: var(--emph-num); /* C+ G2：teal 下不用红色文字 */
 }
 .t {
   display: block;
@@ -136,7 +136,7 @@ const dim = computed(() => DIMS.find((d) => d.key === props.goal.dim))
   box-shadow: inset 0 0 0 3px var(--surface), inset 0 0 0 4px var(--line-strong);
 }
 .target b {
-  color: var(--don-ink);
+  color: var(--emph-num);
 }
 .say {
   margin-top: -4px;

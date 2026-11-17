@@ -20,7 +20,7 @@ const myReplies = [
   { id: 1, thread: 4017, ago: '昨天 21:40', likes: 24, text: '太及时了，我现在就卡在这里，不可从 7 压到 3 之后一直下不去。回去试试左起。' },
   { id: 2, thread: 4017, ago: '昨天 22:03', likes: 3, text: '好，周末去机厅试，成功了回来报告。', quote: { who: 'hayate', text: '不可 3 的话基本就是第三组起手的问题，左起应该能直接解决。' } },
   { id: 3, thread: 4001, ago: '3 天前', likes: 11, text: '大悦城那台周末排队大概四十分钟，工作日晚上基本不用等。', quote: { who: 'kumo', text: '更新了三家店的鼓面灵敏度和排队情况。大悦城那台右咔已经修好了。' } },
-  { id: 4, thread: 3996, ago: '4 天前', likes: 42, text: '千本桜里，31 次，昨天刚全良。' },
+  { id: 4, thread: 3996, ago: '4 天前', likes: 42, text: 'Bad Apple!! feat.nomico 里，31 次，昨天刚全良。' },
 ]
 const favorites = threads.filter((t) => t.featured || t.id === 4012)
 const history = ref(threads.slice(0, 36))
@@ -145,7 +145,7 @@ function apply(a) {
             <span v-if="asMod" class="role moderator">{{ L(ROLE.moderator.zh, ROLE.moderator.ja) }}</span>
           </h1>
           <p class="id-line">
-            <TitlePlate :text="player.title" :rare="me.rare" :game="player.gameTitle ?? null" :site="me.siteTitle" form="text" />
+            <TitlePlate :text="player.title" :game="player.gameTitle ?? null" :site="me.siteTitle" form="text" />
             <DanBadge :dan="player.dan" />
             <span class="t-caption">CN <span class="num">{{ player.taikoIdMasked }}</span></span>
           </p>
@@ -210,7 +210,7 @@ function apply(a) {
                   <PlayerAvatar :user="users[u]" :size="44" />
                   <span class="grow">
                     <span class="uname"><b class="title-1l" :title="users[u].name">{{ users[u].name }}</b><span v-if="ROLE[users[u].role]" class="role" :class="users[u].role">{{ L(ROLE[users[u].role].zh, ROLE[users[u].role].ja) }}</span><DanBadge :dan="users[u].dan" /></span>
-                    <TitlePlate :text="users[u].title" :rare="users[u].rare" :game="users[u].gameTitle ?? null" :site="users[u].siteTitle" form="text" />
+                    <TitlePlate :text="users[u].title" :game="users[u].gameTitle ?? null" :site="users[u].siteTitle" form="text" />
                   </span>
                 </RouterLink>
                 <button type="button" class="btn btn-sm" @click="unfollow(u)">{{ L('取消关注', 'フォロー解除') }}</button>
@@ -364,7 +364,7 @@ function apply(a) {
   line-height: 1.7;
 }
 .reply:hover .reply-text {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .reply-foot {
   display: flex;
@@ -426,7 +426,7 @@ function apply(a) {
   max-width: 100%;
 }
 a.uwho:hover b {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .none {
   padding: 14px 0;

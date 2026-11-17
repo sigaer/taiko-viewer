@@ -248,7 +248,7 @@ export const detailNavPhone = {
       const h0 = await t.hash()
       await page.locator('nav.tabbar').getByRole('button', { name: /搜索/ }).click()
       const inp = page.locator('[role=dialog] input').last()
-      await inp.fill('千本')
+      await inp.fill('天狗')
       await page.waitForTimeout(400)
       await page.locator('[role=dialog] [role=option]').first().tap()
       await page.waitForTimeout(600)

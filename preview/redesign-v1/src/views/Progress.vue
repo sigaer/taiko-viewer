@@ -2,6 +2,7 @@
 import { computed, onBeforeUnmount, onMounted, reactive, ref, shallowRef, watch } from 'vue'
 import Gate from '../components/Gate.vue'
 import Crown from '../components/Crown.vue'
+import Rank from '../components/Rank.vue'
 import { songs, scoreOf, RANKS, DIFFS, player, fmt } from '../mock/data'
 import { L, isReady, songTitle } from '../store'
 import { useQueryState } from '../routeState'
@@ -164,7 +165,7 @@ const rankLabel = computed(() => player.rankCounts.map((n, i) => `${L(RANKS[i + 
             <i v-for="(n, i) in player.rankCounts" :key="i" class="rk" :class="RANKS[i + 2].key" :style="{ flex: n }" />
           </div>
           <ul class="rlegend">
-            <li v-for="(n, i) in player.rankCounts" :key="i"><i class="sw rk" :class="RANKS[i + 2].key" /><span>{{ L(RANKS[i + 2].zh, RANKS[i + 2].ja) }}</span><b class="num">{{ fmt(n) }}</b></li>
+            <li v-for="(n, i) in player.rankCounts" :key="i"><i class="sw rk" :class="RANKS[i + 2].key" /><span class="lg-rank" aria-hidden="true"><Rank :v="i + 2" :px="24" /></span><span>{{ L(RANKS[i + 2].zh, RANKS[i + 2].ja) }}</span><b class="num">{{ fmt(n) }}</b></li>
           </ul>
         </section>
       </div>
@@ -179,9 +180,10 @@ const rankLabel = computed(() => player.rankCounts.map((n, i) => `${L(RANKS[i + 
           <button :aria-pressed="f.show === 'rank'" @click="f.show = 'rank'">{{ L('看评价', '評価') }}</button>
         </div>
         <ul v-if="f.show === 'crown'" class="legend only-desktop">
-          <li><i class="lamp dfc" />{{ L('全良', '全良') }}</li>
-          <li><i class="lamp fc" />{{ L('全连', 'フルコンボ') }}</li>
-          <li><i class="lamp clear" />{{ L('通关', 'クリア') }}</li>
+          <!-- C+ G10：格子仍是色块（--crown-*），图例里加真实王冠，色块与王冠对得上 -->
+          <li><i class="lamp dfc" /><span class="lg-crown" aria-hidden="true"><Crown :v="2" size="chip" /></span>{{ L('全良', '全良') }}</li>
+          <li><i class="lamp fc" /><span class="lg-crown" aria-hidden="true"><Crown :v="1" size="chip" /></span>{{ L('全连', 'フルコンボ') }}</li>
+          <li><i class="lamp clear" /><span class="lg-crown" aria-hidden="true"><Crown :v="0" size="chip" /></span>{{ L('通关', 'クリア') }}</li>
           <li><i class="lamp played" />{{ L('未通关', '未クリア') }}</li>
           <li><i class="lamp none" />{{ L('没打过', '未プレイ') }}</li>
         </ul>
@@ -329,6 +331,16 @@ const rankLabel = computed(() => player.rankCounts.map((n, i) => `${L(RANKS[i + 
   margin-left: auto;
   font-size: var(--fs-12);
   color: var(--ink-2);
+}
+.lg-crown,
+.lg-rank {
+  display: inline-flex;
+}
+.lg-crown:has(.crown) {
+  display: none; /* 版本 A：生成式王冠与色块重复，不显示 */
+}
+.lg-rank:has(.rank) {
+  display: none;
 }
 .legend li {
   display: inline-flex;

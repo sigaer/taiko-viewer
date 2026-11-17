@@ -23,7 +23,7 @@ const day = computed(() => lane.find((d) => d.daysAgo === sel.value) || lane[lan
 const axes = computed(() => DIMS.map((d) => ({ key: d.key, label: L(d.zh, d.ja), value: player.dims[d.key], prev: player.dimsPrev[d.key] })))
 const focus = computed(() => DIMS.find((d) => d.key === player.focus))
 const activeGoal = goals.find((g) => g.status === 'active')
-const me = users.mochidon || { name: player.nickname, hue: 12, dan: player.dan, rare: false }
+const me = users.mochidon || { name: player.nickname, hue: 12, dan: player.dan }
 
 // 新曲：按上架日期取最新 6 首（字符串比较即可，避免 1,500 次 localeCompare）
 const latest = (() => {
@@ -95,7 +95,7 @@ const songLink = (id, d) => (d ? `/songs/${id}?d=${d}&from=today` : `/songs/${id
         <div class="who">
           <PlayerAvatar :user="me" :size="44" />
           <span class="who-name title-1l" :title="player.nickname">{{ player.nickname }}</span>
-          <TitlePlate :text="player.title" :rare="!!me.rare" :game="player.gameTitle ?? null" :site="me.siteTitle" form="text" />
+          <TitlePlate :text="player.title" :game="player.gameTitle ?? null" :site="me.siteTitle" form="text" />
           <DanBadge :dan="player.dan" />
           <span class="t-caption num who-id">CN {{ player.taikoIdMasked }}</span>
         </div>
@@ -110,7 +110,7 @@ const songLink = (id, d) => (d ? `/songs/${id}?d=${d}&from=today` : `/songs/${id
       <div class="deck">
         <div class="me">
           <section class="cell me-rating" :aria-label="L('Rating', 'Rating')">
-            <DrumDial :value="player.rating" :size="150">
+            <DrumDial :value="player.rating" :size="168">
               <span class="t-caption">Rating</span>
               <b class="num big">{{ player.rating.toFixed(2) }}</b>
               <span class="t-caption">/ 15.5</span>
@@ -220,7 +220,7 @@ const songLink = (id, d) => (d ? `/songs/${id}?d=${d}&from=today` : `/songs/${id
 
           <button type="button" class="hero-search" @click="store.paletteOpen = true">
             <Icon name="search" />
-            <span class="grow">{{ L('搜一首歌，比如「千本桜」', '曲名で検索（例：千本桜）') }}</span>
+            <span class="grow">{{ L('搜一首歌，比如「天狗囃子」', '曲名で検索（例：天狗囃子）') }}</span>
             <kbd class="only-desktop">Ctrl K</kbd>
           </button>
           <div class="row-wrap">
@@ -313,8 +313,8 @@ const songLink = (id, d) => (d ? `/songs/${id}?d=${d}&from=today` : `/songs/${id
   min-height: var(--ctl-h);
   padding: 6px 12px 6px 10px;
   border-radius: var(--r-note);
-  background: var(--roll-wash);
-  color: var(--roll-ink);
+  background: var(--annual-wash);
+  color: var(--annual-ink);
 }
 .annual span {
   display: flex;
@@ -357,7 +357,7 @@ const songLink = (id, d) => (d ? `/songs/${id}?d=${d}&from=today` : `/songs/${id
   gap: 12px;
 }
 .me-rating .big {
-  font-size: 44px;
+  font-size: var(--fs-48); /* C+ G2：比 Phase A 的 44px 大一档，首页第一屏最大的数字 */
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.01em;
@@ -597,7 +597,7 @@ const songLink = (id, d) => (d ? `/songs/${id}?d=${d}&from=today` : `/songs/${id
   transition: box-shadow var(--dur-2);
 }
 .hero-search:hover {
-  box-shadow: 4px 4px 0 var(--don);
+  box-shadow: 4px 4px 0 var(--accent);
 }
 .hero-search kbd {
   padding: 3px 8px;

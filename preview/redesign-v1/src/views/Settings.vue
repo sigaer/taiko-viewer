@@ -30,7 +30,7 @@ const density = computed({
 
 /* 歌曲标题显示：本地状态，预览即时反映 */
 const titleMode = ref('zh')
-const previewSongs = [615, 233, 512].map((id) => songById[id]).filter(Boolean)
+const previewSongs = [615, 413, 1308].map((id) => songById[id]).filter(Boolean)
 const titleOf = (s) => (titleMode.value === 'zh' ? s.zh : s.ja)
 const subOf = (s) => {
   const sub = titleMode.value === 'zh' ? s.ja : s.zh
@@ -239,7 +239,7 @@ const { current: currentSec, scrollTo } = useSectionNav(() => NAV.value.map((n) 
           <div class="panel">
             <dl class="kv about-kv">
               <dt>{{ L('版本', 'バージョン') }}</dt>
-              <dd>{{ L('Design V1.2 原型', 'Design V1.2 プロトタイプ') }}</dd>
+              <dd>{{ L('Design V1.3 原型', 'Design V1.3 プロトタイプ') }}</dd>
               <dt>{{ L('数据', 'データ') }}</dt>
               <dd class="data-line">
                 <span class="tag tag-info"><Icon name="info" :size="12" />{{ L('原型', 'プロトタイプ') }}</span>
@@ -268,7 +268,7 @@ const { current: currentSec, scrollTo } = useSectionNav(() => NAV.value.map((n) 
       <p class="about-line">My Taiko, in one place.</p>
       <dl class="kv about-sheet-kv">
         <dt>{{ L('版本', 'バージョン') }}</dt>
-        <dd>{{ L('Design V1.2 原型', 'Design V1.2 プロトタイプ') }}</dd>
+        <dd>{{ L('Design V1.3 原型', 'Design V1.3 プロトタイプ') }}</dd>
         <dt>{{ L('技术栈', '技術スタック') }}</dt>
         <dd>Nuxt 3 · Vue 3 · Element Plus</dd>
       </dl>
@@ -341,7 +341,7 @@ const { current: currentSec, scrollTo } = useSectionNav(() => NAV.value.map((n) 
   color: var(--ink);
 }
 .toc button[aria-current='true'] {
-  border-left-color: var(--ink);
+  border-left-color: var(--selected-line);
   color: var(--ink);
   font-weight: 700;
 }
@@ -537,7 +537,7 @@ const { current: currentSec, scrollTo } = useSectionNav(() => NAV.value.map((n) 
   font-weight: 500;
 }
 .lk:hover .grow {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .about-line {
   font-size: var(--fs-16);

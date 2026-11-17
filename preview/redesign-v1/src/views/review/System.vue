@@ -37,11 +37,12 @@ import {
   ratingHistory, dimHistory, goals, threads, users, milestones, EDGE, datasetInfo, fmt, sections,
 } from '../../mock/data'
 
-// Design System V1.2：活的规范页。所有样本都直接渲染 tokens.css / base.css / domain.css 与 src/components，
+// Design System V1.3（C+）：活的规范页。所有样本都直接渲染 tokens.css / base.css / domain.css 与 src/components，
 // 颜色值与对比度在浏览器里实时读取，换主题后自动重算。
 
 /* ---------------- 页面骨架 ---------------- */
 const SECTIONS = [
+  { id: 'ds-v13', t: 'V1.3 C+' },
   { id: 'ds-principles', t: '设计原则' },
   { id: 'ds-color', t: '颜色' },
   { id: 'ds-type', t: '字体与字阶' },
@@ -224,7 +225,29 @@ const PAIRS = (() => {
     out.push({ group: '实测元素（读本页样本的计算样式）', sel: `[data-cr="${sel}"]`, fgLabel: label, bgLabel: '', min: 4.5 })
   return out
 })()
+// V1.3 C+（docs/19）：品牌、浮层、柔化朱色与角色 token
+const V13_LADDER = ['bg-sunk', 'bg', 'surface', 'surface-2', 'overlay-bg']
+const V13_BRAND = ['brand-primary', 'brand-hover', 'brand-soft', 'brand-on-primary', 'brand-focus', 'don', 'don-data', 'line', 'line-strong']
+const V13_ROLES = [
+  ['action-bg', '主按钮底（.btn-primary、.btn-ink）'],
+  ['link', '链接'],
+  ['selected-bg', '选中的筛选、分段、页签的浅底'],
+  ['selected-line', '选中描边与页签指示线'],
+  ['nav-active-bg', '导航选中'],
+  ['focus-ring', '焦点环'],
+  ['info-wash', '提示条浅底'],
+  ['emph-num', '主数字（Rating、最好成绩）'],
+  ['series', '单一序列图表'],
+  ['row-sel-bg', '选中 / 定位的表格行'],
+  ['accent', '控件强调（复选框、正文圆点）'],
+  ['warn-wash', '警告浅底（字用 --warn）'],
+]
+const V13_SONG = { id: 615, ja: '天狗囃子', zh: '天狗配乐', genre: 'namco', coverOk: true }
+const V13_SAMPLE = { id: 233, ja: '示例', zh: '示例', genre: 'namco', coverOk: false }
 const ALL_TOKENS = [
+  ...V13_LADDER,
+  ...V13_BRAND,
+  ...V13_ROLES.map((r) => r[0]),
   ...PRIMS.flatMap((g) => g.tokens),
   ...SEMANTIC.map((s) => s[0]),
   ...DIFF_KEYS.flatMap((x) => [x.token, x.ink]),
@@ -546,7 +569,7 @@ const plateUser = users.mochidon
 const previewThread = computed(() => ({ ...threads[1], id: 0, ago: L('刚刚', 'たった今'), likes: 0, replies: 0, views: 0 }))
 // VirtualList rowClass：有里谱的行在左侧画一条细色条（行状态挂在行元素上，不在单元格里各自判断）
 const vlRowClass = (item) => (item.levels[4] != null ? 's-vl-ura' : '')
-const rareUser = users.hayate
+const titleUser = users.hayate
 const longThread = threads.reduce((a, t) => (t.title.length > a.title.length ? t : a), threads[0])
 
 // 同步（S2 / S3）：静态对照表引用 SyncPanel 与 store.syncStatus 里的实际文案
@@ -752,7 +775,7 @@ const MAPPING = [
       <div class="s-top-in">
         <RouterLink to="/review" class="s-brand" aria-label="设计总览">
           <Logo :size="30" />
-          <b>Design System · V1.3（Phase A）</b>
+          <b>Design System · V1.3</b>
         </RouterLink>
         <RouterLink to="/review" class="link s-back"><Icon name="chevL" :size="14" />设计总览</RouterLink>
         <span class="grow" />
@@ -779,7 +802,7 @@ const MAPPING = [
 
       <main class="s-doc">
         <header class="s-intro">
-          <h1 class="t-display">Design System V1.3（Phase A）</h1>
+          <h1 class="t-display">Design System V1.3</h1>
           <p class="s-lede">Taiko Viewer「<span lang="ja">譜面</span> Fumen」设计语言的规范。每个样本都由 tokens.css、base.css、domain.css 和组件源码直接渲染，切换主题和语言后看到的就是实际效果。条目后的编号（D11、S2、R3、V6…）对应 docs/07-v1.1-design-decisions.md 的裁决。</p>
           <div class="s-ctl s-ctl-page">
             <div class="seg" role="group" aria-label="主题">
@@ -790,6 +813,65 @@ const MAPPING = [
             </div>
           </div>
         </header>
+
+        <!-- ============ 00 V1.3 C+ ============ -->
+        <section id="ds-v13" class="s-sec">
+          <h2 class="t-h1"><span class="s-n num">00</span>V1.3 C+：品牌、角色与真实素材</h2>
+          <p class="s-lede">C+ 是最终设计（docs/19）：Viewer Teal 品牌色只用于导航选中、主按钮、链接、选中、焦点与单一序列图表；咚、咔、连打色只表示游戏数据；难度、王冠、评价、称号、曲绘与头像用正式站的真实素材。下面的色值从当前页面实时读取（{{ resolvedTheme === 'dark' ? '深色' : '浅色' }}主题）。</p>
+
+          <h3 class="t-h2 s-sub">深色层次（G1）</h3>
+          <ul class="s-sws">
+            <li v-for="t in V13_LADDER" :key="t"><i class="s-chip" :style="{ background: `var(--${t})` }" /><code>--{{ t }}</code><span class="num">{{ hex[t] }}</span></li>
+          </ul>
+          <p class="t-small">下沉 &lt; 页面 &lt; 卡片 &lt; 分区 ≈ 浮层。对话框、抽屉、搜索面板、菜单、浮动面板用 --overlay-bg，外加阴影与 1px --line-strong 外框。</p>
+
+          <h3 class="t-h2 s-sub">品牌与柔化朱色（B3、G3）</h3>
+          <ul class="s-sws">
+            <li v-for="t in V13_BRAND" :key="t"><i class="s-chip" :style="{ background: `var(--${t})` }" /><code>--{{ t }}</code><span class="num">{{ hex[t] }}</span></li>
+          </ul>
+          <p class="t-small">--don-data 只给图表里成片的朱色（密度图难点柱、判定条「良」段）；音符、图例圆点、新纪录的点、通知角标、咚键仍是 --don。</p>
+
+          <h3 class="t-h2 s-sub">角色 token</h3>
+          <ul class="s-sws">
+            <li v-for="r in V13_ROLES" :key="r[0]"><i class="s-chip" :style="{ background: `var(--${r[0]})` }" /><code>--{{ r[0] }}</code><span class="num">{{ hex[r[0]] }}</span><span class="t-caption">{{ r[1] }}</span></li>
+          </ul>
+          <div class="row-wrap s-loose">
+            <button type="button" class="btn btn-primary">主按钮</button>
+            <button type="button" class="btn btn-ink c-secondary">次要（.btn-ink 降级）</button>
+            <button type="button" class="btn">次要</button>
+            <button type="button" class="btn btn-ghost">文字按钮</button>
+            <a class="link" href="#/review/system">链接</a>
+            <button type="button" class="chip" aria-pressed="true">选中的筛选</button>
+            <span class="num up">+0.31</span><span class="num down">−0.04</span>
+          </div>
+
+          <h3 class="t-h2 s-sub">真实素材组件</h3>
+          <div class="s-spec">
+            <div class="s-k">曲绘<small>Cover</small></div>
+            <div class="row-wrap s-loose"><Cover :song="V13_SONG" size="sm" /><Cover :song="V13_SONG" /><Cover :song="V13_SONG" size="lg" /><Cover :song="V13_SAMPLE" size="lg" /><span class="t-small">真实曲绘（白名单）/ 示例占位</span></div>
+          </div>
+          <div class="s-spec">
+            <div class="s-k">难度<small>Diff</small></div>
+            <div class="row-wrap s-loose"><Diff v-for="d in 5" :key="d" :d="d" :star="d + 4" :constant="d >= 4 ? 9 + d / 10 : null" short /></div>
+          </div>
+          <div class="s-spec">
+            <div class="s-k">王冠<small>Crown · 16 / 18 / 22 / 30 / 48</small></div>
+            <div class="row-wrap s-loose"><Crown v-for="sz in ['chip', 'table', '', 'lg', 'xl']" :key="sz" :v="2" :size="sz" /><Crown :v="1" /><Crown :v="0" /><Crown :v="-1" /><Crown :v="null" /></div>
+          </div>
+          <div class="s-spec">
+            <div class="s-k">评价<small>Rank · 表格带名 / 手机行紧凑 / 详情</small></div>
+            <div class="row-wrap s-loose"><Rank :v="5" named /><Rank :v="6" compact /><Rank :v="7" lg label /><Rank :v="8" named /><Rank :v="0" /><Rank :v="1" /></div>
+          </div>
+          <div class="s-spec">
+            <div class="s-k">称号<small>TitlePlate</small></div>
+            <div class="row-wrap s-loose"><TitlePlate :game="{ name: 'きたさいたまの達人', plate: 42 }" form="plate" /><TitlePlate :game="{ name: 'わさびの達人', plate: 42 }" form="text" /><TitlePlate :game="null" :site="{ name: '虹光先行者' }" /></div>
+          </div>
+          <div class="s-spec">
+            <div class="s-k">头像<small>PlayerAvatar</small></div>
+            <div class="row-wrap s-loose"><PlayerAvatar name="年糕咚" :size="24" /><PlayerAvatar name="年糕咚" :size="32" /><PlayerAvatar name="年糕咚" :size="44" /><span class="t-small">没有头像：正式站 /default-avatar.svg，原样显示</span></div>
+          </div>
+          <p class="t-small">小尺寸素材（G5）：评价 56 / 80px、王冠 36 / 60 / 96px，WebP + PNG 回退，按屏幕密度用 srcset 选图；原图保留。生成脚本 qa/tools/gen-small-assets.mjs。完整的尺寸与表面对照见 <RouterLink class="link" to="/review/assets">素材页</RouterLink>。</p>
+        </section>
 
         <!-- ============ 01 设计原则 ============ -->
         <section id="ds-principles" class="s-sec">
@@ -1727,7 +1809,7 @@ const MAPPING = [
             <div class="s-k">称号牌<small>TitlePlate</small></div>
             <div class="row-wrap s-loose">
               <TitlePlate v-if="plateUser" :text="plateUser.title" />
-              <TitlePlate v-if="rareUser" :text="rareUser.title" rare />
+              <TitlePlate v-if="titleUser" :text="titleUser.title" />
               <span class="t-small">普通 · 稀有（山吹）；过长时截断，title 给出全文</span>
             </div>
           </div>
@@ -1787,7 +1869,7 @@ const MAPPING = [
                 <PlayerAvatar v-if="plateUser" :user="plateUser" :size="72" />
                 <div class="col s-stage-id">
                   <b class="t-h2">{{ plateUser?.name }}</b>
-                  <span class="row-wrap"><TitlePlate v-if="rareUser" :text="rareUser.title" rare /><TitlePlate v-if="plateUser" :text="plateUser.title" /><DanBadge :dan="plateUser?.dan" /><span class="tag">{{ L('标签', 'タグ') }}</span></span>
+                  <span class="row-wrap"><TitlePlate v-if="titleUser" :text="titleUser.title" /><TitlePlate v-if="plateUser" :text="plateUser.title" /><DanBadge :dan="plateUser?.dan" /><span class="tag">{{ L('标签', 'タグ') }}</span></span>
                   <span class="row-wrap"><button type="button" class="btn btn-sm">{{ L('关注', 'フォロー') }}</button><button type="button" class="btn btn-sm btn-ghost">{{ L('分享', '共有') }}</button><button type="button" class="link t-small">{{ L('链接', 'リンク') }}</button></span>
                 </div>
               </div>
@@ -1931,10 +2013,10 @@ const MAPPING = [
           <div class="s-radars">
             <figure>
               <Radar :axes="dimAxes" :focus="player.focus" :size="300" :label="L('六维', '6 つの力')" />
-              <figcaption class="t-caption">六维。虚线是 30 天前，浅葱实心点是当前关注方向。量程自动收窄并写在图上。</figcaption>
+              <figcaption class="t-caption">六维。虚线是 30 天前，实心点是当前关注方向。量程自动收窄并写在图上。</figcaption>
             </figure>
             <figure>
-              <Radar :axes="chartAxes" :domain="[0, 15.5]" :size="280" tone="var(--ka)" :label="L('谱面五维', '譜面の 5 要素')" />
+              <Radar :axes="chartAxes" :domain="[0, 15.5]" :size="280" tone="var(--series-alt)" :label="L('谱面五维', '譜面の 5 要素')" />
               <figcaption class="t-caption">谱面五维，固定量程 0–15.5，不同谱面之间可以直接比形状。</figcaption>
             </figure>
           </div>
@@ -1961,7 +2043,7 @@ const MAPPING = [
             <div class="s-k">Spark<small>行内趋势</small></div>
             <div class="row-wrap s-loose">
               <span class="row"><Spark :values="sparkRating" /><b class="num s-evnum sm">{{ player.rating.toFixed(2) }}</b></span>
-              <span class="row"><Spark :values="dimHistory.speed" tone="var(--ka)" /><b class="num s-evnum sm">{{ player.dims.speed.toFixed(2) }}</b></span>
+              <span class="row"><Spark :values="dimHistory.speed" tone="var(--series-alt)" /><b class="num s-evnum sm">{{ player.dims.speed.toFixed(2) }}</b></span>
               <span class="t-small">没有坐标轴，所以右边必须跟着当前值。</span>
             </div>
           </div>
@@ -2230,7 +2312,7 @@ const MAPPING = [
                 <PlayerAvatar :user="voiceAuthor" :size="44" />
                 <span class="s-ident-t">
                   <b>{{ voiceAuthor.name }}</b>
-                  <span class="row-wrap"><TitlePlate v-if="voiceAuthor.title && voiceAuthor.title !== '—'" :text="voiceAuthor.title" :rare="voiceAuthor.rare" /><DanBadge :dan="voiceAuthor.dan" /></span>
+                  <span class="row-wrap"><TitlePlate v-if="voiceAuthor.title && voiceAuthor.title !== '—'" :text="voiceAuthor.title" /><DanBadge :dan="voiceAuthor.dan" /></span>
                 </span>
               </div>
               <ThreadRow :thread="voiceThread" />
@@ -2255,12 +2337,12 @@ const MAPPING = [
         <!-- ============ 12 与现有实现的映射 ============ -->
         <section id="ds-mapping" class="s-sec">
           <h2 class="t-h1"><span class="s-n num">12</span>与现有实现的映射</h2>
-          <p class="s-lede">迁移时按这张表逐项替换。Design V1.2 的 token 可以和现有的 --viewer-* 并存，一个页面一个页面地换。</p>
+          <p class="s-lede">迁移时按这张表逐项替换。Design V1.3 的 token 可以和现有的 --viewer-* 并存，一个页面一个页面地换。</p>
           <div class="panel scroll-x">
             <table class="dt s-w680">
-              <caption class="sr-only">现有实现与 Design V1.2 的对应</caption>
+              <caption class="sr-only">现有实现与 Design V1.3 的对应</caption>
               <thead>
-                <tr><th scope="col">现在</th><th scope="col">Design V1.2</th><th scope="col">用户得到什么</th></tr>
+                <tr><th scope="col">现在</th><th scope="col">Design V1.3</th><th scope="col">用户得到什么</th></tr>
               </thead>
               <tbody>
                 <tr v-for="m in MAPPING" :key="m.old">
@@ -2410,7 +2492,7 @@ const MAPPING = [
   color: var(--ink-3);
 }
 .s-toc button[aria-current='true'] .num {
-  color: var(--don-ink);
+  color: var(--emph-num);
 }
 /* F4.1：当前项的 inset 描边比 :focus-visible 更具体，焦点环要单独写回 */
 .s-toc button:focus-visible {
@@ -2437,7 +2519,7 @@ const MAPPING = [
 .s-n {
   font-size: var(--fs-18);
   font-weight: 700;
-  color: var(--don-ink);
+  color: var(--emph-num);
 }
 .s-lede {
   margin-top: var(--sp-3);
@@ -2854,7 +2936,7 @@ code {
   display: block;
   height: 14px;
   border-radius: 3px;
-  background: var(--ka);
+  background: var(--series-alt);
 }
 .s-sizes {
   display: grid;
@@ -2871,8 +2953,8 @@ code {
   flex: none;
   width: 44px;
   border-radius: var(--r-xs);
-  background: var(--ka-wash);
-  box-shadow: inset 0 0 0 1.5px var(--ka);
+  background: var(--series-band-bg);
+  box-shadow: inset 0 0 0 1.5px var(--series-band-line);
 }
 .s-size-t {
   display: flex;
@@ -3179,15 +3261,15 @@ code {
 .s-touch.show .chip,
 .s-touch.show .seg button,
 .s-touch.show .s-ib-sm {
-  outline: 1px solid var(--ka);
+  outline: 1px solid var(--focus-ring);
   outline-offset: 0;
 }
 .s-touch.show .chip::after,
 .s-touch.show .seg button::after,
 .s-touch.show .hit::after {
-  outline: 1.5px dashed var(--ka-ink);
+  outline: 1.5px dashed var(--focus-ring);
   outline-offset: -1px;
-  background: color-mix(in srgb, var(--ka) 10%, transparent);
+  background: color-mix(in srgb, var(--focus-ring) 10%, transparent);
 }
 .s-fields {
   display: grid;
@@ -3498,7 +3580,7 @@ code {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--don);
+  background: var(--accent);
 }
 
 /* ---------- 09 状态与动效 ---------- */
@@ -3577,7 +3659,7 @@ code {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--ka);
+  background: var(--series-alt);
   transition: left var(--d) var(--ease-out);
 }
 .s-trk.on i {
@@ -3623,8 +3705,8 @@ code {
   gap: var(--sp-3);
 }
 .s-like[aria-pressed='true'] {
-  border-color: var(--don);
-  color: var(--don-ink);
+  border-color: var(--vote-on);
+  color: var(--vote-on-ink);
 }
 
 /* ---------- 10 清单 ---------- */

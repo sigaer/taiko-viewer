@@ -299,7 +299,33 @@
   --info-wash: var(--ka-wash);        /* 信息条、进行中的步骤 */
   --info-ink: var(--ka-ink);
   --brand-mark: var(--ka);            /* 标志的鼓缘 */
-  --btn-ink-bg: var(--ink);           /* .btn-ink：fumen 是藍墨实色，teal 里按次要按钮显示 */
+  --overlay-bg: var(--surface);       /* 浮层底：浅色与 fumen 等于 --surface；teal 深色单独一级（G1） */
+  --overlay-line: transparent;        /* 浮层 1px 外框（box-shadow 画，不占版面）：teal 为 --line-strong */
+  --popover-line: var(--line);        /* Popover 的边框 */
+  --don-data: var(--don);             /* C+ G3：图表里成片的朱色（密度图难点柱、判定条「良」段）；teal 下柔化 */
+  --density-bar: color-mix(in srgb, var(--ink-3) 55%, transparent); /* 密度图普通小节 */
+  --judge-h: 8px;                     /* 成绩判定条高度；teal 6px */
+  --accent: var(--don);               /* 控件强调（复选框 accent-color、悬停投影、正文列表圆点）；teal 为品牌色 */
+  /* Phase B Stage 2（G10）：页面里原先直接用音符色表示交互 / 状态的地方，统一走下面的角色 */
+  --row-sel-bg: color-mix(in srgb, var(--ka) 9%, var(--surface)); /* 选中 / 定位的表格行、选项、拖放区 */
+  --row-sel-line: var(--ka);
+  --warn-wash: var(--roll-wash);      /* 警告状态的浅底（字用 --warn）；两套品牌相同 */
+  --lock-ink: var(--roll-ink);        /* 已锁定的成绩 */
+  --series-band-bg: var(--ka-wash);   /* 图表上的区间带（推荐区间、阶段） */
+  --series-band-line: color-mix(in srgb, var(--ka) 45%, transparent);
+  --series-band-cur: color-mix(in srgb, var(--ka) 22%, var(--surface));
+  --chart-mark: var(--roll);          /* 图表上的事件标注（段位、里程碑的引导线） */
+  --progress-line: var(--ka);         /* 步骤条已完成的连线 */
+  --annual-wash: var(--roll-wash);    /* 年度回顾入口卡片 */
+  --annual-ink: var(--roll-ink);
+  --unread-wash: var(--don-wash);     /* 未读通知的行首条 */
+  --toast-surface: var(--toast-bg);   /* Toast：fumen 是深色条；teal 用浮层底（G1：浮层一级） */
+  --toast-text: var(--toast-ink);
+  --role-mod-bg: var(--ka-wash);      /* 版主 / 官方身份标签 */
+  --role-mod-ink: var(--ka-ink);
+  --role-admin-bg: var(--don-wash);
+  --role-admin-ink: var(--don-ink);
+  --btn-ink-bg: var(--ink);           /* .btn-ink：fumen 是藍墨实色；teal 里是品牌实色（见下方 teal 块），需要次要按钮时加 .c-secondary */
   --btn-ink-line: var(--ink);
   --btn-ink-ink: var(--bg);
   --btn-ink-hover: color-mix(in srgb, var(--ink) 86%, var(--bg));
@@ -460,53 +486,59 @@
   --shadow-pop: 0 18px 50px -12px rgb(22 43 48 / 0.28), 0 2px 6px rgb(22 43 48 / 0.08);
   --shadow-lift: 0 6px 18px -8px rgb(22 43 48 / 0.22);
   --scrim: rgb(15 27 33 / 0.46);
+  --don-data: #e58572;     /* C+ G3（Stage 2 裁定：#e0705c 未达到歌曲详情首屏 ≤ 60% 的口径时调亮到 #e58572） */
   /* contrast-check 在 teal 浅色下不达标的游戏数据文字色，同色相内调暗（V1.2 值在注释里） */
   --rank-iki2-ink: #955922;  /* #995b23 */
   --crown-fc-ink: #925b00;   /* #975e00 */
+  --rank-miyabi1-ink: #925d00; /* #9a6000：teal 浅底上 4.50:1 处在边界，调暗留余量 */
 }
 :root[data-brand='teal'][data-theme='dark'] {
   --brand-primary: #86d9dc;
   --brand-hover: #a0e3e5;
-  --brand-soft: #244b4e;
+  --brand-soft: #2a565a;   /* C+ G1（Phase A #244b4e）：要在 --surface 上看得出 */
   --brand-on-primary: #0b2a2d;
   --brand-focus: #86d9dc;
 
-  --bg: #10282b;
-  --bg-sunk: #0b1e21;
-  --surface: #193338;
-  --surface-2: #234247;
-  --line: #2e4e52;
-  --line-strong: #3d6165;
+  /* C+ G1 深色层次：下沉 < 页面 < 卡片 < 分区 ≈ 浮层（Phase A 值在注释里） */
+  --bg: #0c2023;           /* #10282b */
+  --bg-sunk: #081619;      /* #0b1e21 */
+  --surface: #1a383d;      /* #193338 */
+  --surface-2: #234a50;    /* #234247 */
+  --overlay-bg: #265056;   /* 新增：对话框、抽屉、搜索面板、菜单、浮动面板 */
+  --line: #2f5257;         /* #2e4e52 */
+  --line-strong: #447378;  /* #3d6165 */
   --ink: #e4f4f1;
   --ink-2: #accbca;
-  --ink-3: #8fb0b0;
+  --ink-3: #a3c0c0;        /* G1 定为 #9ababa（Phase A #8fb0b0）；在 --overlay-bg 上只有 4.27:1，同色相调亮到 4.60:1 */
   --ink-inv: #10282b;
-  --ctl-border: #719b9d;
+  --ctl-border: #779fa1;   /* Phase A #719b9d：在 --overlay-bg 上 2.91:1，调亮到 3.08:1 */
   --toast-bg: #31565b;
   --toast-ink: #f1fbf9;
   --ka: #5cc4ef;
   --ka-ink: #8ad4f4;
   --ka-wash: #16344a;
-  --lane: #0b1e21;
-  --lane-line: #2e4e52;
+  --lane: #081619;         /* = --bg-sunk */
+  --lane-line: #2f5257;    /* = --line */
   --shadow-pop: 0 24px 60px -12px rgb(0 0 0 / 0.6), 0 0 0 1px #3d6165;
   --scrim: rgb(5 14 16 / 0.62);
+  --don-data: #e8806c;     /* C+ G3 */
   /* teal 深色的表面比夜藍亮，以下数据文字色在 14% 浅底上不足 4.5:1，同色相内调亮（V1.2 值在注释里） */
-  --diff-easy-ink: #ff8664;     /* #ff7a55 */
-  --diff-hard-ink: #6cb2ec;     /* #5aa9ea */
-  --diff-oni-ink: #ff7ab4;      /* #ff66a8 */
-  --diff-ura-ink: #b497f8;      /* #b192f8 */
-  --rank-iki1-ink: #a2a8b6;     /* #9198a8 */
-  --rank-iki2-ink: #cf976a;     /* #c6844f */
-  --rank-iki3-ink: #9eacc2;     /* #8e9fb8 */
-  --rank-miyabi1-ink: #dc9e00;  /* #d79a00 */
-  --rank-miyabi2-ink: #ee80a7;  /* #eb6997 */
-  --rank-miyabi3-ink: #b68afc;  /* #aa76fb */
+  --diff-easy-ink: #ff8a69;     /* #ff7a55；Phase A teal #ff8664 */
+  --diff-hard-ink: #75b7ed;     /* #5aa9ea；Phase A teal #6cb2ec */
+  --diff-oni-ink: #ff7fb7;      /* #ff66a8；Phase A teal #ff7ab4 */
+  --diff-ura-ink: #d0befb;      /* #b192f8；Phase A teal #b497f8；Stage 2 在点灯格的全连浅底上要 ≥ 4.5:1 */
+  --rank-iki1-ink: #a8adba;     /* #9198a8；Phase A teal #a2a8b6 */
+  --rank-iki2-ink: #d19c72;     /* #c6844f；Phase A teal #cf976a */
+  --rank-iki3-ink: #a4b1c6;     /* #8e9fb8；Phase A teal #9eacc2 */
+  --rank-miyabi1-ink: #e6a500;  /* #d79a00；Phase A teal #dc9e00 */
+  --rank-miyabi2-ink: #ef89ad;  /* #eb6997；Phase A teal #ee80a7 */
+  --rank-miyabi3-ink: #b98ffc;  /* #aa76fb；Phase A teal #b68afc */
 }
 /* 两套主题共用：谱面带的咔、舞台面（深青）、版块色点改为中性 */
 :root[data-brand='teal'] {
   --lane-ka: #56c1ee;
   --lane-focus: #86d9dc;
+  --judge-good: var(--don-data); /* C+ G3：判定条「良」段是成片的朱色 */
   --stage-bg: #1d3d42;
   --stage-sunk: #17353a;
   --stage-surface: #27494e;
@@ -559,7 +591,29 @@
   --info-wash: var(--brand-soft);
   --info-ink: var(--brand-primary);
   --brand-mark: var(--brand-primary);
-  /* .btn-ink 在 teal 里也是品牌主按钮；同一区域出现两个实色按钮时，页面给其中一个加 .c-secondary 降级 */
+  --overlay-line: var(--line-strong);
+  --popover-line: var(--line-strong);
+  --density-bar: var(--line-strong);
+  --judge-h: 6px;
+  --accent: var(--brand-primary);
+  --row-sel-bg: color-mix(in srgb, var(--brand-primary) 12%, var(--surface)); /* 行里有 --ink-3 文字：brand-soft 在深色下只有 4.21:1 */
+  --row-sel-line: var(--brand-primary);
+  --lock-ink: var(--ink-2);
+  --series-band-bg: color-mix(in srgb, var(--brand-primary) 10%, var(--surface));
+  --series-band-line: color-mix(in srgb, var(--brand-primary) 45%, transparent);
+  --series-band-cur: color-mix(in srgb, var(--brand-primary) 22%, var(--surface));
+  --chart-mark: var(--ink-2);
+  --progress-line: var(--brand-primary);
+  --annual-wash: var(--brand-soft);
+  --annual-ink: var(--brand-primary);
+  --unread-wash: var(--brand-soft);
+  --toast-surface: var(--overlay-bg);
+  --toast-text: var(--ink);
+  --role-mod-bg: var(--brand-soft);
+  --role-mod-ink: var(--brand-primary);
+  --role-admin-bg: var(--brand-soft);
+  --role-admin-ink: var(--brand-primary);
+  /* .btn-ink 在 teal 里是品牌实色（与 .btn-primary 相同）；同一区域出现两个实色按钮时，页面给其中一个加 .c-secondary 降为次要按钮 */
   --btn-ink-bg: var(--brand-primary);
   --btn-ink-line: var(--brand-primary);
   --btn-ink-ink: var(--brand-on-primary);

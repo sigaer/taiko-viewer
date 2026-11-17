@@ -399,7 +399,7 @@ const whatIfs = computed(() => {
 }
 .cur {
   display: inline-flex;
-  color: var(--ka-ink);
+  color: var(--series-focus-ink);
 }
 .opts-h,
 .opts-f {
@@ -422,7 +422,7 @@ const whatIfs = computed(() => {
   color: var(--ink-3);
 }
 .seg [aria-pressed='true'] .k {
-  color: var(--don-ink);
+  color: var(--emph-num);
 }
 .judge-in {
   display: grid;
@@ -516,8 +516,8 @@ const whatIfs = computed(() => {
   margin-top: 16px;
   padding: 10px 12px;
   border-radius: var(--r-ctl);
-  background: var(--roll-wash);
-  color: var(--roll-ink);
+  background: var(--warn-wash);
+  color: var(--warn);
   font-size: var(--fs-13);
   font-weight: 700;
 }

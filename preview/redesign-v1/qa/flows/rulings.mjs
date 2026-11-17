@@ -227,10 +227,10 @@ export const paletteShowcase = {
   async run(t) {
     for (const theme of ['light', 'dark']) {
       let page = await t.open({ vp: '1440x900', state: { theme }, route: '/' })
-      await t.step(`desktop ${theme}: palette with 千本`, async () => {
+      await t.step(`desktop ${theme}: palette with 天狗`, async () => {
         await page.keyboard.press('Control+k')
         const inp = page.locator('[role=dialog] input').last()
-        await inp.fill('千本')
+        await inp.fill('天狗')
         await page.waitForTimeout(400)
         await t.shot(`desktop-${theme}`)
       })

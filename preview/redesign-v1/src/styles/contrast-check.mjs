@@ -192,6 +192,9 @@ add('舞台非文字', '--stage-ctl-border', '--stage-bg', UI)
 add('舞台非文字', '--stage-ctl-border', '--stage-surface', UI)
 add('舞台非文字', '--stage-focus', '--stage-bg', UI)
 add('舞台非文字', '--stage-focus', '--stage-surface', UI)
+// 浮层底（C+ G1）：浮层里的文字与链接
+for (const ink of ['--ink', '--ink-2', '--ink-3', '--link']) add('浮层', ink, '--overlay-bg')
+add('非文字', '--ctl-border', '--overlay-bg', UI)
 // 角色 token（V1.3 B3）：两套品牌都检查；fumen 下与 V1.2 的同名检查等值
 add('角色', '--action-ink', '--action-bg')
 add('角色', '--action-ink', '--action-bg-hover')
@@ -204,6 +207,15 @@ add('角色', '--info-ink', '--info-wash')
 add('角色', '--btn-ink-ink', '--btn-ink-bg')
 add('角色', '--tag-don-ink', '--tag-don-bg')
 add('角色', '--tag-info-ink', '--tag-info-bg')
+add('角色', '--warn', '--warn-wash')
+add('角色', '--toast-text', '--toast-surface')
+add('角色', '--annual-ink', '--annual-wash')
+add('角色', '--role-mod-ink', '--role-mod-bg')
+add('角色', '--role-admin-ink', '--role-admin-bg')
+add('角色', '--link', '--row-sel-bg')
+add('角色', '--ink', '--row-sel-bg')
+add('角色', '--ink-3', '--row-sel-bg')
+for (const bg of ['--surface', '--bg']) add('角色', '--lock-ink', bg)
 for (const bg of ['--surface', '--bg']) add('角色', '--emph-num', bg)
 add('角色非文字', '--selected-line', '--surface', UI)
 add('角色非文字', '--tab-line', '--surface', UI)
@@ -212,6 +224,11 @@ add('角色非文字', '--series', '--surface', UI)
 const TEAL_ONLY = [
   { group: '角色非文字', fg: '--input-focus-line', bg: '--surface', min: UI },
   { group: '角色非文字', fg: '--series-alt', bg: '--surface', min: UI },
+  { group: '角色非文字', fg: '--row-sel-line', bg: '--surface', min: UI },
+  // 点灯格（进度页）里的「里」标记：--diff-ura-ink 在王冠色浅底上（fumen 深色 4.10:1 是 V1.2 遗留，只对 teal 检查）
+  { group: '点灯格文字', fg: '--diff-ura-ink', bg: "color-mix(in srgb, var(--crown-clear) 16%, var(--surface))", min: TEXT },
+  { group: '点灯格文字', fg: '--diff-ura-ink', bg: "color-mix(in srgb, var(--crown-fc) 20%, var(--surface))", min: TEXT },
+  { group: '角色非文字', fg: '--progress-line', bg: '--surface', min: UI },
 ]
 // 版块色（I4）：色点 / 色条，非文字，在 --surface 与 --bg 上 ≥ 3:1
 const SECTIONS = ['official', 'events', 'beginner-help', 'score-guides', 'dojo', 'achievements', 'arcade', 'general', 'creative']

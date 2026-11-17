@@ -21,9 +21,9 @@ const VPS = [
   { k: '360', t: '手机 360', w: 360, h: 740 },
 ]
 const VARIANTS = [
-  { k: 'a', t: 'A · V1.2 基线', d: '生成式素材 · Fumen' },
-  { k: 'b', t: 'B · 真实素材', d: '真实素材 · Fumen' },
-  { k: 'c', t: 'C · Viewer Teal', d: '真实素材 · Teal' },
+  { k: 'a', t: 'A · V1.2 基线（历史）', d: '生成式素材 · Fumen，不再维护' },
+  { k: 'b', t: 'B · 真实素材（历史）', d: '真实素材 · Fumen，不再维护' },
+  { k: 'c', t: 'C+ · Viewer Teal（最终）', d: '真实素材 · Teal' },
 ]
 const q = (k, list, def) => (list.some((x) => x.k === route.query[k]) ? route.query[k] : def)
 const page = computed(() => q('page', PAGES, 'today'))
@@ -60,7 +60,7 @@ const scale = computed(() => Math.min(1, colW.value / V.value.w))
   <div class="cmp">
     <header class="top">
       <Logo :size="30" />
-      <b class="grow">三版对照 · Design V1.3（Phase A）</b>
+      <b class="grow">三版对照（Phase A 历史）· Design V1.3</b>
       <RouterLink to="/review/assets" class="btn btn-sm"><Icon name="grid" :size="14" />素材页</RouterLink>
       <RouterLink to="/review" class="btn btn-sm btn-ghost">设计总览</RouterLink>
     </header>

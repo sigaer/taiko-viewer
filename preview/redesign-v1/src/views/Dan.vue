@@ -386,7 +386,7 @@ watch(grade, () => nextTick(center))
   background: var(--line-strong);
 }
 .stage-song:hover :deep(.t) {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .stage-kv {
   display: flex;
@@ -515,7 +515,7 @@ watch(grade, () => nextTick(center))
   font-weight: 500;
 }
 .links a:hover .grow {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .replies {
   display: inline-flex;

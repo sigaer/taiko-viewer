@@ -3,6 +3,8 @@ import { useAuthentic } from './assets'
 import { computed } from 'vue'
 import { CROWNS } from '../mock/data'
 import { L } from '../store'
+import { smallSrc } from './smallasset'
+import { crownFile } from './gamemap'
 
 /**
  * 王冠。
@@ -25,8 +27,8 @@ const text = computed(() => (meta.value ? L(meta.value.zh, meta.value.ja) : L('�
 const legacySize = computed(() => ({ table: '', chip: 'sm', xl: 'lg' })[props.size] ?? props.size)
 const PX = { '': 22, sm: 18, table: 18, lg: 30, xl: 48, chip: 16 }
 const px = computed(() => PX[props.size] ?? 22)
-const FILE = { clear: 'clear', fc: 'full', dfc: 'dondaful' }
-const file = computed(() => (meta.value && FILE[meta.value.key] ? FILE[meta.value.key] : null))
+const file = computed(() => crownFile(props.v))
+const srcs = computed(() => (file.value ? smallSrc('crown', file.value, px.value) : null))
 </script>
 
 <template>
@@ -38,8 +40,10 @@ const file = computed(() => (meta.value && FILE[meta.value.key] ? FILE[meta.valu
       :role="label ? undefined : 'img'"
       :aria-label="label ? undefined : text"
       :aria-hidden="label ? 'true' : undefined"
-      ><img v-if="file" :src="`game/crown/${file}.png`" alt="" :width="px" :height="px" decoding="async"
-    /></span>
+      ><picture v-if="file"
+        ><source type="image/webp" :srcset="srcs.webp" /><img :src="srcs.src" :srcset="srcs.png" alt="" :width="px" :height="px" decoding="async"
+      /></picture
+    ></span>
     <span v-if="label" class="crown-label">{{ text }}</span>
   </span>
   <span v-else class="crown-wrap" :title="label ? undefined : text">

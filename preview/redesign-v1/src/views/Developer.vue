@@ -452,7 +452,7 @@ const { current: currentSec, scrollTo } = useSectionNav(() => NAV.value.map((n) 
   color: var(--ink);
 }
 .toc button[aria-current='true'] {
-  border-left-color: var(--ink);
+  border-left-color: var(--selected-line);
   color: var(--ink);
   font-weight: 700;
 }
@@ -561,7 +561,7 @@ const { current: currentSec, scrollTo } = useSectionNav(() => NAV.value.map((n) 
   background: var(--line-strong);
 }
 .stepper li.done + li::before {
-  background: var(--ka);
+  background: var(--progress-line);
 }
 .stepper .note {
   --n: 30px;

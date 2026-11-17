@@ -133,8 +133,8 @@ onBeforeUnmount(() => {
   max-height: calc(100dvh - 16px);
   overflow-y: auto;
   padding: var(--overlay-pad);
-  background: var(--surface);
-  border: 1px solid var(--line);
+  background: var(--overlay-bg);
+  border: 1px solid var(--popover-line);
   border-radius: var(--overlay-radius);
   box-shadow: var(--overlay-shadow);
   color: var(--ink);

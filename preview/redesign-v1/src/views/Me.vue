@@ -12,7 +12,7 @@ import { sync, openSyncPanel } from '../sync'
 
 // 我的（V9）：身份带 → 概览 → 2×2 快捷格 → 分组入口 → 语言与主题 → 退出登录。
 const router = useRouter()
-const me = users.mochidon || { name: player.nickname, hue: 12, dan: player.dan, rare: false }
+const me = users.mochidon || { name: player.nickname, hue: 12, dan: player.dan }
 const mini = laneDays.slice(-7) // C2：手机「我的」只作概览，显示最近 7 天
 const activeGoal = computed(() => goals.find((g) => g.status === 'active'))
 const signed = (v) => (v >= 0 ? '+' : '') + v.toFixed(2)
@@ -89,7 +89,7 @@ function logout() {
       <span class="grow who-t">
         <span class="who-name title-wrap-2">{{ player.nickname }}</span>
         <span class="who-meta">
-          <TitlePlate :text="player.title" :rare="!!me.rare" :game="player.gameTitle ?? null" :site="me?.siteTitle" form="text" />
+          <TitlePlate :text="player.title" :game="player.gameTitle ?? null" :site="me?.siteTitle" form="text" />
           <DanBadge :dan="player.dan" />
         </span>
         <span class="t-caption num">CN {{ player.taikoIdMasked }}</span>
@@ -218,7 +218,7 @@ function logout() {
   color: var(--ink-3);
 }
 .who:hover .who-name {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 
 /* ---------- 下一步（游客 / 未绑定 / 无成绩） ---------- */
@@ -229,7 +229,7 @@ function logout() {
   padding: 18px 16px;
   margin-bottom: 20px;
   border-radius: var(--r-panel);
-  background: var(--roll-wash);
+  background: var(--info-wash);
 }
 .steps li {
   display: flex;

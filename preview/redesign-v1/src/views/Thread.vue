@@ -224,7 +224,7 @@ const related = (() => {
                 <DanBadge :dan="author.dan" />
               </div>
               <div class="by-line">
-                <TitlePlate :text="author.title" :rare="author.rare" :game="author.gameTitle ?? null" :site="author.siteTitle" form="plate" />
+                <TitlePlate :text="author.title" :game="author.gameTitle ?? null" :site="author.siteTitle" form="plate" />
                 <span class="t-caption">{{ first?.ago || thread.ago }}</span>
               </div>
             </div>
@@ -302,7 +302,7 @@ const related = (() => {
                     <span v-if="users[p.author].role !== 'user'" class="role" :class="users[p.author].role">{{ roleName(users[p.author].role) }}</span>
                     <span v-if="p.author === thread.author" class="tag tag-info">{{ L('楼主', '投稿者') }}</span>
                     <DanBadge :dan="users[p.author].dan" />
-                    <TitlePlate class="only-desktop" :text="users[p.author].title" :rare="users[p.author].rare" :game="users[p.author].gameTitle ?? null" :site="users[p.author].siteTitle" form="text" />
+                    <TitlePlate class="only-desktop" :text="users[p.author].title" :game="users[p.author].gameTitle ?? null" :site="users[p.author].siteTitle" form="text" />
                     <span class="t-caption ago">{{ p.ago }}</span>
                     <span class="floor num">#{{ p.floor }}</span>
                   </div>
@@ -392,7 +392,7 @@ const related = (() => {
           <div v-if="isReady" class="mine">
             <span class="t-caption">{{ L('我的最好成绩', '自己ベスト') }}</span>
             <template v-if="mine">
-              <div class="row"><Crown :v="mine.crown" /><b class="num sc">{{ fmt(mine.score) }}</b><Rank :v="mine.rank" /></div>
+              <div class="row"><Crown :v="mine.crown" /><b class="num sc">{{ fmt(mine.score) }}</b><Rank :v="mine.rank" named /></div>
               <div class="judge" aria-hidden="true"><i class="g" :style="{ flex: mine.good }" /><i class="o" :style="{ flex: mine.ok }" /><i class="n" :style="{ flex: mine.ng }" /></div>
               <span class="t-caption num">{{ L('良', '良') }} {{ mine.good }} · {{ L('可', '可') }} {{ mine.ok }} · {{ L('不可', '不可') }} {{ mine.ng }}</span>
             </template>
@@ -431,7 +431,7 @@ const related = (() => {
   margin-right: 4px;
 }
 .sec:hover {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .title {
   margin: 12px 0 18px;
@@ -463,7 +463,7 @@ const related = (() => {
 }
 .name:hover,
 .nname:hover {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .views {
   white-space: nowrap;
@@ -497,7 +497,7 @@ const related = (() => {
   width: 10px;
   height: 10px;
   border-radius: 50%;
-  background: var(--don);
+  background: var(--accent);
   box-shadow: inset 0 0 0 2px var(--note-ring), 0 0 0 1px var(--note-outline);
 }
 .prose figure {
@@ -555,9 +555,9 @@ const related = (() => {
   font-size: var(--fs-16);
 }
 .act[aria-pressed='true'] {
-  background: var(--don-wash);
-  border-color: var(--don);
-  color: var(--don-ink);
+  background: var(--vote-on-wash);
+  border-color: var(--vote-on);
+  color: var(--vote-on-ink);
 }
 .act.quiet {
   border-color: transparent;
@@ -614,8 +614,8 @@ const related = (() => {
   color: var(--ink);
 }
 .pg[aria-current='page'] {
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--nav-active-bg);
+  color: var(--nav-active-ink);
 }
 .gap {
   padding: 0 2px;
@@ -637,8 +637,8 @@ const related = (() => {
   margin: 0 -12px;
   padding-left: 12px;
   padding-right: 12px;
-  background: var(--roll-wash);
-  box-shadow: inset 3px 0 0 var(--roll);
+  background: var(--row-sel-bg);
+  box-shadow: inset 3px 0 0 var(--row-sel-line);
 }
 .phead {
   display: flex;
@@ -677,7 +677,7 @@ const related = (() => {
   color: var(--ink);
 }
 .mini[aria-pressed='true'] {
-  color: var(--don-ink);
+  color: var(--vote-on-ink);
   font-weight: 700;
 }
 .nested {
@@ -712,7 +712,7 @@ const related = (() => {
   margin: 4px 0 0 16px;
   font-size: var(--fs-13);
   font-weight: 500;
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .morebtn:hover {
   text-decoration: underline;
@@ -742,7 +742,7 @@ const related = (() => {
   align-items: center;
   justify-content: space-between;
   font-size: var(--fs-12);
-  color: var(--ka-ink);
+  color: var(--link);
   font-weight: 500;
 }
 .tray {
@@ -828,7 +828,7 @@ const related = (() => {
   line-height: 1.35;
 }
 .cc-song:hover b {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .mine {
   display: flex;

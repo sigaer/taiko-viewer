@@ -234,7 +234,7 @@ const entries = computed(() => allEntries.value.slice(0, shown.value))
   bottom: 8px;
   width: 3px;
   border-radius: 2px;
-  background: var(--ink);
+  background: var(--selected-line);
 }
 .mx td {
   padding: 0;
@@ -315,12 +315,12 @@ const entries = computed(() => allEntries.value.slice(0, shown.value))
   color: var(--ink-3);
 }
 .stars .chip[aria-pressed='true'] {
-  background: var(--ink);
-  border-color: var(--ink);
+  background: var(--selected-bg);
+  border-color: var(--selected-line);
 }
 .stars .chip[aria-pressed='true'] .s,
 .stars .chip[aria-pressed='true'] .n {
-  color: var(--bg);
+  color: var(--selected-ink);
 }
 
 /* ---------- 攻略列表 ---------- */
@@ -366,7 +366,7 @@ const entries = computed(() => allEntries.value.slice(0, shown.value))
   min-width: 0;
 }
 .g-song:hover :deep(.t) {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .g-tier {
   justify-self: start;
@@ -397,7 +397,7 @@ const entries = computed(() => allEntries.value.slice(0, shown.value))
   min-width: 0;
 }
 .g-author:hover {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .g-help {
   display: inline-flex;

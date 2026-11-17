@@ -30,29 +30,29 @@ const ids = (q) => S.searchSongs(q, 8).items.map((x) => x.song.id)
 ok(S.normalize('センボン ザクラ！') === 'せんぼんざくら', 'normalize: 片假名→平假名、去空格与标点')
 ok(S.normalize('ＬｉＳＡ') === 'lisa', 'normalize: 全角→半角、小写')
 
-// 歌曲
-ok(ids('千本').includes(233) && top('千本').matched.kind === 'title', '千本 → 千本桜（标题前缀）', JSON.stringify(top('千本')?.matched))
-ok(top('千本樱')?.song.id === 233 && top('千本樱').matched.kind === 'title', '千本樱 → 千本桜（中文标题完全相同）')
-ok(top('千本桜')?.song.id === 233 && top('千本桜').matched.kind === 'otherLang', '千本桜（zh 界面）→ 命中另一种语言')
-ok(top('千本桜', { locale: 'ja' })?.matched.kind === 'title', '千本桜（ja 界面）→ 命中标题')
-ok(top('せんぼんざくら')?.song.id === 233, 'せんぼんざくら → 千本桜', JSON.stringify(top('せんぼんざくら')?.matched))
-ok(top('センボンザクラ')?.song.id === 233, 'センボンザクラ → 千本桜（片假名）')
-ok(top('senbonzakura')?.song.id === 233, 'senbonzakura → 千本桜')
-const qby = top('qby')
-ok(qby?.song.id === 233 && qby.matched.kind === 'alias' && /qby/i.test(qby.matched.text), 'qby → 千本桜（别名）', JSON.stringify(qby?.matched))
-// 拉丁查询词只在词首命中：LiSA 不再命中 Nivalis*Anima 的中间
-const lisa = S.searchSongs('LiSA').items
-ok(lisa[0]?.song.id === 702 && lisa[0].matched.kind === 'artist', 'LiSA → 紅蓮華第一（艺术家）', lisa.map((x) => x.song.id).join(','))
-ok(!lisa.some((x) => x.song.id === 100138), 'LiSA 不命中 Nivalis*Anima')
-ok(S.searchSongs('anima').items.some((x) => x.song.id === 100138), 'anima → Nivalis*Anima（词首）')
-ok(S.searchSongs('nival').items.some((x) => x.song.id === 100138), 'nival → Nivalis*Anima（前缀）')
-ok(S.searchSongs('story').items.some((x) => x.song.id === 100136), 'story → ＊Our story, saving the world.')
-ok(S.searchSongs('nightof').items[0]?.song.id === 512, 'nightof → Night of Knights（跨词连写）')
+// 歌曲（Phase B：精选曲换成真实曲号与曲名后，用真实曲目做用例）
+ok(ids('天狗').includes(615) && top('天狗').matched.kind === 'title', '天狗 → 天狗配乐（标题前缀）', JSON.stringify(top('天狗')?.matched))
+ok(top('天狗配乐')?.song.id === 615 && top('天狗配乐').matched.kind === 'title', '天狗配乐 → 615（中文标题完全相同）')
+ok(top('天狗囃子')?.song.id === 615 && top('天狗囃子').matched.kind === 'otherLang', '天狗囃子（zh 界面）→ 命中另一种语言')
+ok(top('天狗囃子', { locale: 'ja' })?.matched.kind === 'title', '天狗囃子（ja 界面）→ 命中标题')
+ok(top('てんぐばやし')?.song.id === 615, 'てんぐばやし → 天狗囃子（读音）', JSON.stringify(top('てんぐばやし')?.matched))
+ok(top('テングバヤシ')?.song.id === 615, 'テングバヤシ → 天狗囃子（片假名）')
+ok(top('tengubayashi')?.song.id === 615, 'tengubayashi → 天狗囃子')
+const kien = top('kien')
+ok(kien?.song.id === 851 && kien.matched.kind === 'alias' && /kien/i.test(kien.matched.text), 'kien → 気焔万丈神楽（别名）', JSON.stringify(kien?.matched))
+// 拉丁查询词只在词首命中
+const holic = S.searchSongs('holic').items
+ok(holic[0]?.song.id === 851 && holic[0].matched.kind === 'artist', 'holic → 気焔万丈神楽第一（艺术家 SOUND HOLIC）', holic.map((x) => x.song.id).join(','))
+ok(!S.searchSongs('auna').items.some((x) => x.song.id === 138), 'auna 不命中 Scars of FAUNA（词中间）')
+ok(S.searchSongs('fauna').items.some((x) => x.song.id === 138), 'fauna → Scars of FAUNA（词首）')
+ok(S.searchSongs('scar').items.some((x) => x.song.id === 138), 'scar → Scars of FAUNA（前缀）')
+if (mock.songById[751]) ok(S.searchSongs('abracadabra').items.some((x) => x.song.id === 751), 'abracadabra → SHINING☆ABRACADABRA（☆ 后算词首）')
+ok(S.searchSongs('daybyday').items[0]?.song.id === 106, 'daybyday → Day by Day!（跨词连写）')
 ok(S.searchSongs('2000').items.some((x) => x.song.id === 179), '2000 → はたラク2000（拉丁与假名之间算词首）')
-ok(S.normalizeWords('Nivalis*Anima') === 'nivalis anima' && S.normalizeWords('はたラク2000') === 'はたらく 2000', 'normalizeWords 保留词边界')
+ok(S.normalizeWords('Scars of FAUNA') === 'scars of fauna' && S.normalizeWords('はたラク2000') === 'はたらく 2000', 'normalizeWords 保留词边界')
 ok(top('615')?.song.id === 615 && top('615').matched.kind === 'id', '615 → 天狗囃子（曲目 ID）')
-ok(top('千本桜 里')?.d === 5 && S.searchSongs('千本桜 里').wantUra, '千本桜 里 → 默认进里谱')
-ok(top('千本桜')?.d === 4, '千本桜 → 默认进魔王')
+ok(top('bad apple 里')?.d === 5 && S.searchSongs('bad apple 里').wantUra, 'bad apple 里 → 默认进里谱')
+ok(top('bad apple')?.d === 4, 'bad apple → 默认进魔王')
 ok(S.searchSongs('zzzqqxx 不存在的歌').items.length === 0, '无结果查询 → 0 首')
 // 排序：标题完全相同 > 前缀 > 别名 > 包含 > 艺术家
 const order = S.searchSongs('星', 8).items.map((x) => x.matched.kind)
@@ -65,7 +65,7 @@ const cfg = S.findConfig(p, 5)
 ok(cfg.items.length >= 1 && cfg.items.every((x) => x.chart.d === 4 && x.chart.star === 10 && x.measure >= 1), '16 oxxo 180 鬼10 → ≥ 1 张谱', `${cfg.items.length} / ${cfg.total}`)
 const cfgAll = S.findConfig(p, 50)
 ok(cfg.items.every((x, i) => cfgAll.items[i].song.id === x.song.id && cfgAll.items[i].measure === x.measure), '配置结果：面板前 5 条 = 工具页前 5 条')
-ok(!S.parseConfig('千本桜').isConfig && !S.parseConfig('xo').isConfig && !S.parseConfig('oxxo').isConfig, '普通查询 / 缺分音不是配置串')
+ok(!S.parseConfig('天狗囃子').isConfig && !S.parseConfig('xo').isConfig && !S.parseConfig('oxxo').isConfig, '普通查询 / 缺分音不是配置串')
 const anyOrder = S.parseConfig('oxxo 16 鬼10 180')
 ok(anyOrder.isConfig && anyOrder.division === 16 && anyOrder.pattern === 'oxxo' && anyOrder.star === 10, '宽松补充：词序任意也能解析（数据模块的 parseConfig 拒绝）', JSON.stringify(anyOrder))
 const emptyCfg = S.findConfig(S.parseConfig('48 oxoxoxoxoxoxoxox 400 鬼1'), 5)
@@ -85,13 +85,13 @@ ok(S.searchThreads('疾风连打').items.some((t) => t.author === 'hayate'), '�
 const ac = S.searchActions('同步', { canSync: true })
 ok(ac.some((a) => a.key === 'sync'), '同步 → 同步成绩操作')
 ok(!S.searchActions('同步', { canSync: false }).some((a) => a.key === 'sync'), '不能同步时不出同步操作')
-const rt = S.searchActions('千本', { song: mock.songById[233], d: 5 }).find((a) => a.key === 'rt')
-ok(rt && rt.to === '/tools/rt?song=233&d=5', '命中歌曲时 RT 计算器带上歌曲', rt?.to)
+const rt = S.searchActions('天狗', { song: mock.songById[615], d: 4 }).find((a) => a.key === 'rt')
+ok(rt && rt.to === '/tools/rt?song=615&d=4', '命中歌曲时 RT 计算器带上歌曲', rt?.to)
 ok(S.searchPages('定数')[0]?.path === '/songs/constants', '定数 → 定数表页面')
 ok(S.EXAMPLES.every((q) => S.searchSongs(q).items.length || S.findConfig(S.parseConfig(q)).items.length || S.findNotes(S.parseNotes(q)).length), '每个示例查询都有结果')
 
 // 性能：真实数据集
-const typed = ['千', '千本', '千本桜', 's', 'se', 'sen', 'senbon', 'senbonzakura', 'q', 'qb', 'qby', 'L', 'Li', 'LiSA', '7', '76', '765', '16 oxxo 180 鬼10', '星', '星夜', 'Night', 'ドン', 'zzzz']
+const typed = ['天', '天狗', '天狗囃子', 't', 'te', 'ten', 'tengu', 'tengubayashi', 'k', 'ki', 'kien', 'h', 'ho', 'holic', '7', '76', '765', '16 oxxo 180 鬼10', '星', '星夜', 'Night', 'ドン', 'zzzz']
 function timeAll() {
   let w = 0
   let sum = 0

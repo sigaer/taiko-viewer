@@ -67,7 +67,7 @@ async function firstScreenTiming(page) {
 }
 
 async function main() {
-  ensureDir(path.join(OUT_DIR, 'v13'))
+  ensureDir(path.join(OUT_DIR, 'v13f'))
   if (!noBuild) {
     const b = await build({ retries: 1 })
     if (!b.ok) throw new Error('build failed')
@@ -78,14 +78,14 @@ async function main() {
   try {
     const onlyScroll = process.argv.includes('--only-scroll')
     if (onlyScroll) {
-      const prev = JSON.parse(fs.readFileSync(path.join(OUT_DIR, 'v13', 'metrics.json'), 'utf8'))
+      const prev = JSON.parse(fs.readFileSync(path.join(OUT_DIR, 'v13f', 'metrics.json'), 'utf8'))
       out.load = prev.load
       out.blocked = prev.blocked
     }
     // ---- 1. load metrics ----
     for (const vp of onlyScroll ? [] : VPS) {
       for (const p of PAGES)
-        for (const v of ['a', 'b', 'c']) {
+        for (const v of ['c']) { // Phase B：只测 C+（A、B 不再维护；Phase A 的三版本数字在 metrics-phaseA.json）
           // fresh context per measurement: empty HTTP cache, so bytes and timings are cold-load numbers
           const ctx = await newContext(browser, { vp, state: { theme: 'light' } })
           try {
@@ -128,7 +128,7 @@ async function main() {
         page.on('pageerror', (e) => msgs.push('pageerror: ' + e.message.slice(0, 160)))
         for (const p of PAGES) {
           msgs.length = 0
-          await page.goto(pageUrl(srv.url, p.route, { variant: 'b', theme: 'light', data: 'real' }), { waitUntil: 'load' })
+          await page.goto(pageUrl(srv.url, p.route, { variant: 'c', theme: 'light', data: 'real' }), { waitUntil: 'load' })
           await settle(page)
           await waitFirstScreenImages(page)
           await page.waitForTimeout(400)
@@ -140,7 +140,8 @@ async function main() {
           }))
           // layout vs the unblocked B capture (same page / vp / theme light)
           const snap = await layoutSnapshot(page)
-          const ref = path.join(OUT_DIR, 'v13', 'layout', `${p.slug}__${vp}__light__b.json`)
+          // 对照：同一页面在曲绘域名可用时的 C+ 版面（v13.mjs shots --variants=c --suffix=__after --layout=qa/out/v13f/layout）
+          const ref = path.join(OUT_DIR, 'v13f', 'layout', `${p.slug}__${vp}__light__c__after.json`)
           let mism = null
           if (fs.existsSync(ref)) {
             const LEAF = new Set(['IMG', 'svg', 'path', 'circle', 'rect', 'line', 'polyline', 'polygon', 'text', 'g', 'SMALL'])
@@ -172,7 +173,7 @@ async function main() {
         })
         page.on('requestfinished', (r) => r.url().includes(HOST) && (done++, inflight--))
         page.on('requestfailed', (r) => r.url().includes(HOST) && (aborted++, inflight--))
-        await page.goto(pageUrl(srv.url, route, { variant: 'b', theme: 'light', data: 'real' }), { waitUntil: 'load' })
+        await page.goto(pageUrl(srv.url, route, { variant: 'c', theme: 'light', data: 'real' }), { waitUntil: 'load' })
         await settle(page)
         await waitFirstScreenImages(page)
         const before = issued
@@ -185,7 +186,7 @@ async function main() {
         const afterScroll = { issued, inflight, ms: Date.now() - t0 }
         await page.waitForTimeout(3000)
         const covers = await page.evaluate(() => ({ mounted: document.querySelectorAll('.cover.acov').length, withImg: document.querySelectorAll('.cover.acov img').length, scrollY: Math.round(scrollY) }))
-        out.scroll.push({ route, variant: 'b', pageHeight: H, firstScreenRequests: before, issuedDuringScroll: afterScroll.issued - before, inflightRightAfterScroll: afterScroll.inflight, totalIssued: issued, finished: done, aborted, maxInFlight: maxIn, scrollMs: afterScroll.ms, inflightAfter3s: inflight, ...covers })
+        out.scroll.push({ route, variant: 'c', pageHeight: H, firstScreenRequests: before, issuedDuringScroll: afterScroll.issued - before, inflightRightAfterScroll: afterScroll.inflight, totalIssued: issued, finished: done, aborted, maxInFlight: maxIn, scrollMs: afterScroll.ms, inflightAfter3s: inflight, ...covers })
         log('scroll ' + JSON.stringify(out.scroll.at(-1)))
       } finally {
         await ctx.close().catch(() => {})
@@ -195,7 +196,7 @@ async function main() {
     await withTimeout(browser.close(), 15000, 'browser.close').catch(() => {})
     await stopServer(srv)
   }
-  fs.writeFileSync(path.join(OUT_DIR, 'v13', 'metrics.json'), JSON.stringify(out, null, 1))
+  fs.writeFileSync(path.join(OUT_DIR, 'v13f', 'metrics.json'), JSON.stringify(out, null, 1))
 }
 
 main().catch((e) => {

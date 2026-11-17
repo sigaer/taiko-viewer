@@ -25,6 +25,10 @@ const THEMES = [
   { v: 'system', t: '跟随系统' },
 ]
 const CHANGES = [
+  ['真实游戏素材（V1.3）', '曲绘、难度、王冠、评价、称号牌与默认头像都来自正式站'],
+  ['Viewer Teal（V1.3）', '品牌色只给导航、主按钮、链接、选中与焦点；朱色只表示游戏数据'],
+  ['深色层次（V1.3）', '页面、卡片、分区、浮层四级明度拉开'],
+  ['真实曲目（V1.3）', '带真实曲名的曲目，曲号都对得上；首屏以真实曲绘为主'],
   ['手机同步入口', '顶栏同步按钮用角标表达状态，点开同一个同步面板'],
   ['全局搜索', '曲名、别名、日文、艺术家、配置串、物量都有真实结果'],
   ['路由状态', '筛选、排序、页签写进地址；返回时还原筛选与滚动位置'],
@@ -54,7 +58,12 @@ const DOCS = [
   ['docs/17-v1.3-comparison.md', 'V1.3 三版对照结果'],
   ['docs/18-v1.3-decisions-needed.md', 'V1.3 待裁定事项'],
   ['qa/screenshots/index.html', '关键截图与浅深对照'],
-  ['qa/screenshots/v13/index.html', 'V1.3 三版对照截图与颜色分析'],
+  ['docs/19-v1.3-phase-b-decisions.md', 'V1.3 Phase B 裁定（C+）'],
+  ['docs/20-v1.3-phase-b-completion.md', 'V1.3 Phase B 完成记录'],
+  ['docs/21-v1.3-visual-acceptance.md', 'V1.3 视觉验收与测试报告'],
+  ['docs/22-v1.3-design-freeze.md', 'Design V1.3 Final 冻结候选'],
+  ['qa/screenshots/v13/index.html', 'V1.3 Phase A 三版对照截图（历史）'],
+  ['qa/screenshots/v13-final/index.html', 'V1.3 C+ 最终截图'],
 ]
 </script>
 
@@ -62,7 +71,7 @@ const DOCS = [
   <div class="hub">
     <header class="top">
       <Logo :size="34" />
-      <b class="grow">Taiko Viewer · Design V1.3（Phase A）</b>
+      <b class="grow">Taiko Viewer · Design V1.3</b>
       <div class="seg" role="group" aria-label="主题">
         <button v-for="t in THEMES" :key="t.v" type="button" :aria-pressed="store.theme === t.v" @click="store.theme = t.v">{{ t.t }}</button>
       </div>
@@ -72,7 +81,7 @@ const DOCS = [
       <section class="intro" aria-labelledby="hub-title">
         <div>
           <h1 id="hub-title">把每一次练习，画成一条谱面。</h1>
-          <p class="lead">Taiko Viewer 全站重新设计，方向名「<span lang="ja">譜面</span> Fumen」。V1.1 与 V1.2 两轮按设计裁定逐项修复：同步、搜索、路由状态、对比度与触控、真实规模数据、模块的视觉区分和手机详情页导航。V1.3 Phase A 增加三个可切换的对照版本：A（V1.2 基线）、B（真实游戏素材）、C（真实素材 + Viewer Teal），在原型面板里切换。产品能力全部保留；所有数据都是示例。</p>
+          <p class="lead">Taiko Viewer 全站重新设计，方向名「<span lang="ja">譜面</span> Fumen」。V1.1 与 V1.2 两轮按设计裁定逐项修复：同步、搜索、路由状态、对比度与触控、真实规模数据、模块的视觉区分和手机详情页导航。V1.3 采用 C+：正式站的真实游戏素材（曲绘、难度、王冠、评价、称号、头像）加 Viewer Teal 品牌色，深色主题拉开层次，朱色只表示游戏数据。Phase A 的 A、B 两个对照版本作为历史保留开关，不再维护。产品能力全部保留；所有数据都是示例。</p>
           <div class="row-wrap">
             <button type="button" class="btn btn-primary btn-lg" @click="open({ path: '/', auth: 'ready' })"><Icon name="desktop" :size="18" />打开桌面原型</button>
             <button type="button" class="btn btn-lg" @click="phone({ path: '/', auth: 'ready' })"><Icon name="phone" :size="18" />打开手机原型</button>
@@ -95,7 +104,7 @@ const DOCS = [
         <RouterLink to="/review/directions"><Icon name="layers" :size="22" /><b>三个设计方向</b><span>譜面 / 祭 / 帖，以及为什么选第一个</span></RouterLink>
         <RouterLink to="/review/system"><Icon name="grid" :size="22" /><b>Design System</b><span>Tokens、组件、图表、动效与模块语气的活样张</span></RouterLink>
         <RouterLink to="/states"><Icon name="info" :size="22" /><b>状态页样例</b><span>加载、空、错误、权限引导</span></RouterLink>
-        <RouterLink to="/review/compare"><Icon name="layers" :size="22" /><b>三版对照</b><span>A / B / C 并排：今日、歌曲详情、全部成绩、社区，桌面与手机</span></RouterLink>
+        <RouterLink to="/review/compare"><Icon name="layers" :size="22" /><b>三版对照（历史）</b><span>Phase A 的 A / B / C 并排；A、B 不再维护，C+ 是最终设计</span></RouterLink>
         <RouterLink to="/review/assets"><Icon name="image" :size="22" /><b>素材页</b><span>曲绘、难度、王冠、评价、称号、头像的每个尺寸与表面</span></RouterLink>
       </nav>
 

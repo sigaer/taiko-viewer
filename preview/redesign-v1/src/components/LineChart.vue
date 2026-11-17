@@ -131,11 +131,11 @@ svg {
   stroke-width: 2;
 }
 .mark {
-  stroke: var(--roll);
+  stroke: var(--chart-mark);
   stroke-dasharray: 2 3;
 }
 .mark-dot {
-  fill: var(--roll);
+  fill: var(--chart-mark);
   stroke: var(--surface);
   stroke-width: 2;
 }
@@ -163,6 +163,6 @@ svg {
 }
 .tip em {
   font-style: normal;
-  color: var(--roll);
+  color: var(--chart-mark);
 }
 </style>

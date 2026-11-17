@@ -145,20 +145,8 @@ async function triptych() {
 //   hue bins: twelve 30° bins over saturated pixels; a bin counts when it holds > 1.5 % of all sampled pixels
 //   sampling: every 2nd pixel in x and y
 const TH = { neutral: 0.12, darkTint: [0.2, 0.35], brand: [170, 200], binShare: 0.015 }
-async function analyze() {
-  const report = JSON.parse(fs.readFileSync(REPORT, 'utf8'))
-  const byName = Object.fromEntries(report.map((r) => [r.name, r]))
-  const rows = []
-  await withPage(async (page) => {
-    await page.addScriptTag({ content: HELPERS })
-    for (const p of PAGES)
-      for (const vp of VPS)
-        for (const t of THEMES)
-          for (const v of ['a', 'b', 'c']) {
-            const n = name(p.slug, vp, t, v)
-            const rep = byName[n]
-            const m = await page.evaluate(
-              async ([src, rects, TH]) => {
+// colour census of one screenshot (runs in the page)
+const MEASURE = async ([src, rects, TH]) => {
                 const I = await __px(src)
                 const res = (excl) => {
                   let tot = 0, neu = 0, dark = 0, brand = 0, don = 0, other = 0
@@ -183,7 +171,22 @@ async function analyze() {
                   return { samples: tot, neutral: f(neu), darkTint: f(dark), brandBand: f(brand), donBand: f(don), otherSaturated: f(other), hueBinsOver: bins.filter((k) => k / tot > TH.binShare).length }
                 }
                 return { whole: res(false), noCovers: res(true) }
-              },
+              }
+
+async function analyze() {
+  const report = JSON.parse(fs.readFileSync(REPORT, 'utf8'))
+  const byName = Object.fromEntries(report.map((r) => [r.name, r]))
+  const rows = []
+  await withPage(async (page) => {
+    await page.addScriptTag({ content: HELPERS })
+    for (const p of PAGES)
+      for (const vp of VPS)
+        for (const t of THEMES)
+          for (const v of ['a', 'b', 'c']) {
+            const n = name(p.slug, vp, t, v)
+            const rep = byName[n]
+            const m = await page.evaluate(
+              MEASURE,
               [dataUrl(path.join(SHOT_DIR, n + '.jpg')), rep?.census?.coverRects || [], TH],
             )
             const cen = rep?.census || {}
@@ -227,6 +230,80 @@ async function analyze() {
   return rows
 }
 
+/* ---------------- before | after pairs (C → C+) ---------------- */
+async function pairs() {
+  const dir = path.join(QA_DIR, 'screenshots', 'v13-final', 'compare')
+  let n = 0
+  await withPage(async (page) => {
+    await page.addScriptTag({ content: HELPERS })
+    for (const p of PAGES)
+      for (const vp of VPS)
+        for (const t of THEMES) {
+          const files = ['before', 'after'].map((w) => path.join(dir, `${p.slug}__${vp}__${t}__c__${w}.jpg`))
+          if (!files.every((f) => fs.existsSync(f))) continue
+          const out = await page.evaluate(
+            async ([srcs, title, dark]) => {
+              const imgs = await Promise.all(srcs.map(__load))
+              const w = imgs[0].width, h = imgs[0].height
+              const s = w > 1000 ? 0.6 : 1
+              const gap = 16, head = 34
+              const c = document.createElement('canvas')
+              c.width = Math.round(2 * w * s + 3 * gap)
+              c.height = Math.round(h * s + head + gap)
+              const x = c.getContext('2d')
+              x.fillStyle = dark ? '#081619' : '#e3eeec'
+              x.fillRect(0, 0, c.width, c.height)
+              x.font = '600 15px system-ui, sans-serif'
+              ;['Before · Phase A 的 C', 'After · C+（Phase B Stage 1）'].forEach((l, i) => {
+                const ox = gap + i * (w * s + gap)
+                x.fillStyle = dark ? '#e4f4f1' : '#203f43'
+                x.fillText(l, ox, 22)
+                x.drawImage(imgs[i], ox, head, w * s, h * s)
+              })
+              x.fillStyle = dark ? '#a3c0c0' : '#4d696c'
+              x.font = '12px system-ui, sans-serif'
+              x.textAlign = 'right'
+              x.fillText(title, c.width - gap, 22)
+              return c.toDataURL('image/jpeg', 0.8)
+            },
+            [files.map(dataUrl), `${p.slug} · ${vp} · ${t} · data=real`, t === 'dark'],
+          )
+          fs.writeFileSync(path.join(dir, `pair__${p.slug}__${vp}__${t}.jpg`), Buffer.from(out.split(',')[1], 'base64'))
+          n++
+        }
+  })
+  log(`pairs: ${n}`)
+}
+
+/* ---------------- G3: before / after (C → C+) ---------------- */
+// qa/screenshots/v13-final/compare/{page}__{vp}__{theme}__c__before|after.jpg; cover rects from the shots report of that dir
+async function g3() {
+  const dir = path.join(QA_DIR, 'screenshots', 'v13-final', 'compare')
+  // 「after」用当前的报告（曲绘 + 头像的矩形，docs/19 G3：统计排除图片）；「before」用 Stage 1 时保存的报告
+  // （Phase A 的 C 只记曲绘矩形；那时的默认头像是中性灰鼓面，不落在朱色带，不影响统计）
+  const load = (f) => (fs.existsSync(f) ? JSON.parse(fs.readFileSync(f, 'utf8')) : [])
+  const rep = Object.fromEntries([...load(path.join(OUT_DIR, 'v13f', 'shots-report-compare-before.json')).filter((r) => r.name.endsWith('__before')), ...load(path.join(OUT_DIR, 'v13', 'shots-report-compare.json')).filter((r) => r.name.endsWith('__after'))].map((r) => [r.name, r]))
+  const rows = []
+  await withPage(async (page) => {
+    await page.addScriptTag({ content: HELPERS })
+    for (const p of PAGES)
+      for (const vp of VPS)
+        for (const t of THEMES) {
+          const row = { page: p.slug, vp, theme: t }
+          for (const when of ['before', 'after']) {
+            const n = `${p.slug}__${vp}__${t}__c__${when}`
+            if (!fs.existsSync(path.join(dir, n + '.jpg'))) continue
+            const m = await page.evaluate(MEASURE, [dataUrl(path.join(dir, n + '.jpg')), rep[n]?.census?.coverRects || [], TH])
+            row[when] = { don: m.whole.donBand, brand: m.whole.brandBand, ratio: m.whole.brandBand ? +(m.whole.donBand / m.whole.brandBand).toFixed(2) : null, donNoCovers: m.noCovers.donBand, brandNoCovers: m.noCovers.brandBand, ratioNoCovers: m.noCovers.brandBand ? +(m.noCovers.donBand / m.noCovers.brandBand).toFixed(2) : null, neutral: m.whole.neutral, darkTint: m.whole.darkTint, other: m.whole.otherSaturated }
+          }
+          rows.push(row)
+          const f = (x) => (x ? `don ${(x.don * 100).toFixed(2)}% brand ${(x.brand * 100).toFixed(2)}% ratio ${x.ratio} (no covers ${x.ratioNoCovers})` : '—')
+          log(`${p.slug} ${vp} ${t}: before ${f(row.before)} | after ${f(row.after)}`)
+        }
+  })
+  fs.writeFileSync(path.join(QA_DIR, 'screenshots', 'v13-final', 'g3-analysis.json'), JSON.stringify({ thresholds: TH, rows }, null, 1))
+}
+
 /* ---------------- index ---------------- */
 function index() {
   const files = fs.readdirSync(SHOT_DIR)
@@ -263,6 +340,8 @@ try {
   else if (cmd === 'triptych') await triptych()
   else if (cmd === 'analyze') await analyze()
   else if (cmd === 'index') index()
+  else if (cmd === 'g3') await g3()
+  else if (cmd === 'pairs') await pairs()
   else {
     console.log('usage: node qa/v13-post.mjs layout | triptych | analyze | index')
     process.exit(2)

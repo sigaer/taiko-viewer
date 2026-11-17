@@ -144,7 +144,7 @@ const activeGoal = goals.find((g) => g.status === 'active')
             :bands="bands"
             :days="days"
             :height="200"
-            :tone="q.metric === 'rating' ? 'var(--don)' : 'var(--ka)'"
+            :tone="q.metric === 'rating' ? 'var(--series)' : 'var(--series-alt)'"
             :label="stackLabel"
           />
 
@@ -308,11 +308,11 @@ const activeGoal = goals.find((g) => g.status === 'active')
   border-radius: var(--r-xs);
 }
 .sw.band {
-  background: var(--ka-wash);
-  border: 1px solid var(--ka);
+  background: var(--series-band-bg);
+  border: 1px solid var(--series-band-line);
 }
 .sw.band.cur {
-  background: color-mix(in srgb, var(--ka) 22%, var(--surface));
+  background: var(--series-band-cur);
 }
 .tick {
   width: 2px;
@@ -380,7 +380,7 @@ const activeGoal = goals.find((g) => g.status === 'active')
   line-height: 1.4;
 }
 a.mtext:hover {
-  color: var(--ka-ink);
+  color: var(--link);
   text-decoration: underline;
 }
 .older {
@@ -418,7 +418,7 @@ a.mtext:hover {
 .legend-line i {
   width: 18px;
   height: 0;
-  border-top: 2px solid var(--don);
+  border-top: 2px solid var(--series);
 }
 .legend-line i.dash {
   border-top: 2px dashed var(--ink-3);
@@ -429,7 +429,7 @@ a.mtext:hover {
   text-align: center;
 }
 .focus-say b {
-  color: var(--ka-ink);
+  color: var(--series-focus-ink);
 }
 .next {
   display: flex;

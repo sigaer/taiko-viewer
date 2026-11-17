@@ -402,7 +402,7 @@ const placeholder = computed(() => L('曲名、别名、帖子，或「16 oxxo 1
                           <span class="my">
                             <template v-if="mineOf(item.song, d)">
                               <Crown :v="mineOf(item.song, d).crown" size="sm" />
-                              <Rank :v="mineOf(item.song, d).rank" />
+                              <Rank :v="mineOf(item.song, d).rank" compact />
                               <span class="num sc">{{ fmt(mineOf(item.song, d).score) }}</span>
                             </template>
                             <span v-else class="na">—</span>
@@ -518,9 +518,9 @@ const placeholder = computed(() => L('曲名、别名、帖子，或「16 oxxo 1
   max-height: 76dvh;
   display: flex;
   flex-direction: column;
-  background: var(--surface);
+  background: var(--overlay-bg);
   border-radius: var(--overlay-radius);
-  box-shadow: var(--overlay-shadow);
+  box-shadow: var(--overlay-shadow), 0 0 0 1px var(--overlay-line);
   overflow: hidden;
   animation: drop var(--dur-2) var(--ease-out);
 }

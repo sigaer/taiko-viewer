@@ -202,7 +202,7 @@ function download() {
                   <td class="r num sc">{{ fmt(s.score) }}</td>
                   <td class="r num c-acc">{{ s.acc.toFixed(2) }}%</td>
                   <td class="c"><Crown :v="s.crown" /></td>
-                  <td class="c"><Rank :v="s.rank" /></td>
+                  <td class="c"><Rank :v="s.rank" named /></td>
                   <td>
                     <span class="rtcell">
                       <b class="num">{{ s.rt.toFixed(2) }}</b>
@@ -346,7 +346,7 @@ function download() {
   font-size: var(--fs-13);
 }
 .dims li.focus .dn {
-  color: var(--ka-ink);
+  color: var(--series-focus-ink);
   font-weight: 700;
 }
 .track {
@@ -358,7 +358,7 @@ function download() {
   position: absolute;
   top: -1px;
   height: 4px;
-  background: var(--don);
+  background: var(--series);
   border-radius: 2px;
 }
 .p0,
@@ -377,14 +377,14 @@ function download() {
 .p1 {
   width: 14px;
   height: 14px;
-  background: var(--don);
+  background: var(--series);
   box-shadow: inset 0 0 0 2px var(--note-ring), 0 0 0 1px var(--note-outline);
 }
 .dims li.focus .p1 {
-  background: var(--ka);
+  background: var(--series-focus);
 }
 .dims li.focus .seg-line {
-  background: var(--ka);
+  background: var(--series-focus);
 }
 .dims b {
   font-size: var(--fs-18);
@@ -425,7 +425,7 @@ function download() {
   min-width: 0;
 }
 .slink:hover :deep(.t) {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .idx {
   color: var(--ink-3);
@@ -443,7 +443,7 @@ function download() {
 .rtcell b {
   min-width: 44px;
   font-size: var(--fs-16);
-  color: var(--don-ink);
+  color: var(--emph-num);
 }
 .rtbar {
   flex: 1;
@@ -455,7 +455,7 @@ function download() {
 .rtbar i {
   display: block;
   height: 100%;
-  background: var(--don);
+  background: var(--series);
   border-radius: 3px;
 }
 tr.out .rtbar i {
@@ -477,7 +477,7 @@ tr.out .rtcell b {
   padding: 10px 12px;
   font-size: var(--fs-12);
   color: var(--ink-2);
-  border-top: 2px solid var(--don);
+  border-top: 2px solid var(--series);
 }
 .cut:hover {
   background: none;
@@ -528,7 +528,7 @@ tr.out .rtcell b {
 }
 .fr-head .num {
   flex: none;
-  color: var(--don-ink);
+  color: var(--emph-num);
   font-weight: 700;
 }
 .fr-name {
@@ -662,7 +662,7 @@ tr.out .rtcell b {
   }
   .mrt {
     font-size: var(--fs-22);
-    color: var(--don-ink);
+    color: var(--emph-num);
   }
   .mrow.out .mrt {
     color: var(--ink-3);
@@ -671,7 +671,7 @@ tr.out .rtcell b {
     padding: 8px 0;
     font-size: var(--fs-12);
     color: var(--ink-2);
-    border-top: 2px solid var(--don);
+    border-top: 2px solid var(--series);
     margin-top: -1px;
   }
 }

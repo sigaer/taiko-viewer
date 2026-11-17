@@ -134,7 +134,7 @@ function onTabKey(e) {
             <span v-if="roleText" class="role" :class="u.role">{{ roleText }}</span>
           </div>
           <div class="id-row">
-            <TitlePlate :text="u.title" :rare="u.rare" :game="u.gameTitle ?? null" :site="u.siteTitle" form="plate" />
+            <TitlePlate :text="u.title" :game="u.gameTitle ?? null" :site="u.siteTitle" form="plate" />
             <DanBadge :dan="u.dan" />
           </div>
           <p class="t-small loc">{{ L(city[0], city[1]) }} · {{ L(`${joined.y} 年 ${joined.m} 月加入`, `${joined.y}年${joined.m}月登録`) }}</p>
@@ -187,7 +187,7 @@ function onTabKey(e) {
                   <span class="rep-title title-wrap-2" :title="songTitle(songById[s.songId])">{{ songTitle(songById[s.songId]) }}</span>
                   <Diff :d="s.d" :star="s.star" :constant="s.constant" short />
                   <span class="rep-score"><b class="num">{{ fmt(s.score) }}</b></span>
-                  <span class="rep-lamp"><Crown :v="s.crown" /><Rank :v="s.rank" /></span>
+                  <span class="rep-lamp"><Crown :v="s.crown" /><Rank :v="s.rank" named /></span>
                 </span>
               </RouterLink>
               <button v-if="self" type="button" class="btn btn-ghost btn-sm swap" @click="swapSlot = i"><Icon name="sync" :size="14" />{{ L('更换', '変更') }}</button>
@@ -208,7 +208,7 @@ function onTabKey(e) {
                   <span class="num pos">{{ i + 1 }}</span>
                   <RouterLink :to="`/songs/${s.songId}?d=${s.d}&from=community`" class="grow"><SongCell :song="songById[s.songId]" /></RouterLink>
                   <Diff :d="s.d" :star="s.star" :constant="s.constant" short class="only-desktop" />
-                  <Crown :v="s.crown" /><Rank :v="s.rank" />
+                  <Crown :v="s.crown" /><Rank :v="s.rank" compact />
                   <b class="num sc">{{ fmt(s.score) }}</b>
                 </li>
               </ol>
@@ -306,8 +306,8 @@ function onTabKey(e) {
   margin-top: 16px;
   padding: 10px 12px 10px 16px;
   border-radius: var(--r-panel);
-  background: var(--ka-wash);
-  color: var(--ka-ink);
+  background: var(--info-wash);
+  color: var(--info-ink);
   font-size: var(--fs-13);
   font-weight: 500;
 }
@@ -336,6 +336,9 @@ function onTabKey(e) {
   display: flex;
   align-items: center;
   gap: 6px;
+  /* Stage 3 R3：标签行统一高度（= 30px 王冠），五个数字落在同一条基线上；
+     评价图标（占位 24、绘制 28）与纯文字的 Rating 标签不再把数字顶高或拉低 */
+  height: 30px;
   font-size: var(--fs-13);
   color: var(--ink-2);
   white-space: nowrap;
@@ -352,7 +355,7 @@ function onTabKey(e) {
   gap: 4px 10px;
 }
 .medal.rt .num {
-  color: var(--don-ink);
+  color: var(--emph-num);
 }
 .pct {
   font-size: var(--fs-13);
@@ -385,7 +388,7 @@ function onTabKey(e) {
   flex: 1; /* F5.1：三张卡片等高（网格行拉伸），「更换」贴卡片底部 */
 }
 .rep-link:hover .rep-title {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .rep-text {
   display: flex;

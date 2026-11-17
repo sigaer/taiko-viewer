@@ -27,7 +27,7 @@ export async function themeFlash(browser, base, findings, verified) {
               'DOMContentLoaded',
               () => {
                 const de = document.documentElement
-                window.__qaDcl = { theme: de.dataset.theme || null, bg: getComputedStyle(de).backgroundColor, bodyBg: document.body ? getComputedStyle(document.body).backgroundColor : null, scheme: getComputedStyle(de).colorScheme }
+                window.__qaDcl = { theme: de.dataset.theme || null, brand: de.dataset.brand || null, bg: getComputedStyle(de).backgroundColor, bodyBg: document.body ? getComputedStyle(document.body).backgroundColor : null, scheme: getComputedStyle(de).colorScheme }
               },
               { capture: true, once: true },
             )
@@ -42,10 +42,12 @@ export async function themeFlash(browser, base, findings, verified) {
         const bodyL = r ? lumOf(r.bodyBg) : null
         // transparent html bg (rgba(0,0,0,0)) renders as the canvas colour → white in light scheme
         const transparent = /rgba\(0, 0, 0, 0\)/.test(r?.bg || '')
-        const ok = r && r.theme === 'dark' && !transparent && l != null && l < 0.25
+        // Phase B：默认是 C+（teal）；首屏脚本必须已写入 data-brand=teal，html 底色就是 C+ 深色 --bg #0c2023（不先闪 Phase A 的 #10282b 或藍墨）
+        const okBrand = r && r.brand === 'teal' && r.bg === 'rgb(12, 32, 35)'
+        const ok = r && r.theme === 'dark' && !transparent && l != null && l < 0.25 && okBrand
         results.push({ scenario: s.label, route, ...r, ok })
         if (!ok)
-          findings.push({ check: 'theme-flash', severity: 'error', route, case: `theme-flash:${s.label}`, selector: 'html', detail: `at DOMContentLoaded data-theme=${r?.theme} html bg=${r?.bg} body bg=${r?.bodyBg} color-scheme=${r?.scheme} — not dark yet` })
+          findings.push({ check: 'theme-flash', severity: 'error', route, case: `theme-flash:${s.label}`, selector: 'html', detail: `at DOMContentLoaded data-theme=${r?.theme} data-brand=${r?.brand} html bg=${r?.bg} body bg=${r?.bodyBg} color-scheme=${r?.scheme} — not dark yet` })
         await page.close()
       } finally {
         await withTimeout(ctx.close(), 10_000, 'ctx.close').catch(() => {})

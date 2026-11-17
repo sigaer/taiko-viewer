@@ -282,7 +282,7 @@ const colCount = computed(() => 2 + numCols.value.length + (isReady.value ? 1 : 
                   <span v-else class="num">{{ c.key === 'notes' ? fmt(r.chart.notes) : fx(r.chart[c.key]) }}</span>
                 </td>
                 <td v-if="isReady" class="c">
-                  <span v-if="scoreRow(r)" class="mine"><Crown :v="scoreRow(r).crown" /><Rank :v="scoreRow(r).rank" /></span>
+                  <span v-if="scoreRow(r)" class="mine"><Crown :v="scoreRow(r).crown" /><Rank :v="scoreRow(r).rank" named /></span>
                   <span v-else class="na">—</span>
                 </td>
               </VirtualList>
@@ -333,7 +333,7 @@ const colCount = computed(() => 2 + numCols.value.length + (isReady.value ? 1 : 
           </template>
           <template v-if="isReady">
             <dt>{{ L('我的成绩', '自分の記録') }}</dt>
-            <dd v-if="selScore" class="mine end"><Crown :v="selScore.crown" /><Rank :v="selScore.rank" /><span class="num">{{ fx(selScore.acc) }}%</span></dd>
+            <dd v-if="selScore" class="mine end"><Crown :v="selScore.crown" /><Rank :v="selScore.rank" named /><span class="num">{{ fx(selScore.acc) }}%</span></dd>
             <dd v-else class="na">—</dd>
           </template>
         </dl>
@@ -461,10 +461,10 @@ const colCount = computed(() => 2 + numCols.value.length + (isReady.value ? 1 : 
   border-radius: var(--r-ctl);
 }
 .ctable tr.is-sel td {
-  background: color-mix(in srgb, var(--ka) 9%, var(--surface));
+  background: var(--row-sel-bg);
 }
 .ctable tr.is-sel td.song {
-  box-shadow: inset 3px 0 0 var(--ka), inset 0 -1px 0 var(--line);
+  box-shadow: inset 3px 0 0 var(--row-sel-line), inset 0 -1px 0 var(--line);
 }
 .ctable td .num {
   font-size: var(--fs-14);
@@ -472,7 +472,7 @@ const colCount = computed(() => 2 + numCols.value.length + (isReady.value ? 1 : 
 }
 .ctable td.main-col .num {
   font-size: var(--fs-16);
-  color: var(--don-ink);
+  color: var(--emph-num);
   font-weight: 700;
 }
 .ctable td.sorted:not(.main-col) .num {
@@ -499,7 +499,7 @@ const colCount = computed(() => 2 + numCols.value.length + (isReady.value ? 1 : 
   display: block;
   height: 100%;
   border-radius: 2px;
-  background: var(--ka);
+  background: var(--series-alt);
 }
 .mine {
   display: inline-flex;
@@ -528,8 +528,8 @@ const colCount = computed(() => 2 + numCols.value.length + (isReady.value ? 1 : 
   max-width: 200px;
 }
 .tablewrap.overflow tr.is-sel td.song {
-  background: color-mix(in srgb, var(--ka) 9%, var(--surface));
-  box-shadow: inset 3px 0 0 var(--ka), inset -1px 0 0 var(--line-strong), inset 0 -1px 0 var(--line);
+  background: var(--row-sel-bg);
+  box-shadow: inset 3px 0 0 var(--row-sel-line), inset -1px 0 0 var(--line-strong), inset 0 -1px 0 var(--line);
 }
 
 /* ---------- 检视栏 ---------- */
@@ -589,7 +589,7 @@ const colCount = computed(() => 2 + numCols.value.length + (isReady.value ? 1 : 
 .tick.main::before {
   left: -1.5px;
   width: 3px;
-  background: var(--don);
+  background: var(--series);
 }
 .lb {
   position: absolute;
@@ -606,7 +606,7 @@ const colCount = computed(() => 2 + numCols.value.length + (isReady.value ? 1 : 
   font-size: var(--fs-18);
 }
 .tick.main .lb b {
-  color: var(--don-ink);
+  color: var(--emph-num);
 }
 .tick.lo .lb {
   right: 7px;
@@ -699,7 +699,7 @@ const colCount = computed(() => 2 + numCols.value.length + (isReady.value ? 1 : 
     color: var(--ink-3);
   }
   .mrow[aria-pressed='true'] {
-    background: color-mix(in srgb, var(--ka) 9%, var(--surface));
+    background: var(--row-sel-bg);
   }
   .mbody {
     min-width: 0;
@@ -730,7 +730,7 @@ const colCount = computed(() => 2 + numCols.value.length + (isReady.value ? 1 : 
     font-size: var(--fs-28);
     font-weight: 700;
     line-height: 1;
-    color: var(--don-ink);
+    color: var(--emph-num);
   }
 }
 </style>

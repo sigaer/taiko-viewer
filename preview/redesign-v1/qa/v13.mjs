@@ -83,7 +83,8 @@ export async function assetCensus(page) {
     }
     const all = (q) => [...document.querySelectorAll(q)].filter(vis)
     const realCovers = all('.cover.acov.real').filter((c) => c.querySelector('img.on'))
-    const coverRects = all('.cover').map((c) => {
+    // 曲绘与头像的矩形（docs/19 G3：像素统计排除图片——它们不是界面自己的颜色）
+    const coverRects = all('.cover, .aavatar, .brand-logo').map((c) => {
       const r = c.getBoundingClientRect()
       return [Math.max(0, r.x), Math.max(0, r.y), Math.min(innerWidth, r.right), Math.min(vh, r.bottom)]
     })

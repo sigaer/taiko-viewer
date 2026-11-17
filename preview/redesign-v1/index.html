@@ -32,7 +32,8 @@
         d.dataset.theme = t
         d.lang = s.locale === 'ja' ? 'ja' : 'zh-CN'
         if (s.motion === 'reduce') d.dataset.motion = 'reduce'
-        var v = /^[abc]$/.test(q.variant || '') ? q.variant : /^[abc]$/.test(s.variant || '') ? s.variant : 'a'
+        // Phase B：默认 C+；Phase A 期间存下的版本选择（没有 variantRev）不沿用
+        var v = /^[abc]$/.test(q.variant || '') ? q.variant : s.variantRev === 'phase-b' && /^[abc]$/.test(s.variant || '') ? s.variant : 'c'
         d.dataset.assets = v === 'a' ? 'generated' : 'authentic'
         d.dataset.brand = v === 'c' ? 'teal' : 'fumen'
       })()
@@ -49,17 +50,18 @@
         background: #101728;
         color: #e9edf7;
       }
-      /* 版本 C（Viewer Teal）：与 tokens.css 的 teal --bg / --ink 一致 */
+      /* C+（Viewer Teal，默认）：与 tokens.css 的 teal --bg / --ink 一致（深色 --bg 是 C+ G1 的 #0c2023）。
+         上面两条是历史版本 A、B（fumen）的底色 */
       html[data-brand='teal'] {
         background: #eaf6f5;
         color: #203f43;
       }
       html[data-brand='teal'][data-theme='dark'] {
-        background: #10282b;
+        background: #0c2023;
         color: #e4f4f1;
       }
     </style>
-    <title>Taiko Viewer · Design V1.3 (Phase A)</title>
+    <title>Taiko Viewer · Design V1.3</title>
   </head>
   <body>
     <div id="app"></div>

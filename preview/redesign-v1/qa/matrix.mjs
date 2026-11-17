@@ -34,28 +34,44 @@ function defaultAuth(screens, p) {
 }
 
 export function caseId(c) {
-  return [slugRoute(c.route), c.vp, c.theme, c.locale, c.auth, c.dataset, ...(c.variant && c.variant !== 'a' ? [c.variant] : [])].join('__')
+  return [slugRoute(c.route), c.vp, c.theme, c.locale, c.auth, c.dataset, ...(c.variant && c.variant !== 'c' ? [c.variant] : [])].join('__')
 }
 
-// V1.3 Phase A targeted set (--v13): the four comparison pages × 5 viewports × light / dark × variants B and C on data=real,
-// plus ja once (four pages × 1440 / 390, light, B and C).
+// V1.3 targeted set (--v13). Phase B Stage 1: the four representative pages on C+ (the default variant) ×
+// 5 viewports × light / dark, on the default data AND data=real, plus ja once (four pages × 1440 / 390, light, both datasets).
+// (Phase A ran the same pages on variants B and C with data=real.)
 export const V13_PAGES = ['/', '/songs/615', '/play/scores', '/community']
 function v13Matrix() {
   const out = []
   const mk = (route, vp, o) => {
-    const c = { route, vp, theme: o.theme || 'light', locale: o.locale || 'zh', auth: 'ready', dataset: 'real', variant: o.variant, core: false, tags: [o.tag] }
+    const c = { route, vp, theme: o.theme || 'light', locale: o.locale || 'zh', auth: 'ready', dataset: o.dataset, variant: 'c', core: false, tags: [o.tag] }
     c.id = caseId(c)
     out.push(c)
   }
-  for (const v of ['b', 'c'])
+  for (const dataset of ['full', 'real'])
     for (const p of V13_PAGES) {
-      for (const vp of Object.keys(VIEWPORTS)) for (const theme of ['light', 'dark']) mk(p, vp, { theme, variant: v, tag: 'v13' })
-      for (const vp of ['1440x900', '390x844']) mk(p, vp, { locale: 'ja', variant: v, tag: 'v13-ja' })
+      for (const vp of Object.keys(VIEWPORTS)) for (const theme of ['light', 'dark']) mk(p, vp, { theme, dataset, tag: 'v13' })
+      for (const vp of ['1440x900', '390x844']) mk(p, vp, { locale: 'ja', dataset, tag: 'v13-ja' })
     }
   return out
 }
 
-export async function buildMatrix({ quick = false, only = null, v13 = false } = {}) {
+// G12 缺失素材用例（--blocked）：今日、曲库、歌曲详情、成绩、社区、个人主页 × 1440 / 390 × 浅 / 深，曲绘域名被屏蔽
+export const BLOCKED_PAGES = ['/', '/songs', '/songs/615', '/play/scores', '/community', '/u/mochidon']
+function blockedMatrix() {
+  const out = []
+  for (const p of BLOCKED_PAGES)
+    for (const vp of ['1440x900', '390x844'])
+      for (const theme of ['light', 'dark']) {
+        const c = { route: p, vp, theme, locale: 'zh', auth: 'ready', dataset: 'full', variant: 'c', core: false, tags: ['blocked'] }
+        c.id = caseId(c) + '__blocked'
+        out.push(c)
+      }
+  return out
+}
+
+export async function buildMatrix({ quick = false, only = null, v13 = false, blocked = false } = {}) {
+  if (blocked) return { cases: blockedMatrix(), pages: BLOCKED_PAGES }
   if (v13) {
     let list = v13Matrix()
     if (only) list = list.filter((c) => c.id.includes(only) || c.route.includes(only))

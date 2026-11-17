@@ -24,7 +24,7 @@ const NOW = '11-16 20:46'
 
 const tickets = ref([
   {
-    id: 2187, cat: 'score', status: 'waiting', updated: '11-16 19:20', title: '千本桜（里）全良后，歌曲页的王冠还是全连',
+    id: 2187, cat: 'score', status: 'waiting', updated: '11-16 19:20', title: 'Bad Apple!! feat.nomico（里）全良后，歌曲页的王冠还是全连',
     messages: [
       { from: 'me', at: '11-16 18:55', text: '打出了全良，同步后成长记录里有「新全良」，但歌曲页的王冠还是金色。' },
       { from: 'staff', at: '11-16 19:05', text: '收到。能告诉我们是哪一次同步吗？我们查一下那次的成绩快照。' },
@@ -46,7 +46,7 @@ const tickets = ref([
     ],
   },
   {
-    id: 2142, cat: 'catalog', status: 'done', updated: '11-08 16:30', title: '幽玄ノ乱 鬼的谱面图少了两个音符',
+    id: 2142, cat: 'catalog', status: 'done', updated: '11-08 16:30', title: 'Abyss of hell 鬼的谱面图少了两个音符',
     messages: [
       { from: 'me', at: '11-07 21:15', text: '歌曲页和游戏结算都是 1262，但谱面图数下来只有 1260。' },
       { from: 'staff', at: '11-08 11:20', text: '第 87 小节有两个音符被标记遮住了，谱面图已重新生成。' },
@@ -313,7 +313,7 @@ function submitNew() {
 }
 .tk.on {
   background: var(--surface-2);
-  box-shadow: inset 3px 0 0 var(--ink);
+  box-shadow: inset 3px 0 0 var(--selected-line);
 }
 .tk-title {
   font-size: var(--fs-16);

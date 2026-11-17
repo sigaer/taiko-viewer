@@ -3,6 +3,7 @@ import { useAuthentic } from './assets'
 import { computed } from 'vue'
 import { DIFFS } from '../mock/data'
 import { L } from '../store'
+import { diffImage } from './gamemap'
 
 /**
  * 难度徽章：难度 + 星级 +（可选）定数。三段信息始终按同一顺序出现。
@@ -31,7 +32,7 @@ const icon = computed(() => (props.lg ? 22 : 18))
 
 <template>
   <span v-if="authentic" class="adiff" :class="[meta.key, { lg }]" :title="full">
-    <span class="adiff-ico" :style="{ width: icon + 'px', height: icon + 'px' }"><img :src="`game/diff/${d}.png`" alt="" :width="icon" :height="icon" decoding="async" /></span>
+    <span class="adiff-ico" :style="{ width: icon + 'px', height: icon + 'px' }"><img :src="diffImage(d)" alt="" :width="icon" :height="icon" decoding="async" /></span>
     <span v-if="d === 5" class="adiff-ura" aria-hidden="true">{{ L('里', '裏') }}</span>
     <span class="sr-only">{{ full }}</span>
     <span v-if="star != null" class="s num"><span aria-hidden="true">★</span><span class="sr-only">{{ L('星级', '星') }}</span>{{ star }}</span>

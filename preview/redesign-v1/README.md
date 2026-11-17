@@ -1,22 +1,15 @@
-# Taiko Viewer Design V1.3（Phase A）—— 譜面 Fumen
+# Taiko Viewer Design V1.3 Final — Design Freeze Candidate（待批准）
 
-Taiko Viewer 全站重新设计的高保真原型（方向名「譜面 Fumen」）。
+Taiko Viewer 全站重新设计的高保真原型。当前版本是 V1.3 Final，状态为 Design Freeze Candidate，等待批准（`docs/22-v1.3-design-freeze.md`）。
 
-- **默认状态是 V1.2**（Design Freeze Candidate，尚未批准，见 `docs/13-design-freeze.md`）。
-- **V1.3 Phase A** 在它之上加了三个可切换的对照版本：A（V1.2 基线）、B（真实游戏素材）、C（真实素材 + 青绿品牌）。方向尚未选定，见 `docs/18-v1.3-design-decision.md`。
-
-## V1.3 Phase A
-
-- 实时对照：`#/review/compare`。素材页：`#/review/assets`。
-- 任意页面的地址在 `#` 之前加 `?variant=a|b|c`、`?theme=light|dark`、`?data=full|demo|real`，只对这次加载生效；原型面板里也可以切换。
-- 对照截图在 `qa/screenshots/v13/`（入口 `index.html`）。
-- 真实图标在 `public/game/`，从正式站 `main` 原样取出。**曲绘不在仓库里**：版本 B、C 运行时从 `static.sakura-bot.cn` 加载白名单内曲目的曲绘，离线时显示占位。
-- C 目前只整理了今日、歌曲详情、全部成绩、社区四个页面和外壳，其余页面在 C 下颜色是混的。
+- **默认状态是 C+**：真实游戏素材 + Viewer Teal 品牌色（`docs/19-v1.3-phase-b-decisions.md`）。打开原型看到的就是最终设计。
+- **A、B 是历史对照开关**：A = V1.2 的生成式素材与 Fumen 配色；B = 真实素材 + Fumen 配色。Phase B 起不再维护和验收。
+- **要原样复现历史状态，用提交**：V1.2 是 `cb8fb5aa`，Phase A 的三版本对照是 `10d069b4`。开关里的 A、B 因为数据修正（G9）已经和历史截图不逐像素一致。
 
 ## 边界
 
 - 独立的 Vite + Vue 3 工程（纯 CSS），只使用 `src/mock/` 生成的模拟数据。
-- 不引用、不修改 `taiko_viewer/` 生产工程；不连接后端、数据库或任何 API；不改变 API 契约。唯一的外部请求是版本 B、C 下的曲绘图片（只带曲目 ID）。
+- 不引用、不修改 `taiko_viewer/` 生产工程；不连接后端、数据库或任何 API；不改变 API 契约。唯一的外部请求是曲绘图片：只对白名单曲目，只带曲目 ID，从 `static.sakura-bot.cn` 加载。
 - 不参与部署。同步、提交、删除等操作只在前端模拟。
 - 管理后台不在范围内；年度回顾只做了入口页。
 - 原型里的测试结果（包括 `qa/` 的浏览器验收）都基于模拟数据，**不是生产验收**。
@@ -41,33 +34,34 @@ npm run dev
 | 地址 | 内容 |
 |---|---|
 | `#/review` | 设计总览：全部画面清单（可按桌面或手机尺寸打开）与文档列表 |
-| `#/review/system` | Design System V1.2 活样张：每个样本由 tokens、base、domain 样式与组件源码直接渲染；书面规范见 `docs/04-design-system.md` |
-| `#/review/directions` | 三个设计方向（譜面 / 祭 / 帖）的对照 |
+| `#/review/system` | Design System V1.3 活样张；书面规范见 `docs/04-design-system.md` |
+| `#/review/assets` | 素材页：难度、王冠、评价、称号牌、曲绘与占位、头像 |
+| `#/review/compare` | A / B / C 三版本对照（历史） |
+| `#/review/directions` | 三个设计方向（譜面 / 祭 / 帖）的对照（历史） |
 | `#/review/device?p=/songs/615` | 手机预览框（390 / 360 / 820） |
 | `#/states` | 加载、空、错误、未登录、未绑定、404、离线、同步样张等状态 |
 
-## V1.2 新增与修改
+任意页面的地址在 `#` 之前加 `?variant=a|b|c`、`?theme=light|dark`、`?data=full|demo|real`，只对这次加载生效。
 
-逐项见 `docs/08-v1.1-fix-record.md` 第 13 节，裁定见 `docs/10-v1.2-design-decisions.md`，验收见 `docs/11-v1.2-quality-report.md`。
+## V1.3 做了什么
 
-- **手机详情页导航（F1）**：歌曲详情、帖子详情在手机上不显示底栏，顶栏为返回 · 标题 · 搜索 · 同步 · 通知；外壳提供 `--shell-bottom`，页面固定条写 `--dock-h`（`src/dock.js`），操作条、回复框、悬浮按钮、Toast 都从这些变量取位置；回复框 1–5 行并跟随软键盘（键盘跟随只有代码，未在真实键盘下验证）。
-- **触控豁免定稿（F2）**：只有满足三条的行内文字链接可以低于 44px，其余一律 ≥ 44×44。
-- **搜索面板性能（F3）**：首键与热态分开测（首键 p95 ≤ 100ms、热态 p95 ≤ 50ms）；删除结果行预挂载。
-- **剩余质量问题（F4）**：favicon（`public/favicon.svg`）、评审页焦点环、「文字超出盒子」提示分类、平板补看四页。
-- **个人主页（F5）**：代表成绩卡片等高；手机公开范围与数字区布局。
+逐项见 `docs/20-v1.3-phase-b-completion.md`，验收见 `docs/21-v1.3-visual-acceptance.md`。
 
-## V1.1 新增与修改
+- **品牌**：Viewer Teal 只表示交互（主按钮、链接、选中、焦点、导航）；音符色只表示游戏数据；咔向蓝偏移；深色主题五级明度（下沉 < 页面 < 卡片 < 分区 ≈ 浮层），浮层单独一级。
+- **数据靠排版**：主数字用 `--ink` 与字号层级，不用红色；下降量不用红色；图表里成片的朱色用柔化的 `--don-data`。
+- **真实素材**：曲绘（正式站静态域名，白名单曲目）、难度图标、王冠、评价、称号牌、默认头像、完整标志，原样使用；评价与王冠另有小尺寸版本。
+- **数据修正**：精选曲里 ID 与曲名对不上的换成真实曲目；默认数据首屏以真实曲绘为主；缺失曲绘清单。
+- **去掉没有来源的东西**：段位徽章不显示；没有「稀有称号」；不生成随机头像。
 
-逐项见 `docs/08-v1.1-fix-record.md`，裁决见 `docs/07-v1.1-design-decisions.md`。
+## `public/game`
 
-- **同步**：全站一个状态机（`src/sync.js`）；手机顶栏同步按钮 + 状态角标；桌面状态条 + 浮层；同一个 `SyncPanel`。
-- **全局搜索**：`src/search.js`（规范化、别名、假名互通、拉丁词首匹配）；配置串、物量、帖子、操作、页面；完整键盘与读屏语义；手机全屏。
-- **路由状态**：`useQueryState` 把筛选写进地址；返回还原滚动；详情页返回走历史。
-- **Design System 修复**：K1–K10 全部处理；控件与浮层 token；`--diff-*-ink` 等文字色；236 项对比度检查；首屏主题不闪；减少动效；缺失值统一「—」。
-- **真实规模数据**：`full` 1,520 首 / 880 条成绩 / 240 帖；`demo` 30 首精选曲；14 类边界曲。
-- **新组件**：VirtualList、TimeStack、PlayerAvatar、TitlePlate、DanBadge、Popover、SyncPanel、SyncButton。
-- **模块视觉**：今日、歌曲详情、成长时间栈、目标、社区头条、帖子分页、个人主页、「我的」、账号类单栏、表格列优先级与密度。
-- **截图复核裁定 C1–C14**：平板今日列表、谱面带列宽、谱面图每行小节数、平板曲库筛选、难度文字、详情页曲名等。
+真实素材目录，共 80 个文件、904,131 字节（约 883 KB）：
+
+- 从正式站 `origin/main` 原样复制 31 个：难度 5、王冠 3、评价 7、称号牌 12、牌面清单 1、头像 2、完整标志 1。来源路径与 md5 见 `public/game/README.md`。
+- 小尺寸素材 46 个：评价 `rank/56`、`rank/80`，王冠 `crown/36`、`crown/60`、`crown/96`，每个尺寸有 WebP 与 PNG 两份。由 `qa/tools/gen-small-assets.mjs` 从原图等比缩小，前后字节数在 `small-assets.json`。
+- `README.md`、`MISSING.md`（六首没有曲绘的真实曲目）、`small-assets.json`。
+
+曲绘不在仓库里。
 
 ## 原型控制面板
 
@@ -75,15 +69,16 @@ npm run dev
 
 | 开关 | 取值 |
 |---|---|
+| 版本 | C+（默认）/ A、B（历史，标为历史对照） |
 | 主题 | 跟随系统 / 浅色 / 深色（`system` / `light` / `dark`） |
 | 语言 | 简体中文 / 日本語（`zh` / `ja`） |
 | 登录态 | 游客 / 未绑定 / 无成绩 / 已同步（`guest` / `unbound` / `empty` / `ready`，默认 `ready`） |
-| 数据规模 | 真实规模 / 精选 30 首（`full` / `demo`），切换后刷新；也可用地址参数 `?data=full|demo` |
+| 数据 | `full`（默认：50 首真实曲目 + 1,470 首生成曲）/ `demo`（30 首精选）/ `real`（只有 50 首真实曲目），切换后刷新 |
 | 下一次同步结果 | 成功 / 部分成功 / 失败（`success` / `partial` / `failed`） |
-| 减少动效 | 跟随系统 / 开启（`system` / `reduce`，开启时根元素 `data-motion="reduce"`） |
-| 列表密度 | 宽松 / 紧凑（`comfortable` / `compact`，与设置页同一个值） |
+| 减少动效 | 跟随系统 / 开启（`system` / `reduce`） |
+| 列表密度 | 宽松 / 紧凑（`comfortable` / `compact`） |
 
-设置写入 `localStorage['tv-design-v1']`，iframe 通过 `storage` 事件与外层同步。
+设置写入 `localStorage['tv-design-v1']`，iframe 通过 `storage` 事件与外层同步。Phase A 期间存下的版本选择不沿用，打开原型一律回到 C+。
 
 ## Node 检查
 
@@ -91,10 +86,11 @@ npm run dev
 
 | 命令 | 内容 |
 |---|---|
-| `node src/mock/selftest.mjs` | 模拟数据自检：两套数据集的数量、边界桶、索引一致性、确定性、生成耗时 |
-| `node src/search.test.mjs` | 命令面板纯逻辑（P1–P6）与每次按键耗时 |
-| `node src/sync.test.mjs` | 同步状态机（S1），假计时器 |
-| `node src/styles/contrast-check.mjs [--json]` | token 对比度（236 项，浅深分别计）；不达标时退出码 1 |
+| `node src/mock/selftest.mjs` | 模拟数据自检：数据集的数量、边界桶、索引一致性、确定性、生成耗时 |
+| `node src/search.test.mjs` | 命令面板纯逻辑与每次按键耗时 |
+| `node src/sync.test.mjs` | 同步状态机，假计时器 |
+| `node src/styles/contrast-check.mjs [--json]` | token 对比度：当前 630 项（fumen 与 teal 的浅、深四套），全部达标；不达标时退出码 1 |
+| `node src/assets.test.mjs` | 素材映射：难度、王冠优先级、评价值 ↔ 文件与中日文名称（与正式站 `scoreRank.ts` 一致）、12 张称号牌、每个复制文件的 md5；当前 99 项 |
 
 ## 浏览器验收（QA）
 
@@ -106,34 +102,36 @@ npm run qa:quick        # 快速子集（--quick）
 npm run qa:curate       # 把关键截图复制到 qa/screenshots 并生成 index.html
 node qa/run.mjs --suite checks --only songs-615
 node qa/run.mjs --suite flows --flows palette,sync
-node qa/compare.mjs capture before|after   # 手机详情页修改前后的定点截图
-node qa/compare.mjs combine                # 合成前后对比图
+node qa/run.mjs --suite visual,checks --blocked   # 屏蔽曲绘域名，跑缺失素材用例
+node qa/run.mjs --suite perf --variant a          # 性能套件默认测 C+；只有测历史版本 A / B 时才加 --variant
+node qa/run.mjs --v13                             # 四个代表页面的定向检查
 ```
 
-常用参数：`--suite visual|checks|flows|perf|all`（可逗号分隔）、`--quick`、`--only <子串>`、`--flows a,b`、`--base URL`（对已有服务器运行，不构建）、`--no-build`、`--max-minutes 25`、`--concurrency 1|2`。
+常用参数：`--suite visual|checks|flows|perf|all`（可逗号分隔）、`--quick`、`--only <子串>`、`--flows a,b`、`--base URL`（对已有服务器运行，不构建）、`--no-build`、`--max-minutes 25`、`--concurrency 1|2`；V1.3 新增 `--blocked`、`--variant a|b|c`（只影响性能套件，`full` 与 `demo` 两次都按它跑；默认 `c`，测量前断言根元素的版本属性）、`--v13`。
 
-- 原始输出：`qa/out/`（`results.json`、`summary.md`、`run.log`、`shots/`、`flows/`），不入库（`.gitignore`）。
-- 入库的精选截图：`qa/screenshots/`，用 `qa/screenshots/index.html` 浏览；手机详情页修改前后的对比图在 `qa/screenshots/compare/`（390 与 360 宽，修改前 / 修改后并排）。
-- 最近一次结果（V1.2）：368 个用例、18 个流程全部通过，错误 0、警告 0，性能预算全部满足；详见 `docs/11-v1.2-quality-report.md`。V1.1 的结果见 `docs/09-v1.1-qa-report.md`。
+- 性能预算：搜索面板首键 p95 ≤ 50 ms、热态 p95 ≤ 50 ms，路由切换 p95 ≤ 200 ms，其余沿用 V1.2。
+- 原始输出：`qa/out/`，不入库（`.gitignore`）。
+- 入库的截图：V1.3 Final 在 `qa/screenshots/v13-final/`；Phase A 对照在 `qa/screenshots/v13/`；V1.2 及更早在 `qa/screenshots/`（含 `compare/`），原样保留，不重拍。
+- 最近一次结果（V1.3 Final，C+，`docs/21-v1.3-visual-acceptance.md`）：完整矩阵 378 个用例，错误 0、警告 0；18 个流程全部通过；缺失素材 24 个用例，错误 0、警告 0；5 轮性能全部在预算内（`full` 首键 p95 15.7–22.5 ms、热态 13.3–17.3 ms、路由切换 79.1–100.9 ms）。Phase B 前期写过的一组性能数字实际测的是历史版本 A，已在 `21` §5 更正。V1.2 的结果在 `docs/11-v1.2-quality-report.md`。
 - 以上都在模拟数据上完成，不是生产验收。
 
 ## 目录
 
 ```text
 preview/redesign-v1/
-├─ index.html          首屏主题脚本（D10）、favicon 引用、noindex
-├─ public/             favicon.svg
+├─ index.html          首屏主题与版本脚本、favicon 引用、noindex
+├─ public/             favicon.svg；game/（真实素材）
 ├─ vite.config.js
 ├─ docs/               设计文档（见下表）
-├─ qa/                 浏览器验收脚本、精选截图
+├─ qa/                 浏览器验收脚本、tools/（小尺寸素材生成）、精选截图
 └─ src/
-   ├─ main.js · App.vue · router.js · store.js
+   ├─ main.js · App.vue · router.js · store.js · assets.test.mjs
    ├─ sync.js · search.js · routeState.js · motion.js · breakpoints.js
    ├─ sectionNav.js · hscroll.js · focusTrap.js · dock.js
    ├─ styles/          tokens.css · base.css · domain.css · contrast-check.mjs
-   ├─ components/      框架、浮层、图表与业务组件
+   ├─ components/      框架、浮层、图表与业务组件；gamemap.js · smallasset.js · lazy.js
    ├─ views/           产品画面（每个路由一个文件）；review/ 为评审页
-   └─ mock/            catalog.js · generate.js · data.js · selftest.mjs
+   └─ mock/            catalog.js · generate.js · data.js · real.js · titles.js · selftest.mjs
 ```
 
 ## 文档
@@ -143,18 +141,22 @@ preview/redesign-v1/
 | `docs/01-product-audit.md` | 现有产品的信息架构与设计问题 |
 | `docs/02-design-directions.md` | 三个设计方向与取舍 |
 | `docs/03-ia-mapping.md` | 新旧信息架构映射与功能覆盖清单 |
-| `docs/04-design-system.md` | Design System V1.2 规范 |
+| `docs/04-design-system.md` | Design System V1.3 规范 |
 | `docs/05-page-specs.md` | 主要页面的设计说明 |
 | `docs/06-migration-plan.md` | 实施建议与分阶段迁移方案 |
-| `docs/07-v1.1-design-decisions.md` | V1.1 设计裁决（S / P / R / D / M / V / Q / C） |
-| `docs/08-v1.1-fix-record.md` | V1.1 与 V1.2 逐项修复记录与验证级别 |
+| `docs/07-v1.1-design-decisions.md` | V1.1 设计裁决 |
+| `docs/08-v1.1-fix-record.md` | V1.1 与 V1.2 逐项修复记录 |
 | `docs/09-v1.1-qa-report.md` | V1.1 真实浏览器验收报告 |
-| `docs/10-v1.2-design-decisions.md` | V1.2 设计裁定（F1–F5，Design Freeze 轮） |
+| `docs/10-v1.2-design-decisions.md` | V1.2 设计裁定 |
 | `docs/11-v1.2-quality-report.md` | V1.2 质量与性能报告 |
-| `docs/12-risks-and-integration-acceptance.md` | 遗留风险登记与正式集成验收清单 |
-| `docs/13-design-freeze.md` | Design Freeze 决策 |
+| `docs/12-risks-and-integration-acceptance.md` | 遗留风险登记与正式集成验收清单（含 V1.3） |
+| `docs/13-design-freeze.md` | V1.2 Design Freeze 决策（历史） |
 | `docs/14-v1.3-asset-audit.md` | V1.3 素材盘点与业务映射 |
-| `docs/15-v1.3-brand-system.md` | V1.3 品牌配色与使用规则（Fumen × Viewer Teal） |
-| `docs/16-v1.3-component-specs.md` | V1.3 组件规范：曲绘、难度、王冠、评价、称号、头像 |
-| `docs/17-v1.3-visual-comparison.md` | V1.3 三版本视觉对照、性能与验证程度 |
-| `docs/18-v1.3-design-decision.md` | V1.3 推荐方向与待裁定事项 |
+| `docs/15-v1.3-brand-system.md` | Phase A 品牌配色与使用规则（历史；被 19 修订的以 19 为准） |
+| `docs/16-v1.3-component-specs.md` | Phase A 组件规范（历史；被 19 修订的以 19 为准） |
+| `docs/17-v1.3-visual-comparison.md` | Phase A 三版本视觉对照（历史） |
+| `docs/18-v1.3-design-decision.md` | Phase A 推荐方向与待裁定事项（历史） |
+| `docs/19-v1.3-phase-b-decisions.md` | Phase B 裁定（C+，G0–G13、D1–D14） |
+| `docs/20-v1.3-phase-b-completion.md` | Phase B 完成记录与验证程度 |
+| `docs/21-v1.3-visual-acceptance.md` | V1.3 视觉验收与测试报告 |
+| `docs/22-v1.3-design-freeze.md` | V1.3 Final 的 Design Freeze 候选文档 |

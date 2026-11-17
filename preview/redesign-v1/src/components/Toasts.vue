@@ -34,11 +34,11 @@ import { store } from '../store'
   gap: 10px;
   padding: 10px var(--overlay-pad) 10px 12px;
   border-radius: var(--overlay-radius);
-  background: var(--toast-bg);
-  color: var(--toast-ink);
+  background: var(--toast-surface);
+  color: var(--toast-text);
   font-size: var(--fs-14);
   font-weight: 500;
-  box-shadow: var(--overlay-shadow);
+  box-shadow: var(--overlay-shadow), 0 0 0 1px var(--overlay-line);
 }
 @media (max-width: 767px) {
   .toasts {

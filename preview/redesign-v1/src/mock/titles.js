@@ -69,3 +69,43 @@ export const PLATE_SAMPLES = [
 /** 站内称号（AccountTitle）：正式站 ANNUAL_BETA_TITLE。原型里挂在一个模拟玩家上 */
 export const SITE_TITLE = { key: 'annual-beta-pioneer', name: '虹光先行者', style: 'rainbow' }
 export const SITE_TITLE_HOLDER = 'hayate'
+
+/**
+ * 称号页的目录（docs/19 G8）：只用 title_song_relations.json 里真实存在的称号；按正式数据有的两个维度分组：
+ * 达成类型 req（clear / full_combo / all_perfect）与难度范围 scope（unspecified / oni / inner_oni / easy / normal / hard）。
+ * how = 关系表里的 condition_text 原文（正式数据中日文混合，原样显示）。plate = manifest 里这一组合的牌面编号；没有对应时为 null，只显示文字。
+ * owned / using 是模拟的玩家状态。
+ */
+export const TITLE_CATALOG = [
+  { id: 1, name: '最高速の歌姫', req: 'full_combo', scope: 'inner_oni', plate: 60, how: '初音ミクの消失‐劇場版‐(裏)をフルコンボ', owned: true, using: true },
+  { id: 2, name: 'きたさいたまの達人', req: 'full_combo', scope: 'oni', plate: 42, how: 'きたさいたま2000を難易度おにでフルコンボ', owned: true },
+  { id: 3, name: 'わさびの達人', req: 'full_combo', scope: 'oni', plate: 42, how: 'Wasabi Body Blowを難易度おにでフルコンボ', owned: false },
+  { id: 4, name: '黒薔薇の使徒', req: 'full_combo', scope: 'oni', plate: 42, how: 'Black Rose Apostleを難易度おにでフルコンボ', owned: false },
+  { id: 5, name: 'さんぽの達人', req: 'full_combo', scope: 'inner_oni', plate: 60, how: 'さんぽ(裏)をフルコンボ', owned: true },
+  { id: 6, name: '戦神', req: 'full_combo', scope: 'inner_oni', plate: 60, how: 'Xa(裏)をオプション「あべこべ」でフルコンボ', owned: false },
+  { id: 7, name: 'ドドドドドンだフルコンボ！', req: 'all_perfect', scope: 'inner_oni', plate: 61, how: '在《全力咚咚咚咚咚！》的“魔王（隐藏）”难度下达成全良连段吧', owned: false },
+  { id: 8, name: 'トロいか2000', req: 'all_perfect', scope: 'oni', plate: 43, how: '在《Toro-Ika 2000》的“魔王”难度下达成全良连段吧', owned: false },
+  { id: 9, name: '歌劇「リコレクトブルー」', req: 'clear', scope: 'oni', plate: 41, how: '在《歌剧「Recollect Blue」》的“魔王”难度下达成通关吧', owned: true },
+  { id: 10, name: '宝の丘', req: 'clear', scope: 'inner_oni', plate: 59, how: '在《宝物之丘》的“魔王（隐藏）”难度下达成通关吧', owned: true },
+  { id: 11, name: 'ばいそくドンだー', req: 'clear', scope: 'unspecified', plate: 0, how: '1プレイ中全曲でオプション「ばいそく」を付けてクリア', owned: true },
+  { id: 12, name: 'さんばいドンだー', req: 'clear', scope: 'unspecified', plate: 0, how: '1プレイ中全曲でオプション「さんばい」を付けてクリア', owned: false },
+  { id: 13, name: 'フルコンボの達人', req: 'full_combo', scope: 'unspecified', plate: 2, how: '在１次游玩中以“全连”通关所有曲目吧', owned: false },
+  { id: 14, name: 'たつじんコース', req: 'full_combo', scope: 'unspecified', plate: 2, how: '十露盤2000をフルコンボ', owned: true },
+  { id: 15, name: 'カオスタイムの達人', req: 'full_combo', scope: 'unspecified', plate: 2, how: '用任意难度在《!!!Chaos Time!!!》中达成全连吧', owned: false },
+  { id: 16, name: '手を叩きながら歩いていこう', req: 'full_combo', scope: 'easy', plate: null, how: '在《4+1的各自的未来》的“简单”难度下达成全连吧', owned: true },
+  { id: 17, name: '歌いながら歩いていこう', req: 'full_combo', scope: 'normal', plate: null, how: '在《4+1的各自的未来》的“一般”难度下达成全连吧', owned: false },
+  { id: 18, name: '支え合いながら歩いていこう', req: 'full_combo', scope: 'hard', plate: null, how: '在《4+1的各自的未来》的“困难”难度下达成全连吧', owned: false },
+]
+export const TITLE_REQ = [
+  { key: 'clear', zh: '通关', ja: 'クリア' },
+  { key: 'full_combo', zh: '全连', ja: 'フルコンボ' },
+  { key: 'all_perfect', zh: '全良', ja: '全良' },
+]
+export const TITLE_SCOPE = [
+  { key: 'unspecified', zh: '不限难度', ja: '難易度指定なし' },
+  { key: 'oni', zh: '魔王', ja: 'おに' },
+  { key: 'inner_oni', zh: '魔王（里）', ja: 'おに（裏）' },
+  { key: 'hard', zh: '困难', ja: 'むずかしい' },
+  { key: 'normal', zh: '普通', ja: 'ふつう' },
+  { key: 'easy', zh: '简单', ja: 'かんたん' },
+]

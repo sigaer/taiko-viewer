@@ -154,7 +154,7 @@ function setTag(name) {
                       <DanBadge :dan="leadAuthor.dan" />
                     </div>
                     <div class="la-line">
-                      <TitlePlate :text="leadAuthor.title" :rare="leadAuthor.rare" :game="leadAuthor.gameTitle ?? null" :site="leadAuthor.siteTitle" form="plate" />
+                      <TitlePlate :text="leadAuthor.title" :game="leadAuthor.gameTitle ?? null" :site="leadAuthor.siteTitle" form="plate" />
                       <span class="ago">{{ lead.ago }}</span>
                     </div>
                   </div>
@@ -649,8 +649,8 @@ function setTag(name) {
     width: 56px;
     height: 56px;
     border-radius: 50%;
-    background: var(--ink);
-    color: var(--bg);
+    background: var(--action-bg);
+    color: var(--action-ink);
     box-shadow: var(--shadow-lift);
   }
 }

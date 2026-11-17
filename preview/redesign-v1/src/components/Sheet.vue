@@ -87,9 +87,9 @@ onBeforeUnmount(() => {
   max-height: min(86dvh, 820px);
   display: flex;
   flex-direction: column;
-  background: var(--surface);
+  background: var(--overlay-bg);
   border-radius: var(--overlay-radius);
-  box-shadow: var(--overlay-shadow);
+  box-shadow: var(--overlay-shadow), 0 0 0 1px var(--overlay-line);
   animation: rise var(--dur-2) var(--ease-out);
 }
 @keyframes rise {

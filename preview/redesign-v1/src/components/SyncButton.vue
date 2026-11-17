@@ -203,8 +203,8 @@ onBeforeUnmount(() => listen(false))
   color: var(--ok);
 }
 .syncchip.warn {
-  background: var(--roll-wash);
-  color: var(--roll-ink);
+  background: var(--warn-wash);
+  color: var(--warn);
   font-weight: 700;
 }
 .syncchip.fail {
@@ -223,9 +223,9 @@ onBeforeUnmount(() => listen(false))
   width: 340px;
   max-width: calc(100vw - 32px);
   padding: var(--overlay-pad);
-  background: var(--surface);
+  background: var(--overlay-bg);
   border-radius: var(--overlay-radius);
-  box-shadow: var(--overlay-shadow);
+  box-shadow: var(--overlay-shadow), 0 0 0 1px var(--overlay-line);
 }
 .pop:focus {
   outline: none;

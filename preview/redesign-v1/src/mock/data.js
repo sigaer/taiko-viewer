@@ -1,7 +1,9 @@
 // Design V1.1 原型 Mock 数据 · 装配与导出。
 // 精选内容在 catalog.js（手写），生成器在 generate.js（确定性，无 Math.random / Date.now，「今天」= 2026-11-16）。
-// 数据集（M1）：full（默认）= 30 首精选 + 生成曲，共 ≥ 1,500 首；demo = 只有 30 首精选。
-//   real（V1.3 对照用，docs/16 A8）= 50 首真实曲号与曲名（real.js），其余数值仍是模拟数据。
+// 数据集（M1）：full（默认）= 50 首真实曲目 + 生成曲，共 1,520 首；demo = 30 首精选；real = 只有 50 首真实曲目。
+//   V1.3 Phase B（docs/19 G9）：精选曲里 ID 与曲名对不上或没有依据的 18 首，在所有数据集里都换成真实曲号与曲名
+//   （real.js，来自正式站测试数据）；带真实曲名的曲目 ID 都对得上。生成曲仍是示例曲目（不请求曲绘、显示示例占位）。
+//   成绩、王冠、评价、定数、帖子内容仍是确定性生成的模拟数据。
 //   解析顺序：地址 ?data=full|demo|real（location.search 或 hash 中 ? 之后）→ localStorage['tv-design-v1'].dataset → 'full'。
 //
 // 原型字段 → 真实模型字段（taiko_viewer/types/*）
@@ -43,7 +45,7 @@ import { BASE_GAME_TITLES, EXTRA_GAME_TITLES, SITE_TITLE, SITE_TITLE_HOLDER } fr
 import {
   buildCuratedSongs, genSongs, curatedScores, generatedScores, genRatingHistory, genDimHistory, genLaneDays,
   genWeeklies, genGoalHistory, genUsers, genThreads, genLongThreadPosts, genShortPosts, genNotifications,
-  makeFinders, normalize, parseConfig, round,
+  makeFinders, normalize, parseConfig, round, accToRt,
 } from './generate.js'
 
 export { GENRES, DIFFS, RANKS, CROWNS, DIMS, CHART_AXES, UGC_TAGS, FACT, GOAL_TYPES, THREAD_TYPES, sections, chartUgc, danGrades, events, devApps }
@@ -80,7 +82,7 @@ function resolveDataset() {
 export const datasetName = resolveDataset()
 const FULL = datasetName === 'full'
 const REAL = datasetName === 'real'
-const GENERATED_SONGS = 1490
+const GENERATED_SONGS = 1470 // + 50 首真实曲目 = 1,520
 const SCORE_TARGET = 880
 
 export const fmt = (n) => (n == null ? '—' : Number(n).toLocaleString('en-US'))
@@ -89,11 +91,10 @@ export const fx = (n, d = 2) => (n == null ? '—' : Number(n).toFixed(d))
 /* ---------------- real 数据集：曲目身份替换 ---------------- */
 const PAIR = new Map(REAL_PAIRS.map(([id, ja, zh]) => [id, { ja, zh }]))
 const VERIFIED = new Set(VERIFIED_CURATED)
-/** 旧 ID → 本数据集里的 ID（full / demo 原样返回） */
-const rid = (id) => (REAL && REAL_REMAP[id] != null ? REAL_REMAP[id] : id)
+/** 精选曲的旧 ID（V1.2 手写，已作废）→ 真实曲号。所有数据集都替换。 */
+const rid = (id) => (REAL_REMAP[id] != null ? REAL_REMAP[id] : id)
 // 手写文字里的曲名：按原行的日文名 / 中文名与 real.js 的简写表替换成借用的那首（只在 real 数据集）
 const NAME_SWAP = (() => {
-  if (!REAL) return []
   const skip = new Set(['ありがとう', '谢谢', 'そばかす', '雀斑']) // 同时是常用词，替换会误伤正文
   const out = []
   for (const row of SONG_ROWS) {
@@ -113,7 +114,6 @@ const swapText = (t) => {
 }
 /** 深拷贝并替换曲目引用：songId / song.id 换成新 ID，字符串里的曲名换成新曲名。full / demo 原样返回同一对象。 */
 function realize(v, key) {
-  if (!REAL) return v
   if (typeof v === 'string') return swapText(v)
   if (typeof v === 'number') return key === 'songId' ? rid(v) : v
   if (Array.isArray(v)) return v.map((x) => realize(x))
@@ -140,10 +140,9 @@ const realRows = () =>
     return r
   })
 const realAliases = () => Object.fromEntries(VERIFIED_CURATED.map((id) => [id, CURATED_ALIASES[id] || []]))
-const curated = REAL ? buildCuratedSongs(realRows(), realAliases()) : buildCuratedSongs(SONG_ROWS, CURATED_ALIASES)
-const generated = FULL ? genSongs(GENERATED_SONGS, curated.map((s) => s.id)) : { songs: [], edge: null }
+const curated = buildCuratedSongs(realRows(), realAliases())
 const realExtra = (() => {
-  if (!REAL) return []
+  if (!REAL && !FULL) return []
   const have = new Set(curated.map((s) => s.id))
   const ids = REAL_PAIRS.map((p) => p[0]).filter((id) => !have.has(id))
   // 星级、定数、谱面等模拟值借用生成器（取第 20 首起，避开边界用例），身份换成真实曲号与曲名
@@ -154,9 +153,11 @@ const realExtra = (() => {
   })
 })()
 
+const generated = FULL ? genSongs(GENERATED_SONGS, [...curated, ...realExtra].map((s) => s.id)) : { songs: [], edge: null }
+
 export const songs = [...curated, ...realExtra, ...generated.songs]
-// 曲绘白名单（docs/16 A1）：real 数据集的曲目全部有依据；full / demo 只有已验证的精选曲。合成曲一律不请求图片。
-for (const s of songs) s.coverOk = REAL || (!s.generated && VERIFIED.has(s.id))
+// 曲绘白名单（docs/16 A1）：曲号与曲名有依据的真实曲目才请求图片；生成曲一律显示示例占位。
+for (const s of songs) s.coverOk = !s.generated && PAIR.has(s.id)
 export const songById = Object.fromEntries(songs.map((s) => [s.id, s]))
 
 const chartMap = new Map()
@@ -169,18 +170,19 @@ export const songsByShelf = { 0: [], 1: [], 2: [] }
 for (const s of songs) (songsByShelf[s.shelf] ||= []).push(s)
 
 // M2 边界桶：精选曲中天然存在的 + 生成曲中按序号落位的。
+// Phase B：精选曲换成真实曲号后，按真实曲名重新挑边界用例（特殊字符：…！？、！、!!；中日同名）
 const CURATED_EDGE = {
-  special: [100136, 100052, 88],
-  sameTitle: [100138, 100136, 100120],
+  special: [484, 10, 345],
+  sameTitle: [138, 1308, 1197],
   noUra: [851, 816],
   unlisted: [438],
-  otherPlatform: [1290],
-  bpmRange: [100140, 1412],
+  otherPlatform: [1379],
+  bpmRange: [138, 1412],
 }
 export const EDGE = Object.fromEntries(
   ['longJa', 'longZh', 'special', 'sameTitle', 'noUra', 'oniOnly', 'noConstant', 'noChartImage', 'noAudio', 'noArtist', 'unlisted', 'otherPlatform', 'manyAliases', 'bpmRange'].map((k) => [
     k,
-    [...(CURATED_EDGE[k] || []).map(rid), ...(generated.edge?.[k] || [])].filter((id) => songById[id]),
+    [...(CURATED_EDGE[k] || []), ...(generated.edge?.[k] || [])].filter((id) => songById[id]),
   ]),
 )
 
@@ -201,7 +203,32 @@ fix(615, 4, { ng: 3, ok: 41, good: 688, crown: 0, score: 968440, rank: 7, acc: 9
 fix(233, 5, { ng: 0, ok: 0, good: chartOf(rid(233), 5).notes, crown: 2, score: 1004290, rank: 8, acc: 100, combo: chartOf(rid(233), 5).notes, daysAgo: 0, plays: 31 })
 fix(278, 5, { locked: true })
 
-export const scores = FULL ? [...cScores, ...generatedScores(generated.songs, SCORE_TARGET - cScores.length, RANKS)] : cScores
+// Stage 3 R4：按单曲 RT 排的列表（Rating「构成 Rating 的成绩」、个人主页「代表成绩」「最好成绩」）以真实曲目开头。
+// 取曲绘可用的真实曲目里定数最高的 8 张魔王 / 里谱（不含 public/game/MISSING.md 的 6 首），给它们确定性的高精度成绩，
+// 单曲 RT 因此排在生成曲前面。只改这 8 条模拟成绩的数值；成绩条数、玩家展示的 Rating（11.97）与六维不变。
+{
+  const MISSING = new Set([1255, 345, 32, 1323, 395, 1324])
+  const ACCS = [0.9962, 0.9951, 0.9944, 0.9936, 0.9929, 0.9921, 0.9913, 0.9905]
+  const top = cScores
+    .filter((x) => PAIR.has(x.songId) && !MISSING.has(x.songId) && x.constant != null && !x.locked && !(x.songId === rid(233) && x.d === 5))
+    .sort((a, b) => b.constant - a.constant || a.songId - b.songId || a.d - b.d)
+    .slice(0, ACCS.length)
+  top.forEach((x, i) => {
+    const notes = chartOf(x.songId, x.d).notes
+    const acc = ACCS[i]
+    const ok = Math.max(1, Math.round((1 - acc) * notes * 2))
+    const good = notes - ok
+    const realAcc = (good + ok * 0.5) / notes
+    const score = Math.round((1000000 * realAcc) / 10) * 10
+    Object.assign(x, { good, ok, ng: 0, crown: 1, combo: notes, score, rank: score >= 1000000 ? 8 : 7, acc: round(realAcc * 100, 2), rt: accToRt(x.constant, realAcc) })
+  })
+}
+
+// 默认数据的首屏（G9）：最近的游玩都是真实曲目——生成曲的成绩整体早 120 天（真实曲目的成绩在 0–119 天内），
+// 按日期排的成绩页首屏全是真实曲绘。这只是模拟数据的「最近」，排序的含义不变（仍按日期 / 分数 / 定数排）。
+const gScores = FULL ? generatedScores(generated.songs, SCORE_TARGET - cScores.length, RANKS) : []
+for (const x of gScores) x.daysAgo += 120
+export const scores = [...cScores, ...gScores]
 const scoreMap = new Map(scores.map((x) => [x.songId * 8 + x.d, x]))
 /** O(1)；找不到返回 undefined。 */
 export const scoreOf = (songId, d) => scoreMap.get(Number(songId) * 8 + Number(d))

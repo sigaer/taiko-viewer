@@ -9,7 +9,6 @@ import { PLATES } from '../mock/titles'
  *
  * 版本 A（V1.2 的 V6 称号牌）：一块小铭牌，双细线边框、两端各一颗鋲。
  *   text  string   称号文字（必填）
- *   rare  boolean  稀有称号：山吹色牌面
  *
  * 版本 B、C（docs/16 A5）：游戏称号与站内称号分开画。
  *   game  { name, plate, custom? } | null   游戏称号（user.gameTitle）；null = 没有称号，什么都不显示。
@@ -19,11 +18,10 @@ import { PLATES } from '../mock/titles'
  *                            text：列表行等窄位置，只显示 --ink-3 / --fs-12 文字，单行截断。
  *   site  { name } | null   站内称号（AccountTitle）：中性小标签 + 左侧 3px 彩虹竖条，不套牌面。
  *
- * 例：<TitlePlate :text="user.title" :rare="user.rare" :game="user.gameTitle" :site="user.siteTitle" form="plate" />
+ * 例：<TitlePlate :text="user.title" :game="user.gameTitle" :site="user.siteTitle" form="plate" />
  */
 const props = defineProps({
   text: { type: String, default: '' },
-  rare: { type: Boolean, default: false },
   game: { type: Object, default: undefined },
   form: { type: String, default: 'plate' },
   site: { type: Object, default: null },
@@ -63,7 +61,7 @@ watch(() => [props.game, props.form, authentic.value], fit)
 </script>
 
 <template>
-  <span v-if="legacy" class="plate" :class="{ rare }" :title="text">
+  <span v-if="legacy" class="plate" :title="text">
     <span class="pt">{{ text }}</span>
   </span>
   <span v-else class="gtitle" :class="'f-' + form">
@@ -112,11 +110,6 @@ watch(() => [props.game, props.form, authentic.value], fit)
   background: var(--pc);
   flex: none;
 }
-.plate.rare {
-  --pc: var(--roll);
-  background: var(--roll-wash);
-  color: var(--roll-ink);
-}
 .pt {
   min-width: 0;
   overflow: hidden;
@@ -126,8 +119,9 @@ watch(() => [props.game, props.form, authentic.value], fit)
 /* ---------- 版本 B、C ---------- */
 .gtitle {
   display: inline-flex;
+  flex-wrap: wrap; /* 窄屏：牌面 220px + 站内称号放不下一行时，站内称号换到下一行 */
   align-items: center;
-  gap: 6px;
+  gap: 4px 6px;
   min-width: 0;
   max-width: 100%;
   vertical-align: middle;

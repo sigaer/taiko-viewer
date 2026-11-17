@@ -18,9 +18,9 @@ import { danTier, faceColor } from './identity'
  *
  * 例：<PlayerAvatar :user="users[thread.author]" :size="32" />
  *
- * 版本 B、C（docs/16 A6）：有 avatarUrl（或 src）时显示图片（圆形、cover、1px --line 外描边），加载失败退回默认头像；
- *   默认头像是中性鼓面：--bg-sunk 鼓面、--line-strong 鼓缘、--ink-2 昵称首字，所有人同一种颜色，不按色相、段位着色。
- *   模拟玩家都没有 avatarUrl（原型不导入真实用户的图片）。
+ * 版本 B、C（docs/19 G6）：有 avatarUrl（或 src）时显示上传的图片（圆形、cover、1px --line 外描边）；
+ *   没有头像、或图片加载失败时，显示正式站的默认头像 /default-avatar.svg（原样复制在 public/game/avatar/，不改动）。
+ *   不生成任何随机的身份图；模拟玩家都没有 avatarUrl（原型不导入真实用户的图片）。
  */
 const props = defineProps({
   user: { type: Object, default: null },
@@ -32,9 +32,14 @@ const props = defineProps({
   src: { type: String, default: '' },
 })
 const authentic = useAuthentic()
-const url = computed(() => props.src || props.user?.avatarUrl || '')
+const DEFAULT_AVATAR = 'game/avatar/default-avatar.svg'
+const own = computed(() => props.src || props.user?.avatarUrl || '')
 const failed = ref(false)
-watch(url, () => (failed.value = false))
+watch(own, () => (failed.value = false))
+const url = computed(() => (own.value && !failed.value ? own.value : DEFAULT_AVATAR))
+function onErr() {
+  if (own.value) failed.value = true
+}
 const nm = computed(() => props.user?.name ?? props.name ?? '')
 const hueV = computed(() => props.user?.hue ?? props.hue ?? 220)
 const danV = computed(() => props.user?.dan ?? props.dan ?? '')
@@ -57,28 +62,14 @@ const rivets = computed(() => {
 
 <template>
   <span
-    v-if="authentic && url && !failed"
+    v-if="authentic"
     class="aavatar img"
     :style="{ width: size + 'px', height: size + 'px' }"
     :role="label ? 'img' : undefined"
     :aria-label="label || undefined"
     :aria-hidden="label ? undefined : 'true'"
-    ><img :src="url" alt="" :width="size" :height="size" decoding="async" @error="failed = true"
+    ><img :src="url" alt="" :width="size" :height="size" decoding="async" @error="onErr"
   /></span>
-  <svg
-    v-else-if="authentic"
-    class="aavatar"
-    :width="size"
-    :height="size"
-    viewBox="0 0 100 100"
-    :role="label ? 'img' : undefined"
-    :aria-label="label || undefined"
-    :aria-hidden="label ? undefined : 'true'"
-  >
-    <circle cx="50" cy="50" r="50" class="a-rim" />
-    <circle cx="50" cy="50" :r="50 - rim" class="a-face" />
-    <text x="50" y="52" text-anchor="middle" dominant-baseline="middle" class="a-glyph">{{ glyph }}</text>
-  </svg>
   <svg
     v-else
     class="pavatar"
@@ -139,18 +130,6 @@ const rivets = computed(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-}
-.a-rim {
-  fill: var(--line-strong);
-}
-.a-face {
-  fill: var(--bg-sunk);
-}
-.a-glyph {
-  fill: var(--ink-2);
-  font-family: var(--font-ui);
-  font-size: 40px;
-  font-weight: 700;
 }
 .glyph {
   fill: var(--note-ring);

@@ -134,7 +134,7 @@ export const screenReview = {
     await t.step('C8: palette hides "view all" when every song is listed', async () => {
       await page.keyboard.press('Control+k')
       const inp = page.locator('[role=dialog] input').last()
-      await inp.fill('千本')
+      await inp.fill('天狗')
       await page.waitForTimeout(400)
       const r = await page.evaluate(() => {
         const opts = [...document.querySelectorAll('[role=dialog] [role=option]')].map((o) => o.textContent)

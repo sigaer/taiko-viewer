@@ -3,6 +3,7 @@ import { computed, nextTick, onBeforeUnmount, reactive, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import Icon from '../components/Icon.vue'
 import Logo from '../components/Logo.vue'
+import { useAuthentic } from '../components/assets'
 import Lane from '../components/Lane.vue'
 import { laneDays, FACT, songById } from '../mock/data'
 import { store, L, toast, songTitle } from '../store'
@@ -137,13 +138,16 @@ function noteClass(f) {
   if (n === 'goal') return 'big roll'
   return n === 'ka' ? 'ka' : n === 'ghost' ? 'ghost' : ''
 }
+// C+ G6：登录页的品牌区用正式站的完整标志（optimized/logo-256.webp，原样复制）；紧凑导航仍是鼓面标志
+const authentic = useAuthentic()
+const BRAND_LOGO = 'game/brand/logo-256.webp'
 </script>
 
 <template>
   <div class="auth">
     <div class="side">
       <header class="top">
-        <RouterLink to="/" class="brand" :aria-label="L('Taiko Viewer 首页', 'Taiko Viewer ホーム')"><Logo :size="32" /><span>Taiko Viewer</span></RouterLink>
+        <RouterLink to="/" class="brand" :aria-label="L('Taiko Viewer 首页', 'Taiko Viewer ホーム')"><img v-if="authentic" class="brand-logo" :src="BRAND_LOGO" alt="" width="32" height="32" /><Logo v-else :size="32" /><span>Taiko Viewer</span></RouterLink>
         <div class="row top-acts">
           <button class="btn btn-ghost btn-sm" type="button" :lang="store.locale === 'zh' ? 'ja' : 'zh-CN'" @click="store.locale = store.locale === 'zh' ? 'ja' : 'zh'">{{ store.locale === 'zh' ? '日本語' : '中文' }}</button>
           <RouterLink to="/" class="btn btn-ghost btn-sm"><Icon name="chevL" :size="16" />{{ L('返回首页', 'ホームへ') }}</RouterLink>
@@ -331,6 +335,10 @@ function noteClass(f) {
 .top-acts {
   gap: 6px;
 }
+.brand-logo {
+  flex: none;
+  object-fit: contain;
+}
 .brand {
   display: inline-flex;
   align-items: center;
@@ -419,7 +427,7 @@ function noteClass(f) {
   color: var(--ink-2);
 }
 .pw-toggle.on {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .pw-toggle.on::after {
   /* 密码可见时，眼睛上加一道斜线：再点一次就隐藏 */

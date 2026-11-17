@@ -27,7 +27,8 @@ export function stateFor(c) {
     syncOutcome: c.syncOutcome || 'success',
     motion: c.motion || 'system',
     density: c.density || 'comfortable',
-    variant: c.variant || 'a',
+    variant: c.variant || 'c', // Phase B：默认 C+
+    variantRev: 'phase-b',
   }
 }
 
@@ -61,6 +62,8 @@ export async function newContext(browser, { vp = '1440x900', state = {}, colorSc
     { st },
   )
   if (extraInit) await ctx.addInitScript(extraInit.fn, extraInit.arg)
+  // V1.3 G12 缺失素材用例：QA_BLOCK_COVERS=1 时屏蔽曲绘域名（只在 run.mjs --blocked 里设置）
+  if (process.env.QA_BLOCK_COVERS === '1') await ctx.route('https://static.sakura-bot.cn/**', (r) => r.abort('blockedbyclient'))
   ctx.setDefaultTimeout(8000)
   ctx.setDefaultNavigationTimeout(20000)
   return ctx

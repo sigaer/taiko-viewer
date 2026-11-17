@@ -358,7 +358,7 @@ function enter() {
   background: var(--line-strong);
 }
 .stepper li.done + li::before {
-  background: var(--ka);
+  background: var(--progress-line);
 }
 .stepper .note {
   --n: 30px;
@@ -373,7 +373,7 @@ function enter() {
 }
 /* D11：音符里的数字。朱色音符换 --don-solid 底（白字 ≥ 4.5:1）；浅葱 / 山吹音符上的数字用深色 */
 .stepper .note:not(.ka, .roll, .ghost) {
-  background: var(--don-solid);
+  background: var(--action-bg);
 }
 .stepper .note:is(.ka, .roll) .num {
   color: var(--note-outline);
@@ -502,8 +502,8 @@ function enter() {
   gap: 10px;
   padding: 12px 14px;
   border-radius: var(--r-ctl);
-  background: var(--roll-wash);
-  color: var(--roll-ink);
+  background: var(--warn-wash);
+  color: var(--warn);
   font-size: var(--fs-14);
 }
 .alert span {
@@ -559,9 +559,9 @@ function enter() {
   font-weight: 700;
 }
 .phases li.now .mark {
-  background: var(--ka-wash);
-  color: var(--ka-ink);
-  box-shadow: inset 0 0 0 1.5px var(--ka);
+  background: var(--info-wash);
+  color: var(--info-ink);
+  box-shadow: inset 0 0 0 1.5px var(--info-line);
 }
 
 /* 结果 */
@@ -597,8 +597,8 @@ function enter() {
   font-size: var(--fs-16);
 }
 .state.warn {
-  background: var(--roll-wash);
-  color: var(--roll-ink);
+  background: var(--warn-wash);
+  color: var(--warn);
 }
 .state.bad {
   border: 1px solid var(--danger);

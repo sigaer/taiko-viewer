@@ -435,8 +435,8 @@ const retried = (zh, ja) => toast(L(zh, ja), 'info')
   height: 44px;
   margin-bottom: 8px;
   border-radius: 50%;
-  background: var(--roll-wash);
-  color: var(--roll-ink);
+  background: var(--warn-wash);
+  color: var(--warn);
 }
 .gate-acts {
   justify-content: center;

@@ -2,10 +2,11 @@
 import { expect, firstVisible, activeInfo } from '../lib/flowkit.mjs'
 
 const QUERIES = [
-  { q: '千本', expect: /千本[桜樱]/, label: 'title prefix (zh)' },
-  { q: 'センボンザクラ', expect: /千本[桜樱]/, label: 'katakana reading' },
-  { q: 'qby', expect: /qby|别名|別名/i, label: 'alias' },
-  { q: 'LiSA', expect: /LiSA/i, label: 'artist' },
+  // Phase B（docs/19 G9）：V1.2 的千本桜 / 紅蓮華 等精选曲换成了真实曲号与曲名，查询改用同一类型的真实曲目
+  { q: '天狗', expect: /天狗[配囃]/, label: 'title prefix (zh)' },
+  { q: 'テングバヤシ', expect: /天狗[配囃]/, label: 'katakana reading' },
+  { q: 'kien', expect: /kien|别名|別名/i, label: 'alias' },
+  { q: 'HOLIC', expect: /HOLIC/i, label: 'artist' },
   { q: '16 oxxo 180 鬼10', expect: /oxxo|配置|BPM|小节|小節/i, label: 'pattern string (P3)' },
   { q: '765', expect: /物量|765/, label: 'note count (P4)' },
   { q: '全良', expect: /全良/, label: 'term / thread' },
@@ -66,7 +67,7 @@ export const paletteDesktop = {
         const i = d.querySelector('input')
         return { role: i.getAttribute('role'), listbox: !!d.querySelector('[role=listbox]') }
       })
-      await setQuery(page, '千本')
+      await setQuery(page, '天狗')
       const opt = await page.locator('[role=dialog] [role=option]').count()
       expect(r.role === 'combobox' && r.listbox && opt > 0, `input role=${r.role}, listbox=${r.listbox}, options=${opt}`)
     })
@@ -96,8 +97,8 @@ export const paletteDesktop = {
       await page.keyboard.press('Home')
       expect((await activeIndex(page)) === 0, 'Home did not go to first item')
     })
-    await t.step('Enter on "千本" navigates to a song', async () => {
-      await setQuery(page, '千本')
+    await t.step('Enter on "天狗" navigates to a song', async () => {
+      await setQuery(page, '天狗')
       await page.keyboard.press('Home').catch(() => {})
       await page.keyboard.press('Enter')
       await page.waitForTimeout(500)
@@ -188,7 +189,7 @@ export const palettePhone = {
     })
     await t.step('first tap on a result navigates', async () => {
       const { input } = await paletteParts(page)
-      await input.fill('千本')
+      await input.fill('天狗')
       await page.waitForTimeout(350)
       const p = await paletteParts(page)
       const before = await t.hash()

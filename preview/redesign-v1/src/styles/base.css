@@ -213,11 +213,25 @@ table {
 .faint {
   color: var(--ink-3);
 }
+/* 变化量（C+ G2）：上升 = --ok + 上箭头；下降 = --ink-2 + 下箭头，不用红色表示下降。箭头对读屏隐藏（文字里已有 + / −） */
 .up {
   color: var(--ok);
 }
 .down {
-  color: var(--danger);
+  color: var(--ink-2);
+}
+.up::before,
+.down::before {
+  display: inline-block;
+  margin-right: 2px;
+  font-size: 0.7em;
+  vertical-align: 0.1em;
+}
+.up::before {
+  content: '▲' / '';
+}
+.down::before {
+  content: '▼' / '';
 }
 .truncate {
   overflow: hidden;

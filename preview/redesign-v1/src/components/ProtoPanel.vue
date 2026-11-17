@@ -11,10 +11,11 @@ const AUTH = [
   ['empty', '无成绩'],
   ['ready', '已同步'],
 ]
+// C+ 是最终设计（默认）；A、B 是 Phase A 的历史对照，不再维护
 const VARIANTS = [
-  ['a', 'A 基线', '生成式素材 · Fumen 配色'],
-  ['b', 'B 素材', '真实素材 · Fumen 配色'],
-  ['c', 'C Teal', '真实素材 · Viewer Teal'],
+  ['c', 'C+ 最终', '真实素材 · Viewer Teal（默认）'],
+  ['a', 'A 历史', 'V1.2 生成式素材 · Fumen（不再维护）'],
+  ['b', 'B 历史', '真实素材 · Fumen（不再维护）'],
 ]
 const OUTCOMES = [
   ['success', '成功'],
@@ -31,8 +32,8 @@ const OUTCOMES = [
         <button class="icon-btn" aria-label="收起" @click="open = false"><Icon name="close" :size="18" /></button>
       </div>
       <div class="field">
-        <span class="field-label">对照版本</span>
-        <div class="seg" role="group" aria-label="对照版本">
+        <span class="field-label">版本</span>
+        <div class="seg" role="group" aria-label="版本">
           <button v-for="v in VARIANTS" :key="v[0]" :aria-pressed="store.variant === v[0]" :title="v[2]" @click="store.variant = v[0]">{{ v[1] }}</button>
         </div>
       </div>
@@ -116,9 +117,9 @@ const OUTCOMES = [
   flex-direction: column;
   gap: 12px;
   padding: 12px 14px 14px;
-  background: var(--surface);
+  background: var(--overlay-bg);
   border-radius: var(--r-panel);
-  box-shadow: var(--shadow-pop);
+  box-shadow: var(--shadow-pop), 0 0 0 1px var(--overlay-line);
 }
 .seg {
   display: flex;

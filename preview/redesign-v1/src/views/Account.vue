@@ -6,6 +6,7 @@ import Sheet from '../components/Sheet.vue'
 import EmptyLane from '../components/EmptyLane.vue'
 import PlayerAvatar from '../components/PlayerAvatar.vue'
 import TitlePlate from '../components/TitlePlate.vue'
+import { TITLE_CATALOG } from '../mock/titles'
 import DanBadge from '../components/DanBadge.vue'
 import { player, devApps, users } from '../mock/data'
 import { store, L, toast } from '../store'
@@ -116,15 +117,13 @@ function savePw() {
 }
 
 /* ---------- 称号展示 ---------- */
-const TITLES = [
-  { text: player.title, rare: false },
-  { text: '太鼓好き', rare: false },
-  { text: '九段合格', rare: false },
-  { text: '全良收藏家', rare: true },
-  { text: '节奏旅人', rare: false },
-]
-const shownTitle = ref(player.title)
-const shownRare = computed(() => !!TITLES.find((t) => t.text === shownTitle.value)?.rare)
+// G8：可选的展示称号是玩家已获得的真实游戏称号（mock/titles.js 的目录，按达成类型与难度范围取牌面）
+const TITLES = TITLE_CATALOG.filter((t) => t.owned).map((t) => ({ text: t.name, plate: t.plate }))
+const shownTitle = ref(player.gameTitle?.name || TITLES[0].text)
+const shownGame = computed(() => {
+  const t = TITLES.find((x) => x.text === shownTitle.value)
+  return t ? { name: t.text, plate: t.plate } : null
+})
 function onTitle() {
   toast(L(`展示称号已换成「${shownTitle.value}」`, `表示する称号を「${shownTitle.value}」に変更しました`))
 }
@@ -232,7 +231,7 @@ const { current: currentSec, scrollTo } = useSectionNav(() => NAV.value.map((n) 
           <div class="grow ident-main">
             <h2 class="ident-name title-wrap-2">{{ nickname }}</h2>
             <p class="row-wrap ident-plates">
-              <TitlePlate :text="shownTitle" :rare="shownRare" />
+              <TitlePlate :text="shownTitle" :game="shownGame" form="plate" />
               <DanBadge :dan="player.dan" />
             </p>
             <p class="ident-meta">
@@ -338,7 +337,7 @@ const { current: currentSec, scrollTo } = useSectionNav(() => NAV.value.map((n) 
               <PlayerAvatar :name="nickname" :hue="HUE" :dan="player.dan" :size="44" />
               <div class="grow">
                 <b class="title-1l" :title="nickname">{{ nickname }}</b>
-                <span class="row-wrap"><TitlePlate :text="shownTitle" :rare="shownRare" /><DanBadge :dan="player.dan" /></span>
+                <span class="row-wrap"><TitlePlate :text="shownTitle" :game="shownGame" form="plate" /><DanBadge :dan="player.dan" /></span>
               </div>
             </div>
             <div class="field">
@@ -612,7 +611,7 @@ const { current: currentSec, scrollTo } = useSectionNav(() => NAV.value.map((n) 
   color: var(--ink);
 }
 .toc button[aria-current='true'] {
-  border-left-color: var(--ink);
+  border-left-color: var(--selected-line);
   color: var(--ink);
   font-weight: 700;
 }
@@ -824,7 +823,7 @@ li.opt {
 }
 a.opt:hover b,
 button.opt:hover b {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 button.opt[disabled] {
   cursor: default;

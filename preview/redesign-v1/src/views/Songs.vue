@@ -292,7 +292,7 @@ const fx2 = (n) => (n == null ? null : n.toFixed(2))
               <template v-for="d in [4, 5]" :key="d">
                 <span v-if="mineOf(x.s, d) !== 'nochart'" class="mm">
                   <span class="sr-only">{{ L(DIFFS[d].zh, DIFFS[d].ja) }}</span>
-                  <template v-if="mineOf(x.s, d)"><Crown :v="mineOf(x.s, d).crown" size="sm" /><Rank :v="mineOf(x.s, d).rank" /></template>
+                  <template v-if="mineOf(x.s, d)"><Crown :v="mineOf(x.s, d).crown" size="sm" /><Rank :v="mineOf(x.s, d).rank" compact /></template>
                   <span v-else class="na">—</span>
                 </span>
               </template>
@@ -368,7 +368,7 @@ const fx2 = (n) => (n == null ? null : n.toFixed(2))
                   <span v-for="d in [4, 5]" :key="d" class="mslot">
                     <template v-if="mineOf(x.s, d) !== 'nochart'">
                       <span class="sr-only">{{ L(DIFFS[d].zh, DIFFS[d].ja) }}</span>
-                      <template v-if="mineOf(x.s, d)"><Crown :v="mineOf(x.s, d).crown" /><Rank :v="mineOf(x.s, d).rank" /></template>
+                      <template v-if="mineOf(x.s, d)"><Crown :v="mineOf(x.s, d).crown" /><Rank :v="mineOf(x.s, d).rank" compact /></template>
                       <span v-else class="na">—</span>
                     </template>
                   </span>
@@ -478,8 +478,8 @@ const fx2 = (n) => (n == null ? null : n.toFixed(2))
   font-size: var(--fs-13);
 }
 .fopt[aria-pressed='true'] {
-  background: var(--ink);
-  color: var(--bg);
+  background: var(--selected-bg);
+  color: var(--selected-ink);
   font-weight: 700;
 }
 .fopt[aria-pressed='true'] .num {
@@ -505,7 +505,7 @@ const fx2 = (n) => (n == null ? null : n.toFixed(2))
 .check input {
   width: 16px;
   height: 16px;
-  accent-color: var(--don);
+  accent-color: var(--accent);
 }
 .toolbar {
   display: flex;
@@ -527,7 +527,7 @@ const fx2 = (n) => (n == null ? null : n.toFixed(2))
   color: var(--ink-3);
 }
 .search:focus-within {
-  border-color: var(--ka);
+  border-color: var(--input-focus-line);
   box-shadow: var(--focus);
 }
 .sinput {
@@ -599,7 +599,7 @@ const fx2 = (n) => (n == null ? null : n.toFixed(2))
   border-radius: var(--r-ctl);
 }
 .rowlink:hover :deep(.t) {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .c-genre {
   width: 112px;
@@ -625,7 +625,7 @@ const fx2 = (n) => (n == null ? null : n.toFixed(2))
 }
 .k {
   font-size: var(--fs-16);
-  color: var(--don-ink);
+  color: var(--emph-num);
 }
 .mine-h {
   display: inline-grid;
@@ -640,6 +640,14 @@ const fx2 = (n) => (n == null ? null : n.toFixed(2))
   display: inline-grid;
   grid-template-columns: 48px 48px;
   gap: 6px;
+}
+/* 真实素材（C+）：每格是「王冠 + 评价图标 + 两字评价名」（docs/19 G4，评价不只靠颜色），格宽 48 → 96px（Stage 3 R1：与日期之间 ≥ 12px，宽度从歌曲列取）
+   （表格在容器放不下时已经会横滑，最小宽度不另加） */
+:root[data-assets='authentic'] .mine-h {
+  grid-template-columns: auto 96px 96px;
+}
+:root[data-assets='authentic'] .mine {
+  grid-template-columns: 96px 96px;
 }
 .mslot {
   display: inline-flex;
@@ -752,7 +760,7 @@ const fx2 = (n) => (n == null ? null : n.toFixed(2))
     height: 18px;
     padding: 0 4px;
     border-radius: 9px;
-    background: var(--don-solid); /* D11：白字计数需要 --don-solid（--don 上只有 3.9:1） */
+    background: var(--action-bg); /* D11：白字计数需要实色底（fumen = --don-solid；--don 上只有 3.9:1） */
     color: var(--ink-on-solid);
     font-size: var(--fs-12);
   }

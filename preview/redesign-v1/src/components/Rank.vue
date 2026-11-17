@@ -3,6 +3,8 @@ import { useAuthentic } from './assets'
 import { computed } from 'vue'
 import { RANKS } from '../mock/data'
 import { L } from '../store'
+import { smallSrc } from './smallasset'
+import { rankFile } from './gamemap'
 
 /**
  * 评价（粹 / 雅 / 极）。
@@ -21,6 +23,7 @@ const props = defineProps({
   label: { type: Boolean, default: false },
   px: { type: Number, default: 0 },
   named: { type: Boolean, default: false },
+  compact: { type: Boolean, default: false }, // C+ G4：手机列表行，占位 20、绘制 24，后面跟 --fs-11 的评价名（任何宽度都在图标右边；360 宽放不下时由列表行隐藏次要信息让位，见 Scores.vue）
 })
 const authentic = useAuthentic()
 const meta = computed(() => RANKS[props.v] || RANKS[0])
@@ -28,28 +31,34 @@ const none = computed(() => meta.value.key === 'none')
 const text = computed(() => (none.value ? L('没有评价', '評価なし') : L(meta.value.zh, meta.value.ja)))
 const glyph = computed(() => (none.value ? '—' : meta.value.glyph ? L(meta.value.glyph, meta.value.glyphJa) : ''))
 
-const slot = computed(() => props.px || (props.lg ? 36 : 24))
-const draw = computed(() => (!props.px && props.lg ? 40 : Math.round((slot.value * 28) / 24)))
-const withText = computed(() => props.label || (props.named && !none.value))
+const slot = computed(() => (props.compact ? 20 : props.px || (props.lg ? 36 : 24)))
+const draw = computed(() => (props.compact ? 24 : !props.px && props.lg ? 40 : Math.round((slot.value * 28) / 24)))
+const showName = computed(() => (props.named || props.compact) && !none.value)
+const withText = computed(() => props.label || showName.value)
+// 小于 24px 的占位只写评价名；compact 是例外（docs/19 G4：图标 + 名称）
+const imageOk = computed(() => props.compact || slot.value >= 24)
+const srcs = computed(() => (rankFile(props.v) ? smallSrc('rank', rankFile(props.v), draw.value) : null))
 const aText = computed(() => (props.v === 1 ? L('未取得', '未取得') : none.value ? L('未设置', '未設定') : text.value))
 </script>
 
 <template>
-  <span v-if="authentic" class="rank-wrap" :class="{ 'a-gap': withText }" :title="withText ? undefined : aText">
+  <span v-if="authentic" class="rank-wrap" :class="{ 'a-gap': withText && !compact, compact }" :title="withText ? undefined : aText">
     <span
       class="arank"
-      :class="{ none, txt: !none && slot < 24 }"
+      :class="{ none, txt: !none && !imageOk }"
       :style="{ width: slot + 'px', height: slot + 'px', '--draw': draw + 'px' }"
       :role="withText ? undefined : 'img'"
       :aria-label="withText ? undefined : aText"
       :aria-hidden="withText ? 'true' : undefined"
     >
       <template v-if="none">—</template>
-      <template v-else-if="slot < 24">{{ text }}</template>
-      <img v-else :src="`game/rank/${v}.png`" alt="" :width="draw" :height="draw" decoding="async" />
+      <template v-else-if="!imageOk">{{ text }}</template>
+      <picture v-else
+        ><source type="image/webp" :srcset="srcs.webp" /><img :src="srcs.src" :srcset="srcs.png" alt="" :width="draw" :height="draw" decoding="async"
+      /></picture>
     </span>
     <span v-if="label" class="rank-label">{{ none ? '—' : text }}</span>
-    <span v-else-if="named && !none" class="rank-name">{{ text }}</span>
+    <span v-else-if="showName" class="rank-name">{{ text }}</span>
   </span>
   <span v-else class="rank-wrap" :title="label ? undefined : text">
     <span v-if="label" class="rank" :class="[meta.key, { lg }]" aria-hidden="true">{{ glyph }}</span>
@@ -78,5 +87,12 @@ const aText = computed(() => (props.v === 1 ? L('未取得', '未取得') : none
   font-weight: 500;
   color: var(--ink-2);
   white-space: nowrap;
+}
+/* 手机列表行（G4）：图标 20 / 24 + 两字评价名 --fs-11；图比占位大 2px，间距 6px 看得见 4px */
+.rank-wrap.compact {
+  gap: 6px;
+}
+.rank-wrap.compact .rank-name {
+  font-size: var(--fs-11);
 }
 </style>

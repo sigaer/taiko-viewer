@@ -522,9 +522,9 @@ kbd {
   top: calc(100% + 8px);
   width: 220px;
   padding: var(--overlay-pad-sm);
-  background: var(--surface);
+  background: var(--overlay-bg);
   border-radius: var(--overlay-radius);
-  box-shadow: var(--overlay-shadow);
+  box-shadow: var(--overlay-shadow), 0 0 0 1px var(--overlay-line);
   z-index: 5;
 }
 .menu-head {

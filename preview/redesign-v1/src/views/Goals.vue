@@ -299,7 +299,7 @@ function drop() {
 }
 .gtype {
   font-weight: 700;
-  color: var(--don-ink);
+  color: var(--emph-num);
 }
 .gtitle {
   font-size: var(--fs-28);
@@ -331,7 +331,7 @@ function drop() {
 }
 .p-line {
   fill: none;
-  stroke: var(--ka);
+  stroke: var(--series-alt);
   stroke-width: 2.5;
   stroke-linejoin: round;
   stroke-linecap: round;
@@ -387,7 +387,7 @@ b.p-v {
 }
 .target b.p-d {
   font-size: var(--fs-14);
-  color: var(--don-ink);
+  color: var(--emph-num);
 }
 .target .p-v,
 .target .p-d {
@@ -483,7 +483,7 @@ b.p-v {
   min-height: var(--hit);
 }
 .h-body:hover b {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .h-body b {
   font-size: var(--fs-14);

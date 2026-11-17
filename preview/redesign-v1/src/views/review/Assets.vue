@@ -76,7 +76,7 @@ const SURFACES = [
   <div class="assets">
     <header class="top">
       <Logo :size="30" />
-      <b class="grow">素材页 · Design V1.3（Phase A）</b>
+      <b class="grow">素材页 · Design V1.3</b>
       <RouterLink to="/review/compare" class="btn btn-sm"><Icon name="layers" :size="14" />三版对照</RouterLink>
       <RouterLink to="/review" class="btn btn-sm btn-ghost">设计总览</RouterLink>
     </header>
@@ -222,7 +222,7 @@ const SURFACES = [
       <section aria-labelledby="a-title">
         <h2 id="a-title">称号 Title</h2>
         <div class="ba">
-          <AssetsScope mode="generated" class="ba-side"><span class="ba-k">A · 一种铭牌（含 rare）</span><div class="row-wrap"><TitlePlate text="精度调律师" /><TitlePlate text="全良猎人" rare /></div></AssetsScope>
+          <AssetsScope mode="generated" class="ba-side"><span class="ba-k">A · 一种铭牌</span><div class="row-wrap"><TitlePlate text="精度调律师" /><TitlePlate text="全良猎人" /></div></AssetsScope>
           <Icon name="chevR" :size="18" class="ba-arrow" />
           <AssetsScope mode="authentic" class="ba-side"><span class="ba-k">B、C · 游戏称号牌 / 文字 / 站内称号</span><div class="row-wrap"><TitlePlate :game="{ name: 'きたさいたまの達人', plate: 42 }" form="plate" /><TitlePlate :game="{ name: 'きたさいたまの達人', plate: 42 }" form="text" /><TitlePlate :game="null" :site="SITE_TITLE" /></div></AssetsScope>
         </div>
@@ -264,25 +264,21 @@ const SURFACES = [
         <div class="ba">
           <AssetsScope mode="generated" class="ba-side"><span class="ba-k">A · 随机色相鼓面 + 段位鼓缘</span><div class="row-wrap"><PlayerAvatar name="年糕咚" :hue="12" dan="九段" :size="44" /><PlayerAvatar name="疾风连打" :hue="205" dan="达人" :size="44" /></div></AssetsScope>
           <Icon name="chevR" :size="18" class="ba-arrow" />
-          <AssetsScope mode="authentic" class="ba-side"><span class="ba-k">B、C · 中性默认头像</span><div class="row-wrap"><PlayerAvatar name="年糕咚" :size="44" /><PlayerAvatar name="疾风连打" :size="44" /></div></AssetsScope>
+          <AssetsScope mode="authentic" class="ba-side"><span class="ba-k">C+ · 正式站默认头像</span><div class="row-wrap"><PlayerAvatar name="年糕咚" :size="44" /><PlayerAvatar name="疾风连打" :size="44" /></div></AssetsScope>
         </div>
         <AssetsScope mode="authentic">
           <div class="grid">
             <figure>
               <div class="row-wrap"><PlayerAvatar v-for="s in AV_SIZES" :key="s" :user="AV_USER" :size="s" /></div>
-              <figcaption><b>没有头像 · 24 / 32 / 44 / 72 / 96px</b>中性鼓面：--bg-sunk 鼓面、--line-strong 鼓缘、--ink-2 首字；原型里所有模拟玩家都是这一种</figcaption>
+              <figcaption><b>没有头像 · 24 / 32 / 44 / 72 / 96px</b>正式站 /default-avatar.svg 原样显示（public/game/avatar/default-avatar.svg ← taiko_viewer/public/default-avatar.svg）；原型里所有模拟玩家都是这一种</figcaption>
             </figure>
             <figure>
               <div class="row-wrap"><PlayerAvatar v-for="s in [32, 44, 72]" :key="s" :user="AV_USER" src="game/avatar/miku.png" :size="s" /></div>
               <figcaption><b>正式站默认头像 · miku.png</b>论坛接口的回落图（443×402，不是正方形）。只在这里演示「有头像」状态，不代表任何玩家</figcaption>
             </figure>
             <figure>
-              <div class="row-wrap"><PlayerAvatar v-for="s in [32, 44, 72]" :key="s" :user="AV_USER" src="game/avatar/default-avatar.svg" :size="s" /></div>
-              <figcaption><b>正式站默认头像 · default-avatar.svg</b>/my 页使用。只在这里演示</figcaption>
-            </figure>
-            <figure>
               <div class="row-wrap"><PlayerAvatar :user="AV_USER" src="game/__forced-failure__/a.png" :size="44" /></div>
-              <figcaption><b>图片加载失败</b>退回中性默认头像</figcaption>
+              <figcaption><b>图片加载失败</b>退回默认头像 default-avatar.svg</figcaption>
             </figure>
           </div>
           <div class="surfaces">

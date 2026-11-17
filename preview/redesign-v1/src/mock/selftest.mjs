@@ -106,7 +106,8 @@ ok(A.scores.every((x) => A.chartOf(x.songId, x.d)), 'every score references a ch
 ok(A.scores.every((x) => A.scoreOf(x.songId, x.d) === x), 'scoreOf consistent')
 ok(A.songs.every((s) => s.charts.every((c) => A.chartOf(s.id, c.d) === c)), 'chartOf consistent')
 ok(A.chartOf('615', '4') === A.chartOf(615, 4), 'chartOf coerces string ids')
-ok(A.scoreOf(615, 4).score === 968440 && A.scoreOf(233, 5).crown === 2 && A.scoreOf(278, 5).locked, 'fixed demo rows')
+// Phase B：V1.2 的 233 / 278 已换成真实曲号 413（Bad Apple!! feat.nomico）/ 1104（Aragami）
+ok(A.scoreOf(615, 4).score === 968440 && A.scoreOf(413, 5).crown === 2 && A.scoreOf(1104, 5).locked, 'fixed demo rows')
 ok(A.player.crownCounts.dfc === A.scores.filter((x) => x.crown === 2).length, 'crownCounts derived')
 ok(A.player.rankCounts.reduce((a, b) => a + b, 0) === A.scores.filter((x) => x.rank >= 2).length, 'rankCounts derived')
 ok(A.player.scoredCharts === A.scores.length, 'scoredCharts')
@@ -117,7 +118,7 @@ ok(A.chartOf(615, 4).density.length === 64 && A.chartOf(615, 4).density === A.ch
 // 搜索 / 查谱
 ok(A.normalize('センボンザクラ') === A.normalize('せんぼんざくら'), 'kana normalize')
 ok(A.normalize('ＡＢＣ　Def!') === 'abcdef', 'width/case/punct normalize')
-ok(A.searchDocs.length === A.songs.length && A.searchDocs.find((d) => d.id === 233).norm.aliases.includes('qby'), 'searchDocs')
+ok(A.searchDocs.length === A.songs.length && A.searchDocs.find((d) => d.id === 615).norm.aliases.includes('tengu'), 'searchDocs')
 const q = A.parseConfig('16 oxxo 180 鬼10')
 const canon = A.findByConfig(q)
 console.log('  findByConfig canonical:', canon.length, 'zero-case:', A.findByConfig({ division: 48, pattern: 'oooooooooooo', d: 1 }).length)

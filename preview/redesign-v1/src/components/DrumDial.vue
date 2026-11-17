@@ -39,10 +39,10 @@ const rivets = computed(() => {
   --tone: var(--series); /* 单一序列（Rating）：fumen = --don，teal = 品牌色 */
 }
 .dial.ka {
-  --tone: var(--ka);
+  --tone: var(--series-alt);
 }
 .dial.roll {
-  --tone: var(--roll);
+  --tone: var(--chart-mark);
 }
 svg {
   width: 100%;

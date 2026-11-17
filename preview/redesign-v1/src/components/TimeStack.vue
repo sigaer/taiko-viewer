@@ -14,7 +14,7 @@ import { L } from '../store'
  *   bands   [{ fromDaysAgo, toDaysAgo, key, label, current }]  关注方向时段（浅葱带；current = 进行中）
  *   days    [{ daysAgo, played, facts }]  每日练习：底部细条，有游玩画短刻度，有进展画小音符
  *   digits  number   读数小数位（默认 2）
- *   tone    string   折线颜色（默认 'var(--don)'）
+ *   tone    string   折线颜色（默认 'var(--series)'：单一序列用品牌色）
  *   label   string   图表的读屏名称（默认「成长时间栈」）
  *   height  number   折线区高度 px（默认 180）
  *
@@ -28,7 +28,7 @@ const props = defineProps({
   bands: { type: Array, default: () => [] },
   days: { type: Array, default: () => [] },
   digits: { type: Number, default: 2 },
-  tone: { type: String, default: 'var(--don)' },
+  tone: { type: String, default: 'var(--series)' },
   label: { type: String, default: '' },
   height: { type: Number, default: 180 },
 })
@@ -351,22 +351,22 @@ svg {
   stroke-width: 2;
 }
 .mark-guide {
-  stroke: var(--roll);
+  stroke: var(--chart-mark);
   stroke-dasharray: 2 3;
   opacity: 0.7;
 }
 .band rect {
-  fill: var(--ka-wash);
-  stroke: color-mix(in srgb, var(--ka) 45%, transparent);
+  fill: var(--series-band-bg);
+  stroke: var(--series-band-line);
 }
 .band.current rect {
-  fill: color-mix(in srgb, var(--ka) 22%, var(--surface));
-  stroke: var(--ka);
+  fill: var(--series-band-cur);
+  stroke: var(--series-band-line);
 }
 .band-t {
   font-size: 11px;
   font-weight: 700;
-  fill: var(--ka-ink);
+  fill: var(--series-focus-ink);
 }
 .narrow .band-t {
   font-size: 10px;

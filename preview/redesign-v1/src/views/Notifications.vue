@@ -128,7 +128,7 @@ const actor = (n) => (n.type === 'system' ? L('系统通知', 'システム通�
 }
 .cnt {
   margin-left: 5px;
-  color: var(--don-ink);
+  color: var(--emph-num);
 }
 .list-panel {
   overflow: hidden;
@@ -152,7 +152,7 @@ const actor = (n) => (n.type === 'system' ? L('系统通知', 'システム通�
   --n: 10px;
 }
 .unread .gut {
-  background: var(--don-wash);
+  background: var(--unread-wash);
 }
 .main {
   flex: 1;
@@ -163,7 +163,7 @@ const actor = (n) => (n.type === 'system' ? L('系统通知', 'システム通�
   padding: 14px 8px 14px 12px;
 }
 a.main:hover .text {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 a.main:focus-visible {
   box-shadow: inset var(--focus);
@@ -202,7 +202,7 @@ a.main:focus-visible {
 }
 .open {
   gap: 1px;
-  color: var(--ka-ink);
+  color: var(--link);
   font-weight: 500;
 }
 .mark {

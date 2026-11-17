@@ -196,7 +196,7 @@ const agoText = (n) => (n === 0 ? L('今天', '今日') : L(`${n} 天前`, `${n}
         <p v-if="song.aliases && song.aliases.length" class="aliases title-1l" :title="aliasText">{{ L('别名：', '別名：') }}{{ aliasText }}</p>
       </div>
       <div class="head-acts only-desktop">
-        <button class="btn btn-ink"><Icon name="playTri" :size="16" />{{ L('游玩练习', '練習プレイ') }}</button>
+        <button class="btn btn-ink c-secondary"><Icon name="playTri" :size="16" />{{ L('游玩练习', '練習プレイ') }}</button>
         <button class="btn" @click="toast(L('已收藏', 'お気に入りに追加'))"><Icon name="bookmark" :size="16" />{{ L('收藏', '保存') }}</button>
       </div>
     </header>
@@ -230,13 +230,14 @@ const agoText = (n) => (n === 0 ? L('今天', '今日') : L(`${n} 天前`, `${n}
         <!-- 手机端把我的成绩放在最前面 -->
         <section class="panel mine only-mobile-flex" :aria-label="L('我的成绩', '自分の記録')">
           <template v-if="mine">
+            <!-- C+ G2：王冠与评价在上一行，尺寸不超过分数的高度；最好成绩是卡片里唯一的最大字号 -->
+            <div class="mine-marks">
+              <Crown :v="mine.crown" size="lg" label />
+              <Rank :v="mine.rank" :px="30" named />
+            </div>
             <div class="mine-top">
-              <Crown :v="mine.crown" size="lg" />
-              <div>
-                <b class="num score">{{ fmt(mine.score) }}</b>
-                <span class="t-caption">{{ L('最好成绩', '自己ベスト') }} · <span class="num">{{ mine.acc.toFixed(2) }}%</span></span>
-              </div>
-              <Rank :v="mine.rank" lg named />
+              <b class="num score">{{ fmt(mine.score) }}</b>
+              <span class="t-caption">{{ L('最好成绩', '自己ベスト') }} · <span class="num">{{ mine.acc.toFixed(2) }}%</span></span>
             </div>
             <div class="judge" aria-hidden="true">
               <i class="g" :style="{ flex: mine.good }" /><i class="o" :style="{ flex: mine.ok }" /><i class="n" :style="{ flex: mine.ng }" />
@@ -432,7 +433,7 @@ const agoText = (n) => (n === 0 ? L('今天', '今日') : L(`${n} 天前`, `${n}
               <button class="orow" @click="pick(x.c.d)">
                 <Diff :d="x.c.d" :star="x.c.star" short />
                 <Crown :v="x.sc.crown" size="sm" />
-                <Rank :v="x.sc.rank" />
+                <Rank :v="x.sc.rank" named />
                 <b class="num">{{ fmt(x.sc.score) }}</b>
               </button>
             </li>
@@ -735,7 +736,7 @@ const agoText = (n) => (n === 0 ? L('今天', '今日') : L(`${n} 天前`, `${n}
   background: var(--ink-3);
 }
 .vote[aria-pressed='true'] .vbar i {
-  background: var(--don);
+  background: var(--vote-on);
 }
 .vote b {
   font-size: var(--fs-16);
@@ -1005,15 +1006,18 @@ const agoText = (n) => (n === 0 ? L('今天', '今日') : L(`${n} 天前`, `${n}
     padding: 16px;
     margin-bottom: 28px;
   }
-  .mine-top {
+  .mine-marks {
     display: flex;
     align-items: center;
-    gap: 14px;
+    justify-content: space-between;
+    gap: 12px;
   }
-  .mine-top > div {
-    flex: 1;
+  .mine-top {
     display: flex;
-    flex-direction: column;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 4px 12px;
   }
   .score {
     font-size: 36px;

@@ -155,7 +155,7 @@ function setGoal(r, g) {
               <span class="tag tag-ka">{{ L(dimOf(r.dim).zh, dimOf(r.dim).ja) }}</span>
               <span v-if="r.unplayed" class="tag">{{ L('没打过', '未プレイ') }}</span>
               <template v-else-if="scoreOf(r.songId, r.d)">
-                <Crown :v="scoreOf(r.songId, r.d).crown" size="sm" /><Rank :v="scoreOf(r.songId, r.d).rank" />
+                <Crown :v="scoreOf(r.songId, r.d).crown" size="sm" /><Rank :v="scoreOf(r.songId, r.d).rank" compact />
                 <span class="num t-small">{{ fmt(scoreOf(r.songId, r.d).score) }}</span>
               </template>
             </div>
@@ -181,7 +181,7 @@ function setGoal(r, g) {
             <RouterLink :to="link(r)" class="rsong"><SongCell :song="songById[r.songId]" size="lg" /></RouterLink>
             <div class="rmeta">
               <Diff :d="r.d" :star="r.score.star" :constant="r.score.constant" show-missing />
-              <Crown :v="r.score.crown" size="sm" /><Rank :v="r.score.rank" />
+              <Crown :v="r.score.crown" size="sm" /><Rank :v="r.score.rank" compact />
               <span class="num t-small">{{ fmt(r.score.score) }}</span>
             </div>
             <div class="prog">
@@ -223,7 +223,7 @@ function setGoal(r, g) {
 }
 .focus-dot {
   margin-left: 6px;
-  color: var(--ka);
+  color: var(--series-focus);
 }
 .recs {
   border-top: 1px solid var(--line-strong);
@@ -240,7 +240,7 @@ function setGoal(r, g) {
   min-width: 0;
 }
 .rsong:hover :deep(.t) {
-  color: var(--ka-ink);
+  color: var(--link);
 }
 .rsong :deep(.t) {
   font-size: var(--fs-16);
@@ -275,9 +275,9 @@ function setGoal(r, g) {
   width: 43%;
   top: 0;
   bottom: 0;
-  background: var(--ka-wash);
-  border-left: 1px solid var(--ka);
-  border-right: 1px solid var(--ka);
+  background: var(--series-band-bg);
+  border-left: 1px solid var(--series-band-line);
+  border-right: 1px solid var(--series-band-line);
 }
 .pin {
   position: absolute;
@@ -286,7 +286,7 @@ function setGoal(r, g) {
   height: 12px;
   margin: -6px 0 0 -6px;
   border-radius: 50%;
-  background: var(--don);
+  background: var(--series);
   box-shadow: inset 0 0 0 2px var(--note-ring), 0 0 0 1px var(--note-outline);
 }
 .ract {
@@ -310,7 +310,7 @@ function setGoal(r, g) {
   display: block;
   height: 100%;
   border-radius: var(--r-xs);
-  background: var(--ka);
+  background: var(--series-alt);
 }
 .rec.chase {
   grid-template-columns: minmax(0, 1.4fr) auto minmax(0, 1fr) auto;

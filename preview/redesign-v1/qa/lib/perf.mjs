@@ -39,7 +39,7 @@ window.__qaSettle = (root, quiet = 120, timeout = 4000) => new Promise((resolve)
   setTimeout(tick, 20)
 })`
 
-export async function runPerf(browser, base, { findings, rapidNavMetrics, verified, dataset = 'full', variant = 'a' }) {
+export async function runPerf(browser, base, { findings, rapidNavMetrics, verified, dataset = 'full', variant = 'c' }) {
   const m = {}
   const notes = []
   const ctx = await newContext(browser, { vp: '1440x900', state: { dataset, auth: 'ready', variant } })
@@ -47,6 +47,13 @@ export async function runPerf(browser, base, { findings, rapidNavMetrics, verifi
     const page = await ctx.newPage()
     const errs = collectErrors(page)
     await gotoRoute(page, base, '/')
+    // Phase B Stage 3：记录并断言实际测到的版本（root 的 data-brand / data-assets），不让测量悄悄落到历史版本上
+    const root = await page.evaluate(() => ({ brand: document.documentElement.dataset.brand, assets: document.documentElement.dataset.assets }))
+    m.variant = variant
+    m.rootBrand = root.brand
+    m.rootAssets = root.assets
+    const want = { a: ['fumen', 'generated'], b: ['fumen', 'authentic'], c: ['teal', 'authentic'] }[variant]
+    if (!want || root.brand !== want[0] || root.assets !== want[1]) throw new Error(`perf: expected variant ${variant} (${want}), page has data-brand=${root.brand} data-assets=${root.assets}`)
     await page.addScriptTag({ content: MEASURE })
 
     // 1. data generation
@@ -66,7 +73,7 @@ export async function runPerf(browser, base, { findings, rapidNavMetrics, verifi
     // 2. palette keystrokes (F3): first keystroke after each open vs. warm keystrokes after it.
     //    20 opens; each open types one query character by character, then closes with Esc.
     try {
-      const QUERIES = ['lisa', 'qby', 'oni', 'sakura', 'senbon', 'night', 'tengu', '765', 'drive', 'kaka', 'mirage', 'ura', 'rapid', 'neon', 'gold', 'hime', 'star', 'don', 'ka', 'blue']
+      const QUERIES = ['holic', 'kien', 'oni', 'sakura', 'tengubayashi', 'night', 'tengu', '765', 'drive', 'kaka', 'mirage', 'ura', 'rapid', 'neon', 'gold', 'hime', 'star', 'don', 'ka', 'blue']
       const first = []
       const warm = []
       let missed = 0
@@ -233,8 +240,8 @@ export async function runPerf(browser, base, { findings, rapidNavMetrics, verifi
     if (status === 'fail') findings.push({ check: 'perf', severity: 'error', route: null, case: `perf:${dataset}`, selector: null, detail: `[${dataset}] ${b.label}: ${v} > budget ${b.max}` })
     return { metric: k, label: b.label, value: v ?? null, budget: b.max, status }
   })
-  if (dataset !== 'full') return { dataset, metrics: m, table, notes }
+  if (dataset !== 'full') return { dataset, variant, metrics: m, table, notes }
   verified.push('perf: palette keystroke latency, /songs filter/sort latency, route switch timing, mounted rows/cells, DOM size, heap (1440×900, full dataset)')
-  log(`perf[${dataset}]: ${table.map((r) => `${r.metric}=${r.value ?? '—'}(${r.status})`).join(' ')}`)
-  return { dataset, metrics: m, table, notes }
+  log(`perf[${dataset}, variant ${variant}, data-brand=${m.rootBrand}]: ${table.map((r) => `${r.metric}=${r.value ?? '—'}(${r.status})`).join(' ')}`)
+  return { dataset, variant, metrics: m, table, notes }
 }

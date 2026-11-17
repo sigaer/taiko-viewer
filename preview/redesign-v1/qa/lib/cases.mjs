@@ -93,6 +93,8 @@ export async function runCase(browser, base, c, { visual = true, checks = true, 
         // V1.3：曲绘域名上缩略图确实缺失的 6 个真实曲号（docs/14 的 HEAD 记录：404）走「原图 → 缺失占位」降级，是预期结果；
         // 曲绘域名上的其他失败仍算错误（屏蔽域名只在 qa/v13-metrics.mjs 的降级测试里出现）
         else if (/static\.sakura-bot\.cn\/cover\/(thumb\/\d+\/)?(1255|345|32|1323|395|1324)\.(webp|png)/.test(e.text)) add('network', 'info', null, `known missing cover (fallback to placeholder): ${e.text}`)
+        // 缺失素材用例（--blocked）：曲绘域名被测试屏蔽，失败是预期的
+        else if (process.env.QA_BLOCK_COVERS === '1' && /static\.sakura-bot\.cn|ERR_BLOCKED_BY_CLIENT/.test(e.text)) add('network', 'info', null, `cover host blocked by the test: ${e.text}`)
         else add(e.kind === 'console' || e.kind === 'pageerror' ? 'console' : 'network', 'error', null, `${e.kind}: ${e.text}`)
       }
     }

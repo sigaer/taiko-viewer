@@ -456,7 +456,7 @@ function startMigrate() {
   background: var(--line-strong);
 }
 .stepper li.done + li::before {
-  background: var(--ka);
+  background: var(--progress-line);
 }
 .stepper .note {
   --n: 32px;
@@ -473,7 +473,7 @@ function startMigrate() {
 }
 /* D11：音符里的数字。朱色音符换 --don-solid 底（白字 ≥ 4.5:1）；浅葱 / 山吹音符上的数字用深色 */
 .stepper .note:not(.ka, .roll, .ghost) {
-  background: var(--don-solid);
+  background: var(--action-bg);
 }
 .stepper .note:is(.ka, .roll) .num {
   color: var(--note-outline);
@@ -561,7 +561,7 @@ function startMigrate() {
   transition: transform var(--dur-2) var(--ease-out);
 }
 .sw[aria-checked='true'] {
-  background: var(--ink);
+  background: var(--action-bg);
 }
 .sw[aria-checked='true'] i {
   transform: translateX(18px);

@@ -34,9 +34,9 @@ i {
   flex: 1;
   min-width: 2px;
   border-radius: 2px 2px 0 0;
-  background: color-mix(in srgb, var(--ink-3) 55%, transparent);
+  background: var(--density-bar);
 }
 i.hot {
-  background: var(--don);
+  background: var(--don-data);
 }
 </style>

@@ -698,7 +698,6 @@ export const EXTRA_USERS = [
   ['mint_k', 'Mint_K'], ['yosuzume', '夜雀'],
 ]
 const USER_TITLES = ['连打之鬼', '节奏旅人', '体力怪兽', '全良猎人', '太鼓新人', '里谱探索者', '机厅之主', '滚奏达人', '变速克星', '读谱专家', '夜行鼓手', '咚咔平衡者', '后半爆发', '十段挑战者']
-const RARE_TITLES = new Set(['全良猎人', '连打之鬼', '机厅之主', '变速克星'])
 
 /** 补足用户：既有 8 个 key 保留并补 rating；新增 32 个。rating 与段位相关。 */
 export function genUsers(baseUsers, danGrades, playerRating) {
@@ -708,11 +707,11 @@ export function genUsers(baseUsers, danGrades, playerRating) {
     return i < 0 ? null : round(6.5 + i * 0.42 + (r() - 0.5) * 0.8)
   }
   const out = {}
-  for (const [k, u] of Object.entries(baseUsers)) out[k] = { ...u, rating: k === 'mochidon' ? playerRating : ratingOf(u.dan), rare: RARE_TITLES.has(u.title) }
+  for (const [k, u] of Object.entries(baseUsers)) out[k] = { ...u, rating: k === 'mochidon' ? playerRating : ratingOf(u.dan) }
   EXTRA_USERS.forEach(([key, name], i) => {
     const dan = danGrades[Math.min(danGrades.length - 1, Math.floor(r() ** 0.7 * danGrades.length))]
     const title = pick(r, USER_TITLES)
-    out[key] = { name, role: i === 4 || i === 17 ? 'moderator' : 'user', title, dan, hue: Math.floor(r() * 360), rating: ratingOf(dan), rare: RARE_TITLES.has(title) }
+    out[key] = { name, role: i === 4 || i === 17 ? 'moderator' : 'user', title, dan, hue: Math.floor(r() * 360), rating: ratingOf(dan) }
   })
   return out
 }

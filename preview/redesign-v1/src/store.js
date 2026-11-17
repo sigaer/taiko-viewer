@@ -46,8 +46,10 @@ export const store = reactive({
   syncOutcome: oneOf(saved.syncOutcome, ['success', 'partial', 'failed'], 'success'),
   motion: oneOf(saved.motion, ['system', 'reduce'], 'system'),
   density: oneOf(saved.density, ['comfortable', 'compact'], 'comfortable'), // 列表密度（V11），设置页绑定
-  // 对照版本（V1.3）：a = 生成式素材 + Fumen 配色（默认，即 V1.2）；b = 真实素材 + Fumen；c = 真实素材 + Viewer Teal
-  variant: urlOverride.variant || oneOf(saved.variant, ['a', 'b', 'c'], 'a'),
+  // 版本（V1.3）：c = 真实素材 + Viewer Teal（Phase B 起的默认，即最终设计 C+）；
+  // a（V1.2 生成式素材）、b（真实素材 + Fumen）只作历史对照保留开关，不再维护。
+  // Phase A 期间存下的选择（没有 variantRev）不沿用，打开原型一律回到 C+。
+  variant: urlOverride.variant || (saved.variantRev === 'phase-b' ? oneOf(saved.variant, ['a', 'b', 'c'], 'c') : 'c'),
   paletteOpen: false,
   syncing: false, // 兼容旧页面：等于 sync.state === 'running'
   toasts: [],
@@ -99,6 +101,7 @@ function persist() {
     const prev = JSON.parse(localStorage.getItem(KEY) || '{}') || {}
     const next = { ...prev }
     for (const k of PERSISTED) if (!fromUrl(k)) next[k] = store[k]
+    next.variantRev = 'phase-b'
     localStorage.setItem(KEY, JSON.stringify(next))
   } catch {
     /* 隐私模式下忽略 */
@@ -285,7 +288,7 @@ const recentSeed = () => {
   } catch {
     /* ignore */
   }
-  return [615, 233, 100140, 512]
+  return [615, 413, 138, 1308]
 }
 export const recentIds = ref(
   (() => {
