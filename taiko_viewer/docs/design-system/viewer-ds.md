@@ -85,7 +85,7 @@
   3. 样张上的标签只写组件名、token 名、状态名（ASCII 标识即可），不写说明文字。需要展示中日文字形时，把元素标上 `data-ds-specimen`（文案检查会放过它）。
   4. `DsSampleShell` 在离开路由时卸载样张内容、再激活时重新挂载：Element Plus 的弹层（select、tooltip、dropdown）会在 `<body>` 留下常驻节点，若随停用的 keepalive 页面一起被销毁，Vue 会报 `Cannot read properties of null (reading 'nextSibling')`，下一页的 head 也不会更新。所以样张状态在返回时会重置，这是有意的。
 - 组件自身的文案键：加在 `locales/zh.json` 与 `ja.json` 的 `ds.<组件>.*` 下，两边同时加；`npm run check:ds` 会核对。
-- 组件测试：新建 `tests/ds<Component>.test.{ts,mjs}`，并把文件加进 `package.json` 的 `test:ds`（这是唯一需要改的共享行；如需完全避免，可以把用例写进各自的新文件，由集成人员合并进脚本）。
+- 组件测试：新建 `tests/ds<Component>.test.{ts,mjs}`。`npm run test:ds` 按 `tests/ds*.test.*` 自动找到它，不需要改 `package.json`。
 
 ## 7. 检查与脚本
 
