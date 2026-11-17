@@ -54,12 +54,14 @@
 - `npm run check:scoped-css` 编译每个 scoped 样式块比对；`components/ds/`、`ds-samples/` 出现即失败，仓库其余部分只出报告。已知的 `pages/admin/taiko/chart-ugc.vue:212` 在报告里，阶段 0 不修。
 - 软键盘避让（社区阶段实现）的验收必须包括：查看编译后的样式确认选择器命中；iOS Safari 与 Android Chrome 真机通过。模拟的矮视口不算。
 
-## 5. 字体（D0-4 = B）
+## 5. 字体（D0-4 = B，2026-11-17 正式裁定）
+
+- 首屏自托管字体预算：≤150 KiB、≤12 个请求。Barlow / Barlow Condensed 按需加载；首次集成正式页面时重新验证字体加载与 FOUT。
 
 - 自托管 Barlow（400 / 500 / 600 / 700）与 Barlow Condensed（500 / 600 / 700），latin + latin-ext 两个 unicode-range 分片，woff2，`font-display: swap`。文件原样取自 `@fontsource/barlow` 5.3.0 与 `@fontsource/barlow-condensed` 5.3.0（npm），SIL Open Font License 1.1，许可文本 `assets/font/ds/OFL-Barlow.txt`、`OFL-Barlow-Condensed.txt`。没有加 npm 依赖。
 - 中日文用系统字体。token 的字体栈保持规格原样，`'Noto Sans SC Variable'` / `'Noto Sans JP Variable'` 排在系统字体前面；方案 B 不声明这两个字体，浏览器直接落到系统字体。
 - 只有 `ds-samples/_shared/DsSampleShell.vue` 导入 `fonts.css`；正常生产构建里没有这些字体文件，现有页面也不请求它们。
-- P0-10 的 A / B 对比页是 `/_ds/fonts`（`?fonts=a` 为方案 A）。方案 A 的 Noto Sans SC / JP 可变字体约 10 MB，没有加依赖、也没有放进仓库：页面在 `?fonts=a` 时链接 `/_ds-fonts-a/fonts-cjk.css`，这个地址应用本身不提供，由 `scripts/ds/font-measure.mjs` 在测量时用请求拦截从仓库外的 `@fontsource-variable` 安装目录应答。不经测量脚本打开时方案 A 退回方案 B。token 不用改。若以后决定采用 A，再按 D0-4 的结论决定字体文件的来源与加载范围。
+- P0-10 的 A / B 对比页是 `/_ds/fonts`（`?fonts=a` 为方案 A）。方案 A 的 Noto Sans SC / JP 可变字体约 10 MB，没有加依赖、也没有放进仓库：页面在 `?fonts=a` 时链接 `/_ds-fonts-a/fonts-cjk.css`，这个地址应用本身不提供，由 `scripts/ds/font-measure.mjs` 在测量时用请求拦截从仓库外的 `@fontsource-variable` 安装目录应答。不经测量脚本打开时方案 A 退回方案 B。token 不用改。该对照仅保留历史测量用途；本轮正式裁定不引入完整自托管 Noto Sans SC / JP。
 
 ## 6. 样张页（D0-1 = A，P0-26）
 

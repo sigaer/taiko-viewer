@@ -1,6 +1,6 @@
 # 阶段 0 验收记录（Design System V1.3 落地生产代码）
 
-> 本文记录的所有运行结果都是 **Windows 开发自检**，不是验收。按 `AGENTS.md` 与 `23` 4.0，浏览器检查、构建与内存相关的验收必须在 Linux 服务器上通过 `scripts/memory/run_*.sh` 运行；到目前为止没有任何一项在 Linux 隔离环境里验证过。第 9 节是在服务器上补做验收的操作手册。
+> 当前结论：**实现成果获认可，Linux 最终验收阻塞，未通过**。第 1–10 节的历史运行结果仅为 Windows 开发自检；2026-11-17 Linux 尝试在隔离准入阶段返回 75，未启动构建或浏览器，见第 11 节。D0-4 已正式裁定为方案 B。仅批准 Linux 验收，未批准合并 main、生产发布或阶段 1 正式页面替换。
 
 ## 1. 环境与范围
 
@@ -27,7 +27,7 @@
 | D0-1 | A：样张只在开发与显式测试构建里存在 | `nuxt.config.ts` 的 `pages:extend` 钩子调用 `ds-samples/routes.ts`，只在 `NODE_ENV=development` 或 `TAIKO_DS_SAMPLES=1` 时注册 `/_ds`；页面放在 `ds-samples/`，不在 `pages/` 下。正常构建里没有路由与代码（第 5 节） |
 | D0-2 | A，加严：新 token 只在 `html.ds-preview` 下生效 | `assets/css/ds/tokens.css` 的每条声明都在 `html.ds-preview…` 下，没有 `:root`；Element Plus 映射、字体使用、共用样式同样限定。`check-tokens.mjs` 拒绝其他选择器。旧 `--viewer-*` 未改、未做别名 |
 | D0-3 | A：Element Plus 映射只在样张页；主色 = 品牌青绿；info = 中性 | `assets/css/ds/element-plus.css`，全部 `html.ds-preview:root …`；主色走 `--action-bg`，info 走 `--ink-2` / `--bg-sunk`，没有音符色 |
-| D0-4 | 先 B：中日文系统字体，只自托管 Barlow / Barlow Condensed | `assets/css/ds/fonts.css` + `assets/font/ds/`（14 个 woff2，约 255 KB，OFL）。A 的对照见 4.3 |
+| D0-4 | 正式 B：中日文系统字体，按需自托管 Barlow / Barlow Condensed；首屏 ≤150 KiB、≤12 请求 | `assets/css/ds/fonts.css` + `assets/font/ds/`（14 个 woff2，约 255 KB，OFL）。A 的对照见 4.3 |
 | D0-5 | A：`sharp`，无损 WebP + PNG，保留原图，可重复，带 `--check` | `scripts/ds/generate_small_game_icons.mjs`，46 个文件，`--check` 逐字节一致 |
 | D0-6 | 王冠可见文字属性（off / short / full），默认 off | `DsCrown` 的 `text` 属性；短名 `ds.crown.short.*` 是暂定值，阶段 2 定 |
 | D0-7 | A：服务端固定默认头像地址当作没有头像 | `utils/ds/avatar.ts` + 测试（常量与两处服务端 `DEFAULT_AVATAR` 一致） |
@@ -60,7 +60,7 @@
 | P0-07 对比度 | 完成 | 368 对全部达标 |
 | P0-08 Element Plus 映射 | 完成 | 浏览器自检见 2.2 |
 | P0-09 字体 | 完成（方案 B） | |
-| P0-10 字体实测 | 完成（开发测量） | `/_ds/fonts` + `scripts/ds/font-measure.mjs`，见 4.3；首屏字体字节预算仍待负责人定 |
+| P0-10 字体实测 | 完成（开发测量） | `/_ds/fonts` + `scripts/ds/font-measure.mjs`，见 4.3；预算已正式确认：首屏 ≤150 KiB、≤12 请求；Linux 测量阻塞 |
 | P0-11 素材校验和 | 完成 | 30 个原图字节数 + md5 |
 | P0-12 小尺寸素材 | 完成 | 1× / 2× 对照图在 `phase0-artifacts/small-icons/`，待负责人看图 |
 | P0-13 王冠换算 | 完成 | 真实成绩抽样比对留到阶段 2（测试库） |
@@ -124,7 +124,7 @@
 | 慢速 | 日 | B | 12 | 134 | 3728–3738 | 1676–1710 |
 | 慢速 | 日 | A | 46 | 853 | 13505–13706 | 7597–7746 |
 
-FOUT = 字体全部到达时间 − 首次内容绘制时间（`font-display: swap`，期间先用回落字体）。方案 B 的 12 个请求是 Barlow 两个分片 × 用到的字重。方案 A 在一屏文字上就多出 19（中）/ 34（日）个分片请求和 0.7–1.0 MB 传输；慢速网络下替换延迟约 8–11 秒。首屏字体字节预算需要负责人定（`12` B1.3）。
+FOUT = 字体全部到达时间 − 首次内容绘制时间（`font-display: swap`，期间先用回落字体）。方案 B 的 12 个请求是 Barlow 两个分片 × 用到的字重。方案 A 在一屏文字上就多出 19（中）/ 34（日）个分片请求和 0.7–1.0 MB 传输；慢速网络下替换延迟约 8–11 秒。2026-11-17 负责人正式确认首屏自托管字体预算 ≤150 KiB、≤12 个请求；正式页面首次集成时重新验证字体加载和 FOUT，不引入完整自托管 Noto Sans SC / JP。上表仍仅为 Windows 开发测量。
 
 ### 4.4 样张总览与矩阵（P0-27 / P0-31 / P0-32）
 
@@ -225,7 +225,7 @@ FOUT = 字体全部到达时间 − 首次内容绘制时间（`font-display: sw
 - Bot 的 `_rank_icon_path` 与评价图对应（B12.4）。
 - 王冠 / 评价换算在真实成绩上的抽样（B2.6，阶段 2，测试库）。
 - 小尺寸素材 1× / 2× 的人工看图结论。
-- 首屏字体字节预算（D0-4 / B1.3）。
+- 首屏字体预算的 Linux 运行验证（预算已正式确认为 ≤150 KiB、≤12 请求，D0-4 / B1.3）。
 
 ## 8. 生产代码里观察到的问题（只记录，未改动）
 
@@ -273,7 +273,7 @@ FOUT = 字体全部到达时间 − 首次内容绘制时间（`font-display: sw
 |---|---|---|---|
 | 0-A1 | V1.3 Final 已批准 | Windows 开发自检（文档核对） | `22` 批准栏（设计分支 `b4bd45b` 的提交说明「Design V1.3 Final 获批」） |
 | 0-A2 | D0-1/2/3/8 开工前有结论 | Windows 开发自检（文档核对） | 2.1 |
-| 0-A3 | 字体方案已定、写明首屏预算 | 未验证 | 方案 B 已落地、已实测（4.3）；预算未定 |
+| 0-A3 | 字体方案已定、写明首屏预算 | 决策已确认；运行证据仅 Windows 开发自检 | B；首屏 ≤150 KiB、≤12 请求；Linux 运行验证阻塞，首次正式页面集成复验加载及 FOUT |
 | 0-B1 | 新代码不引用 Primitive、不写十六进制色 | Windows 开发自检 | `check-ds-usage.mjs` 0 |
 | 0-B2 | 新 token 对比度达标 | Windows 开发自检 | 368/368 |
 | 0-B3 | 难度、王冠、评价、判定颜色只在领域 token 与对应组件 | Windows 开发自检 | `check-ds-usage.mjs` 0 |
@@ -283,7 +283,7 @@ FOUT = 字体全部到达时间 − 首次内容绘制时间（`font-display: sw
 | 0-B7 | 缺失值统一「—」 | Windows 开发自检 | 原子组件与图表样张 |
 | 0-B8 | 品牌色只表交互、音符色只表数据 | Windows 开发自检 | `check-ds-usage.mjs` + 截图 |
 | 0-C1 | 素材与正式站逐字节相同 | Windows 开发自检 | `dsAssets` 测试 |
-| 0-C2 | 小尺寸素材只缩小、两套格式、无滤镜 | Windows 开发自检（看图未完成） | `--check`、`check-ds-usage.mjs`；1× / 2× 看图待负责人 |
+| 0-C2 | 小尺寸素材只缩小、两套格式、无滤镜 | 仅 Windows 开发自检 | `--check`、`check-ds-usage.mjs`；设计负责人已完成看图（见后文），Linux 未验证 |
 | 0-C3 | 曲绘失败显示中性占位，屏蔽域名后版面不变 | Windows 开发自检 | 原子组件浏览器自检（屏蔽曲绘域名用例） |
 | 0-C4 | 评价 2–8 与 Bot 选图一致 | 未验证 | Bot 源码不在本仓库 |
 | 0-C5 | 头像三种状态与服务端默认地址 | Windows 开发自检 | 原子组件浏览器自检 + 测试 |
@@ -296,7 +296,7 @@ FOUT = 字体全部到达时间 − 首次内容绘制时间（`font-display: sw
 | 0-D4 | 文案来自 locale、中日对应、无规格语言 | Windows 开发自检 | `check-ds-copy.mjs` + 4.8 |
 | 0-D5 | 曲名 `lang`、截断带 `title` | Windows 开发自检 | 原子组件浏览器自检（SongCell） |
 | 0-D6 | scoped 检查上线、新代码 0、规则写进约定 | Windows 开发自检 | 4、`viewer-ds.md` §4.1 |
-| 0-D7 | 浏览器 QA 通过内存隔离脚本运行 | 未验证 | 本机不能运行 `run_qa.sh` |
+| 0-D7 | 浏览器 QA 通过内存隔离脚本运行 | 未验证或阻塞 | Linux runner 准入返回 75（其他 QA 占用维护锁），未启动浏览器，见第 11 节 |
 | 0-E1 | 样张页 SSR / 客户端无水合警告与错误、深色首屏不闪 | Windows 开发自检 | 矩阵 457/457（`nuxt dev`） |
 | 0-E2 | 样张页按 D0-1 可达，正常构建不可达 | Windows 开发自检 | 第 5 节；生产服务的 404 未在运行中验证 |
 | 0-E3 | 预缓存、PWA 清单、`theme-color` 不变 | Windows 开发自检（预缓存不完整） | 第 5 节；7.1 |
@@ -305,7 +305,7 @@ FOUT = 字体全部到达时间 − 首次内容绘制时间（`font-display: sw
 | 0-E6 | 现有页面没有新字体或图片请求 | Windows 开发自检（18 页） | 4.6 |
 | 0-E7 | 现有 `test:*` 与 `perf:route-assets` 通过 | 未验证 | 本轮只跑了 `test:version`、`difficultyPresentation`；`perf:route-assets` 读取的清单名已不存在（第 8 节） |
 | 0-F1 | 回退演练做过 | Windows 开发自检 | 第 6 节 |
-| 0-F2 | 合并与发布得到确认、只用部署脚本 | 未验证 | 尚未发布 |
+| 0-F2 | 合并与发布得到确认、只用部署脚本 | 未验证或阻塞（未授权） | 本轮明确禁止合并 main 与生产发布 |
 | 0-F3 | 上线后正式站抽查无变化 | 未验证 | 尚未发布 |
 
 ## 设计负责人复核
@@ -346,7 +346,7 @@ FOUT = 字体全部到达时间 − 首次内容绘制时间（`font-display: sw
 
 ### 字体（D0-4）
 
-实测支持方案 B：一屏文字上，A 比 B 多 19（中）/ 34（日）个请求和 0.7–1.0 MB 传输，慢速网络下字体替换晚 6–9 秒。建议定稿为 B，并把首屏自托管字体的预算定为传输不超过 150 KiB、请求不超过 12 个（即本次样张页的实测上限），第一个正式页面接入时按实际用到的字重再收紧。预算数值等项目负责人确认后，0-A3 才能从「未验证」改掉。
+实测支持方案 B：一屏文字上，A 比 B 多 19（中）/ 34（日）个请求和 0.7–1.0 MB 传输，慢速网络下字体替换晚 6–9 秒。建议定稿为 B，并把首屏自托管字体的预算定为传输不超过 150 KiB、请求不超过 12 个（即本次样张页的实测上限），第一个正式页面接入时按实际用到的字重再收紧。此为当时建议；项目负责人随后在本轮 Linux 最终验收指令中正式确认方案 B 与上述预算，0-A3 的决策条件已满足，Linux 运行证据仍未补齐。
 
 ### 关于出站请求的补充
 
@@ -356,3 +356,76 @@ FOUT = 字体全部到达时间 − 首次内容绘制时间（`font-display: sw
 ### 仍然开着的事
 
 7.2 的全部条目；第 8 节的生产观察项（都没有改）；端口 3527 上图表代理遗留的开发服务器进程（PID 21500）与 `viewer-ds-phase0-charts` 工作树的清理，等项目负责人处理。合并 `main` 与发布不在本次授权内。
+
+
+## 11. Linux 最终验收尝试（2026-11-17，Asia/Shanghai）
+
+### 11.1 结论与授权
+
+**未验证或阻塞：维护锁被其他 QA 占用，停止验收执行。没有任何产品验收项可标为「Linux 隔离验证通过」。** 工程实现认可不等于最终验收通过，也不能证明登录页面和生产形态服务的行为、请求结果未改变。
+
+- 审核目标：`3d9a7b8c7804026a1c52c24a271bcb4d2920a82d`；实施分支 `feature/viewer-ds-phase0`；原始 main：`f9b39e640061663170b103a926f9b5774c4c8916`。
+- 独立工作树：`/var/tmp/ds-phase0-linux-final`，从审核目标检出；开始时 `git status --short`、`git diff` 为空。
+- 主机：Linux `5.10.0-16-amd64 x86_64`，PID 1 为 systemd；Node 路径为 `/www/server/nvm/versions/node/v24.13.0/bin/node`。有 Linux 入口，但本轮没有可用的隔离执行窗口。
+- 已读本记录第 9 节、`AGENTS.md`、`docs/memory-engineering-guidelines.md`。不修改隔离脚本，不使用无隔离服务替代，不抢锁、不停止其他任务。
+- 本轮未加载数据库配置、未连接任何数据库、未操作用户数据；未启动应用、浏览器或安装脚本。测试库可用性与 `SELECT DATABASE()` 尚未验证，不能把登录页面标为通过。
+- D0-4 正式采用 B；完整自托管 Noto Sans SC / JP 不再引入；首屏自托管字体 ≤150 KiB、≤12 请求。首次正式页面集成必须重新验证加载和 FOUT。
+- 本轮只修改验收记录与工程约定，不改产品代码、版本号或历史问题。禁止合并 main、部署生产、阶段 1 页面替换。
+
+### 11.2 准入失败与 main 对照
+
+在实施工作树执行 `bash scripts/memory/run_qa.sh /usr/bin/true`，退出 **75**，唯一输出：
+
+```text
+Another bounded QA task is running
+```
+
+随后在原始 main 工作目录执行同一准入探针，仍退出 **75**、同一输出。两个版本的 `scripts/memory/run_qa.sh` 和 `qa_vault.py` 无差异。这仅证明**准入阻塞在 main 同样可复现**，不是标准构建失败复现；本轮没有运行任何 `npm run build`，不得推断 schema、Nitro 或其他已知构建问题的 Linux 结果。
+
+18:34（UTC+08:00）只读检查发现其他任务的 `taiko-qa-5134059c70f5.service` 为 `active/running`，18:30:48 启动，主 PID `1757694`，cgroup 为 `/development.slice/development-qa.slice/taiko-qa-5134059c70f5.service`，最长运行时间 15 分钟。本轮未干预该任务。runner 在创建本轮 transient service / QA vault 记录前即拒绝，因此无本轮内存峰值、OOM 事件或工作负载时长；这些数据是 **N/A（未运行）**，不是 0。
+
+### 11.3 分项证据状态
+
+| 第 9 节步骤 / 项目 | 状态 | 本轮结果与证据边界 |
+|---|---|---|
+| Linux 隔离产品验收通过项 | 无 | 准入失败，不声明任何通过项 |
+| 1 安装 | 未验证或阻塞 | 未执行 `npm install`，锁文件未改 |
+| 2 原始 main / 回退基线标准构建 | 未验证或阻塞 | 未启动；没有构建日志或 `.output/server/index.mjs` |
+| 3 最终标准构建 | 未验证或阻塞 | 未启动；没有构建报告 |
+| 4 基线差异、路由依赖与 CSS 字节 | 仅 Windows 开发自检 | 历史第 5 节；Linux 未构建，差异未知，不能写 0 |
+| 4 PWA 预缓存 / manifest / theme-color | 仅 Windows 开发自检（不完整） | 历史 3 项预缓存不代表 Linux；文件类型、条目数、样张排除及实际缓存行为未验证 |
+| 5 测试构建与样张路由 | 未验证或阻塞 | 未启动 `TAIKO_DS_SAMPLES=1 npm run build` |
+| 6 作用域、弹层、浏览器矩阵、图表 | 仅 Windows 开发自检 | 历史 72/72、457/457、350/350；本轮无浏览器结果或截图 |
+| 6 字体加载、FOUT、预算 | 仅 Windows 开发自检 | 决策已确认；历史测量不升级为 Linux 实测 |
+| 7 公开旧页面截图、样式与请求 | 仅 Windows 开发自检 | 历史 18 页 / 72 状态；Linux 稳定性复采与基线对照未运行 |
+| 7 需登录账号页 `/account/*` | 未验证或阻塞 | 没有测试库身份验证、请求或截图证据 |
+| 7 社区帖子、发帖、`/forum/me`、通知 | 未验证或阻塞 | 没有测试数据下的行为与请求对照 |
+| 7 个人主页 `/my/*` | 未验证或阻塞 | 没有测试身份下的行为与请求对照 |
+| 7 后台代表页 `/admin/taiko/*` | 未验证或阻塞 | 没有测试权限下的行为与请求对照 |
+| 生产形态 Nitro、正常构建样张 404 | 未验证或阻塞 | 未启动 Nitro；不能用开发服务代替 |
+| 8 `test:ds` / `check:ds` 与其他回归 | 仅 Windows 开发自检 | 本轮未执行测试；历史结果保持原等级 |
+| 回退演练与重建、重启后对照 | 仅 Windows 开发自检 | 本轮未创建回退树；历史第 6 节不能代替 Linux 回退验证 |
+| 9 内存峰值、时长、OOM | 未验证或阻塞 | 本轮 workload 未启动，N/A；不引用其他任务数据 |
+| main 合并、生产发布、线上抽查 | 未验证或阻塞（未授权） | 本轮未执行 |
+
+证据目录：`/var/tmp/ds-phase0/linux-final-20261117/`。`admission.log` 与 `admission-main.log` 为原始拒绝日志；`other-qa-status.txt` 为不含命令参数或环境变量的其他任务状态；`legacy-listener.txt`、`legacy-pid.txt`、`worktrees-before-cleanup.txt` 为清理前检查。构建日志、浏览器报告、PWA 报告与内存报告均未生成，原因如上。小型准入证据副本见 `linux-final-20261117/admission.txt`（随文提交）；不提交日志目录、大型产物或生产数据。
+
+### 11.4 已知旧问题单独登记
+
+| 问题 | 本轮处理与 main 复现状态 |
+|---|---|
+| npm 锁文件不一致 | 不修；Linux 安装未运行，main 的 Linux 复现未验证 |
+| Keepalive + Teleport 异常 | 不纳入阶段 0 修复；**阶段 1 替换导航框架前必须完成针对性修复和回归**；Linux/main 运行复现未验证 |
+| 设置页面水合问题 | 不修；历史 Windows 观察，Linux/main 未验证 |
+| chart-ugc 深色 CSS | 不修；保留第 8 节记录，Linux 页面行为未验证 |
+| route-assets 不兼容当前 Nuxt 产物 | 不修；Linux 产物未生成，未运行 main 对照 |
+| 构建结果中的绝对路径 | 不修；Linux 构建未运行，不能确认路径差异大小 |
+| 外部 Annual schema、Windows Nitro 失败 | 保留第 7/8 节历史记录；未绕过标准构建，Linux/main 未验证 |
+
+恢复验收需要空闲的仓库隔离 runner 窗口；从第 9 节步骤 1 开始，先做原始 main 标准构建，再做最终构建。标准构建如失败，应先报告具体失败及原始 main 复现证据，不跳过检查或扩大修复范围。登录页还需仅含测试数据的测试库，以及实际 `SELECT DATABASE()` 以 `_test` 结尾的只读证明；任何测试数据写入必须先满足仓库显式 mutation opt-in 要求。
+
+### 11.5 清理与交付
+
+本轮没有启动开发服务器、Nitro 或浏览器，故无本轮服务需停止。历史 Windows PID `21500` 在当前 Linux 主机不存在，端口 `3527` 无监听；当前 Git 工作树列表不存在 `viewer-ds-phase0-charts`。这不能证明 Windows 主机上的进程或工作树已清理；不对同号 PID、其他任务工作树或服务执行删除/终止。
+
+验收文档提交并推送实施分支后，核对本轮工作树无未提交改动、无进程使用，再以非强制 `git worktree remove` 清理本轮工作树；证据目录保留供最终审查。主工作树已有的关系数据生成时间更新、`docs/random-dan/` 与 `scripts/dojo/` 保留原样。
