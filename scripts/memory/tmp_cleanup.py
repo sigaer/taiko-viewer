@@ -18,7 +18,7 @@ from pathlib import Path
 
 ROOT = Path('/var/tmp')
 REPO = Path('/home/sigaer/taiko/taiko-forum')
-LOCK = Path('/run/lock/taiko-memory-qa.lock')
+LOCK = Path('/run/lock/taiko-tmp-cleanup.lock')
 REPORT = Path('/var/log/taiko-tmp-cleanup/last.json')
 DAY = 86400
 GENERATED = {'.output', '.output.previous', '.output.next', '.nuxt', 'node_modules', '__pycache__', '.pytest_cache'}
@@ -330,7 +330,7 @@ def main():
         try:
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
-            print(json.dumps({'status': 'SKIPPED', 'reason': 'maintenance lock busy'}))
+            print(json.dumps({'status': 'SKIPPED', 'reason': 'cleanup transaction busy'}))
             return 0
         try:
             report = run(ROOT, apply=args.apply)

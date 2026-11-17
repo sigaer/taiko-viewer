@@ -5,10 +5,10 @@ Applies to Viewer, Annual runtime, local development and QA. Annual semantics, o
 ## Admission and isolation
 
 - Run new ad-hoc Node/Python/browser validation through `bash scripts/memory/run_qa.sh <absolute-command> [args...]`. This Linux host has cgroup v2/systemd; fail closed if isolation is unavailable. Do not silently fall back to an unlimited shell.
-- The runner serializes QA using a host lock, gives the entire process tree MemoryHigh 2 GiB / MemoryMax 3 GiB / MemorySwapMax 256 MiB, TasksMax 256, two CPU cores and 15-minute lifetime. Node heap is 1536 MiB; native memory and browser children are covered by the cgroup, not the heap flag.
+- The default QA profile gives the entire process tree MemoryHigh 2 GiB / MemoryMax 3 GiB / MemorySwapMax 256 MiB, TasksMax 256, two CPU cores and 15-minute lifetime. Node heap is 1536 MiB; native memory and browser children are covered by the cgroup, not the heap flag.
 - Memory isolation is not database isolation. Mutating tests still require the existing test-DB guard, an actual `SELECT DATABASE()` ending in `_test`, and explicit mutation opt-in; private configuration stays outside Git.
 - These are initial **ad-hoc QA** limits, not production budgets or a limit on MySQL. Heavier work needs a recorded peak and a separately budgeted scope. Never increase limits just to make a test pass. Existing editor sessions are not retroactively isolated by this runner.
-- Do not overlap QA, cold profiling and deployment builds on this shared host. Production traffic is not test load. Preserve the standard deploy script's existing flock, heap limit and release procedure; do not start a second build or manually replace output.
+- The resource admission controller permits independent bounded tasks when their aggregate reservations fit; only one heavy build is admitted. Production traffic is not test load. Preserve the standard deploy script's existing flock, heap limit and release procedure; do not start a second build or manually replace output.
 - New dev servers need a named bounded scope, disk-backed TMPDIR, owner/task ID and cleanup in `finally`/shell trap. At task end verify the listener and descendants exited. Inspect PID start time, cwd, parents, connections and ownership before stopping old sessions; never `pkill node/python/chrome`.
 - Leave 25–30% RAM safety reserve plus explicit kernel/cache and admin reserves. Swap usage alone is not a reason to kill services, swapoff or drop caches. Admission also uses MemAvailable, PSI and swap IO.
 
@@ -61,7 +61,7 @@ PSS apportions shared resident pages; RSS sum double-counts shared pages. Per-pr
 - Each worker is a separate transient systemd service. Generator High 1 GiB / Max 1.5 GiB; renderer High 768 MiB / Max 1 GiB; each SwapMax 128 MiB, TasksMax 256, CPUQuota 200%. Canonical output remains unchanged. A runtime deadline plus cgroup teardown bounds descendants after Viewer exits; the admission lease outlasts teardown. Do not release a slot merely by killing the `systemd-run` client.
 - Admission requires MemAvailable >= 30% physical RAM + 3 GiB and memory PSI full avg10 < 2%; otherwise existing queue TTL applies. New Annual work also waits during an active bounded release build. Do not disable these guards to force a validation through maintenance pressure.
 - New scopes: `development.slice` aggregate 6/8 GiB High/Max, SwapMax 1 GiB; `development-qa.slice` 2/3 GiB and `development-build.slice` 4/5 GiB are actual **children**, not independent root slices that evade the aggregate. Existing editor/root processes are not moved live. A future `production.slice` migration is a separate controlled service-maintenance change; no MySQL limit is imposed here.
-- Use `bash scripts/memory/run_dev.sh command ...` for new dev servers, `run_qa.sh` for validation, and `run_build.sh /bin/bash scripts/deploy_forum_web.sh "$(git log -1 --pretty=%s)"` for a Viewer release. The latter invokes the standard deploy script; it does not replace its lock/build/release steps. All three wrappers share one maintenance lock. A validation requiring a dev server must own both server and browser in the same bounded workflow and clean both up.
+- Use `bash scripts/memory/run_dev.sh command ...` for new dev servers, `run_qa.sh` for validation, and `run_build.sh /bin/bash scripts/deploy_forum_web.sh "$(git log -1 --pretty=%s)"` for a Viewer release. The latter invokes the standard deploy script; it does not replace its lock/build/release steps. All three wrappers use the short admission transaction lock and host lease registry; the mutex is released before systemd starts the job. A validation requiring a dev server must own both server and browser in the same bounded workflow and clean both up.
 - QA/dev have a 2 GiB per-file limit (`LimitFSIZE`). This is not a replacement for streaming or a directory quota. Do not generate heap dumps by default. Explicit dump jobs must use the bounded runner, keep total <=2 GiB / <=2 files and finish within the resource budget.
 - Old forensic heaps are preserved separately in `/var/lib/taiko/heap-archive/2026-09-18`. Future dumps go to disk-backed `/var/lib/taiko/heap-active`, 0700. `taiko-heap-budget.timer` checks each minute: <=2 closed snapshots, <=2 GiB, <=7 days. It will not delete an open dump; an active writer violating the aggregate budget produces a failed unit requiring action. This is an operational retention guard, **not a filesystem hard quota**. Never silently count an open oversize dump as compliant.
 - Monitoring includes parent development slices, their children and transient Annual worker units. A short 2-second render can fall between 15-second collector ticks, so capacity acceptance uses a dedicated 200 ms process/cgroup sampler; normal monitoring alone is not proof of a per-job peak.
@@ -83,5 +83,32 @@ PSS apportions shared resident pages; RSS sum double-counts shared pages. Per-pr
 - `taiko-tmp-cleanup.timer` runs daily at 05:45 Asia/Shanghai with up to five minutes of jitter and catches up after downtime. Its implementation is `scripts/memory/tmp_cleanup.py`, installed as `/usr/local/libexec/taiko-tmp-cleanup.py`; units are in `deploy/memory/`.
 - Only recognized Taiko/Viewer temporary roots under `/var/tmp` are eligible. Generated `.output`, `.output.previous`, `.output.next`, `.nuxt`, `node_modules`, Python/test caches and hashed `taiko-build` entries expire after seven days without metadata/content changes. Loose recognized `.log`/`.tmp` files expire after 30 days. Source worktrees, credentials, QA reports, runtime/data directories and the persistent OurTaiko staging DB are retained; this does not prune the QA vault.
 - Process cwd, executable, arguments, environment paths, open descriptors and mapped files, service configuration, regression fixtures and retained source symlinks protect referenced artifacts. Discovery is bounded and completes before deletion; identity and metadata are checked again before each removal. A failed or incomplete scan does not authorize a generic age purge.
-- The job shares `/run/lock/taiko-memory-qa.lock` with QA/dev/build and skips if busy. It is limited to 128/256 MiB High/Max, no swap, half a CPU and ten minutes; production services are not restarted. The latest result is `/var/log/taiko-tmp-cleanup/last.json`, with a compact summary in the journal.
+- The source job uses its own `/run/lock/taiko-tmp-cleanup.lock`; unrelated QA/dev/build activity does not skip cleanup. The installed legacy service is unchanged until an approved rollout. It is limited to 128/256 MiB High/Max, no swap, half a CPU and ten minutes; production services are not restarted. The latest result is `/var/log/taiko-tmp-cleanup/last.json`, with a compact summary in the journal.
 - The host's `/etc/tmpfiles.d/tmp.conf` overrides the vendor's whole same-named file and omits its `/var/tmp` age rule. The dedicated job intentionally manages the approved artifacts; do not restore a blanket `/var/tmp` deletion rule over persistent staging, source or acceptance material.
+
+## Infrastructure V2 admission (source; no production rollout)
+
+`admission.py` stores active reservations in `/run/taiko-resource-admission/leases.json`.
+The legacy mutex name is retained only for atomic admission/release, also detecting
+an old wrapper still holding it. Exit 75 includes `DEFERRED_RESOURCE_BUDGET` and
+specific exhausted budgets. No unbounded retry. Profiles: static 384/512 MiB,
+QA 2/2.5 GiB, browser 1.5/2 GiB, build 4/5 GiB (4096 MiB Node heap), dev 2/3 GiB.
+`TAIKO_QA_PROFILE=static|qa|browser` selects QA; dev requires `TAIKO_DEV_PORT` and
+an explicitly configured listener. Parent and child slice limits remain unchanged.
+
+Reservations account for existing cgroup memory plus remaining promised capacity,
+25% physical RAM + 1 GiB kernel/admin reserve, full memory PSI <2%, swap I/O <=8 MiB/s,
+and CPU reservations no larger than logical CPUs minus two. The swap threshold is
+a conservative admission policy, not a claim of measured throughput capacity.
+Builds defer while Annual workers or a build are active. Standalone builds share
+the existing deployment target mutex; the release script still takes its own lock.
+Do not run legacy and V2 wrappers concurrently during rollout: legacy callers do
+not publish reservations. No live wrapper/slice/Annual service was replaced here.
+
+Leases contain boot ID, supervisor PID/start identity, worktree, cgroup, budgets,
+start, expiry and status. Dead/reused PIDs and prior boots are reaped at the next
+transaction; a populated orphan cgroup remains charged until systemd's hard
+RuntimeMaxSec deadline and complete teardown. A PID or timestamp alone never
+releases live descendants. QA Vault retains bounded logs and memory/cgroup samples.
+Rollback: revert the V2 commit before using new wrappers; drain owned V2 units first.
+No production unit restart, DB change, output switch or slice enlargement is needed.

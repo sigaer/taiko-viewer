@@ -127,7 +127,7 @@ class VaultTests(unittest.TestCase):
         with patch.dict(os.environ,{'QA_RUN_DIR':'/external','QA_RUN_TMPDIR':'/external','QA_ARTIFACT_MANIFEST':str(self.run.root/'artifacts/runtime-manifest.json')}):
             command=qa.systemd_command('test-unit',self.run,['/bin/true','secret-not-logged'])
         self.assertIn('--setenv=QA_RUN_TMPDIR='+str(self.run.scratch),command)
-        self.assertIn('RuntimeMaxSec=15min',command); self.assertIn('MemoryMax=3G',command)
+        self.assertIn('RuntimeMaxSec=900',command); self.assertIn('MemoryMax=2684354560',command)
         self.assertIn('LimitFSIZE=2147483648',command)
         self.assertLess(len(str(qa.DEFAULT_ROOT/'runs/qa-123456789abc/scratch/m.sock').encode()),104)
     def test_artifact_manifest_rejects_outside_and_symlink(self):

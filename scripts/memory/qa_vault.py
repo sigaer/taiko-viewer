@@ -5,6 +5,7 @@ Owns exactly one newly-created run. Existing runs/artifacts are never pruned.
 This is operational containment, not a sandbox against a malicious same-uid job.
 """
 import argparse
+import fcntl
 import hashlib
 import json
 import os
@@ -18,6 +19,9 @@ import subprocess
 import sys
 import time
 import uuid
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import admission
 
 GIB = 1024 ** 3
 DEFAULT_ROOT = Path('/home/sigaer/taiko/qa-vault')
@@ -218,11 +222,34 @@ def tree_usage(path, reject_symlinks=False):
     return {'bytes': total, 'logicalBytes': total, 'allocatedBytes': allocated, 'symlinkCount': symlinks, 'hardlinkEntryCount': hardlinks, 'largestFileBytes': largest, 'entries': entries}
 
 
+def resource_sample(run):
+    group = getattr(run, 'cgroup', None)
+    if group is None or not group.exists():
+        return {}
+    values = {}
+    for name in ['memory.current', 'memory.peak', 'memory.events', 'memory.swap.current']:
+        try:
+            values[name] = (group/name).read_text().strip()
+        except FileNotFoundError:
+            pass
+    rss = 0
+    for file in group.rglob('cgroup.procs'):
+        for pid in file.read_text().split():
+            try:
+                for line in Path('/proc', pid, 'status').read_text().splitlines():
+                    if line.startswith('VmRSS:'):
+                        rss += int(line.split()[1])*1024
+            except FileNotFoundError:
+                pass
+    values['processTreeRss'] = rss
+    return values
+
+
 def sample(run, phase):
     run.verify()
     disk = os.statvfs(run.path)
     scratch = tree_usage(run.scratch) if run.scratch.exists() else {'bytes': 0, 'logicalBytes': 0, 'allocatedBytes': 0, 'symlinkCount': 0, 'largestFileBytes': 0, 'entries': 0}
-    return {'phase': phase, 'timeNs': time.time_ns(), 'freeBytes': disk.f_bavail * disk.f_frsize,
+    return {'resources': resource_sample(run), 'phase': phase, 'timeNs': time.time_ns(), 'freeBytes': disk.f_bavail * disk.f_frsize,
             'totalBytes': disk.f_blocks * disk.f_frsize, 'scratch': scratch, 'run': tree_usage(run.path),
             'evidence': tree_usage(run.evidence, reject_symlinks=True)}
 
@@ -386,25 +413,30 @@ def artifact_manifest(run):
     return path
 
 
-def systemd_command(unit, run, command):
-    return ['systemd-run', '--quiet', '--unit=' + unit, '--slice=development-qa.slice', '--wait', '--collect', '--pipe',
+def systemd_command(unit, run, command, profile="qa"):
+    p = admission.PROFILES[profile]
+    if profile == 'dev':
+        port = str(run.dev_port)
+        command = ['/usr/bin/env', 'PORT='+port, 'NUXT_PORT='+port, 'NITRO_PORT='+port,
+                   'HOST=127.0.0.1', 'NUXT_HOST=127.0.0.1', 'NITRO_HOST=127.0.0.1', *command]
+    return ['systemd-run', '--quiet', '--unit=' + unit, '--slice=' + p['slice'], '--wait', '--collect', '--pipe',
             '--working-directory=' + os.getcwd(), '--setenv=PATH=' + os.environ.get('PATH', ''),
             '--setenv=TMPDIR=' + str(run.scratch),
             '--setenv=QA_RUN_ID=' + run.run_id, '--setenv=QA_RUN_DIR=' + str(run.path),
             '--setenv=QA_RUN_TMPDIR=' + str(run.scratch), '--setenv=QA_EVIDENCE_DIR=' + str(run.evidence),
             '--setenv=QA_ARTIFACT_MANIFEST=' + str(artifact_manifest(run)), '--setenv=TAIKO_QA_SCRATCH_DIR=' + str(run.scratch),
             '--setenv=TAIKO_QA_EVIDENCE_DIR=' + str(run.evidence), '--setenv=TAIKO_QA_RUN_ID=' + run.run_id,
-            '--setenv=NODE_OPTIONS=--max-old-space-size=1536',
-            '-p', 'MemoryHigh=2G', '-p', 'MemoryMax=3G', '-p', 'MemorySwapMax=256M',
-            '-p', 'TasksMax=256', '-p', 'LimitFSIZE=2147483648', '-p', 'CPUQuota=200%',
-            '-p', 'RuntimeMaxSec=15min', '-p', 'TimeoutStopSec=15', '-p', 'KillMode=control-group',
+            '--setenv=NODE_OPTIONS=--max-old-space-size=' + str(p['heap']),
+            '-p', 'MemoryHigh=' + str(p['high']), '-p', 'MemoryMax=' + str(p['memory']), '-p', 'MemorySwapMax=' + ('512M' if profile == 'build' else '256M'),
+            '-p', 'TasksMax=' + str(512 if profile == 'build' else 256), '-p', 'LimitFSIZE=2147483648', '-p', 'CPUQuota=' + str(p['cpu']) + '%',
+            '-p', 'RuntimeMaxSec=' + str(p['seconds']), '-p', 'TimeoutStopSec=15', '-p', 'KillMode=control-group',
             '-p', 'OOMPolicy=stop', '-p', 'UMask=0077', '--',
             '/usr/bin/env', '-i', 'PATH=' + os.environ.get('PATH', ''),
             'TMPDIR=' + str(run.scratch), 'QA_RUN_ID=' + run.run_id, 'QA_RUN_DIR=' + str(run.path),
             'QA_RUN_TMPDIR=' + str(run.scratch), 'QA_EVIDENCE_DIR=' + str(run.evidence),
             'TAIKO_QA_RUN_ID=' + run.run_id, 'TAIKO_QA_SCRATCH_DIR=' + str(run.scratch),
             'TAIKO_QA_EVIDENCE_DIR=' + str(run.evidence), 'QA_ARTIFACT_MANIFEST=' + str(artifact_manifest(run)),
-            'NODE_OPTIONS=--max-old-space-size=1536', *command]
+            'NODE_OPTIONS=--max-old-space-size=' + str(p['heap']), *command]
 
 
 def stop_unit(unit):
@@ -427,6 +459,8 @@ def stop_unit(unit):
 
 def main():
     parser = argparse.ArgumentParser()
+    parser.add_argument('--profile', choices=admission.PROFILES, default='qa')
+    parser.add_argument('--port', type=int)
     parser.add_argument('--abort-run', type=Path)
     parser.add_argument('--abort-reason')
     parser.add_argument('--vault-root', type=Path, default=DEFAULT_ROOT)
@@ -460,20 +494,47 @@ def main():
         signal.signal(number, interrupt)
     code = 1
     process = None
+    leased = False
+    deploy_lock = None
     try:
+        if args.profile == 'build':
+            # Share the established deploy mutex: standalone npm builds cannot
+            # overlap a legacy release. The release script owns its own mutex.
+            deploy_command = any(Path(arg).name == 'deploy_forum_web.sh' for arg in command)
+            if not deploy_command:
+                deploy_lock = os.open('/tmp/taiko-viewer-deploy.lock', os.O_CREAT | os.O_RDWR | os.O_NOFOLLOW, 0o600)
+                try:
+                    fcntl.flock(deploy_lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+                except BlockingIOError:
+                    raise admission.Deferred('formal deployment or build holds production target lock')
+        record['admission'] = admission.acquire(run.run_id, args.profile, unit, args.scratch_limit, args.port)
+        leased = True
+        run.dev_port = args.port
+        run.cgroup = admission.CG / record['admission']['lease']['cgroup'].lstrip('/')
         before = sample(run, 'before')
         record['samples'].append(before)
         reason = violation(before, args.scratch_limit, args.min_free)
         if reason:
             record.update(exitCode=None, stopReason=reason)
         else:
-            process = subprocess.Popen(systemd_command(unit, run, command), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True)
-            result = supervise(process, run, lambda: stop_unit(unit), args.scratch_limit, args.min_free)
+            with admission.annual_start_barrier(args.profile == 'build'):
+                process = subprocess.Popen(systemd_command(unit, run, command, args.profile), stdout=subprocess.PIPE, stderr=subprocess.STDOUT, start_new_session=True)
+                if args.profile == 'build':
+                    deadline = time.monotonic()+5
+                    while process.poll() is None and not admission.populated(record['admission']['lease']['cgroup']):
+                        if time.monotonic() >= deadline:
+                            raise admission.Deferred('build cgroup startup deadline')
+                        time.sleep(.02)
+            result = supervise(process, run, lambda: stop_unit(unit), args.scratch_limit, args.min_free, timeout=admission.PROFILES[args.profile]['seconds']+30)
             result['samples'] = record['samples'] + result['samples']
             record.update(result)
             code = result['exitCode'] if result['exitCode'] is not None and result['exitCode'] >= 0 else 1
             if result['stopReason'] or not result['childrenStopped']:
                 code = code or 1
+    except admission.Deferred as error:
+        record.update(stopReason="DEFERRED_RESOURCE_BUDGET", reason=str(error))
+        print("DEFERRED_RESOURCE_BUDGET: " + str(error), file=sys.stderr)
+        code = 75
     except (OSError, UnsafePath) as error:
         record.update(stopReason=type(error).__name__)
     finally:
@@ -494,6 +555,13 @@ def main():
         except (OSError, UnsafePath) as error:
             record['cleanup'] = 'RETAINED_' + type(error).__name__
             code = 1
+        if leased:
+            try:
+                admission.release(run.run_id)
+            except (OSError, admission.Deferred):
+                record['leaseRelease'] = 'PENDING_REAP_ON_NEXT_ADMISSION'
+        if deploy_lock is not None:
+            os.close(deploy_lock)
         record['finishedNs'] = time.time_ns()
         record['wrapperExitCode'] = code
         try:
