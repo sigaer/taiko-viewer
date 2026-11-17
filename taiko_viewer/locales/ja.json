@@ -2028,6 +2028,79 @@
       "themeLight": "ライト",
       "themeDark": "ダーク"
     },
+    "note": {
+      "don": "ドン",
+      "ka": "カッ",
+      "roll": "連打",
+      "bigDon": "大ドン",
+      "bigKa": "大カッ",
+      "bigRoll": "大連打",
+      "ghost": "プレイ",
+      "fc": "フルコンボ",
+      "dfc": "全良"
+    },
+    "judgeBar": {
+      "name": "判定",
+      "good": "良",
+      "ok": "可",
+      "ng": "不可"
+    },
+    "chart": {
+      "empty": "データなし",
+      "summary": {
+        "series": "{name}：{count} 点、{from} から {to}",
+        "point": "{name}：{value}",
+        "empty": "{name}：データなし"
+      },
+      "line": {
+        "name": "推移"
+      },
+      "spark": {
+        "name": "推移"
+      },
+      "radar": {
+        "name": "能力分布",
+        "item": "{label} {value}",
+        "separator": "、",
+        "summary": "{name}：{items}"
+      },
+      "dial": {
+        "name": "進捗",
+        "summary": "{name}：{value} / {max}"
+      },
+      "density": {
+        "name": "小節ごとのノーツ密度",
+        "summary": "{name}：全 {count} 小節、高密度 {hot} 小節"
+      },
+      "lane": {
+        "name": "最近のプレイ譜面",
+        "overview": "{name}：{days} 日中 {played} 日プレイ",
+        "today": "今日",
+        "rest": "{date} プレイなし",
+        "played": "{date} プレイあり",
+        "facts": "{date} {fact}、記録 {count} 件",
+        "weekday": {
+          "sun": "日",
+          "mon": "月",
+          "tue": "火",
+          "wed": "水",
+          "thu": "木",
+          "fri": "金",
+          "sat": "土"
+        },
+        "fact": {
+          "df": "全良達成",
+          "fc": "フルコンボ",
+          "goal-completed": "目標達成",
+          "rank-upgrade": "評価アップ",
+          "score-pb": "自己ベスト",
+          "clear": "初クリア",
+          "ng-reduced": "不可が減った",
+          "combo-improved": "コンボ更新",
+          "played": "プレイ"
+        }
+      }
+    },
     "crown": {
       "dondaful": "全良",
       "full": "フルコンボ",
