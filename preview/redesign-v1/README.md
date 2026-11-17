@@ -1,6 +1,11 @@
-# Taiko Viewer Design V1.3 Final — Design Freeze Candidate（待批准）
+# Taiko Viewer Design V1.3 Final — APPROVED
 
-Taiko Viewer 全站重新设计的高保真原型。当前版本是 V1.3 Final，状态为 Design Freeze Candidate，等待批准（`docs/22-v1.3-design-freeze.md`）。
+Taiko Viewer 全站重新设计的高保真原型。Design V1.3 Final 已于 2026-11-17 批准（`docs/22-v1.3-design-freeze.md`），冻结基线为提交 `5f770a2ddd2df970454f85fda09fa73008120b66`。
+
+- **设计阶段结束。** 不再有 V1.4，不再探索品牌方向。原型代码冻结在基线提交上。
+- **下一步是分阶段实施**，从阶段 0 的准备开始：`docs/06-migration-plan.md`、`docs/23-phase-0-implementation-tasks.md`。实施前的条件与三项门槛（P0 软键盘避让、P1 王冠不只靠颜色区分、P2 默认头像混合数据复核）见 `docs/06` 与 `docs/12`。
+- **批准不包括合并到 main 或部署。** 合并与部署按仓库现有流程另行处理。
+- 已接受的例外：歌曲详情 1440 浅色的朱色 / 品牌比例为 0.70（目标 ≤ 0.60），原因是谱面音符的游戏含义；不算达标（`docs/12` RK-54）。
 
 - **默认状态是 C+**：真实游戏素材 + Viewer Teal 品牌色（`docs/19-v1.3-phase-b-decisions.md`）。打开原型看到的就是最终设计。
 - **A、B 是历史对照开关**：A = V1.2 的生成式素材与 Fumen 配色；B = 真实素材 + Fumen 配色。Phase B 起不再维护和验收。
@@ -143,13 +148,13 @@ preview/redesign-v1/
 | `docs/03-ia-mapping.md` | 新旧信息架构映射与功能覆盖清单 |
 | `docs/04-design-system.md` | Design System V1.3 规范 |
 | `docs/05-page-specs.md` | 主要页面的设计说明 |
-| `docs/06-migration-plan.md` | 实施建议与分阶段迁移方案 |
+| `docs/06-migration-plan.md` | 分阶段实施方案（已批准从阶段 0 开始，按 V1.3 更新） |
 | `docs/07-v1.1-design-decisions.md` | V1.1 设计裁决 |
 | `docs/08-v1.1-fix-record.md` | V1.1 与 V1.2 逐项修复记录 |
 | `docs/09-v1.1-qa-report.md` | V1.1 真实浏览器验收报告 |
 | `docs/10-v1.2-design-decisions.md` | V1.2 设计裁定 |
 | `docs/11-v1.2-quality-report.md` | V1.2 质量与性能报告 |
-| `docs/12-risks-and-integration-acceptance.md` | 遗留风险登记与正式集成验收清单（含 V1.3） |
+| `docs/12-risks-and-integration-acceptance.md` | 遗留风险登记与正式集成验收清单（含 V1.3 与 P0 / P1 / P2 门槛） |
 | `docs/13-design-freeze.md` | V1.2 Design Freeze 决策（历史） |
 | `docs/14-v1.3-asset-audit.md` | V1.3 素材盘点与业务映射 |
 | `docs/15-v1.3-brand-system.md` | Phase A 品牌配色与使用规则（历史；被 19 修订的以 19 为准） |
@@ -159,4 +164,5 @@ preview/redesign-v1/
 | `docs/19-v1.3-phase-b-decisions.md` | Phase B 裁定（C+，G0–G13、D1–D14） |
 | `docs/20-v1.3-phase-b-completion.md` | Phase B 完成记录与验证程度 |
 | `docs/21-v1.3-visual-acceptance.md` | V1.3 视觉验收与测试报告 |
-| `docs/22-v1.3-design-freeze.md` | V1.3 Final 的 Design Freeze 候选文档 |
+| `docs/22-v1.3-design-freeze.md` | V1.3 Final 的 Design Freeze 文档与批准记录 |
+| `docs/23-phase-0-implementation-tasks.md` | 阶段 0 实施任务清单 |
