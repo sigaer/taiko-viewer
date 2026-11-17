@@ -28,8 +28,14 @@ const DOMAIN = "assets/css/ds/domain.css";
 /** Which files may read a domain / note token family. */
 export const FAMILY_RULES = [
   { family: /--diff-[\w-]+/g, name: "--diff-*", allow: [/^components\/ds\/(Diff|DiffTabs|SongCell)\w*\.vue$/, /^components\/ds\/charts\//] },
-  // Note: the all-perfect note marker is the --crown-dfc rainbow ring (04 V1.2 §9.12 `.note.dfc`)
-  { family: /--crown-[\w-]+/g, name: "--crown-*", allow: [/^components\/ds\/(Crown|Note)\w*\.vue$/, /^components\/ds\/charts\//] },
+  // components/ds/Note.vue may read exactly one crown token: --crown-dfc, the all-perfect note's rainbow ring
+  // (04 V1.2 §9.12 `.note.dfc`). Any other --crown-* there, or --crown-dfc in any other file, still fails.
+  {
+    family: /--crown-[\w-]+/g,
+    name: "--crown-*",
+    allow: [/^components\/ds\/Crown\w*\.vue$/, /^components\/ds\/charts\//],
+    except: [{ file: /^components\/ds\/Note\.vue$/, token: /^--crown-dfc$/ }]
+  },
   { family: /--rank-[\w-]+/g, name: "--rank-*", allow: [/^components\/ds\/Rank\w*\.vue$/, /^components\/ds\/charts\//] },
   { family: /--judge-[\w-]+/g, name: "--judge-*", allow: [/^components\/ds\/(JudgeBar|Note)\w*\.vue$/, /^components\/ds\/charts\//] },
   {
@@ -67,7 +73,10 @@ export function checkFile(file, text) {
   if (!isDomainCss && !showcase) {
     for (const rule of FAMILY_RULES) {
       if (rule.allow.some((re) => re.test(file))) continue;
-      for (const m of code.matchAll(rule.family)) add(m.index, `${rule.name} outside its components`, m[0]);
+      for (const m of code.matchAll(rule.family)) {
+        if ((rule.except || []).some((e) => e.file.test(file) && e.token.test(m[0]))) continue;
+        add(m.index, `${rule.name} outside its components`, m[0]);
+      }
     }
   }
   for (const m of code.matchAll(/\bDanBadge\b|\bdanBadge\b|\bdan(?:Id|Name|Rank|Level)?\b\s*[:=]/g)) add(m.index, "dan badge / dan data", m[0]);

@@ -59,7 +59,7 @@
 - 自托管 Barlow（400 / 500 / 600 / 700）与 Barlow Condensed（500 / 600 / 700），latin + latin-ext 两个 unicode-range 分片，woff2，`font-display: swap`。文件原样取自 `@fontsource/barlow` 5.3.0 与 `@fontsource/barlow-condensed` 5.3.0（npm），SIL Open Font License 1.1，许可文本 `assets/font/ds/OFL-Barlow.txt`、`OFL-Barlow-Condensed.txt`。没有加 npm 依赖。
 - 中日文用系统字体。token 的字体栈保持规格原样，`'Noto Sans SC Variable'` / `'Noto Sans JP Variable'` 排在系统字体前面；方案 B 不声明这两个字体，浏览器直接落到系统字体。
 - 只有 `ds-samples/_shared/DsSampleShell.vue` 导入 `fonts.css`；正常生产构建里没有这些字体文件，现有页面也不请求它们。
-- 为 P0-10 的 A / B 对比预留：方案 A 另建 `assets/css/ds/fonts-cjk.css`，声明 `'Noto Sans SC Variable'` / `'Noto Sans JP Variable'`（按 unicode-range 分片），只由测量用的样张子页导入。token 不用改。
+- P0-10 的 A / B 对比页是 `/_ds/fonts`（`?fonts=a` 为方案 A）。方案 A 的 Noto Sans SC / JP 可变字体约 10 MB，没有加依赖、也没有放进仓库：页面在 `?fonts=a` 时链接 `/_ds-fonts-a/fonts-cjk.css`，这个地址应用本身不提供，由 `scripts/ds/font-measure.mjs` 在测量时用请求拦截从仓库外的 `@fontsource-variable` 安装目录应答。不经测量脚本打开时方案 A 退回方案 B。token 不用改。若以后决定采用 A，再按 D0-4 的结论决定字体文件的来源与加载范围。
 
 ## 6. 样张页（D0-1 = A，P0-26）
 
@@ -67,7 +67,8 @@
 - 路由：`/_ds`（`ds-samples/index.vue`）与 `/_ds/<slug>`，日文 `/ja/_ds/...`（i18n 自动加前缀）。页面 `layout: false`（由钩子写进路由 meta），`robots: noindex,nofollow`。
 - 主题与语言切换用生产机制：`useViewerTheme()`（cookie + `html[data-theme]`）与 `useSwitchLocalePath()`。
 - **组件任务怎么加样张，不改任何共享文件：**
-  1. 新建 `ds-samples/sections/<NN>-<slug>.vue`（`NN` 只决定排序，`slug` 为小写短横线，例如 `60-crown.vue` → `/_ds/crown`）。重启 `nuxt dev` 后自动注册，并出现在 `/_ds` 索引和顶栏里。
+  0. 编号区间决定 `/_ds` 总览里的分组（`ds-samples/_shared/useDsSections.ts`）：10–29 token 与排版，30–69 控件，70–79 素材组件，80–99 音符与图表。
+  1. 新建 `ds-samples/sections/<NN>-<slug>.vue`（`NN` 决定排序与分组，`slug` 为小写短横线，例如 `60-crown.vue` → `/_ds/crown`）。重启 `nuxt dev` 后自动注册，并出现在 `/_ds` 索引和顶栏里。
   2. 文件里用 `DsSampleShell`（必用：它负责作用域、样式表、noindex、主题与语言）和 `DsSampleBlock`：
 
      ```vue
@@ -103,6 +104,10 @@
 | `npm run ds:icons` / `node scripts/ds/generate_small_game_icons.mjs --check [--sheets <dir>]` | P0-12 小尺寸素材：生成、核对（不写文件）、输出 1× / 2× 对照图 |
 | `npm run ds:build-report -- --out a.json` / `--compare base.json cur.json [--expect-samples]` | P0-33 / P0-35 构建产物报告与对比（`_nuxt` 字节、各路由 JS / CSS 依赖、入口 CSS、预缓存、web manifest 与 theme-color、注册路由、字体、locale） |
 | `npm run ds:browser-check -- --base http://127.0.0.1:<port>` | 浏览器检查：进入 / 离开 / keepalive 往返时的 `ds-preview`、现有页面计算样式前后一致、弹层映射、根属性样例 |
+| `node scripts/ds/samples-matrix.mjs --base <url> --out <dir>` | P0-27 / P0-31 / P0-32：全部样张 × 1440 / 820 / 390 / 360 × 浅深 × 中日；控制台、水合、横向溢出、`html lang`、服务端 HTML 的主题与作用域、日文回落到中文 |
+| `node scripts/ds/charts-check.mjs <url> <dir>` | 图表样张：可访问名称、SVG 文字相撞与裁切、Lane 键盘、减少动效，并保存截图 |
+| `node scripts/ds/font-measure.mjs --base <url> --fontsource <dir>` | P0-10：`/_ds/fonts` 上方案 A / B 的字体请求、字节、到达时间与 FOUT（方案 A 的字体从仓库外的 `@fontsource-variable` 安装目录注入，不进仓库、不进构建） |
+| `node scripts/ds/existing-pages.mjs capture --base <url> --out <dir>` / `compare <基线目录> <当前目录>` | P0-01 / P0-34：现有页面截图、关键元素计算样式、字体与图片请求的采集与比对 |
 
 浏览器检查、构建、内存相关检查的**验收**必须在 Linux 服务器上用 `scripts/memory/run_qa.sh`、`run_dev.sh`、`run_build.sh` 运行（先读 `docs/memory-engineering-guidelines.md`）；其他环境里跑的只算开发自检。开发服务器不连数据库：自检时可把 `TAIKO_DB_HOST` 设成不可解析的 `invalid.invalid`，保证任何后台任务都连不上库。
 

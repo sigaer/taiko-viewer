@@ -12,7 +12,7 @@ import { run as contrastRun } from "../scripts/ds/contrast-check.mjs";
 import { structureProblems, resolveContexts, productionFiles, PROD_CONTEXTS, diffResolved, SNAPSHOT } from "../scripts/ds/check-tokens.mjs";
 import { build as mappingBuild } from "../scripts/ds/token-mapping.mjs";
 import { compareReports, normalizeManifestKey, normalizePrecacheUrl } from "../scripts/ds/build-report.mjs";
-import { dsSamplePages, dsSamplesEnabled, sectionSlug } from "../ds-samples/routes.ts";
+import { dsSamplePages, dsSamplesEnabled, sectionOrder, sectionSlug } from "../ds-samples/routes.ts";
 
 const root = new URL("../", import.meta.url);
 const read = (p) => readFileSync(new URL(p, root), "utf8");
@@ -152,6 +152,9 @@ test("sample routes: only in dev or with TAIKO_DS_SAMPLES=1; sections auto-disco
   assert.ok(pages.every((p) => p.meta.layout === false && p.path.startsWith("/_ds")));
   assert.ok(pages.some((p) => p.path === "/_ds/tokens"));
   assert.ok(pages.some((p) => p.path === "/_ds/element-plus"));
+  assert.equal(sectionOrder("70-cover.vue"), 70);
+  assert.equal(sectionOrder("cover.vue"), 999);
+  assert.ok(pages.slice(1).every((p) => Number.isInteger(p.meta.dsOrder) && p.meta.dsOrder > 0));
   // nuxt.config registers them only through the guarded hook
   const config = read("nuxt.config.ts");
   assert.match(config, /"pages:extend"\(pages\) \{\s*if \(dsSamplesEnabled\(\)\) pages\.push\(\.\.\.dsSamplePages\(/);

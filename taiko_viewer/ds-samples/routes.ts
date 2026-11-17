@@ -17,7 +17,7 @@ export interface DsSamplePage {
   name: string;
   path: string;
   file: string;
-  meta: { layout: false; dsSample: string };
+  meta: { layout: false; dsSample: string; dsOrder: number };
 }
 
 export function dsSamplesEnabled(env: Record<string, string | undefined> = process.env): boolean {
@@ -31,10 +31,16 @@ export function sectionSlug(file: string): string | null {
   return /^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug) ? slug : null;
 }
 
+/** Numeric prefix of a section file (`70-cover.vue` → 70); files without one sort last. */
+export function sectionOrder(file: string): number {
+  const m = file.match(/^(\d+)-/);
+  return m ? Number(m[1]) : 999;
+}
+
 export function dsSamplePages(rootDir: string): DsSamplePage[] {
   const dir = join(rootDir, "ds-samples");
   const pages: DsSamplePage[] = [
-    { name: DS_SAMPLES_ROUTE_NAME, path: DS_SAMPLES_ROUTE, file: join(dir, "index.vue"), meta: { layout: false, dsSample: "" } }
+    { name: DS_SAMPLES_ROUTE_NAME, path: DS_SAMPLES_ROUTE, file: join(dir, "index.vue"), meta: { layout: false, dsSample: "", dsOrder: 0 } }
   ];
   const sections = join(dir, "sections");
   if (!existsSync(sections)) return pages;
@@ -48,7 +54,7 @@ export function dsSamplePages(rootDir: string): DsSamplePage[] {
       name: `${DS_SAMPLES_ROUTE_NAME}-${slug}`,
       path: `${DS_SAMPLES_ROUTE}/${slug}`,
       file: join(sections, file),
-      meta: { layout: false, dsSample: slug }
+      meta: { layout: false, dsSample: slug, dsOrder: sectionOrder(file) }
     });
   }
   return pages;

@@ -1,39 +1,47 @@
 <script setup lang="ts">
+// P0-27 overview: every registered section, grouped by its file-prefix range.
 import DsSampleShell from "./_shared/DsSampleShell.vue";
+import { useDsSections } from "./_shared/useDsSections";
 
 defineOptions({ name: "DsSamplesIndex" });
-const router = useRouter();
 const localePath = useLocalePath();
-const sections = computed(() => {
-  const slugs = new Set<string>();
-  for (const route of router.getRoutes()) {
-    const slug = route.meta?.dsSample;
-    if (typeof slug === "string" && slug) slugs.add(slug);
-  }
-  return [...slugs].sort();
-});
+const { groups } = useDsSections();
 </script>
 
 <template>
   <DsSampleShell title="Design System V1.3">
-    <ul class="ds-index" data-testid="ds-index">
-      <li v-for="slug in sections" :key="slug">
-        <NuxtLink :to="localePath(`/_ds/${slug}`)">{{ slug }}</NuxtLink>
-      </li>
-    </ul>
+    <div class="ds-index" data-testid="ds-index">
+      <section v-for="group in groups" :key="group.id" class="ds-index__group" :aria-labelledby="`ds-group-${group.id}`">
+        <h2 :id="`ds-group-${group.id}`" class="ds-index__name">{{ group.id }}</h2>
+        <ul class="ds-index__list">
+          <li v-for="s in group.sections" :key="s.slug">
+            <NuxtLink :to="localePath(`/_ds/${s.slug}`)" :data-testid="`ds-index-${s.slug}`">{{ s.slug }}</NuxtLink>
+          </li>
+        </ul>
+      </section>
+    </div>
   </DsSampleShell>
 </template>
 
 <style scoped>
 .ds-index {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: var(--sp-6);
+}
+.ds-index__name {
+  margin: 0 0 var(--sp-3);
+  font-size: var(--fs-16);
+  color: var(--ink-2);
+}
+.ds-index__list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
   gap: var(--sp-3);
   margin: 0;
   padding: 0;
   list-style: none;
 }
-.ds-index a {
+.ds-index__list a {
   display: flex;
   align-items: center;
   min-height: var(--hit);

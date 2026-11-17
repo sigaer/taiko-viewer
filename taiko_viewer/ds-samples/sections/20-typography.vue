@@ -41,6 +41,7 @@ const scale = ["--fs-11", "--fs-12", "--fs-13", "--fs-14", "--fs-16", "--fs-18",
   padding: 0;
   list-style: none;
   line-height: var(--lh-snug);
+  overflow-wrap: anywhere;
 }
 .ds-scale code {
   display: inline-block;
@@ -54,6 +55,7 @@ const scale = ["--fs-11", "--fs-12", "--fs-13", "--fs-14", "--fs-16", "--fs-18",
 }
 .ds-hier {
   display: flex;
+  flex-wrap: wrap;
   align-items: baseline;
   gap: var(--sp-3);
 }

@@ -8,6 +8,7 @@ import "~/assets/css/ds/fonts.css";
 import "~/assets/css/ds/element-plus.css";
 import "~/assets/css/ds/base.css";
 import { useDsPreviewScope } from "./useDsPreviewScope";
+import { useDsSections } from "./useDsSections";
 
 defineProps<{ title: string }>();
 
@@ -34,17 +35,9 @@ const { t, locale, locales } = useI18n();
 const { theme } = useViewerTheme();
 const switchLocalePath = useSwitchLocalePath();
 const localePath = useLocalePath();
-const router = useRouter();
 
-/** Sections registered by ds-samples/routes.ts (one per file in ds-samples/sections/). */
-const sections = computed(() => {
-  const slugs = new Set<string>();
-  for (const route of router.getRoutes()) {
-    const slug = route.meta?.dsSample;
-    if (typeof slug === "string" && slug) slugs.add(slug);
-  }
-  return [...slugs].sort();
-});
+/** Sections registered by ds-samples/routes.ts (one per file in ds-samples/sections/), in prefix order. */
+const { sections } = useDsSections();
 const localeCodes = computed(() => (locales.value as Array<{ code: string }>).map((l) => l.code));
 </script>
 
@@ -53,7 +46,7 @@ const localeCodes = computed(() => (locales.value as Array<{ code: string }>).ma
     <header class="ds-sample__bar">
       <NuxtLink class="ds-sample__home" :to="localePath('/_ds')">V1.3</NuxtLink>
       <nav class="ds-sample__nav" aria-label="ds-samples">
-        <NuxtLink v-for="slug in sections" :key="slug" :to="localePath(`/_ds/${slug}`)" class="ds-sample__link">{{ slug }}</NuxtLink>
+        <NuxtLink v-for="s in sections" :key="s.slug" :to="localePath(`/_ds/${s.slug}`)" class="ds-sample__link">{{ s.slug }}</NuxtLink>
       </nav>
       <div class="ds-sample__tools">
         <el-segmented v-model="theme" :options="[{ label: t('ds.sample.themeLight'), value: 'light' }, { label: t('ds.sample.themeDark'), value: 'dark' }]" :aria-label="t('ds.sample.theme')" data-testid="ds-theme" />

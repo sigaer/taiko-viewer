@@ -80,6 +80,31 @@ const SNAPSHOT = () => {
 };
 
 const sameJson = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+
+/**
+ * Production's own Element Plus value for the success-message probe, from assets/css/tokens.css
+ * (--el-color-success-light-9 = --viewer-success-surface).
+ */
+function productionMessageBg(theme) {
+  const css = readFileSync(join(ROOT, "assets", "css", "tokens.css"), "utf8");
+  const r = cssComputed([{ name: "prod", css }], { attrs: { "data-theme": theme }, lang: "zh" }).root;
+  const [cr, cg, cb] = parseColor(r["--viewer-success-surface"]);
+  return `rgb(${Math.round(cr)}, ${Math.round(cg)}, ${Math.round(cb)})`;
+}
+
+/**
+ * "Back to baseline" for an existing page. Element Plus loads each component's own stylesheet the first time the
+ * component is used anywhere in the session (el-message.css when a sample page shows a message). If the existing
+ * page never used ElMessage, its message probe is unstyled before the visit and styled afterwards — by production's
+ * mapping, not the ds one. That one case is accepted only when the probe then shows production's value exactly.
+ */
+function sameAsBaseline(before, after, theme) {
+  const { message: m0, ...rest0 } = before;
+  const { message: m1, ...rest1 } = after;
+  if (!sameJson(rest0, rest1)) return false;
+  if (sameJson(m0, m1)) return true;
+  return m0["background-color"] === "rgba(0, 0, 0, 0)" && m1["background-color"] === productionMessageBg(theme);
+}
 const diffKeys = (a, b, prefix = "") =>
   Object.keys({ ...a, ...b }).flatMap((k) =>
     a?.[k] && typeof a[k] === "object" ? diffKeys(a[k], b?.[k], `${prefix}${k}.`) : a?.[k] === b?.[k] ? [] : [`${prefix}${k}: ${JSON.stringify(a?.[k])} → ${JSON.stringify(b?.[k])}`]
@@ -181,7 +206,7 @@ async function run() {
         await page.waitForTimeout(4500); // let the sample message expire
         const s2 = await page.evaluate(SNAPSHOT);
         check(`[${theme}] leave (keepalive deactivate): ds-preview removed`, !s2.htmlClass.split(/\s+/).includes("ds-preview"), `class="${s2.htmlClass}"`);
-        check(`[${theme}] after leaving: html/body/probe computed styles identical to before`, sameJson(s0, s2), diffKeys(s0, s2).slice(0, 6).join("; "));
+        check(`[${theme}] after leaving: html/body/probe computed styles identical to before`, sameAsBaseline(s0, s2, theme), diffKeys(s0, s2).slice(0, 6).join("; "));
         const leftover = await page.$$eval(".ds-ep-tooltip, .ds-ep-select-popper, .ds-ep-dropdown", (els) =>
           els.map((el) => ({ bg: getComputedStyle(el).backgroundColor, visible: !!(el.offsetWidth || el.offsetHeight) }))
         );
@@ -200,7 +225,7 @@ async function run() {
         check(`[${theme}] sample → sample: ds-preview kept`, s3b.htmlClass.split(/\s+/).includes("ds-preview"));
         await routerPush(page, EXISTING_PAGE);
         const s4 = await page.evaluate(SNAPSHOT);
-        check(`[${theme}] second leave: ds-preview removed and styles identical`, !s4.htmlClass.includes("ds-preview") && sameJson(s0, s4), diffKeys(s0, s4).slice(0, 6).join("; "));
+        check(`[${theme}] second leave: ds-preview removed and styles identical`, !s4.htmlClass.includes("ds-preview") && sameAsBaseline(s0, s4, theme), diffKeys(s0, s4).slice(0, 6).join("; "));
 
         // 5. SSR entry into a sample page, then client navigation out
         await page.goto(BASE + "/_ds/tokens", { waitUntil: "networkidle", timeout: 90_000 });
@@ -210,9 +235,17 @@ async function run() {
         check(`[${theme}] SSR entry: robots noindex`, robots === "noindex,nofollow", String(robots));
         await routerPush(page, EXISTING_PAGE);
         const s6 = await page.evaluate(SNAPSHOT);
-        check(`[${theme}] SSR entry then leave: ds-preview removed and styles identical`, !s6.htmlClass.includes("ds-preview") && sameJson(s0, s6), diffKeys(s0, s6).slice(0, 6).join("; "));
+        check(`[${theme}] SSR entry then leave: ds-preview removed and styles identical`, !s6.htmlClass.includes("ds-preview") && sameAsBaseline(s0, s6, theme), diffKeys(s0, s6).slice(0, 6).join("; "));
         const robotsAfter = await page.$('meta[name="robots"][content="noindex,nofollow"]');
         check(`[${theme}] after leaving: sample noindex meta removed`, !robotsAfter);
+        // 5b. leaving from asset and chart sections (component popups, lane buttons, SVG charts) back to the existing page
+        for (const sample of ["/_ds/cover", "/_ds/diff-tabs", "/_ds/title-plate", "/_ds/lane", "/_ds/line-chart", "/_ds/radar", "/_ds/note-judge"]) {
+          await routerPush(page, sample);
+          const inside = await page.evaluate(SNAPSHOT);
+          await routerPush(page, EXISTING_PAGE);
+          const out = await page.evaluate(SNAPSHOT);
+          check(`[${theme}] ${sample} → ${EXISTING_PAGE}: scope set inside, removed after, styles identical`, inside.htmlClass.includes("ds-preview") && !out.htmlClass.includes("ds-preview") && sameAsBaseline(s0, out, theme), diffKeys(s0, out).slice(0, 4).join("; "));
+        }
         if (OUT && theme === "light") await page.screenshot({ path: join(OUT, "existing-after-samples.png") });
       } finally {
         await page.close();
