@@ -67,24 +67,20 @@ onBeforeUnmount(() => observer?.disconnect());
 }
 
 .guest-event-card {
-  position: relative;
-  min-height: 220px;
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
   background:var(--viewer-surface);
 }
 
 .guest-event-card img {
   width: 100%;
-  height: 100%;
-  position: absolute;
-  inset: 0;
-  object-fit: cover;
+  aspect-ratio: 1500 / 448;
+  object-fit: contain;
 }
 
 .guest-event-card div {
-  position: absolute;
-  inset: auto 0 0;
-  padding: 42px 16px 16px;
+  padding: 16px;
   background:var(--viewer-surface-subtle);
 }
 
@@ -108,14 +104,6 @@ onBeforeUnmount(() => observer?.disconnect());
 @media (max-width: 720px) {
   .guest-events__grid {
     grid-template-columns: 1fr;
-  }
-
-  .guest-event-card {
-    min-height: 180px;
-  }
-
-  .guest-events__grid .guest-event-card:nth-child(n + 2) {
-    display: none;
   }
 }
 </style>

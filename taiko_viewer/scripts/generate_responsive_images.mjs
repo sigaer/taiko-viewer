@@ -13,8 +13,8 @@ const jobs = [
   ["logo.png", "logo-256.webp", 256, 82],
   ["nijiiro_2026_dan_overview.png", "nijiiro-2026-640.webp", 640, 78],
   ["nijiiro_2026_dan_overview.png", "nijiiro-2026-960.webp", 960, 78],
-  ["2026_autumn.png", "2026-autumn-800.webp", 800, 78],
-  ["banner_16_9.png", "huali-esports-800.webp", 800, 78],
+  ["touhou-2026.png", "touhou-2026-800.webp", 800, 78],
+  ["rewards-winter-2026.png", "rewards-winter-2026-800.webp", 800, 78],
   ["Makina.png", "guide-makina-160.webp", 160, 80],
   ["miku.png", "guide-miku-160.webp", 160, 80]
 ];

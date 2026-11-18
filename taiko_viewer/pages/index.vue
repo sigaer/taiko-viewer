@@ -27,8 +27,8 @@ const authenticatedHomeState = computed(() => {
 });
 const latestSongs = computed(() => homeContent.value.latestSongs || []);
 const eventSlides = computed(() => [
-  { image: "/optimized/2026-autumn-800.webp", title: t("page.home.eventAutumn") },
-  { image: "/optimized/huali-esports-800.webp", title: t("page.home.eventHualiEsports") }
+  { image: "/optimized/touhou-2026-800.webp", title: t("page.home.eventTouhou") },
+  { image: "/optimized/rewards-winter-2026-800.webp", title: t("page.home.eventWinter") }
 ]);
 
 definePageMeta({
