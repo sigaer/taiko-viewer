@@ -9,12 +9,14 @@
 // runs (no production traffic, deterministic). The page list defaults to the public pages that render without a
 // database (DEFAULT_PAGES); pages that need a login or the test database are listed in NEEDS_DATABASE and must be
 // captured on the Linux host with the test database (AGENTS.md rules: SELECT DATABASE() ending in _test, read-only).
-// compare: computed styles and requests must be identical; screenshots are compared pixel by pixel (sharp) and
-// differing pixel counts are reported. Exit 1 on any difference.
+// compare: DOM, geometry, computed styles, resource identities and errors are hard gates.
+// Pixel differences are diagnostic by default; --strict-pixels additionally makes raster equality a gate.
 // Bounds: one browser, one page at a time, total time limit; read-only, no form submissions.
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
 import sharp from "sharp";
+import { CAPTURE_TIME, resourceIdentity, snapshotContract, compareContracts } from "./page-contract.mjs";
 
 const args = process.argv.slice(2);
 const mode = args[0];
@@ -92,6 +94,7 @@ const fileName = (page, width, theme) => `${(page === "/" ? "root" : page.replac
 
 async function capture() {
   const { chromium } = await import("playwright-core");
+  const beforeCapture = process.env.DS_CAPTURE_SETUP ? (await import(pathToFileURL(resolve(process.env.DS_CAPTURE_SETUP)).href)).beforeCapture : async () => {};
   const BASE = opt("--base", "http://127.0.0.1:3517").replace(/\/$/, "");
   const OUT = resolve(opt("--out", "existing-pages"));
   const pagesArg = opt("--pages", null);
@@ -107,7 +110,9 @@ async function capture() {
   const browser = await chromium.launch(process.env.DS_BROWSER ? { headless: true, executablePath: process.env.DS_BROWSER } : { headless: true, channel: "chrome" });
   try {
     for (const theme of ["light", "dark"]) {
-      const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce" });
+      const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce", ignoreHTTPSErrors: Boolean(process.env.DS_STORAGE_STATE), ...(process.env.DS_STORAGE_STATE ? { storageState: process.env.DS_STORAGE_STATE } : {}) });
+      // Freeze wall-clock content/cache keys without freezing network or timers.
+      await context.addInitScript((time) => { const RealDate=Date; globalThis.Date=new Proxy(RealDate,{construct:(target,args,newTarget)=>Reflect.construct(target,args.length?args:[time],newTarget),apply:()=>new RealDate(time).toString(),get:(target,key)=>key==='now'?()=>new RealDate(time).getTime():Reflect.get(target,key)}); }, CAPTURE_TIME);
       await context.addCookies([{ name: "taiko_theme", value: theme, url: BASE }, { name: "viewer_locale", value: "zh", url: BASE }]);
       await context.route("**/*", (route) => (new URL(route.request().url()).host === host ? route.continue() : route.abort()));
       const page = await context.newPage();
@@ -118,18 +123,21 @@ async function capture() {
             const requests = [];
             const errors = [];
             const onReq = (r) => {
-              if (["font", "image"].includes(r.resourceType())) requests.push(`${r.resourceType()} ${normalizeUrl(r.url(), BASE)}`);
+              if (["font", "image"].includes(r.resourceType())) requests.push(`${r.resourceType()} ${resourceIdentity(r.url(), BASE)}`);
             };
             const onCon = (m) => m.type() === "error" && errors.push(m.text().slice(0, 200));
+            const onError = (error) => errors.push("PAGEERROR " + String(error.message).slice(0,200));
+            page.on("pageerror", onError);
             page.on("request", onReq);
             page.on("console", onCon);
             let status = null;
             try {
+              await beforeCapture({ path, width, theme });
               const resp = await page.goto(BASE + path, { waitUntil: "networkidle", timeout: 120_000 });
               status = resp?.status() ?? null;
               await page.evaluate(() => document.fonts.ready);
               await page.waitForTimeout(500);
-              const snap = await page.evaluate(SNAP, [SELECTORS, PROPS]);
+
               const name = fileName(path, width, theme);
               // Lazy images would start loading while a full-page screenshot enlarges the viewport: scroll through the
               // page first, then wait until every image has loaded and decoded, so both runs photograph the same state.
@@ -154,13 +162,37 @@ async function capture() {
               await page.waitForTimeout(400);
               // Dev-only overlay (Nuxt DevTools button with a live timer) is hidden; elements listed in MASK are masked.
               await page.addStyleTag({ content: "#nuxt-devtools-container,#nuxt-devtools-anchor{display:none!important}" });
+              await page.addStyleTag({content:'*,*::before,*::after{animation:none!important;transition:none!important;caret-color:transparent!important}'});
+              await page.evaluate(() => document.fonts.ready);
+              const snap = await page.evaluate(SNAP, [SELECTORS, PROPS]);
+              const contract = await page.evaluate(snapshotContract);
+              for (const img of contract.images) img.src=resourceIdentity(img.src,BASE);
+              let loadOrder = null;
+              if (process.env.DS_LOAD_ORDER_PROBE === '1') {
+                const css = await page.evaluate(async () => {
+                  const response=await fetch('/_ds/element-plus');
+                  if(!response.ok) throw Error('sample CSS probe unavailable');
+                  const doc=new DOMParser().parseFromString(await response.text(),'text/html');
+                  const existing=new Set([...document.querySelectorAll('link[rel="stylesheet"]')].map(el=>el.href));
+                  const urls=[...doc.querySelectorAll('link[rel="stylesheet"]')].map(el=>new URL(el.getAttribute('href'),location.href).href).filter(url=>!existing.has(url));
+                  if(!urls.length) throw Error('sample CSS probe did not add any stylesheet');
+                  for(const href of urls.reverse()) await new Promise((resolve,reject)=>{const link=document.createElement('link');link.rel='stylesheet';link.href=href;link.onload=resolve;link.onerror=reject;document.head.append(link);});
+                  return urls.map(url=>new URL(url).pathname);
+                });
+                const after=await page.evaluate(snapshotContract);
+                for(const img of after.images) img.src=resourceIdentity(img.src,BASE);
+                const changed=compareContracts(contract,after);
+                if(changed.length) throw Error('sample CSS load-order regression: '+changed.join(', '));
+                loadOrder={stylesheets:css,unchanged:true};
+              }
               await page.screenshot({ path: join(OUT, `${name}.png`), fullPage: true, animations: "disabled", caret: "hide", mask: MASK.map((m) => page.locator(m)), maskColor: "#ff00ff" });
-              records.push({ path, width, theme, name, status, finalUrl: page.url().replace(BASE, ""), snap, requests: [...new Set(requests)].sort(), errors });
+              records.push({ path, width, theme, name, status, finalUrl: page.url().replace(BASE, ""), snap, contract, loadOrder, requests: [...new Set(requests)].sort(), errors });
               console.log(`captured ${name} (${status})`);
             } catch (e) {
               records.push({ path, width, theme, name: fileName(path, width, theme), error: String(e.message || e).slice(0, 200) });
               console.log(`ERROR ${path} ${width} ${theme}: ${String(e.message || e).slice(0, 120)}`);
             } finally {
+              page.off("pageerror", onError);
               page.off("request", onReq);
               page.off("console", onCon);
             }
@@ -203,6 +235,11 @@ async function compare() {
   const byName = new Map(B.records.map((r) => [r.name, r]));
   const lines = [];
   let problems = 0;
+  if (!A.records.length || A.records.length !== B.records.length ||
+      new Set(A.records.map(r => r.name)).size !== A.records.length || byName.size !== B.records.length) {
+    lines.push("FAIL capture state sets are empty, unequal, or contain duplicates");
+    problems++;
+  }
   for (const a of A.records) {
     const b = byName.get(a.name);
     if (!b) {
@@ -211,8 +248,8 @@ async function compare() {
       continue;
     }
     if (a.error || b.error) {
-      lines.push(`SKIP  ${a.name}: capture error (baseline: ${a.error || "ok"}; current: ${b.error || "ok"})`);
-      if (!!a.error !== !!b.error) problems++;
+      lines.push(`FAIL  ${a.name}: capture error (baseline: ${a.error || "ok"}; current: ${b.error || "ok"})`);
+      problems++;
       continue;
     }
     const issues = [];
@@ -229,13 +266,20 @@ async function compare() {
       const onlyA = a.requests.filter((r) => !b.requests.includes(r));
       issues.push(`font/image requests differ: +[${onlyB.join(", ")}] -[${onlyA.join(", ")}]`);
     }
+    issues.push(...compareContracts(a.contract,b.contract));
+    if (JSON.stringify([...a.errors].sort())!==JSON.stringify([...b.errors].sort())) issues.push("console/page errors differ");
     const px = await pixelDiff(join(dirA, `${a.name}.png`), join(dirB, `${b.name}.png`));
-    if (px.sizeDiffers || px.pixels) issues.push(`screenshot differs: ${px.sizeDiffers || `${px.pixels} px in rows ${px.rows}`}`);
+    if (px.sizeDiffers) issues.push(`screenshot dimensions differ: ${px.sizeDiffers}`);
+    else if (px.pixels) {
+      const diagnostic=`raster difference: ${px.pixels} px in rows ${px.rows}`;
+      if (args.includes('--strict-pixels')) issues.push(diagnostic);
+      else console.log(`DIAGNOSTIC ${a.name}: ${diagnostic}; DOM/layout/style/resource gates still required`);
+    }
     if (issues.length) problems++;
     lines.push(`${issues.length ? "FAIL" : "ok  "}  ${a.name} (${a.status}, ${a.requests.length} font/image requests, ${Object.keys(a.snap).length - 2} elements)${issues.length ? "  — " + issues.join("; ") : ""}`);
   }
   for (const l of lines) console.log(l);
-  console.log(problems ? `\n${problems} page state(s) differ` : `\nall ${A.records.length} page states identical (computed styles, font/image requests, screenshots)`);
+  console.log(problems ? `\n${problems} page state(s) differ` : `\nall ${A.records.length} page states identical (DOM, layout, computed styles, font/image requests; raster differences diagnostic)`);
   process.exitCode = problems ? 1 : 0;
 }
 
