@@ -76,7 +76,7 @@ try {
     };
     const settled = async path => {
       await page.waitForURL(`${base}${prefix}${path}`, { timeout: 10000 });
-      const selector = path === '/account/songs' ? '.songs-page .result-count' : path === '/my/weekly' ? '.weekly-hero' : path === '/my/growth' ? '.passport-hero' : '.my-page';
+      const selector = path === '/account/songs' ? '.sl .sl-summary' : path === '/my/weekly' ? '.weekly-hero' : path === '/my/growth' ? '.passport-hero' : '.hub';
       await page.locator(selector).waitFor({ timeout: 10000 });
       for (let n = 0; n < 200 && active; n++) await pause(25);
       assert.equal(active, 0, 'requests settle');
@@ -107,7 +107,7 @@ try {
           }
           for (const path of paths.slice(1)) { await click(path); if (interval) await pause(interval); else await settled(path); }
           await settled('/my');
-          assert.equal(await page.locator('.my-page').count(), 1, 'final view matches final click');
+          assert.equal(await page.locator('.hub').count(), 1, 'final view matches final click');
           for (const path of ['/my/growth', '/my/weekly', '/account/songs']) { await click(path); if (interval) await pause(interval); else await settled(path); }
           await settled('/account/songs');
           if ([4, 9].includes(i)) { await cdp.send('HeapProfiler.collectGarbage'); (row.samples ||= []).push(await heap()); }

@@ -1,16 +1,19 @@
 <script setup lang="ts">
-import AccountToolGate from "~/components/tools/AccountToolGate.vue";
 import { computed, ref, watch, onBeforeUnmount } from "vue";
 import { buildPageDescription } from "~/utils/seo";
-import { difficultyLabelKey } from "~/utils/difficulty";
 import type { TargetRecommendationKey, TargetRecommendationsPayload } from "~/types/recommendation-intelligence";
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
 const localePath = useLocalePath();
+const { accountUser, fetchCurrentUser } = useAccountState();
+await fetchCurrentUser();
 definePageMeta({
+  contentLayout: "wide",
   pageTitleKey: "tools.recommend",
   pageDescKey: "page.tools.recommend.desc",
   navKey: "/tools/recommend",
+  hidePageHeader: true,
+  reworkElementPlus: true,
   breadcrumbs: [{ labelKey: "nav.myTaiko", to: "/my" }, { labelKey: "tools.recommend", to: "/tools/recommend" }]
 });
 useViewerSeo(() => ({ title: t("tools.recommend"), description: buildPageDescription(t("page.tools.recommend.desc")), path: "/tools/recommend" }));
@@ -21,37 +24,37 @@ const dim = ref("");
 const target = ref<TargetRecommendationKey>("goku");
 const star = ref("");
 const includeImage = ref(false);
-const { data: ordinaryData, loading, failed, load, invalidate } = useRecommendationTool();
+const { data: ordinaryData, loading, failed, errorStatus, errorMessage, load, invalidate } = useRecommendationTool();
 watch([n,dim],invalidate);
-const accountUser = useState<{id:number}|null>("account-user",()=>null);
 const bindingGeneration = useState("account-binding-generation",()=>0);
 let targetGeneration=0;
 let targetController:AbortController|null=null;
-const clearTarget=()=>{targetGeneration++;targetController?.abort();targetController=null;targetData.value=null;targetLoading.value=false;targetError.value="";};
+const clearTarget=()=>{targetGeneration++;targetController?.abort();targetController=null;targetData.value=null;targetLoading.value=false;targetError.value="";targetStatus.value=0;targetStatusMessage.value="";};
 const targetData = ref<TargetRecommendationsPayload | null>(null);
 const targetLoading = ref(false);
 const targetError = ref("");
-const copy = computed(() => locale.value === "ja" ? {
-  hint: "通常推薦と目標推薦を選択できます。",
-  ordinary: "通常推薦", target: "目標推薦", count: "推薦数（1-50）", dim: "指標（任意）", placeholder: "空欄なら総合 Rating", submit: "推薦を表示", exportImage: "画像も生成", imageAlt: "おすすめ楽曲",
-  targetType: "目標", star: "星級（任意）", allStars: "すべて", runTarget: "目標候補を表示", current: "現在", targetScore: "目標", gap: "差", progress: "進捗", index: "目標推薦指数", unplayed: "未プレイ", empty: "条件に合う候補がありません", insufficient: "候補数が少ないため、表示できる結果が限られています"
-} : {
-  hint: "可分别查看普通推荐与目标推荐。",
-  ordinary: "普通推荐", target: "目标推荐", count: "推荐数量（1-50）", dim: "维度（可选）", placeholder: "留空为综合 Rating", submit: "查看推荐", exportImage: "同时生成图片", imageAlt: "推荐歌曲",
-  targetType: "目标", star: "星级（可选）", allStars: "全部", runTarget: "查看目标候选", current: "当前", targetScore: "目标", gap: "差距", progress: "进度", index: "目标推荐指数", unplayed: "未游玩", empty: "没有符合条件的候选歌曲", insufficient: "候选数量不足，当前结果可能有限"
-});
-const targetOptions = computed(() => locale.value === "ja" ? [
-  { value: "goku", label: "極" }, { value: "ziya", label: "紫雅" }, { value: "fenya", label: "粉雅" }, { value: "jinya", label: "金雅" }, { value: "full_combo", label: "フルコンボ" }, { value: "dondaful", label: "全良" }
-] : [
-  { value: "goku", label: "极" }, { value: "ziya", label: "紫雅" }, { value: "fenya", label: "粉雅" }, { value: "jinya", label: "金雅" }, { value: "full_combo", label: "全连" }, { value: "dondaful", label: "全良" }
-]);
+// Status and server message of a failed target read: "no bound ID" and "no data yet" have their own presentation.
+const targetStatus = ref(0);
+const targetStatusMessage = ref("");
+// Values are what the endpoints accept; labels from the locale files.
+const dimOptions = [
+  { value: "综合", key: "overall" },
+  { value: "大歌力", key: "big" },
+  { value: "体力", key: "stamina" },
+  { value: "高速处理", key: "speed" },
+  { value: "精度力", key: "accuracy" },
+  { value: "节奏处理", key: "rhythm" },
+  { value: "复合处理", key: "complex" }
+] as const;
+const targetOptions: TargetRecommendationKey[] = ["goku", "ziya", "fenya", "jinya", "full_combo", "dondaful"];
 const stars = Array.from({ length: 10 }, (_, i) => String(i + 1));
-const targetLabel = computed(() => targetOptions.value.find((item) => item.value === target.value)?.label || target.value);
+const targetLabel = computed(() => t(`rework.recommendTool.targets.${target.value}`));
 
 watch(()=>[accountUser.value?.id,bindingGeneration.value],clearTarget,{flush:"sync"});
 watch([target,star],clearTarget);
 onBeforeUnmount(clearTarget);
-const submitOrdinary = async () => load({ n: n.value, dim: dim.value, image: includeImage.value });
+const validCount = computed(() => Number.isInteger(n.value) && n.value >= 1 && n.value <= 50);
+const submitOrdinary = async () => { if (!validCount.value) return; await load({ n: n.value, dim: dim.value, image: includeImage.value }); };
 const submitTarget = async () => {
   clearTarget();const request=targetGeneration;targetController=new AbortController();
   targetLoading.value = true;
@@ -62,91 +65,115 @@ const submitTarget = async () => {
     if(request===targetGeneration)targetData.value=result;
   } catch (error) {
     if(request!==targetGeneration)return;
+    const failure = error as { statusCode?: unknown; status?: unknown; data?: { statusMessage?: unknown } } | null;
+    targetStatus.value = Number(failure?.statusCode ?? failure?.status) || 0;
+    targetStatusMessage.value = String(failure?.data?.statusMessage || "");
     targetError.value = error instanceof Error ? error.message : t("home.personal.recommendationUnavailable");
   } finally { if(request===targetGeneration){targetLoading.value = false;targetController=null;} }
 };
 const formatGap = (item: TargetRecommendationsPayload["items"][number]) => {
-  if (item.gapKind === "unplayed") return copy.value.unplayed;
+  if (item.gapKind === "unplayed") return t("rework.recommendTool.unplayed");
   if (item.gapValue === null) return "—";
   if (item.gapKind === "score") return `${item.gapValue.toLocaleString()}`;
   return `${item.gapValue}`;
 };
-const ordinarySummary = computed(() => `${dim.value || (locale.value === 'ja' ? '総合 Rating' : '综合 Rating')} · ${includeImage.value ? copy.value.exportImage : (locale.value === 'ja' ? 'リストのみ' : '仅列表')}`);
+const dimLabel = computed(() => {
+  const option = dimOptions.find((item) => item.value === dim.value);
+  return option ? t(`rework.ratingDims.${option.key}`) : t("rework.recommendTool.overall");
+});
+const ordinarySummary = computed(() => `${dimLabel.value} · ${includeImage.value ? t("rework.recommendTool.image") : t("rework.recommendTool.listOnly")}`);
+const songLink = (songId: number, level: number, query: Record<string, string> = {}) => localePath({ path: `/songs/${songId}`, query: { difficulty: String(level), ...query } });
 </script>
 
 <template>
-  <div class="page-stack">
-    <AccountToolGate>
-      <section class="recommendation-tool">
-        <div class="tool-header">
-          <div><div class="mode-tabs" role="tablist">
-            <button class="mode-tab" :class="{ active: mode === 'ordinary' }" role="tab" :aria-selected="mode === 'ordinary'" @click="mode = 'ordinary'">{{ copy.ordinary }}</button>
-            <button class="mode-tab" :class="{ active: mode === 'target' }" role="tab" :aria-selected="mode === 'target'" @click="mode = 'target'">{{ copy.target }}</button>
-          </div></div>
-        </div>
+  <div class="rw-stack">
+    <ReworkPageHeader :title="t('tools.recommend')" />
+    <ReworkGate :need="accountUser ? null : 'login'">
+      <div class="rw-seg" role="group" :aria-label="t('rework.recommendTool.mode')">
+        <button type="button" :aria-pressed="mode === 'ordinary'" @click="mode = 'ordinary'">{{ t("rework.recommendTool.ordinary") }}</button>
+        <button type="button" :aria-pressed="mode === 'target'" @click="mode = 'target'">{{ t("rework.recommendTool.target") }}</button>
+      </div>
 
-        <div v-if="mode === 'ordinary'">
-          <el-form label-position="top" class="ordinary-form" @submit.prevent="submitOrdinary">
-            <div class="recommend-primary-controls">
-            <el-form-item :label="copy.count"><el-input-number v-model="n" :min="1" :max="50" controls-position="right" /></el-form-item>
-              <el-button type="primary" :loading="loading" native-type="submit">{{ copy.submit }}</el-button>
-            </div>
-            <details class="recommend-advanced"><summary>{{ locale === 'ja' ? '推薦の条件' : '推荐设置' }}<span>{{ ordinarySummary }}</span></summary>
-              <div class="advanced-fields">
-            <el-form-item :label="copy.dim"><el-select v-model="dim" clearable :placeholder="copy.placeholder"><el-option v-for="option in (locale === 'ja' ? [{ label: '総合 Rating', value: '综合' }, { label: '大歌力', value: '大歌力' }, { label: '体力', value: '体力' }, { label: '高速処理', value: '高速处理' }, { label: '精度力', value: '精度力' }, { label: 'リズム処理', value: '节奏处理' }, { label: '複合処理', value: '复合处理' }] : [{ label: '综合 Rating', value: '综合' }, { label: '大歌力', value: '大歌力' }, { label: '体力', value: '体力' }, { label: '高速处理', value: '高速处理' }, { label: '精度力', value: '精度力' }, { label: '节奏处理', value: '节奏处理' }, { label: '复合处理', value: '复合处理' }])" :key="option.value" :label="option.label" :value="option.value" /></el-select></el-form-item>
-            <el-form-item><el-checkbox v-model="includeImage">{{ copy.exportImage }}</el-checkbox></el-form-item>
-              </div>
-            </details>
-          </el-form>
-          <el-alert v-if="failed" :title="t('home.personal.recommendationUnavailable')" type="error" show-icon :closable="false" class="result-alert viewer-friendly-alert" />
-          <template v-if="ordinaryData">
-            <div v-if="!ordinaryData.items.length" class="empty-state">{{ copy.empty }}</div>
-            <header v-if="ordinaryData.items.length" class="recommend-results-head"><h2>{{ locale === 'ja' ? 'おすすめ楽曲' : '推荐结果' }}</h2><span>{{ ordinaryData.items.length }}{{ locale === 'ja' ? '曲' : '首' }}</span></header>
-            <div v-if="ordinaryData.items.length" class="target-list" data-testid="ordinary-list">
-              <RecommendationSongItem v-for="item in ordinaryData.items" :key="`${item.songId}-${item.level}`"
-                :song-id="item.songId" :title="item.title" :difficulty-type="item.level" :star-level="item.starLevel"
-                :to="localePath({ path: `/songs/${item.songId}`, query: { difficulty: String(item.level), ...(item.canCreateGoal ? { recommendation: item.recommendationToken } : {}) } })">
-                <template v-if="item.isUnplayed" #tags><span>{{ copy.unplayed }}</span></template>
-                <template v-if="item.canCreateGoal" #actions><RecommendationGoalAction :token="item.recommendationToken" :song-id="item.songId" :difficulty-type="item.level" /></template>
-              </RecommendationSongItem>
-            </div>
-            <div v-if="ordinaryData.image" class="chart-wrap"><img :src="ordinaryData.image" :alt="copy.imageAlt" class="chart-image" /></div>
-          </template>
-        </div>
-
-        <div v-else>
-          <el-form label-position="top" @submit.prevent="submitTarget">
-            <el-form-item :label="copy.targetType"><el-select v-model="target"><el-option v-for="option in targetOptions" :key="option.value" :label="option.label" :value="option.value" /></el-select></el-form-item>
-            <el-form-item :label="copy.star"><el-select v-model="star" clearable :placeholder="copy.allStars"><el-option :label="copy.allStars" value="" /><el-option v-for="value in stars" :key="value" :label="`${value}★`" :value="value" /></el-select></el-form-item>
-            <el-button type="primary" :loading="targetLoading" native-type="submit">{{ copy.runTarget }}</el-button>
-          </el-form>
-          <el-alert v-if="targetError" :title="targetError" type="error" show-icon :closable="false" class="result-alert" />
-          <div v-if="targetLoading" class="target-loading" aria-busy="true"></div>
-          <template v-else-if="targetData">
-            <p v-if="!targetData.isEnough" class="result-note">{{ copy.insufficient }}</p>
-            <div v-if="!targetData.items.length" class="empty-state">{{ copy.empty }}</div>
-            <div v-else class="target-list">
-              <article v-for="item in targetData.items" :key="`${item.songId}-${item.level}`" class="target-item target-item--target">
-                <NuxtLink :to="localePath({ path: `/songs/${item.songId}`, query: { difficulty: String(item.level) } })" class="target-item__song">
-                  <SongCoverImage :song-id="item.songId" :alt="item.title" sizes="64px" fit="contain" />
-                  <span class="target-item__title" lang="zh-CN">{{ item.title }}</span>
-                </NuxtLink>
-                <div class="target-item__meta"><span>{{ item.star }}★</span><span>{{ copy.index }} {{ item.targetRecommendationIndex.toFixed(1) }}</span></div>
-                <div class="target-item__metrics"><span>{{ copy.current }} {{ item.currentScore === null ? copy.unplayed : item.currentScore.toLocaleString() }}</span><span>{{ copy.targetScore }} {{ item.targetScore === null ? targetLabel : item.targetScore.toLocaleString() }}</span><span>{{ copy.gap }} {{ formatGap(item) }}</span></div>
-                <div class="progress-line"><span :style="{ width: `${Math.min(100, Math.max(0, item.progressPercent))}%` }"></span></div>
-                <small>{{ copy.progress }} {{ item.progressPercent.toFixed(1) }}%</small>
-              </article>
-            </div>
-          </template>
-        </div>
+      <section v-if="mode === 'ordinary'" class="rw-stack" :aria-label="t('rework.recommendTool.ordinary')">
+        <form class="rw-form" @submit.prevent="submitOrdinary">
+          <label class="rw-field">
+            <span class="rw-field__label">{{ t("rework.recommendTool.count") }}</span>
+            <input v-model.number="n" class="rw-input num" type="number" min="1" max="50" step="1" inputmode="numeric" required />
+          </label>
+          <label class="rw-field rw-field--half">
+            <span class="rw-field__label">{{ t("rework.recommendTool.dim") }}</span>
+            <select v-model="dim" class="rw-select">
+              <option value="">{{ t("rework.recommendTool.overall") }}</option>
+              <option v-for="option in dimOptions" :key="option.value" :value="option.value">{{ t(`rework.ratingDims.${option.key}`) }}</option>
+            </select>
+          </label>
+          <label class="rw-check"><input v-model="includeImage" type="checkbox" />{{ t("rework.recommendTool.image") }}</label>
+          <button type="submit" class="rw-btn rw-btn--primary" :disabled="loading || !validCount" :aria-busy="loading">{{ t("rework.recommendTool.submit") }}</button>
+        </form>
+        <ReworkScoresReadState v-if="failed" :status="errorStatus" :message="errorMessage" :failed-title="t('home.personal.recommendationUnavailable')" @retry="submitOrdinary" />
+        <ReworkState v-else-if="loading" kind="loading" :lines="6" />
+        <template v-else-if="ordinaryData">
+          <ReworkState v-if="!ordinaryData.items.length" kind="empty" :title="t('rework.recommendTool.empty')" />
+          <ReworkPanel v-else :title="t('rework.recommendTool.results')" data-testid="ordinary-list">
+            <template #actions><span class="rw-count">{{ t("rework.recommendTool.resultCount", { n: ordinaryData.items.length }) }} · {{ ordinarySummary }}</span></template>
+            <ReworkScoresRecommendRow
+              v-for="item in ordinaryData.items"
+              :key="`${item.songId}-${item.level}`"
+              :song-id="item.songId"
+              :title="item.title"
+              :level="item.level"
+              :star="item.starLevel"
+              :to="songLink(item.songId, item.level, item.canCreateGoal ? { recommendation: item.recommendationToken } : {})"
+              :fit="{ candidate: item.candidateIndicator, reference: item.referenceIndicator, deviation: item.deviationRatio, inRange: item.inStrictRange }"
+            >
+              <template v-if="item.isUnplayed" #tags><span class="tag">{{ t("rework.recommendTool.unplayed") }}</span></template>
+              <template v-if="item.canCreateGoal" #actions><RecommendationGoalAction :token="item.recommendationToken" :song-id="item.songId" :difficulty-type="item.level" /></template>
+            </ReworkScoresRecommendRow>
+          </ReworkPanel>
+          <ReworkPanel v-if="ordinaryData.image" :title="t('rework.recommendTool.imageAlt')">
+            <img :src="ordinaryData.image" :alt="t('rework.recommendTool.imageAlt')" class="rw-result-image" />
+          </ReworkPanel>
+        </template>
       </section>
-    </AccountToolGate>
+
+      <section v-else class="rw-stack" :aria-label="t('rework.recommendTool.target')">
+        <form class="rw-form" @submit.prevent="submitTarget">
+          <fieldset class="rw-field">
+            <legend class="rw-field__label">{{ t("rework.recommendTool.targetType") }}</legend>
+            <div class="rw-seg">
+              <button v-for="option in targetOptions" :key="option" type="button" :aria-pressed="target === option" @click="target = option">{{ t(`rework.recommendTool.targets.${option}`) }}</button>
+            </div>
+          </fieldset>
+          <label class="rw-field rw-field--half">
+            <span class="rw-field__label">{{ t("rework.recommendTool.star") }}</span>
+            <select v-model="star" class="rw-select">
+              <option value="">{{ t("rework.recommendTool.allStars") }}</option>
+              <option v-for="value in stars" :key="value" :value="value">{{ t("rework.recommendTool.starOption", { n: value }) }}</option>
+            </select>
+          </label>
+          <button type="submit" class="rw-btn rw-btn--primary" :disabled="targetLoading" :aria-busy="targetLoading">{{ t("rework.recommendTool.runTarget") }}</button>
+        </form>
+        <ReworkScoresReadState v-if="targetError" :status="targetStatus" :message="targetStatusMessage" :failed-title="targetError" @retry="submitTarget" />
+        <ReworkState v-else-if="targetLoading" kind="loading" :lines="6" />
+        <template v-else-if="targetData">
+          <p v-if="!targetData.isEnough" class="rw-note" role="status">{{ t("rework.recommendTool.insufficient") }}</p>
+          <ReworkState v-if="!targetData.items.length" kind="empty" :title="t('rework.recommendTool.empty')" />
+          <ReworkPanel v-else :title="t('rework.recommendTool.targetResults', { target: targetLabel })">
+            <template #actions><span class="rw-count">{{ t("rework.recommendTool.resultCount", { n: targetData.items.length }) }}</span></template>
+            <ReworkScoresRecommendRow
+              v-for="item in targetData.items"
+              :key="`${item.songId}-${item.level}`"
+              :song-id="item.songId"
+              :title="item.title"
+              :level="item.level"
+              :star="item.star"
+              :to="songLink(item.songId, item.level)"
+            >
+              <ReworkScoresTargetProgress :item="item" :target-label="targetLabel" :gap="formatGap(item)" />
+            </ReworkScoresRecommendRow>
+          </ReworkPanel>
+        </template>
+      </section>
+    </ReworkGate>
   </div>
 </template>
-
-<style scoped>
-.page-stack{display:grid;gap:32px;}.recommendation-tool{min-width:0;}.tool-header{margin-bottom:24px;}.mode-tabs{display:flex;gap:24px;border-bottom:1px solid var(--viewer-border);}.mode-tab{min-height:48px;padding:8px 0;border:0;border-bottom:3px solid transparent;background:transparent;color:var(--viewer-text-muted);font:inherit;cursor:pointer;}.mode-tab.active{color:var(--viewer-primary);border-bottom-color:var(--viewer-primary);font-weight:600;}.mode-tab:focus-visible{outline:3px solid var(--viewer-link);outline-offset:3px;}
-.ordinary-form{margin-bottom:28px;}.recommend-primary-controls{display:flex;align-items:flex-end;gap:20px;}.recommend-primary-controls .el-form-item{margin:0;}.recommend-primary-controls>.el-button{margin-bottom:0;}.recommend-advanced{margin-top:12px;}.recommend-advanced summary{display:flex;align-items:center;flex-wrap:wrap;gap:4px 16px;min-height:48px;cursor:pointer;color:var(--viewer-link);font-size:14px;}.recommend-advanced summary::before{content:'+';font-size:18px;}.recommend-advanced[open] summary::before{content:'−';}.recommend-advanced summary span{color:var(--viewer-text-muted);}.advanced-fields{display:grid;grid-template-columns:minmax(200px,320px) auto;align-items:end;gap:12px 24px;padding:16px 0 4px;}.advanced-fields .el-form-item{margin:0;}
-.recommend-results-head{display:flex;gap:16px;align-items:baseline;margin:0 0 8px;}.recommend-results-head h2{font-size:20px;font-weight:600;margin:0;}.recommend-results-head>span{font-size:14px;color:var(--viewer-text-muted);}.target-list{display:grid;gap:0;}.target-item{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:16px;padding:18px 0;border-bottom:1px solid var(--viewer-border);min-width:0;}.target-item__song{min-width:0;display:grid;grid-template-columns:56px minmax(0,1fr);align-items:center;gap:14px;color:var(--viewer-text);text-decoration:none;}.target-item__song :deep(.song-cover-picture){width:56px;height:56px;border-radius:7px;overflow:hidden;}.target-item__text{display:grid;gap:6px;min-width:0;}.target-item__title{overflow-wrap:anywhere;font-weight:600;font-size:16px;line-height:1.5;}.target-item__meta,.target-item__metrics{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:14px;line-height:1.5;color:var(--viewer-text-muted);}.target-item :deep(.recommendation-goal-action>button){font-size:14px;padding:8px 12px;border-color:var(--viewer-border);color:var(--viewer-link);background:var(--viewer-surface);white-space:nowrap;}.target-item--target{grid-template-columns:minmax(0,1fr);}.result-alert{margin-top:16px;}.chart-wrap{margin-top:28px;}.chart-image{display:block;max-width:100%;height:auto;}.empty-state,.result-note{margin-top:20px;font-size:15px;color:var(--viewer-text-muted);}.target-loading{min-height:120px;background:var(--viewer-surface-subtle);}.progress-line{height:6px;background:var(--viewer-surface-subtle);border-radius:6px;overflow:hidden;}.progress-line span{height:100%;display:block;background:var(--viewer-primary);}.target-item small{color:var(--viewer-text-muted);font-size:14px;}
-@media(max-width:640px){.advanced-fields{grid-template-columns:minmax(0,1fr);}.target-item{gap:12px;}.target-item__song{gap:12px;}.recommend-primary-controls{justify-content:space-between;gap:16px;}}
-</style>

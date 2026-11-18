@@ -91,3 +91,167 @@ html.viewer-rework .rw-vh {
     transition: background-color var(--dur-1), border-color var(--dur-1);
   }
 }
+
+/*
+ * Form building blocks of reworked pages (slice B: parameters of the score tools). Native controls only, so no
+ * popup node is left in <body>.
+ * .rw-stack       vertical rhythm of a page body
+ * .rw-form        a wrapping row of fields with the submit action at the end
+ * .rw-field       label above its control; .rw-field__label; .rw-field--grow takes the free width
+ * .rw-input / .rw-select   text / number input and native select, 44 px tall, 16 px text (no zoom on phones)
+ * .rw-seg         segmented buttons (aria-pressed); wraps on narrow screens
+ * .rw-check       checkbox with its label, 44 px target
+ */
+html.viewer-rework .rw-stack {
+  display: grid;
+  gap: var(--sp-5);
+  min-width: 0;
+}
+html.viewer-rework .rw-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--sp-4) var(--sp-5);
+  min-width: 0;
+}
+html.viewer-rework .rw-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  max-width: 100%;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+html.viewer-rework .rw-field--grow {
+  flex: 1 1 260px;
+}
+html.viewer-rework .rw-field__label {
+  padding: 0;
+  font-size: var(--fs-13);
+  font-weight: 500;
+  color: var(--ink-2);
+}
+html.viewer-rework .rw-input,
+html.viewer-rework .rw-select {
+  min-height: var(--hit);
+  max-width: 100%;
+  padding: 0 var(--sp-3);
+  border: 1px solid var(--ctl-border);
+  border-radius: var(--r-ctl);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-16);
+  box-sizing: border-box;
+}
+html.viewer-rework .rw-input[type="number"] {
+  width: 120px;
+}
+html.viewer-rework .rw-select {
+  min-width: 160px;
+}
+html.viewer-rework .rw-input:focus-visible,
+html.viewer-rework .rw-select:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+  border-color: var(--input-focus-line);
+}
+html.viewer-rework .rw-input:disabled,
+html.viewer-rework .rw-select:disabled {
+  background: var(--bg-sunk);
+  color: var(--ink-3);
+}
+html.viewer-rework .rw-seg {
+  display: inline-flex;
+  justify-self: start;
+  flex-wrap: wrap;
+  max-width: 100%;
+  padding: 2px;
+  border-radius: var(--r-ctl);
+  background: var(--bg-sunk);
+}
+html.viewer-rework .rw-seg > button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: var(--hit);
+  padding: 0 var(--sp-3);
+  border: 0;
+  border-radius: calc(var(--r-ctl) - 2px);
+  background: transparent;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: var(--fs-13);
+  cursor: pointer;
+}
+html.viewer-rework .rw-seg > button[aria-pressed="true"] {
+  background: var(--seg-on-bg);
+  color: var(--seg-on-ink);
+  font-weight: 700;
+  box-shadow: 0 0 0 1px var(--seg-on-ring);
+}
+html.viewer-rework .rw-seg > button:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
+}
+html.viewer-rework .rw-seg > button:disabled {
+  cursor: default;
+  color: var(--ink-3);
+}
+html.viewer-rework .rw-check {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  min-height: var(--hit);
+  font-size: var(--fs-14);
+  color: var(--ink);
+  cursor: pointer;
+}
+html.viewer-rework .rw-check input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--action-bg);
+}
+html.viewer-rework .rw-check input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+@media (max-width: 767px) {
+  html.viewer-rework .rw-form {
+    gap: var(--sp-3) var(--sp-4);
+  }
+  html.viewer-rework .rw-form > .rw-btn--primary {
+    flex: 1 1 100%;
+  }
+  html.viewer-rework .rw-select {
+    min-width: 0;
+    width: 100%;
+  }
+  html.viewer-rework .rw-field--grow,
+  html.viewer-rework .rw-field--half {
+    flex: 1 1 calc(50% - var(--sp-4));
+  }
+}
+/* .rw-count  a quiet count beside a panel title; .rw-note  a notice line; .rw-result-image  a returned image */
+html.viewer-rework .rw-count {
+  font-size: var(--fs-13);
+  color: var(--ink-3);
+}
+html.viewer-rework .rw-note {
+  margin: 0;
+  padding: var(--sp-2) var(--sp-4);
+  border-radius: var(--r-ctl);
+  background: var(--warn-wash);
+  color: var(--ink);
+  font-size: var(--fs-14);
+}
+html.viewer-rework .rw-result-image {
+  display: block;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
+  border-radius: var(--r-ctl);
+}

@@ -11,6 +11,7 @@ import {
   alternateLocale,
 } from "~/utils/rework/navigation";
 import { searchShortcut } from "~/utils/rework/search";
+import { PLAY_TABS } from "~/utils/rework/scores";
 const props = defineProps<{
   title: string;
   contentLayout: string;
@@ -46,11 +47,7 @@ const secondary: Record<string, { key: string; to: string }[]> = {
     { key: "guide", to: "/guide" },
     { key: "titles", to: "/titles" },
   ],
-  play: [
-    { key: "scores", to: "/account/songs" },
-    { key: "progress", to: "/tools/progress" },
-    { key: "recommend", to: "/tools/recommend" },
-  ],
+  play: [...PLAY_TABS],
   growth: [
     { key: "growth", to: "/my/growth" },
     { key: "weekly", to: "/my/weekly" },

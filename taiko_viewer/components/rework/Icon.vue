@@ -14,6 +14,15 @@ const paths: Record<string, string> = {
   theme: "M20 15A9 9 0 0 1 9 4a9 9 0 1 0 11 11",
   back: "m15 4-8 8 8 8",
   close: "m5 5 14 14M19 5 5 19",
+  // slice B: score list and image tools
+  lock: "M6 11h12v10H6zM8 11V8a4 4 0 0 1 8 0v3",
+  edit: "M4 20h4L19 9l-4-4L4 16zM13 7l4 4",
+  trash: "M4 7h16M9 7V4h6v3M6 7l1 14h10l1-14",
+  chevron: "m6 9 6 6 6-6",
+  plus: "M12 5v14M5 12h14",
+  upload: "M12 16V4m-5 5 5-5 5 5M4 20h16",
+  download: "M12 4v12m-5-5 5 5 5-5M4 20h16",
+  open: "M14 4h6v6M20 4l-9 9M18 14v6H4V6h6",
 };
 </script>
 <template>
