@@ -18,7 +18,6 @@ const ticketDetail = ref<SupportTicketDetail | null>(null);
 definePageMeta({
   contentLayout: "wide",
   hidePageHeader: true,
-  reworkElementPlus: true,
   middleware: "account-auth",
   pageTitleKey: "account.supportReview",
   pageDescKey: "page.account.supportReview.desc",

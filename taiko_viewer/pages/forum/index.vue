@@ -15,7 +15,7 @@ const allDiscussionsPath = computed(() => ({ path: '/forum/discussions', query: 
   ...(activeFilter.value === 'guide' ? { threadType: 'guide' } : {})
 } }));
 
-definePageMeta({ pageTitleKey: "forum.title", pageDescKey: "page.forum.index.desc", navKey: "/forum", hidePageHeader: true, contentLayout: "wide", reworkElementPlus: true, breadcrumbs: [{ labelKey: "forum.title", to: "/forum" }] });
+definePageMeta({ pageTitleKey: "forum.title", pageDescKey: "page.forum.index.desc", navKey: "/forum", hidePageHeader: true, contentLayout: "wide", breadcrumbs: [{ labelKey: "forum.title", to: "/forum" }] });
 useViewerSeo(() => ({ title: t("forum.title"), description: buildPageDescription(t("page.forum.index.desc")), path: "/forum", keywords: [t("forum.title"), t("page.forum.index.keyword")] }));
 
 const { data, pending, error: homeError, refresh: refreshHome } = useForumResource<ForumHomePayload>('forum-home', () => apiFetch('/api/forum/home', { retry: 0 }));

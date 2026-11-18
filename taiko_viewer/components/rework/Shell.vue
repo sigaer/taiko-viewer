@@ -12,6 +12,7 @@ import {
   SONGS_TABS,
   TOOLS_TABS,
   tabCurrent,
+  isLegacyPage,
 } from "~/utils/rework/navigation";
 import { searchShortcut } from "~/utils/rework/search";
 import { PLAY_TABS } from "~/utils/rework/scores";
@@ -50,14 +51,66 @@ const syncMark = computed(() => syncIndicatorMark(syncKind.value));
 const syncLabel = computed(() =>
   syncKind.value ? t("rework.account.sync.indicator.label", { state: t(`rework.account.sync.indicator.${syncKind.value}`) }) : t("rework.sync"),
 );
+// Account menu (slice G): the avatar in the top bar opens profile, sync, settings and sign out. A menu button: Enter /
+// Space / ArrowDown open it on the first item, ArrowUp on the last; arrows, Home and End move inside; Escape closes and
+// returns focus to the button; Tab, an outside click and any navigation close it. Signed out the bar keeps the link.
+const { signingOut, signOut } = useAccountSignOut();
+const menuOpen = ref(false);
+const menuButton = ref<HTMLButtonElement>();
+const menuList = ref<HTMLElement>();
+const menuItems = () => [...(menuList.value?.querySelectorAll<HTMLElement>('[role="menuitem"]') || [])];
+async function openMenu(focus: "first" | "last" = "first") {
+  menuOpen.value = true;
+  await nextTick();
+  const items = menuItems();
+  (focus === "last" ? items[items.length - 1] : items[0])?.focus();
+}
+function closeMenu(returnFocus = false) {
+  if (!menuOpen.value) return;
+  menuOpen.value = false;
+  if (returnFocus) nextTick(() => menuButton.value?.focus());
+}
+function menuButtonKey(event: KeyboardEvent) {
+  if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+    event.preventDefault();
+    openMenu(event.key === "ArrowUp" ? "last" : "first");
+  }
+}
+function menuKey(event: KeyboardEvent) {
+  const items = menuItems();
+  const at = items.indexOf(document.activeElement as HTMLElement);
+  const move = (i: number) => items[(i + items.length) % items.length]?.focus();
+  if (event.key === "ArrowDown") move(at + 1);
+  else if (event.key === "ArrowUp") move(at - 1);
+  else if (event.key === "Home") move(0);
+  else if (event.key === "End") move(items.length - 1);
+  else if (event.key === "Escape") closeMenu(true);
+  else if (event.key === "Tab") return closeMenu();
+  else return;
+  event.preventDefault();
+}
+function outsidePointer(event: PointerEvent) {
+  const target = event.target as Node;
+  if (!menuList.value?.contains(target) && !menuButton.value?.contains(target)) closeMenu();
+}
+watch(menuOpen, (open) => {
+  if (open) document.addEventListener("pointerdown", outsidePointer, true);
+  else document.removeEventListener("pointerdown", outsidePointer, true);
+});
+async function menuSignOut() {
+  closeMenu();
+  await signOut();
+}
 const main = ref<HTMLElement>();
 const searchOpen = ref(false);
 const searchButton = ref<HTMLButtonElement>();
 let trigger: HTMLElement | null = null;
-// `rework-ep` turns on the V1.3 Element Plus mapping (assets/css/ds/element-plus.css) for pages whose route meta
-// has `reworkElementPlus: true`. It sits on <html>, so popups teleported to <body> follow it, and it follows the
-// current route, so it is gone as soon as a page without the flag is shown (also when that page is kept alive).
-useHead(() => ({ htmlAttrs: { class: route.meta.reworkElementPlus === true ? "viewer-rework rework-ep" : "viewer-rework" } }));
+// `rework-ep` turns on the V1.3 Element Plus mapping (assets/css/ds/element-plus.css). Since slice G it is the default
+// for every page in this shell; only the pages outside the rework that still render here (isLegacyPage: the annual
+// entry /annual, admin paths) go without it, and they keep the old page background. The class sits on <html>, so
+// popups teleported to <body> follow it, and it follows the current route (also when a page is kept alive).
+const legacyPage = computed(() => isLegacyPage(route.path));
+useHead(() => ({ htmlAttrs: { class: legacyPage.value ? "viewer-rework" : "viewer-rework rework-ep" } }));
 const active = computed(() => activeDestination(route.path));
 const moduleTitle = computed(() =>
   active.value ? t(`rework.${active.value}`) : props.title,
@@ -129,6 +182,7 @@ watch(
   () => route.fullPath,
   () => {
     searchOpen.value = false;
+    menuOpen.value = false;
     nextTick(revealTab);
   },
 );
@@ -138,13 +192,16 @@ onMounted(() => {
   // Static payloads contain the build-time guest, never the current session.
   if (nuxtApp.payload.prerenderedAt) void fetchCurrentUser(true);
 });
-onBeforeUnmount(() => window.removeEventListener("keydown", shortcut));
+onBeforeUnmount(() => {
+  window.removeEventListener("keydown", shortcut);
+  document.removeEventListener("pointerdown", outsidePointer, true);
+});
 await fetchCurrentUser();
 </script>
 <template>
   <div
     class="rework-shell"
-    :class="{ 'has-tabs': tabs.length, 'has-bottom-nav': showMobileNav }"
+    :class="{ 'has-tabs': tabs.length, 'has-bottom-nav': showMobileNav, 'is-legacy': legacyPage }"
   >
     <a href="#viewer-main" class="skip-link" @click.prevent="main?.focus()">{{
       t("rework.skip")
@@ -246,15 +303,40 @@ await fetchCurrentUser();
           :aria-label="unreadCount ? `${t('rework.notifications')} (${unreadCount})` : t('rework.notifications')"
           :aria-current="path === '/forum/notifications' ? 'page' : undefined"
           ><ReworkIcon name="bell" /><span v-if="unreadCount" class="bell-dot num" aria-hidden="true">{{ unreadCount > 99 ? "99+" : unreadCount }}</span></NuxtLink
+        ><div v-if="accountUser" class="account-menu"
+          ><button
+            :id="'rework-account-button'"
+            ref="menuButton"
+            type="button"
+            class="account-link"
+            :aria-label="t('rework.accountMenu')"
+            aria-haspopup="menu"
+            :aria-expanded="menuOpen"
+            aria-controls="rework-account-menu"
+            data-account-menu
+            @click="menuOpen ? closeMenu() : openMenu()"
+            @keydown="menuButtonKey"
+          ><DsPlayerAvatar :src="accountUser.avatarUrl" :size="32" /></button
+          ><ul
+            v-show="menuOpen"
+            id="rework-account-menu"
+            ref="menuList"
+            class="account-menu__list"
+            role="menu"
+            aria-labelledby="rework-account-button"
+            @keydown="menuKey"
+          >
+            <li role="none"><NuxtLink role="menuitem" tabindex="-1" :to="localePath('/account/profile')"><ReworkIcon name="my" />{{ t("account.profile") }}</NuxtLink></li>
+            <li role="none"><NuxtLink role="menuitem" tabindex="-1" :to="localePath('/account/sync')"><ReworkIcon name="sync" />{{ t("account.sync") }}</NuxtLink></li>
+            <li role="none"><NuxtLink role="menuitem" tabindex="-1" :to="localePath('/settings')"><ReworkIcon name="settings" />{{ t("nav.settings") }}</NuxtLink></li>
+            <li role="none" class="account-menu__sep"><button role="menuitem" tabindex="-1" type="button" :disabled="signingOut" :aria-busy="signingOut" @click="menuSignOut"><ReworkIcon name="logout" />{{ t("rework.account.profile.signOut") }}</button></li>
+          </ul></div
         ><NuxtLink
+          v-else
           class="account-link"
-          :to="localePath(accountUser ? '/account/profile' : '/account')"
+          :to="localePath('/account')"
           :aria-label="t('rework.my')"
-          ><DsPlayerAvatar
-            v-if="accountUser"
-            :src="accountUser.avatarUrl"
-            :size="32"
-          /><span v-else>{{ t("rework.login") }}</span></NuxtLink
+          ><span>{{ t("rework.login") }}</span></NuxtLink
         >
       </div>
     </header>
@@ -326,6 +408,11 @@ await fetchCurrentUser();
   background: var(--bg);
   color: var(--ink);
 }
+/* Pages outside the rework (isLegacyPage) keep the page background they had before the slice G tuning. */
+.rework-shell.is-legacy {
+  background: var(--chrome-bg);
+}
+/* The frame (rail, top bar, tabs, phone bottom bar) keeps the teal tint: --chrome-* (slice G tuning). */
 .rework-rail,
 .rework-bar,
 .rework-tabs,
@@ -347,8 +434,8 @@ await fetchCurrentUser();
   align-items: center;
   flex-direction: column;
   gap: 4px;
-  background: var(--surface);
-  border-right: 1px solid var(--line);
+  background: var(--chrome-surface);
+  border-right: 1px solid var(--chrome-line);
   z-index: var(--z-rail);
   padding: 12px 4px;
 }
@@ -379,7 +466,7 @@ await fetchCurrentUser();
   border-radius: var(--r-note);
 }
 .rail-item:hover .rail-pill {
-  background: var(--bg-sunk);
+  background: var(--chrome-sunk);
 }
 .rail-item[aria-current] .rail-pill {
   background: var(--nav-active-bg);
@@ -408,7 +495,7 @@ await fetchCurrentUser();
   cursor: pointer;
 }
 .icon-button:hover {
-  background: var(--bg-sunk);
+  background: var(--chrome-sunk);
 }
 .bell,
 .sync-control {
@@ -425,7 +512,7 @@ await fetchCurrentUser();
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  box-shadow: 0 0 0 2px var(--bg);
+  box-shadow: 0 0 0 2px var(--chrome-bg);
 }
 .sync-dot.is-warn {
   background: var(--warn);
@@ -470,8 +557,8 @@ await fetchCurrentUser();
   align-items: center;
   gap: 16px;
   padding: 0 var(--gutter);
-  background: var(--bg);
-  border-bottom: 1px solid var(--line);
+  background: var(--chrome-bg);
+  border-bottom: 1px solid var(--chrome-line);
 }
 .module-title {
   font-size: 18px;
@@ -488,7 +575,7 @@ await fetchCurrentUser();
   padding: 0 12px;
   border: 1px solid var(--line-strong);
   border-radius: var(--r-note);
-  background: var(--surface);
+  background: var(--chrome-surface);
   color: var(--ink-3);
   font: inherit;
   font-size: 13px;
@@ -518,14 +605,75 @@ await fetchCurrentUser();
   font-size: 14px;
   text-decoration: none;
 }
+.account-menu {
+  position: relative;
+}
+button.account-link {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  border-radius: 50%;
+  cursor: pointer;
+}
+.account-menu__list {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: var(--z-palette);
+  min-width: 200px;
+  margin: 0;
+  padding: var(--overlay-pad-sm);
+  list-style: none;
+  border: 1px solid var(--overlay-line);
+  border-radius: var(--overlay-radius);
+  background: var(--overlay-bg);
+  box-shadow: var(--overlay-shadow);
+  font-family: var(--font-ui);
+}
+.account-menu__list :is(a, button) {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: var(--hit);
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--r-ctl);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-14);
+  text-align: left;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.account-menu__list :is(a, button):is(:hover, :focus-visible) {
+  background: var(--bg-sunk);
+}
+.account-menu__list :is(a, button):focus-visible {
+  outline-offset: -2px;
+}
+.account-menu__list svg {
+  color: var(--ink-2);
+}
+.account-menu__list button:disabled {
+  color: var(--disabled-ink);
+  cursor: default;
+}
+.account-menu__sep {
+  margin-top: 4px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+}
 .rework-tabs {
   display: flex;
   gap: 4px;
   overflow: auto;
   scrollbar-width: thin;
   padding: 0 var(--gutter);
-  background: var(--bg);
-  border-bottom: 1px solid var(--line);
+  background: var(--chrome-bg);
+  border-bottom: 1px solid var(--chrome-line);
   position: relative;
 }
 .desktop-tabs {
@@ -573,7 +721,7 @@ await fetchCurrentUser();
   left: 100px;
   z-index: 100;
   padding: 12px;
-  background: var(--surface);
+  background: var(--chrome-surface);
   color: var(--link);
 }
 .skip-link:focus {
@@ -629,7 +777,8 @@ await fetchCurrentUser();
     height: 28px;
   }
   .search-trigger,
-  .account-link {
+  .account-link,
+  .account-menu {
     display: none;
   }
   .bar-actions {
@@ -663,8 +812,8 @@ await fetchCurrentUser();
     right: 0;
     z-index: var(--z-bar);
     padding: 4px 6px calc(4px + env(safe-area-inset-bottom));
-    border-top: 1px solid var(--line);
-    background: var(--surface);
+    border-top: 1px solid var(--chrome-line);
+    background: var(--chrome-surface);
   }
   .rework-bottom a,
   .rework-bottom button {

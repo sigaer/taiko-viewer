@@ -35,7 +35,6 @@ onBeforeUnmount(() => { viewActive = false; searchGeneration++; });
 
 definePageMeta({
   contentLayout: "reading",
-  reworkElementPlus: true,
   hidePageHeader: true,
   composerHeader: true,
   middleware: "account-auth",

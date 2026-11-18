@@ -116,6 +116,15 @@ export function pairs() {
   add("element-plus", "--warn", "--warn-wash"); // warning tag
   add("element-plus", "--action-bg", "--surface", UI); // switch on, checkbox
   add("element-plus", "--ctl-border", "--surface", UI); // switch off, input border
+  // Slice G tuning: the teal frame (--chrome-*), the primary fill and its states, separation of the neutral page
+  for (const ink of ["--ink", "--ink-2", "--ink-3", "--link", "--nav-active-text"]) for (const bg of ["--chrome-bg", "--chrome-surface", "--chrome-sunk"]) add("chrome", ink, bg);
+  add("chrome", "--nav-active-ink", "--nav-active-bg");
+  for (const bg of ["--chrome-bg", "--chrome-surface"]) add("chrome non-text", "--focus-ring", bg, UI);
+  add("chrome non-text", "--line-strong", "--chrome-surface", 1.2); // search field edge in the bar
+  add("role", "--action-ink", "--action-bg-active");
+  for (const bg of ["--surface", "--bg", "--surface-2"]) add("role non-text", "--action-bg", bg, UI); // primary fill vs its surroundings
+  // Disabled text is exempt from 1.4.3; the floor keeps the label legible while it no longer reads as enabled
+  add("disabled", "--disabled-ink", "--disabled-bg", 2.5);
   return list;
 }
 

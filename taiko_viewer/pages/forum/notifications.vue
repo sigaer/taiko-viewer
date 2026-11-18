@@ -57,7 +57,6 @@ definePageMeta({
   middleware: "account-auth",
   hidePageHeader: true,
   contentLayout: "wide",
-  reworkElementPlus: true,
   pageTitleKey: "forum.notifications",
   pageDescKey: "page.forum.notifications.desc",
   navKey: "/forum",

@@ -45,7 +45,6 @@ definePageMeta({
   pageDescKey: "page.songs.detail.desc",
   navKey: "/songs",
   hidePageHeader: true,
-  reworkElementPlus: true
 });
 
 const [songDetailState, chartUgcState] = await Promise.all([
@@ -125,15 +124,20 @@ const songListLabelKey = computed(() => {
   return "nav.songsAvailable";
 });
 
+// The address names the song shelf (list=removed / list=other) when it does not already name one, so the shell back
+// button and the breadcrumb, which only see the address, return to that shelf (slice G added "other": without a
+// remembered library location an "other" song used to go back to /songs).
 watch(
   () => [song.value?.shelf_status, route.query.list] as const,
   async ([shelfStatus, listQuery]) => {
     if (!song.value || !isOwnRoute() || listQuery === "removed" || listQuery === "available") return;
-    if (normalizedShelfStatus(shelfStatus) !== 1) return;
+    const status = normalizedShelfStatus(shelfStatus);
+    const list = status === 1 ? "removed" : status === 2 && listQuery !== "other" ? "other" : null;
+    if (!list) return;
     await navigateTo(
       {
         path: route.path,
-        query: { ...route.query, list: "removed" }
+        query: { ...route.query, list }
       },
       { replace: true }
     );

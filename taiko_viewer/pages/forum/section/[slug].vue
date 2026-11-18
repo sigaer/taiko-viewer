@@ -5,7 +5,6 @@ definePageMeta({
   navKey: "/forum",
   hidePageHeader: true,
   contentLayout: "wide",
-  reworkElementPlus: true,
   breadcrumbs: [
     { labelKey: "forum.title", to: "/forum" },
     { labelKey: "page.forum.section.title" }

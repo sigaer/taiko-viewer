@@ -32,6 +32,19 @@ export function activeDestination(path: string): DestinationKey | null {
   return null;
 }
 
+/**
+ * Pages outside the rework that still render in the default layout (slice G). The shell gives every other page the
+ * V1.3 Element Plus mapping (`rework-ep` on <html>); these keep the old Element Plus colours and page background.
+ * /annual is the annual entry (out of scope, renders in the default layout); /admin paths normally use their own
+ * layout and are listed so that one falling back to the default layout is not restyled either.
+ */
+export const LEGACY_PAGES = ['/annual'] as const;
+export const LEGACY_PREFIXES = ['/admin'] as const;
+export function isLegacyPage(path: string): boolean {
+  const value = withoutLocale(path);
+  return (LEGACY_PAGES as readonly string[]).includes(value) || LEGACY_PREFIXES.some((p) => value === p || value.startsWith(p + '/'));
+}
+
 export const alternateLocale = (locale: string): "zh" | "ja" => locale === "ja" ? "zh" : "ja";
 
 /**

@@ -266,6 +266,14 @@ export async function runAccountScenarios({ browser, base, out, web = webRoot, l
     if (only && !options.warmUp && !only.split(",").some((p) => name.startsWith(p))) return;
     const started = Date.now();
     const handle = await openContext(browser, { base, ...options });
+    // Slice G diagnostics: REWORK_TRACE=<scenario prefix,…> records a Playwright trace of matching scenarios, and every
+    // scenario keeps the requests still in flight when it fails (a navigation that never finishes shows up here).
+    const traced = (process.env.REWORK_TRACE || "").split(",").filter(Boolean).some((p) => name.startsWith(p));
+    if (traced) await handle.context.tracing.start({ screenshots: true, snapshots: true, sources: false });
+    const inflight = new Map();
+    handle.page.on("request", (r) => inflight.set(r, { url: r.url().replace(base, ""), type: r.resourceType(), at: Date.now() - started }));
+    handle.page.on("requestfinished", (r) => inflight.delete(r));
+    handle.page.on("requestfailed", (r) => inflight.delete(r));
     try {
       const detail = (await body(handle)) || {};
       if (options.warmUp) return;
@@ -276,8 +284,9 @@ export async function runAccountScenarios({ browser, base, out, web = webRoot, l
     } catch (error) {
       await shot(handle.page, `FAILED-${name}-${options.width}-${options.lang || "zh"}-${options.theme || "light"}`).catch(() => {});
       const main = await handle.page.evaluate(() => (document.querySelector("#viewer-main")?.innerHTML || "").slice(0, 1500)).catch(() => "");
-      results.push({ name, ...options, pass: false, ms: Date.now() - started, step: handle.progress.at, error: String(error?.message || error).slice(0, 900), faults: handle.faults.slice(0, 10), warnings: handle.warnings.slice(0, 5), calls: handle.calls.slice(-6).map((c) => ({ ...c, body: c.body && JSON.stringify(c.body).slice(0, 200) })), main });
+      results.push({ name, ...options, pass: false, ms: Date.now() - started, inflight: [...inflight.values()].slice(0, 20), step: handle.progress.at, error: String(error?.message || error).slice(0, 900), faults: handle.faults.slice(0, 10), warnings: handle.warnings.slice(0, 5), calls: handle.calls.slice(-6).map((c) => ({ ...c, body: c.body && JSON.stringify(c.body).slice(0, 200) })), main });
     } finally {
+      if (traced) await handle.context.tracing.stop({ path: resolve(out, `${label}_trace-${name}-${options.width}-${options.lang || "zh"}.zip`) }).catch(() => {});
       await handle.page.close().catch(() => {});
       await handle.context.close().catch(() => {});
     }
@@ -940,8 +949,14 @@ export async function runAccountScenarios({ browser, base, out, web = webRoot, l
       assert.equal(await page.locator("h1").count(), 1);
       assert.ok(await noOverflow(page), "profile: no horizontal overflow");
       assert.deepEqual(await touchTargets(page), [], "profile: touch targets");
-      const toc = await page.locator(".ra-toc").boundingBox();
-      const body = await page.locator(".ra-profile__body").boundingBox();
+      // Slice G: measured at the top of the page in one step. The row is sticky below 1100 px and the page can scroll
+      // itself to a pending binding challenge after loading; measuring after that scroll compared a stuck row with a
+      // scrolled-away column (failed once in the slice G run: a scenario race, not a layout change).
+      const { toc, body } = await page.evaluate(() => {
+        scrollTo(0, 0);
+        const r = (s) => { const b = document.querySelector(s).getBoundingClientRect(); return { x: b.x, y: b.y, width: b.width, height: b.height }; };
+        return { toc: r(".ra-toc"), body: r(".ra-profile__body") };
+      });
       if (width >= 1100) assert.ok(toc.x + toc.width <= body.x, "side list");
       else assert.ok(toc.y < body.y && toc.width > body.width * 0.9, "compact row above the sections");
       if (shots.has(key)) await shot(page, `profile-intercepted-${key}`, true);
@@ -949,9 +964,14 @@ export async function runAccountScenarios({ browser, base, out, web = webRoot, l
     });
 
   // 9. Element Plus mapping on these pages, off elsewhere; dialogs leave no node behind
+  // Slice G: the page without the mapping is /annual (out of scope); every reworked page has it by default.
   await scenario("element-plus-switch", { width: 820 }, async ({ page, state }) => {
+    // /annual renders only for phones (middleware/annual-mobile.global.ts; a desktop browser is sent to the home page),
+    // so this page presents itself as one; the shell and the reworked pages do not depend on the user agent.
+    await page.setExtraHTTPHeaders({ "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1" });
+    await page.addInitScript((ua) => Object.defineProperty(Navigator.prototype, "userAgent", { get: () => ua }), "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1");
     state.real = true;
-    await page.goto(`${base}/about`, { waitUntil: "networkidle" });
+    await page.goto(`${base}/annual`, { waitUntil: "networkidle" });
     assert.ok(!(await htmlClasses(page)).includes("rework-ep"));
     const baseline = await page.evaluate(() => document.body.children.length);
     for (const path of ["/account/login", "/account/register", "/account/forgot-password", "/settings"]) {
@@ -967,7 +987,7 @@ export async function runAccountScenarios({ browser, base, out, web = webRoot, l
     await page.locator(".el-select-dropdown__item").first().waitFor();
     const primary = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--el-color-primary").trim());
     await page.keyboard.press("Escape");
-    await go(page, "zh", "/about");
+    await go(page, "zh", "/annual");
     await page.waitForFunction(() => !document.documentElement.classList.contains("rework-ep"), null, { timeout: 15000 });
     const after = await page.evaluate(() => document.body.children.length);
     assert.ok(after <= baseline + 2, `body nodes ${baseline} → ${after}`);

@@ -26,6 +26,10 @@ const authenticatedHomeState = computed(() => {
   return "authenticated_unbound";
 });
 const latestSongs = computed(() => homeContent.value.latestSongs || []);
+// Slice G: with the growth surface shown, the annual banner sits in the greeting row (components/rework/today/Hello.vue:
+// beside the greeting from 1100 px, above it below that) instead of a row of its own that left 40 % of it empty.
+const bannerInGreeting = computed(() => homePresentation.value === "authenticated" && authenticatedHomeState.value === "authenticated_ready");
+provide("rework-home-banner", bannerInGreeting);
 const eventSlides = computed(() => [
   { image: "/optimized/2026-autumn-800.webp", title: t("page.home.eventAutumn") },
   { image: "/optimized/huali-esports-800.webp", title: t("page.home.eventHualiEsports") }
@@ -33,7 +37,6 @@ const eventSlides = computed(() => [
 
 definePageMeta({
   hidePageHeader: true,
-  reworkElementPlus: true,
   pageTitleKey: "site.homeTitle",
   pageDescKey: "page.home.desc",
   navKey: "/",
@@ -56,7 +59,7 @@ useViewerSeo(() => ({
     :data-home-state-status="homeStateStatus"
     :data-home-presentation="homePresentation"
   >
-    <div class="home-annual"><AnnualHero /></div>
+    <div v-if="!bannerInGreeting" class="home-annual"><AnnualHero /></div>
     <ReworkTodayGuest
       v-if="homePresentation === 'guest'"
       :latest-songs="latestSongs"

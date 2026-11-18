@@ -1,4 +1,4 @@
-// Stage 5 slice F: dan courses, guides, titles, tools, /more, /about, /alias-log, the practice view, shell tabs.
+// Stage 5 slice F (and slice G at the end of this file): dan courses, guides, titles, tools, /more, /about, /alias-log, the practice view, shell tabs.
 // Pure helpers and source contracts; the browser checks are scripts/rework/pages-scenarios.mjs.
 import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
@@ -223,8 +223,9 @@ test("tools: computation and request code unchanged; only copy, meta and present
   const cases = [
     ["rtCalculator", "pages/tools/rt-calculator.vue", [...copyBlock, /^definePageMeta\(\{ pageTitleKey: 'tools\.rtCalculator'/, /^const \{ locale, t \} = useI18n\(\);$/]],
     ["tjaConstants", "pages/tools/tja-constants.vue", [/^definePageMeta\(\{ pageTitleKey: 'tools\.tjaConstants'/]],
-    ["chartConfig", "pages/tools/chart-config.vue", [/^errorMessage\.value = await resolveViewerError\(error, t\("errors\.queryFailed"\)\);$/]],
-    ["noteCount", "pages/tools/note-count.vue", [/^errorMessage\.value = await resolveViewerError\(error, t\("errors\.queryFailed"\)\);$/, /^const submit = async \(\) => \{$/]],
+    // slice G: the 工具 group shares one content width (contentLayout "wide" → "standard")
+    ["chartConfig", "pages/tools/chart-config.vue", [/^errorMessage\.value = await resolveViewerError\(error, t\("errors\.queryFailed"\)\);$/, /^contentLayout: "wide",$/]],
+    ["noteCount", "pages/tools/note-count.vue", [/^errorMessage\.value = await resolveViewerError\(error, t\("errors\.queryFailed"\)\);$/, /^const submit = async \(\) => \{$/, /^contentLayout: "wide",$/]],
     ["guideLevel", "pages/guide/[difficulty]/[level].vue", [/summaryRows|colorMap|headerCellClassName|getRowToneClass|hasTagLoadError|getTagItems/, /^const \{ data: guideContent, pending, error \} = await useGuideContent/, /^if \(row\.rowIndex === 1/, /^return colorMap|^return "";|^return `guide-tag-row|^if \(rowId < 1/, /^\};$/, /^\}$/]],
     ["practice", "pages/ourtaikoview/[id]/[difficulty].vue", [...copyBlock, /^const \{ locale, t \} = useI18n\(\);$/]]
   ];
@@ -245,19 +246,20 @@ test("tools: computation and request code unchanged; only copy, meta and present
   assert.match(await read("utils/rtCalculator.ts"), /export function calculateV2/, "computation module untouched (no diff in this slice)");
 });
 
-test("word cloud: ReworkGate; nothing imports AccountToolGate any more (the file stays for slice G)", async () => {
+test("word cloud: ReworkGate; nothing imports AccountToolGate any more (slice G removed the file)", async () => {
   const source = await read("pages/tools/word-cloud.vue");
   assert.match(source, /<ReworkGate :need="accountUser \? null : 'login'">/);
   assert.match(source, /await loadChart\("\/api\/account\/charts\/word-cloud"\)/, "same endpoint");
   const { readdir } = await import("node:fs/promises");
   const walk = async (dir) => (await readdir(new URL(`../${dir}`, import.meta.url), { withFileTypes: true })).flatMap((e) => (e.isDirectory() ? [] : [`${dir}/${e.name}`]));
   const files = [];
-  for (const dir of ["pages", "pages/tools", "pages/grade", "pages/account", "components", "components/rework", "components/tools", "layouts"]) files.push(...(await walk(dir)));
+  for (const dir of ["pages", "pages/tools", "pages/grade", "pages/account", "components", "components/rework", "layouts"]) files.push(...(await walk(dir)));
   for (const file of files.filter((f) => f.endsWith(".vue") && !f.endsWith("AccountToolGate.vue"))) assert.doesNotMatch(await read(file), /<AccountToolGate|import AccountToolGate/, file);
-  await read("components/tools/AccountToolGate.vue");
+  const { existsSync } = await import("node:fs");
+  assert.equal(existsSync(new URL("../components/tools/AccountToolGate.vue", import.meta.url)), false, "slice G removed the unused gate");
 });
 
-test("slice pages: own <h1>, the Element Plus mapping (except /about, kept as the unmapped reference page)", async () => {
+test("slice pages: own <h1>; the Element Plus mapping is the shell default since slice G (no page flag, /about included)", async () => {
   const pages = [
     "pages/grade/2023.vue", "pages/grade/2024.vue", "pages/grade/2025/[grade].vue", "pages/grade/2026/[grade].vue",
     "pages/guide/index.vue", "pages/guide/[difficulty]/[level].vue", "pages/titles.vue",
@@ -267,14 +269,104 @@ test("slice pages: own <h1>, the Element Plus mapping (except /about, kept as th
   for (const page of pages) {
     const source = await read(page);
     assert.match(source, /hidePageHeader: true/, page);
-    assert.match(source, /reworkElementPlus: true/, page);
+    assert.doesNotMatch(source, /reworkElementPlus/, page + " (slice G: the mapping is the shell default)");
     // copy tables come from the locale files (the calculator still picks the song title's language: data, not copy)
     assert.doesNotMatch(source, /const copy = computed\(\(\) =>\s*locale\.value === ["']ja["']/, page + ": no inline bilingual copy");
     assert.doesNotMatch(source, /locale\.value === "ja"\s*\?\s*"[^"]*[぀-ヿ一-鿿]/u, page + ": no inline bilingual strings");
   }
   const about = await read("pages/about.vue");
   assert.match(about, /hidePageHeader: true/);
-  assert.doesNotMatch(about, /reworkElementPlus/);
+  assert.doesNotMatch(about, /reworkElementPlus/); // slice G: /about gets the mapping like every page
   assert.doesNotMatch(await read("pages/ourtaikoview/[id]/[difficulty].vue"), /<main\b/, "no nested <main>");
   assert.match(await read("pages/more.vue"), /v\{\{ appVersion \}\}/);
+});
+
+// ---------------------------------------------------------------- slice G (finishing pass)
+
+test("slice G: the Element Plus mapping is the shell default; only the out-of-scope pages go without it", async () => {
+  const { isLegacyPage, LEGACY_PAGES } = await import("../utils/rework/navigation.ts");
+  assert.deepEqual([...LEGACY_PAGES], ["/annual"]);
+  for (const path of ["/annual", "/ja/annual", "/annual/", "/admin/taiko/dashboard", "/admin"]) assert.equal(isLegacyPage(path), true, path);
+  for (const path of ["/", "/about", "/ja/about", "/songs", "/annualx", "/more", "/settings"]) assert.equal(isLegacyPage(path), false, path);
+  const shell = await read("components/rework/Shell.vue");
+  assert.match(shell, /class: legacyPage\.value \? "viewer-rework" : "viewer-rework rework-ep"/);
+  assert.match(shell, /\.rework-shell\.is-legacy \{\n  background: var\(--chrome-bg\);/, "out-of-scope pages keep the old page background");
+  const { readdir } = await import("node:fs/promises");
+  const stack = ["pages"];
+  while (stack.length) {
+    const dir = stack.pop();
+    for (const entry of await readdir(new URL(`../${dir}`, import.meta.url), { withFileTypes: true })) {
+      const path = `${dir}/${entry.name}`;
+      if (entry.isDirectory()) stack.push(path);
+      else if (path.endsWith(".vue")) assert.doesNotMatch(await read(path), /reworkElementPlus:/, `${path}: one mechanism, no page flag`);
+    }
+  }
+});
+
+test("slice G: colour tuning (neutral light page, teal frame, one step lower dark primary, disabled tokens)", async () => {
+  const css = await read("assets/css/ds/tokens.css");
+  const block = (sel) => css.slice(css.indexOf(sel), css.indexOf("}", css.indexOf(sel)));
+  const light = block('html.viewer-rework:not([data-theme="dark"]) {');
+  const dark = block('html.viewer-rework[data-theme="dark"] {');
+  for (const [k, v] of [["--bg", "#f0f4f4"], ["--bg-sunk", "#e4eaea"], ["--surface", "#ffffff"], ["--surface-2", "#f7f9f9"], ["--line", "#d3dcdc"], ["--chrome-bg", "#eaf6f5"], ["--chrome-surface", "#f9fdfc"], ["--chrome-sunk", "#def0ee"], ["--chrome-line", "#ccdfdc"], ["--brand-primary", "#006c76"]])
+    assert.match(light, new RegExp(`${k}: ${v};`), `light ${k}`);
+  for (const [k, v] of [["--bg", "#0c2023"], ["--surface", "#1a383d"], ["--chrome-bg", "#0c2023"], ["--chrome-surface", "#1a383d"], ["--action-bg", "#45aeb5"], ["--action-bg-hover", "#5cbcc2"], ["--action-bg-active", "#3a9da4"], ["--brand-primary", "#86d9dc"], ["--brand-focus", "#86d9dc"], ["--disabled-bg", "#1f3d42"], ["--disabled-ink", "#6b8a8c"]])
+    assert.match(dark, new RegExp(`${k}: ${v};`), `dark ${k}`);
+  const tuning = await json("scripts/ds/spec/tuning-2026-11-18.json");
+  assert.deepEqual(Object.keys(tuning.changed.light), ["--bg", "--bg-sunk", "--surface", "--surface-2", "--line"]);
+  assert.deepEqual(Object.keys(tuning.changed.dark), ["--action-bg", "--action-bg-hover"]);
+  const { run } = await import("../scripts/ds/contrast-check.mjs");
+  const rows = run(css);
+  assert.deepEqual(rows.filter((r) => !r.pass).map((r) => `${r.theme} ${r.fg}/${r.bg} ${r.ratio.toFixed(2)}`), []);
+  const fill = rows.find((r) => r.theme === "dark" && r.group === "role non-text" && r.fg === "--action-bg" && r.bg === "--surface");
+  assert.ok(fill.ratio >= 3, "dark primary fill against the surface");
+  const shell = await read("components/rework/Shell.vue");
+  for (const sel of [".rework-rail {", ".rework-bar {", ".rework-tabs {"]) assert.match(shell.slice(shell.indexOf(sel), shell.indexOf("}", shell.indexOf(sel))), /background: var\(--chrome-(bg|surface)\)/, sel);
+  assert.match(shell, /border-top: 1px solid var\(--chrome-line\);\n    background: var\(--chrome-surface\);/, "phone bottom bar");
+  assert.match(await read("assets/css/ds/rework.css"), /\.rw-btn\[aria-disabled="true"\] \{\n  border-color: var\(--disabled-line\);\n  background: var\(--disabled-bg\);\n  color: var\(--disabled-ink\);/);
+  const ep = await read("assets/css/ds/element-plus.css");
+  assert.match(ep, /--el-button-disabled-bg-color: var\(--disabled-bg\);/);
+  assert.match(ep, /--el-button-active-bg-color: var\(--action-bg-active\);/);
+});
+
+test("slice G: account menu in the top bar (menu button pattern), one sign-out, phone entries in the hub", async () => {
+  const shell = await read("components/rework/Shell.vue");
+  assert.match(shell, /aria-haspopup="menu"/);
+  assert.match(shell, /:aria-expanded="menuOpen"/);
+  assert.match(shell, /role="menu"/);
+  assert.equal((shell.slice(shell.indexOf("<template>")).match(/ role="menuitem"/g) || []).length, 4, "profile, sync, settings, sign out");
+  for (const to of ["/account/profile", "/account/sync", "/settings"]) assert.ok(shell.includes(`role="menuitem" tabindex="-1" :to="localePath('${to}')"`), to);
+  for (const key of ['"ArrowDown"', '"ArrowUp"', '"Home"', '"End"', '"Escape"', '"Tab"']) assert.ok(shell.includes(key), key);
+  assert.match(shell, /document\.addEventListener\("pointerdown", outsidePointer, true\)/, "outside click closes");
+  assert.match(shell, /searchOpen\.value = false;\n    menuOpen\.value = false;/, "navigation closes");
+  assert.ok(shell.includes(`<NuxtLink\n          v-else\n          class="account-link"\n          :to="localePath('/account')"`), "signed out: the sign-in link stays");
+  const signOut = await read("composables/useAccountSignOut.ts");
+  assert.match(signOut, /apiFetch\("\/api\/account\/auth\/logout", \{ method: "POST" \}\);\n      clearAccountUser\(\);\n      await navigateTo\(localePath\("\/account\/login"\)\);/);
+  assert.match(await read("pages/account/profile.vue"), /const \{ signingOut, signOut \} = useAccountSignOut\(\);/);
+  const hub = await read("components/rework/my/Hub.vue");
+  assert.ok(hub.includes(`:to="localePath('/settings')"`));
+  assert.match(hub, /v-if="status === 'authenticated'"[\s\S]*data-sign-out @click="signOut"/);
+  assert.match(hub, /void primeAnnualBgm\(\);/, "annual entry primes the music like the former sidebar");
+  for (const lang of ["zh", "ja"]) assert.equal(typeof get(await json(`locales/${lang}.json`), "rework.accountMenu"), "string");
+});
+
+test("slice G: home banner in the greeting row; other songs back to their shelf; reply previews; dead code removed", async () => {
+  const home = await read("pages/index.vue");
+  assert.match(home, /provide\("rework-home-banner", bannerInGreeting\);/);
+  assert.match(home, /<div v-if="!bannerInGreeting" class="home-annual"><AnnualHero \/><\/div>/);
+  const hello = await read("components/rework/today/Hello.vue");
+  assert.match(hello, /<div v-if="banner" class="th-banner"><AnnualHero \/><\/div>/);
+  assert.match(hello, /grid-template-columns: auto minmax\(0, 1fr\) minmax\(0, 612px\);/);
+  const detail = await read("pages/songs/[id].vue");
+  assert.ok(detail.includes(`const list = status === 1 ? "removed" : status === 2 && listQuery !== "other" ? "other" : null;`));
+  const reply = await read("components/rework/community/ReplyBox.vue");
+  assert.doesNotMatch(reply, /<ForumSafeImage/);
+  assert.match(reply, /class="crb__failed" role="img"/);
+  const { existsSync } = await import("node:fs");
+  for (const file of ["components/SidebarNav.vue", "components/MobileTabBar.vue", "components/AppMobileHeader.vue", "components/account/AccountSongScores.vue", "components/my-taiko/Overview.vue", "components/RecommendationSongItem.vue", "components/tools/AccountToolGate.vue", "components/GradeDojoShell.vue", "components/forum/ForumSafeImage.vue"])
+    assert.equal(existsSync(new URL(`../${file}`, import.meta.url)), false, file);
+  assert.match(await read("scripts/verify_annual_contract.mjs"), /const sidebarSource = await read\("components\/rework\/my\/Hub\.vue"\);/);
+  const runner = await read("scripts/rework/selfcheck-runner.mjs");
+  assert.match(runner, /report\.devLock = releaseOwnDevLock\(\{ port, spawnedAt, portFree: report\.portFreeAfter \}\);/);
+  assert.doesNotMatch(runner, /NUXT_IGNORE_LOCK/);
 });

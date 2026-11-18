@@ -40,6 +40,7 @@ const { t } = useI18n();
   display: grid;
   gap: var(--sp-5);
   min-width: 0;
+  max-width: 800px;
   font-family: var(--font-ui);
   color: var(--ink);
 }

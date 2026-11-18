@@ -123,8 +123,8 @@ html.rework-ep:root .el-button.el-button--primary {
   --el-button-active-text-color: var(--action-ink);
   --el-button-hover-bg-color: var(--action-bg-hover);
   --el-button-hover-border-color: var(--action-bg-hover);
-  --el-button-active-bg-color: var(--action-bg-hover);
-  --el-button-active-border-color: var(--action-bg-hover);
+  --el-button-active-bg-color: var(--action-bg-active);
+  --el-button-active-border-color: var(--action-bg-active);
 }
 html.ds-preview:root .el-button.el-button--primary.is-plain,
 html.rework-ep:root .el-button.el-button--primary.is-plain {
@@ -176,9 +176,21 @@ html.ds-preview:root .el-button.is-disabled,
 html.ds-preview:root .el-button.is-disabled:hover,
 html.rework-ep:root .el-button.is-disabled,
 html.rework-ep:root .el-button.is-disabled:hover {
-  --el-button-disabled-text-color: var(--ink-3);
-  --el-button-disabled-bg-color: var(--bg-sunk);
-  --el-button-disabled-border-color: var(--line);
+  --el-button-disabled-text-color: var(--disabled-ink);
+  --el-button-disabled-bg-color: var(--disabled-bg);
+  --el-button-disabled-border-color: var(--disabled-line);
+}
+/* Slice G: the keyboard focus of fields and the upload trigger is the same 2 px ring as .rw-input / .rw-btn */
+html.ds-preview:root .el-input__wrapper.is-focus,
+html.ds-preview:root .el-select__wrapper.is-focused,
+html.ds-preview:root .el-textarea__inner:focus-visible,
+html.ds-preview:root .el-upload:focus-visible,
+html.rework-ep:root .el-input__wrapper.is-focus,
+html.rework-ep:root .el-select__wrapper.is-focused,
+html.rework-ep:root .el-textarea__inner:focus-visible,
+html.rework-ep:root .el-upload:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 1px;
 }
 html.ds-preview:root .el-button:focus-visible,
 html.rework-ep:root .el-button:focus-visible {

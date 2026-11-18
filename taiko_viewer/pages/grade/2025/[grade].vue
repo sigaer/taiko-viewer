@@ -15,7 +15,6 @@ definePageMeta({
   pageDesc: "虹 2025",
   navKey: "/grade/2025",
   hidePageHeader: true,
-  reworkElementPlus: true,
   breadcrumbs: [{ label: "段位查询", to: "/grade/2025" }, { label: "虹 2025", to: "/grade/2025" }]
 });
 

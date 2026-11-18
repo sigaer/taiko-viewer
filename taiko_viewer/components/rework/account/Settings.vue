@@ -70,8 +70,7 @@ const s = (key: string) => t(`rework.account.settings.${key}`);
   width: 100%;
   flex-direction: column;
   gap: var(--sp-6);
-  max-width: 760px;
-  margin: 0 auto;
+  max-width: 800px;
   font-family: var(--font-ui);
   color: var(--ink);
 }

@@ -215,7 +215,7 @@ export async function runPagesScenarios({ browser, base, out, web = webRoot, lab
         assert.equal(r.status, 200, `${path} renders`);
         assert.equal((r.html.match(/<h1\b/g) || []).length, 1, `${path}: one h1`);
         const ep = /<html[^>]*class="[^"]*\brework-ep\b/.test(r.html);
-        assert.equal(ep, path !== "/about", `${path}: rework-ep ${path !== "/about"}`);
+        assert.equal(ep, true, `${path}: rework-ep (slice G: every reworked page, /about included)`);
         checks[path] = r.html;
       }
       const nine = checks["/grade/2026/%E4%B9%9D%E6%AE%B5"];
@@ -543,9 +543,14 @@ export async function runPagesScenarios({ browser, base, out, web = webRoot, lab
     return { playerState: state };
   });
 
-  // 9. Element Plus mapping: off on /about (left without the flag on purpose), on for the slice pages
+  // 9. Element Plus mapping: on for every slice page (slice G: /about too), off on the out-of-scope /annual
+  // Slice G: the page without the mapping is /annual (out of scope); every reworked page has it by default.
   await scenario("element-plus-switch", { width: 820 }, async ({ page }) => {
-    await page.goto(`${base}/about`, { waitUntil: "networkidle" });
+    // /annual renders only for phones (middleware/annual-mobile.global.ts; a desktop browser is sent to the home page),
+    // so this page presents itself as one; the shell and the reworked pages do not depend on the user agent.
+    await page.setExtraHTTPHeaders({ "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1" });
+    await page.addInitScript((ua) => Object.defineProperty(Navigator.prototype, "userAgent", { get: () => ua }), "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1");
+    await page.goto(`${base}/annual`, { waitUntil: "networkidle" });
     assert.ok(!(await htmlClasses(page)).includes("rework-ep"));
     await go(page, "zh", "/tools/rt-calculator?songId=1&level=4");
     await page.waitForFunction(() => document.documentElement.classList.contains("rework-ep"));
@@ -554,7 +559,7 @@ export async function runPagesScenarios({ browser, base, out, web = webRoot, lab
     await page.locator(".el-select-dropdown").first().waitFor();
     const dropdown = await page.$eval(".el-select-dropdown", (el) => getComputedStyle(el.closest(".el-popper")).backgroundColor);
     await page.keyboard.press("Escape");
-    await go(page, "zh", "/about");
+    await go(page, "zh", "/annual");
     await page.waitForFunction(() => !document.documentElement.classList.contains("rework-ep"));
     const after = await page.evaluate(() => document.body.children.length);
     assert.ok(after <= baseline + 2, `body nodes ${baseline} → ${after}`);
@@ -583,7 +588,7 @@ export async function runPagesScenarios({ browser, base, out, web = webRoot, lab
           await page.locator(".gl-tag").nth(0).locator(".gl-items").waitFor();
         }
         if (path.startsWith("/tools/rt-calculator")) await page.getByRole("button", { name: "全良", exact: true }).click();
-        assert.equal((await htmlClasses(page)).includes("rework-ep"), path !== "/about", `${path}: rework-ep`);
+        assert.equal((await htmlClasses(page)).includes("rework-ep"), true, `${path}: rework-ep`);
         assert.equal(await page.evaluate(() => document.documentElement.dataset.theme), theme);
         assert.equal(await page.locator("h1").count(), 1, `${path}: one h1`);
         assert.ok(await noOverflow(page), `${path}: no horizontal overflow`);

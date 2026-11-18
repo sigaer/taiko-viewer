@@ -483,11 +483,20 @@ export async function runTodayScenarios({ browser, base, out, web = webRoot, lab
       assert.equal((await header.textContent()).split(fixtureUser.username).length - 1, 1, "account name shown once");
       const geo = await header.evaluate((el) => {
         const r = (s) => el.querySelector(s).getBoundingClientRect();
-        return { h1: r("h1"), links: r(".th-links"), avatar: r(".th-avatar") };
+        return { h1: r("h1"), links: r(".th-links"), avatar: r(".th-avatar"), banner: r(".th-banner img") };
       });
       assert.ok(geo.avatar.right <= geo.h1.left, "avatar beside the greeting");
-      if (width >= 768) assert.ok(geo.links.top < geo.h1.bottom && geo.links.left >= geo.h1.right - 1, "actions on the h1 row");
-      else assert.ok(geo.links.top >= geo.h1.bottom - 1, "actions below the h1 on phones");
+      // slice G: the annual banner is part of the greeting row (beside it from 1100 px, above it below that)
+      assert.equal(await page.locator(".home-annual").count(), 0, "no separate banner row");
+      assert.ok(geo.banner.width > 0 && geo.banner.width <= 612.5, "banner at most its natural width");
+      if (width >= 1100) {
+        assert.ok(geo.banner.left >= geo.h1.right - 1 && geo.banner.top < geo.h1.bottom, "banner on the right of the greeting");
+        assert.ok(geo.links.top >= geo.h1.bottom - 1 && geo.links.left < geo.banner.left, "actions under the greeting");
+      } else {
+        assert.ok(geo.banner.bottom <= geo.h1.top + 1, "banner above the greeting");
+        if (width >= 768) assert.ok(geo.links.top < geo.h1.bottom && geo.links.left >= geo.h1.right - 1, "actions on the h1 row");
+        else assert.ok(geo.links.top >= geo.h1.bottom - 1, "actions below the h1 on phones");
+      }
       // charts: Rating dial and six-dimension radar with accessible names, no clipped / colliding text
       const names = await accessibleCharts(page);
       assert.ok(names.some((n) => n.startsWith("Rating") && n.includes("9.27")), "dial name: " + names.join(" | "));
@@ -825,8 +834,13 @@ export async function runTodayScenarios({ browser, base, out, web = webRoot, lab
   });
 
   // 11. Element Plus mapping on the reworked pages and off elsewhere
+  // Slice G: the page without the mapping is /annual (out of scope); every reworked page has it by default.
   await scenario("element-plus-switch", { width: 820 }, async ({ page, state }) => {
-    await page.goto(`${base}/about`, { waitUntil: "networkidle" });
+    // /annual renders only for phones (middleware/annual-mobile.global.ts; a desktop browser is sent to the home page),
+    // so this page presents itself as one; the shell and the reworked pages do not depend on the user agent.
+    await page.setExtraHTTPHeaders({ "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1" });
+    await page.addInitScript((ua) => Object.defineProperty(Navigator.prototype, "userAgent", { get: () => ua }), "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1");
+    await page.goto(`${base}/annual`, { waitUntil: "networkidle" });
     assert.ok(!(await htmlClasses(page)).includes("rework-ep"));
     state.signedIn = true;
     await injectSignedIn(page);
@@ -835,8 +849,8 @@ export async function runTodayScenarios({ browser, base, out, web = webRoot, lab
       await page.waitForURL((u) => u.pathname === path);
       await page.waitForFunction(() => document.documentElement.classList.contains("rework-ep"), null, { timeout: 15000 });
     }
-    await push(page, "/about");
-    await page.waitForURL(/\/about$/);
+    await push(page, "/annual");
+    await page.waitForURL(/\/annual$/);
     await page.waitForFunction(() => !document.documentElement.classList.contains("rework-ep"), null, { timeout: 15000 });
     await page.goBack();
     await page.waitForURL(/\/my\/weekly$/);

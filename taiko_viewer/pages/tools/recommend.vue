@@ -13,7 +13,6 @@ definePageMeta({
   pageDescKey: "page.tools.recommend.desc",
   navKey: "/tools/recommend",
   hidePageHeader: true,
-  reworkElementPlus: true,
   breadcrumbs: [{ labelKey: "nav.myTaiko", to: "/my" }, { labelKey: "tools.recommend", to: "/tools/recommend" }]
 });
 useViewerSeo(() => ({ title: t("tools.recommend"), description: buildPageDescription(t("page.tools.recommend.desc")), path: "/tools/recommend" }));

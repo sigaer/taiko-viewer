@@ -129,7 +129,7 @@ test('slice pages: own header, Element Plus mapping, ReworkGate instead of Accou
   for (const page of ['pages/account/songs.vue', 'pages/my/index.vue', 'pages/tools/b30.vue', 'pages/tools/trend.vue', 'pages/tools/progress.vue', 'pages/tools/recommend.vue']) {
     const source = await read(page);
     assert.match(source, /hidePageHeader: true/, page);
-    assert.match(source, /reworkElementPlus: true/, page);
+    assert.doesNotMatch(source, /reworkElementPlus/, page + " (slice G: the mapping is the shell default)");
     assert.doesNotMatch(source, /AccountToolGate|locale(\.value)? === ["']ja["']/, page + ': no old gate, no inline bilingual copy');
   }
   for (const page of ['pages/account/songs.vue', 'pages/tools/b30.vue', 'pages/tools/trend.vue', 'pages/tools/progress.vue', 'pages/tools/recommend.vue']) {
@@ -146,7 +146,7 @@ test('slice pages: own header, Element Plus mapping, ReworkGate instead of Accou
   assert.doesNotMatch(await read('pages/tools/word-cloud.vue'), /<AccountToolGate|import AccountToolGate/, 'word cloud (slice F): no old gate');
   assert.match(await read('pages/tools/word-cloud.vue'), /<ReworkGate :need="accountUser \? null : 'login'">/, 'word cloud (slice F): ReworkGate');
   // slice C reworked the two growth pages: they carry the mapping now (was: not flagged, belonged to slice C)
-  for (const growth of ['pages/my/growth.vue', 'pages/my/weekly.vue']) assert.match(await read(growth), /reworkElementPlus: true/, growth + ' (slice C)');
+  for (const growth of ['pages/my/growth.vue', 'pages/my/weekly.vue']) assert.doesNotMatch(await read(growth), /reworkElementPlus/, growth + ' (slice C; slice G: the mapping is the shell default)');
 });
 
 test('server images are kept: the same endpoints and parameters', async () => {
@@ -291,7 +291,7 @@ test('slice C pages: own header, Element Plus mapping, gates, no hand-written gr
   for (const path of ['pages/index.vue', 'pages/my/growth.vue', 'pages/my/weekly.vue']) {
     const source = await read(path);
     assert.match(source, /hidePageHeader: true/, path);
-    assert.match(source, /reworkElementPlus: true/, path);
+    assert.doesNotMatch(source, /reworkElementPlus/, path + " (slice G: the mapping is the shell default)");
   }
   const growth = await read('pages/my/growth.vue');
   const weekly = await read('pages/my/weekly.vue');

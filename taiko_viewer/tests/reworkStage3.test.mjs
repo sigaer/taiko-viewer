@@ -161,7 +161,7 @@ test("P2 / identity: avatars are DsPlayerAvatar; no dan; titles through DsTitleP
 test("every community page uses the rework frame and the Element Plus mapping", async () => {
   for (const path of PAGES) {
     const source = await read(path);
-    assert.match(source, /reworkElementPlus: true/, path);
+    assert.doesNotMatch(source, /reworkElementPlus/, path + " (slice G: the mapping is the shell default)");
     if (!path.endsWith("new.vue")) assert.match(source, /hidePageHeader: true/, path);
   }
   assert.match(await read("pages/forum/new.vue"), /composerHeader: true/);

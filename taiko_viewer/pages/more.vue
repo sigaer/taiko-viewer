@@ -19,7 +19,6 @@ definePageMeta({
   navKey: "/more",
   hidePageDescription: true,
   hidePageHeader: true,
-  reworkElementPlus: true,
   breadcrumbs: [{ labelKey: "nav.more", to: "/more" }]
 });
 

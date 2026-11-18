@@ -2,7 +2,7 @@
 import {ref,computed,onMounted,onActivated,watch,nextTick} from 'vue';
 import type {ResourceGrant,DeveloperClient} from '@sakura-taiko/contract';
 definePageMeta({
-  contentLayout: "reading",hidePageHeader:true,reworkElementPlus:true,middleware:'account-auth',pageTitleKey:'account.developer',hidePageDescription:true,navKey:'/account/profile'});
+  contentLayout: "reading",hidePageHeader:true,middleware:'account-auth',pageTitleKey:'account.developer',hidePageDescription:true,navKey:'/account/profile'});
 const {accountUser,fetchCurrentUser}=useAccountState();
 await fetchCurrentUser(true);
 if(accountUser.value?.developerApiV1Access!==true)throw createError({statusCode:404,statusMessage:'Not found'});
@@ -128,7 +128,7 @@ onMounted(refresh);
 
 <style scoped>
 /* Self-contained on purpose (see the template comment). Element Plus variables only: on this page they carry the
-   V1.3 mapping (route meta reworkElementPlus → html.rework-ep), and the isolated Linux host defines the same names. */
+   V1.3 mapping (html.rework-ep, the shell default since slice G), and the isolated Linux host defines the same names. */
 .grant-page{display:grid;gap:16px;width:100%;min-width:0;color:var(--el-text-color-primary);line-height:1.6}
 .grant-head h1{margin:0;font-size:clamp(1.375rem,2.4vw,2rem);font-weight:800;line-height:1.25;overflow-wrap:anywhere}
 .permission-explainer{margin:8px 0 0;line-height:1.7;color:var(--el-text-color-regular);overflow-wrap:anywhere}

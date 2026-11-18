@@ -18,7 +18,6 @@ await fetchCurrentUser();
 
 definePageMeta({
   hidePageHeader: true,
-  reworkElementPlus: true,
   middleware: "account-auth",
   pageTitleKey: "nav.support",
   pageDescKey: "page.support.desc",

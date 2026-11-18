@@ -64,9 +64,9 @@ html.viewer-rework .rw-btn--sm {
 }
 html.viewer-rework .rw-btn:disabled,
 html.viewer-rework .rw-btn[aria-disabled="true"] {
-  border-color: var(--line);
-  background: var(--bg-sunk);
-  color: var(--ink-3);
+  border-color: var(--disabled-line);
+  background: var(--disabled-bg);
+  color: var(--disabled-ink);
   cursor: not-allowed;
 }
 html.viewer-rework .rw-link {

@@ -12,9 +12,8 @@ definePageMeta({
   pageTitleKey: "nav.settings",
   pageDescKey: "page.settings.desc",
   navKey: "/settings",
-  contentLayout: "reading",
+  contentLayout: "standard", // slice G: one content width for the 工具 group (the column keeps 800 px)
   hidePageHeader: true,
-  reworkElementPlus: true,
   breadcrumbs: [{ labelKey: "nav.settings", to: "/settings" }]
 });
 

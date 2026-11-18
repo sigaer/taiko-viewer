@@ -32,7 +32,6 @@ definePageMeta({
   pageDescKey: "page.aliasLog.desc",
   navKey: "/alias-log",
   hidePageHeader: true,
-  reworkElementPlus: true,
   breadcrumbs: [{ labelKey: "nav.aliasLog", to: "/alias-log" }]
 });
 

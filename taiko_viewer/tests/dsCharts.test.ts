@@ -59,18 +59,22 @@ test("linear scale maps both ends and a zero-width domain to the middle", () => 
   assert.equal(scaleLinear(3, 3, 0, 200)(3), 100);
 });
 
-test("nice axis: at most 4 ticks, covers the data, steps are 1 / 2 / 2.5 / 5 × 10^k", () => {
+test("nice axis: at most 4 ticks, covers the data, steps are 1 / 2 / 2.5 / 4 / 5 × 10^k", () => {
   for (const values of [[11.2, 11.97], [0, 15.5], [0, 1_000_000], [-3, 0.1], [9.99, 10.01], [42], [0], [0, 0, 0], [-1e9, 1e9]]) {
     const axis = niceAxis(values)!;
     assert.ok(axis, `axis for ${values}`);
     assert.ok(axis.ticks.length >= 2 && axis.ticks.length <= 4, `${values}: ${axis.ticks.length} ticks`);
     assert.ok(axis.lo <= Math.min(...values) && axis.hi >= Math.max(...values), `${values} inside [${axis.lo}, ${axis.hi}]`);
     const mant = axis.step / 10 ** Math.floor(Math.log10(axis.step));
-    assert.ok([1, 2, 2.5, 5].some((k) => Math.abs(k - mant) < 1e-9), `step ${axis.step}`);
+    assert.ok([1, 2, 2.5, 4, 5].some((k) => Math.abs(k - mant) < 1e-9), `step ${axis.step}`);
     for (const t of axis.ticks) assert.equal(Number(t.toFixed(axis.decimals)), t, `tick ${t} prints exactly with ${axis.decimals} decimals`);
   }
   assert.equal(niceAxis([]), null);
   assert.equal(niceAxis([null, Number.NaN, undefined]), null);
+  // slice G: the upper bound is the tightest one the tick budget allows (0–10,200 → 12,000, not 15,000)
+  assert.deepEqual(niceAxis([0, 10_200])!.ticks, [0, 4000, 8000, 12000]);
+  assert.deepEqual(niceAxis([0, 1_000_000])!.ticks, [0, 500000, 1000000]);
+  assert.equal(niceAxis([880_000, 968_310])!.hi, 1_000_000);
   assert.equal(stepDecimals(0.25), 2);
   assert.equal(stepDecimals(0.5), 1);
   assert.equal(stepDecimals(500), 0);
@@ -112,6 +116,12 @@ test("line geometry: extreme values stay inside the plot and widen the y-label g
   for (const t of g.ticks) assert.ok(labelWidth(t.text) <= g.pad.l - 8);
 });
 
+test("y labels: digit grouping from 10,000, plain below", () => {
+  assert.deepEqual(lineGeometry([0, 1_000_000], 390, 200)!.ticks.map((t) => t.text), ["0", "500,000", "1,000,000"]);
+  assert.deepEqual(lineGeometry([0, 10_200], 390, 200)!.ticks.map((t) => t.text), ["0", "4000", "8000", "12,000"]);
+  assert.deepEqual(lineGeometry([9.2, 9.4], 390, 200)!.ticks.map((t) => t.text).slice(0, 2), ["9.2", "9.3"]);
+});
+
 test("x labels never get closer than 1.5 label widths, always include first and last", () => {
   for (const [n, width] of [[30, 330], [90, 330], [7, 330], [400, 1200], [2, 60]] as const) {
     const lw = labelWidth("10/28");
@@ -124,6 +134,18 @@ test("x labels never get closer than 1.5 label widths, always include first and 
   assert.deepEqual(xLabelIndices(1, 300, 30), [0]);
   assert.deepEqual(xLabelIndices(0, 300, 30), []);
   assert.deepEqual(xLabelIndices(4, 1000, 30), [0, 1, 2, 3]);
+});
+
+test("x labels: one even integer step, the last label anchored at the end", () => {
+  for (const [n, width] of [[30, 330], [90, 330], [91, 900], [400, 1200], [13, 300], [8, 330]] as const) {
+    const lw = labelWidth("10/28");
+    const idx = xLabelIndices(n, width, lw);
+    if (idx.length < 3) continue;
+    const step = idx[1] - idx[0];
+    for (let k = 1; k < idx.length - 1; k += 1) assert.equal(idx[k] - idx[k - 1], step, `n=${n} w=${width}: ${idx}`);
+    assert.ok(idx[idx.length - 1] - idx[idx.length - 2] <= 2 * step, `last gap n=${n}`);
+  }
+  assert.deepEqual(xLabelIndices(91, 900, labelWidth("10/28")), [0, 7, 14, 21, 28, 35, 42, 49, 56, 63, 70, 77, 90]);
 });
 
 test("nearest index clamps to the series", () => {

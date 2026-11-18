@@ -20,6 +20,31 @@ const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(here, "..", "..");
 export const TOKEN_FILE = join(ROOT, "assets", "css", "ds", "tokens.css");
 export const SNAPSHOT = join(here, "spec", "tokens-v1.3-cplus.json");
+/**
+ * Slice G colour tuning (viewer-ds.md §实施调色（2026-11-18）): the only deliberate differences from the frozen
+ * prototype. The snapshot is the prototype cascade with this overlay applied; with --prototype the production file
+ * must equal prototype + overlay, and production with the overlay reverted must equal the prototype and docs/04.
+ */
+export const TUNING_FILE = join(here, "spec", "tuning-2026-11-18.json");
+export const TUNING = JSON.parse(readFileSync(TUNING_FILE, "utf8"));
+const decls = (map) => Object.entries(map).map(([k, v]) => `${k}: ${v};`).join(" ");
+/** CSS that applies the tuning on top of the prototype cascade (C+ teal selectors). */
+export function prototypeTuningCss(t = TUNING) {
+  const light = { ...Object.fromEntries(Object.entries(t.changed.light).map(([k, v]) => [k, v.tuned])), ...t.added.light };
+  const dark = { ...Object.fromEntries(Object.entries(t.changed.dark).map(([k, v]) => [k, v.tuned])), ...t.added.dark };
+  return `:root[data-brand='teal']:not([data-theme='dark']) { ${decls(light)} }
+:root[data-brand='teal'][data-theme='dark'] { ${decls(dark)} }
+:root[data-brand='teal'] .stage { ${decls(t.added.stage)} }
+`;
+}
+/** CSS that puts the prototype values back over the production file (production selectors). */
+export function productionRevertCss(t = TUNING) {
+  const back = (theme) => decls(Object.fromEntries(Object.entries(t.changed[theme]).map(([k, v]) => [k, v.prototype])));
+  return `html.ds-preview:not([data-theme="dark"]) { ${back("light")} }
+html.ds-preview[data-theme="dark"] { ${back("dark")} }
+`;
+}
+export const TUNING_ADDED = Object.fromEntries([...Object.keys(TUNING.added.light), ...Object.keys(TUNING.added.dark), ...Object.keys(TUNING.added.stage)].map((k) => [k, "added by the slice G tuning"]));
 
 /** Prototype-only tokens that intentionally do not exist in production (name -> reason). */
 export const PROTOTYPE_ONLY = {
@@ -123,7 +148,7 @@ export function diffResolved(expected, actual, label, ignore = {}) {
         if (!(name in a)) lines.push(`${label} ${ctx}/${el}: missing ${name} (expected ${e[name]})`);
         else if (norm(e[name]) !== norm(a[name])) lines.push(`${label} ${ctx}/${el}: ${name} = ${a[name]}, expected ${e[name]}`);
       }
-      for (const name of Object.keys(a)) if (!(name in e)) lines.push(`${label} ${ctx}/${el}: extra ${name} = ${a[name]}`);
+      for (const name of Object.keys(a)) if (!(name in e) && !ignore[name]) lines.push(`${label} ${ctx}/${el}: extra ${name} = ${a[name]}`);
     }
   }
   return lines;
@@ -307,14 +332,22 @@ if (isMain) {
   let compared = 0;
 
   if (protoDir) {
-    const proto = resolveContexts(prototypeFiles(protoDir), PROTO_CONTEXTS);
-    for (const ctx of Object.values(proto)) for (const el of ["root", "stage"]) for (const name of Object.keys(PROTOTYPE_ONLY)) delete ctx[el][name];
-    const diff = diffResolved(proto, prod, "prototype");
-    problems.push(...diff);
+    const strip = (resolved) => {
+      for (const ctx of Object.values(resolved)) for (const el of ["root", "stage"]) for (const name of Object.keys(PROTOTYPE_ONLY)) delete ctx[el][name];
+      return resolved;
+    };
+    // 1. production = prototype + tuning overlay (every value, both elements, four contexts)
+    const proto = strip(resolveContexts([...prototypeFiles(protoDir), { name: "tuning overlay", css: prototypeTuningCss() }], PROTO_CONTEXTS));
+    problems.push(...diffResolved(proto, prod, "prototype+tuning"));
     compared += Object.values(proto).reduce((s, c) => s + Object.keys(c.root).length + Object.keys(c.stage).length, 0);
+    // 2. production with the tuning reverted = the untouched prototype (so the overlay is the whole difference)
+    const pure = strip(resolveContexts(prototypeFiles(protoDir), PROTO_CONTEXTS));
+    const reverted = resolveContexts([...productionFiles(), { name: "tuning revert", css: productionRevertCss() }], PROD_CONTEXTS);
+    problems.push(...diffResolved(pure, reverted, "prototype (tuning reverted)", TUNING_ADDED));
+    console.log(`tuning: ${Object.keys(TUNING.changed.light).length + Object.keys(TUNING.changed.dark).length} changed and ${Object.keys(TUNING_ADDED).length} added tokens (${TUNING_FILE.split(/[\/]/).pop()})`);
     const docPath = join(protoDir, "docs", "04-design-system.md");
     if (existsSync(docPath)) {
-      const doc = checkDoc(readFileSync(docPath, "utf8"), prod);
+      const doc = checkDoc(readFileSync(docPath, "utf8"), reverted);
       problems.push(...doc.problems);
       console.log(`docs/04 tables: ${doc.checked} values checked, ${doc.problems.length} mismatches, ${doc.skipped.length} prose cells not machine-checkable`);
       if (args.includes("--verbose")) for (const s of doc.skipped) console.log(`  skipped ${s}`);

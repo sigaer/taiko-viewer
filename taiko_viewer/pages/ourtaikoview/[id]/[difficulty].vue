@@ -7,7 +7,6 @@ defineOptions({ name: 'PracticePlayerPage' });
 definePageMeta({
   contentLayout: "immersive",
   hidePageHeader: true,
-  reworkElementPlus: true,
   mobileNav: false,
   key: route => route.fullPath,
   validate: route => /^[1-9]\d*$/.test(String(route.params.id)) &&

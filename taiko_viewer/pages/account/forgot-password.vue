@@ -41,7 +41,6 @@ definePageMeta({
   pageDescKey: "page.account.forgotPassword.desc",
   navKey: "/account/forgot-password",
   hidePageHeader: true,
-  reworkElementPlus: true,
   breadcrumbs: [
     { labelKey: "account.title", to: "/account/profile" },
     { labelKey: "account.forgotPassword", to: "/account/forgot-password" }

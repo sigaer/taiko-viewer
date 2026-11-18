@@ -33,7 +33,6 @@ definePageMeta({
   pageDescKey: "page.account.songs.desc",
   navKey: "/account/songs",
   hidePageHeader: true,
-  reworkElementPlus: true,
   breadcrumbs: [
     { labelKey: "account.title", to: "/account/profile" },
     { labelKey: "account.songs", to: "/account/songs" }

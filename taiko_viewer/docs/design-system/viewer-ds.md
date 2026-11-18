@@ -136,3 +136,40 @@
 - **王冠短名是暂定的**：`ds.crown.short.*`（中文两字、日文紧凑写法）只为 D0-6 的「短名」模式先占位，最终文字与排版在阶段 2 设计成绩组件时定。方向：王冠旁加文字，桌面全名、手机短名。
 - 组件的纯逻辑（选图、换算、退回顺序）写在各组件的普通 `<script>` 块里并导出，测试通过 `tests/dsHarness.mjs` 编译组件后直接调用；同一个 harness 用 `vue/server-renderer` 与真实 locale 做 SSR 渲染断言。
 - 样张数据放在 `ds-samples/data/atoms.json`（曲号与曲名来自 `tests/fixtures/annual-summary.sample.json`，称号来自 `assets/data/title_song_relations.json`；自定义称号是编的），不放进模板或脚本字面量。
+
+## 实施调色（2026-11-18）
+
+切片 G 按设计负责人的裁定调整了 token 的值；**以下取值与冻结原型（`preview/redesign-v1` `b4bd45b`，C+）有意不同**。方向不变：青绿表示交互，音符色表示游戏含义。
+只改 token 的值，没有改组件样式；音符、王冠、评价、难度、类型的 token 都没有改；真实素材不动；`.stage` 舞台面不变。
+差异的唯一来源是 `scripts/ds/spec/tuning-2026-11-18.json`：`check-tokens.mjs` 的快照是「原型级联 + 这份调整」，`--prototype` 时另外核对「生产文件去掉这份调整 = 原型」以及 `04` §2.2–§2.5 的表格（即调整就是全部差异）。
+
+| token | 主题 | 原值 | 新值 | 原因 |
+|---|---|---|---|---|
+| `--bg` | 浅 | `#eaf6f5` | `#f0f4f4` | 页面底接近中性（同等明度，极低彩度，仍略偏冷）；素材少的页面不再整页薄荷色 |
+| `--bg-sunk` | 浅 | `#def0ee` | `#e4eaea` | 同一低彩度，下沉面与页面底的区分保持 |
+| `--surface` | 浅 | `#f9fdfc` | `#ffffff` | 面板与页面底的区分加大 |
+| `--surface-2` | 浅 | `#f2f9f8` | `#f7f9f9` | 同上 |
+| `--line` | 浅 | `#ccdfdc` | `#d3dcdc` | 白色面板上的分隔线对比由 1.35 升到 1.40 |
+| `--action-bg` | 深 | `#86d9dc`（`--brand-primary`） | `#45aeb5` | 深色主题的主按钮低一档，不再是表单页最亮的东西；对 `--surface` 4.76:1 |
+| `--action-bg-hover` | 深 | `#a0e3e5`（`--brand-hover`） | `#5cbcc2` | 悬停高一档 |
+
+新增（Semantic / Role 层）：
+
+| token | 浅 | 深 | 用途 |
+|---|---|---|---|
+| `--chrome-bg` | `#eaf6f5` | `#0c2023` | 外壳顶栏、副页签；等于调色前的 `--bg` |
+| `--chrome-surface` | `#f9fdfc` | `#1a383d` | 左侧栏、手机底栏、顶栏搜索框；等于调色前的 `--surface` |
+| `--chrome-sunk` | `#def0ee` | `#081619` | 外壳按钮的悬停底；等于调色前的 `--bg-sunk` |
+| `--chrome-line` | `#ccdfdc` | `#2f5257` | 外壳的分隔线；等于调色前的 `--line` |
+| `--action-bg-active` | `= --action-bg-hover` | `#3a9da4` | 主按钮按下（深色低一档）；Element Plus 的 active 改读它 |
+| `--disabled-bg` / `--disabled-ink` / `--disabled-line` | `--bg-sunk` / `--ink-3` / `--line` | `#1f3d42` / `#6b8a8c` / `#2f5257` | 禁用的按钮（`.rw-btn:disabled`、`el-button.is-disabled`）。深色原来是近黑底加亮字，看起来像可用的深色按钮；现在是低对比的底与字（3.13:1，禁用文字不受 1.4.3 约束，检查设 2.5 的下限） |
+
+分隔（亮度比，改前 → 改后）：面板对页面底 1.08 → 1.11，下沉面对页面底 1.07 → 1.10，分隔线对面板 1.35 → 1.40，分隔线对页面底 1.25 → 1.26。
+
+不变：文字、链接、品牌、选中、焦点的 token（深色链接、选中、焦点环仍是 `#86d9dc`）；`--line-strong`；舞台面（`.stage` 里的 `--action-bg*` 仍取舞台的品牌值，`--action-bg-active` 与 `--disabled-*` 在舞台里按舞台值重新声明）。
+外壳的框架（左侧栏、顶栏、副页签、手机底栏）改读 `--chrome-*`，所以浅色下框架保持青绿底色，内容区是中性底。
+
+对比度（`contrast-check.mjs`，416 对全部通过）新增的配对：正文三档文字、链接、导航当前项在三种框架底上（≥ 4.5）；焦点环在框架底上（≥ 3）；`--action-ink` 在 `--action-bg-active` 上（≥ 4.5）；
+`--action-bg` 对 `--surface` / `--bg` / `--surface-2`（≥ 3，深色 4.76 / 6.40 / 3.68）；禁用文字（≥ 2.5）。
+
+证据（不提交）：主检出 `.claude/stage-artifacts/slice-g/colour/before/`、`after/`：拦截数据的成绩列表、登录后首页、同步、工单，真实的曲库、歌曲详情、登录页，各 1440 / 390 × 浅 / 深。

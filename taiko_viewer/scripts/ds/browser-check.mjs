@@ -37,7 +37,7 @@ function expected(theme) {
     const [cr, cg, cb] = parseColor(r[token]);
     return `rgb(${Math.round(cr)}, ${Math.round(cg)}, ${Math.round(cb)})`;
   };
-  return { primary: rgb("--action-bg"), overlay: rgb("--overlay-bg"), sunk: rgb("--bg-sunk"), surface: rgb("--surface"), ink: rgb("--ink") };
+  return { primary: rgb("--action-bg"), brand: rgb("--brand-primary"), overlay: rgb("--overlay-bg"), sunk: rgb("--bg-sunk"), surface: rgb("--surface"), ink: rgb("--ink") };
 }
 
 /** Computed styles of <html>, <body> and of probe elements with Element Plus classes appended to <body>. */
@@ -164,7 +164,9 @@ async function run() {
   const browser = await chromium.launch({ headless: true, executablePath: BROWSER, channel: BROWSER ? undefined : "chrome" });
   let context;
   try {
-    context = await browser.newContext({ viewport: { width: 1280, height: 900 } });
+    // DS_USER_AGENT (slice G): since every reworked page has the mapping, the existing page without it is /annual,
+    // which only renders for phones (middleware/annual-mobile.global.ts): run with --existing /annual and a phone UA.
+    context = await browser.newContext({ viewport: { width: 1280, height: 900 }, ...(process.env.DS_USER_AGENT ? { userAgent: process.env.DS_USER_AGENT } : {}) });
     const consoleErrors = [];
     for (const theme of ["light", "dark"]) {
       await context.clearCookies();
@@ -270,7 +272,8 @@ async function run() {
       await page.click('[data-testid="ds-probe-toggle"]');
       const after = await probe();
       const theme = await page.evaluate(() => document.documentElement.dataset.theme || "light");
-      const brand = expected(theme).primary;
+      // slice G: the sample rule reads --brand-primary; --action-bg is one step lower in dark since the colour tuning
+      const brand = expected(theme).brand;
       check("root attribute off: probe has no outline", before.outline === "none" && !before.attr, JSON.stringify(before));
       check("root attribute on: rule lands on the scoped element (outline = --brand-primary)", after.attr && after.outline === "solid" && after.outlineColor === brand, JSON.stringify(after));
       check("root attribute on: rule does not land on <html>", after.htmlOutline === "none", after.htmlOutline);

@@ -8,12 +8,11 @@ const { accountUser, fetchCurrentUser } = useAccountState();
 await fetchCurrentUser();
 
 definePageMeta({
-  contentLayout: "wide",
+  contentLayout: "standard", // slice G: one content width for the 工具 group
   pageTitleKey: "tools.wordCloud",
   pageDescKey: "page.tools.wordCloud.desc",
   navKey: "/tools/word-cloud",
   hidePageHeader: true,
-  reworkElementPlus: true,
   breadcrumbs: [
     { labelKey: "nav.myTaiko", to: "/my" },
     { labelKey: "tools.wordCloud", to: "/tools/word-cloud" }

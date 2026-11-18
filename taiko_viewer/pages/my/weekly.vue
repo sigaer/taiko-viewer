@@ -17,7 +17,6 @@ await fetchCurrentUser();
 
 definePageMeta({
   hidePageHeader: true,
-  reworkElementPlus: true,
   contentLayout: "wide",
   pageTitleKey: "weekly.title",
   pageDescKey: "weekly.description",

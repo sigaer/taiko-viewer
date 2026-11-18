@@ -357,7 +357,9 @@ export async function runScoresScenarios({ browser, base, out, web = webRoot, la
         } else if (item.key === "my") {
           await page.locator(".hub .who").waitFor();
           assert.equal((await page.locator(".hub .who-name").textContent()).trim(), fixtureUser.username);
-          assert.equal(await page.locator(".hub .list a").count(), 10, "9 entries + annual");
+          // slice G: + settings, and sign out (a button) for the phone account entries
+          assert.equal(await page.locator(".hub .list a").count(), 11, "9 entries + settings + annual");
+          assert.equal(await page.locator(".hub [data-sign-out]").count(), 1, "sign out");
           const names = Object.fromEntries(await page.$$eval(".hub .list a", (as) => as.map((a) => [a.getAttribute("href"), a.textContent.trim()])));
           const p = prefix(lang);
           for (const [href, key] of [["/account/songs", "rework.scoreList.title"], ["/tools/b30", "tools.b30"], ["/tools/trend", "tools.trend"], ["/tools/progress", "tools.progress"], ["/tools/recommend", "tools.recommend"], ["/my/weekly", "weekly.title"], ["/my/growth", "passport.title"], ["/account/sync", "account.sync"], ["/tools/word-cloud", "tools.wordCloud"]])
@@ -759,14 +761,19 @@ export async function runScoresScenarios({ browser, base, out, web = webRoot, la
     });
 
   // 9. Element Plus mapping: on for these pages (SSR and client), teleported popups mapped, off after leaving
+  // Slice G: the page without the mapping is /annual (out of scope); every reworked page has it by default.
   await scenario("element-plus-switch", { width: 820 }, async ({ page }) => {
+    // /annual renders only for phones (middleware/annual-mobile.global.ts; a desktop browser is sent to the home page),
+    // so this page presents itself as one; the shell and the reworked pages do not depend on the user agent.
+    await page.setExtraHTTPHeaders({ "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1" });
+    await page.addInitScript((ua) => Object.defineProperty(Navigator.prototype, "userAgent", { get: () => ua }), "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1");
     const probe = () =>
       page.evaluate(() => {
         const root = getComputedStyle(document.documentElement);
         return { cls: document.documentElement.className, primary: root.getPropertyValue("--el-color-primary").trim() };
       });
     const popups = () => page.$$eval(".el-overlay, .el-select-dropdown, .el-popper, .el-dialog, .el-message-box", (els) => els.map((el) => String(el.className)).sort());
-    await page.goto(`${base}/about`, { waitUntil: "networkidle" });
+    await page.goto(`${base}/annual`, { waitUntil: "networkidle" });
     const baseline = await probe();
     const baselinePopups = await popups();
     assert.ok(!baseline.cls.includes("rework-ep"));
@@ -787,8 +794,8 @@ export async function runScoresScenarios({ browser, base, out, web = webRoot, la
     await page.keyboard.press("Escape");
     await page.locator(".el-dialog .el-dialog__footer button").first().click();
     await page.waitForFunction(() => !document.querySelector(".el-dialog"), null, { timeout: 15000 });
-    await push(page, "/about");
-    await page.waitForURL(/\/about$/);
+    await push(page, "/annual");
+    await page.waitForURL(/\/annual$/);
     const after = await probe();
     assert.ok(!after.cls.includes("rework-ep"), "leave: rework-ep removed");
     assert.equal(after.primary, baseline.primary);
@@ -802,12 +809,12 @@ export async function runScoresScenarios({ browser, base, out, web = webRoot, la
       await page.waitForURL((u) => u.pathname === path);
       await page.waitForFunction(() => document.documentElement.classList.contains("rework-ep"), null, { timeout: 15000 });
     }
-    // slice C reworked /my/growth: it carries the mapping too (was: not flagged); /about does not
+    // slice C reworked /my/growth: it carries the mapping too (was: not flagged); /annual (out of scope) does not
     await push(page, "/my/growth");
     await page.waitForURL(/\/my\/growth$/);
     await page.waitForFunction(() => document.documentElement.classList.contains("rework-ep"), null, { timeout: 15000 });
-    await push(page, "/about");
-    await page.waitForURL(/\/about$/);
+    await push(page, "/annual");
+    await page.waitForURL(/\/annual$/);
     await page.waitForFunction(() => !document.documentElement.classList.contains("rework-ep"), null, { timeout: 15000 });
     return { dropdownMapped: ddBg };
   });
@@ -821,7 +828,8 @@ export async function runScoresScenarios({ browser, base, out, web = webRoot, la
     state.signedIn = false;
     await page.goto(`${base}/my`, { waitUntil: "networkidle" });
     await page.locator('.hub .rw-gate[data-need="login"]').waitFor();
-    assert.equal(await page.locator(".hub .list a").count(), 8, "guest: entries without sync and annual");
+    assert.equal(await page.locator(".hub .list a").count(), 9, "guest: entries without sync and annual, with settings (slice G)");
+    assert.equal(await page.locator(".hub [data-sign-out]").count(), 0, "guest: no sign out");
     await shot(page, "my-guest-zh-390-dark");
   });
 

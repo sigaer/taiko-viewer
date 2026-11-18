@@ -12,6 +12,8 @@
 // compare: DOM, geometry, computed styles, resource identities and errors are hard gates.
 // Pixel differences are diagnostic by default; --strict-pixels additionally makes raster equality a gate.
 // Bounds: one browser, one page at a time, total time limit; read-only, no form submissions.
+// DS_USER_AGENT (slice G): capture with that user agent, e.g. a phone, for /annual (it only renders on phones and
+// otherwise redirects to the home page: middleware/annual-mobile.global.ts).
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { pathToFileURL } from "node:url";
@@ -110,7 +112,7 @@ async function capture() {
   const browser = await chromium.launch(process.env.DS_BROWSER ? { headless: true, executablePath: process.env.DS_BROWSER } : { headless: true, channel: "chrome" });
   try {
     for (const theme of ["light", "dark"]) {
-      const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce", ignoreHTTPSErrors: Boolean(process.env.DS_STORAGE_STATE), ...(process.env.DS_STORAGE_STATE ? { storageState: process.env.DS_STORAGE_STATE } : {}) });
+      const context = await browser.newContext({ viewport: { width: 1440, height: 900 }, reducedMotion: "reduce", ignoreHTTPSErrors: Boolean(process.env.DS_STORAGE_STATE), ...(process.env.DS_STORAGE_STATE ? { storageState: process.env.DS_STORAGE_STATE } : {}), ...(process.env.DS_USER_AGENT ? { userAgent: process.env.DS_USER_AGENT } : {}) });
       // Freeze wall-clock content/cache keys without freezing network or timers.
       await context.addInitScript((time) => { const RealDate=Date; globalThis.Date=new Proxy(RealDate,{construct:(target,args,newTarget)=>Reflect.construct(target,args.length?args:[time],newTarget),apply:()=>new RealDate(time).toString(),get:(target,key)=>key==='now'?()=>new RealDate(time).getTime():Reflect.get(target,key)}); }, CAPTURE_TIME);
       await context.addCookies([{ name: "taiko_theme", value: theme, url: BASE }, { name: "viewer_locale", value: "zh", url: BASE }]);

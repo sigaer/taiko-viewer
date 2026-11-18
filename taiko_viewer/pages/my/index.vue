@@ -22,7 +22,6 @@ definePageMeta({
   navKey: "/my",
   hidePageDescription: true,
   hidePageHeader: true,
-  reworkElementPlus: true,
   breadcrumbs: [{ labelKey: "nav.myTaiko", to: "/my" }]
 });
 

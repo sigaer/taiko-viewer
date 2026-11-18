@@ -5,7 +5,7 @@ import { buildPageDescription } from "~/utils/seo";
 const { t } = useI18n();
 
 definePageMeta({
-  contentLayout: "reading",
+  contentLayout: "standard", // slice G: one content width for the 工具 group (the column keeps 800 px)
   pageTitleKey: "nav.about",
   pageDescKey: "page.about.desc",
   navKey: "/about",

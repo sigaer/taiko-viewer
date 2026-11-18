@@ -84,7 +84,8 @@ test("crown: every combination of the three counts (0 / >0) and string / invalid
 });
 
 test("crown: same order as AccountSongScores.vue crownLabel for records that exist", () => {
-  const source = read("components/account/AccountSongScores.vue");
+  // Slice G removed the unused component; its crownLabel is kept verbatim as a fixture so the order stays checked.
+  const source = read("tests/fixtures/account-song-scores-crownlabel-original.txt");
   const body = source.slice(source.indexOf("const crownLabel"), source.indexOf("};", source.indexOf("const crownLabel")));
   const order = [...body.matchAll(/item\.(\w+) > 0\) return copy\.value\.(\w+)/g)].map((m) => [m[1], m[2]]);
   assert.deepEqual(order, [

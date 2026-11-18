@@ -45,7 +45,6 @@ const dot = computed(() => ({ color: `var(--section-${props.thread.section.slug}
 
 <style scoped>
 .th :deep(.rw-head__title) {
-  font-size: clamp(1.5rem, 3.2vw, 2.25rem);
   line-height: 1.25;
 }
 .th__sec {

@@ -8,7 +8,6 @@ const localePath = useLocalePath();
 definePageMeta({
   contentLayout: "reading",
   hidePageHeader: true,
-  reworkElementPlus: true,
   pageTitleKey: "page.scoreTokenGuide.title",
   hidePageDescription: true,
   navKey: "/account/sync",

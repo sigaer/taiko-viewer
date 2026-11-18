@@ -1,14 +1,19 @@
 <script setup lang="ts">
 // Header of the signed-in home: avatar beside the greeting <h1> (it carries the name, from the existing growth voice
 // rules; the name is not repeated), site titles under it, the two growth pages on the same row from 768 px, below on phones.
+// Slice G: when the home page provides it, the annual banner (AnnualHero, unchanged, 612 × 121) is part of this row:
+// on the right of the greeting from 1100 px (the growth links then sit under the greeting), above it below 1100 px.
+import type { Ref } from "vue";
 import type { AccountTitle } from "~/types/account-title";
 
 defineProps<{ greeting: string; name: string; avatarUrl?: string; titles?: AccountTitle[]; weeklyTo: string; passportTo: string }>();
 const { t } = useI18n();
+const banner = inject<Ref<boolean> | null>("rework-home-banner", null);
 </script>
 
 <template>
-  <header class="th">
+  <header class="th" :class="{ 'has-banner': banner }">
+    <div v-if="banner" class="th-banner"><AnnualHero /></div>
     <DsPlayerAvatar class="th-avatar" :src="avatarUrl || ''" :size="44" />
     <div class="th-body">
       <h1 id="growth-title" class="th-title">{{ greeting }}</h1>
@@ -46,6 +51,32 @@ const { t } = useI18n();
   font-weight: 900;
   line-height: var(--lh-tight);
   overflow-wrap: anywhere;
+}
+.th-banner {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: 612px;
+  margin-bottom: var(--sp-2);
+}
+@media (min-width: 1100px) {
+  .th.has-banner {
+    grid-template-columns: auto minmax(0, 1fr) minmax(0, 612px);
+    grid-template-rows: auto auto;
+    align-items: start;
+  }
+  .th.has-banner .th-banner {
+    grid-column: 3;
+    grid-row: 1 / span 2;
+    align-self: center;
+    margin: 0;
+  }
+  .th.has-banner .th-avatar {
+    grid-row: 1;
+  }
+  .th.has-banner .th-links {
+    grid-column: 2;
+    grid-row: 2;
+  }
 }
 @media (max-width: 767px) {
   .th {

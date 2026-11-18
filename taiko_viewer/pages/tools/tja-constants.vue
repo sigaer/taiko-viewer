@@ -2,7 +2,7 @@
 import type { TjaResult } from '~/types/tja-calculator';
 import { tjaCalculatorCopy } from '~/utils/tjaCalculatorCopy';
 
-definePageMeta({ pageTitleKey: 'tools.tjaConstants', hidePageDescription: true, navKey: '/tools/tja-constants', hidePageHeader: true, reworkElementPlus: true, breadcrumbs: [
+definePageMeta({ pageTitleKey: 'tools.tjaConstants', hidePageDescription: true, navKey: '/tools/tja-constants', hidePageHeader: true, breadcrumbs: [
   { labelKey: 'nav.more', to: '/more' }, { labelKey: 'tools.tjaConstants', to: '/tools/tja-constants' }
 ] });
 const { locale } = useI18n();

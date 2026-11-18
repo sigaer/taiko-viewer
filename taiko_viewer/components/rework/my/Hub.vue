@@ -5,6 +5,7 @@
 // The groups keep the old `my-links` class: the Linux My Taiko integration tests look for it in the server HTML.
 import type { PropType } from "vue";
 import type { AccountTitle } from "~/types/account-title";
+import { primeAnnualBgm, releasePrimedAnnualBgm } from "~/utils/annualBgm.client";
 
 type Entry = { path: string; label: string; icon: string };
 defineProps({
@@ -19,6 +20,17 @@ defineProps({
 const emit = defineEmits<{ retry: [] }>();
 const { t } = useI18n();
 const localePath = useLocalePath();
+// Slice G: on phones the account menu of the top bar lives here (profile is the identity band, sync is in the first
+// group): settings and sign out, the same sign-out as the top bar menu and the profile page.
+const { signingOut, signOut } = useAccountSignOut();
+// The annual entry starts the annual music inside this tap, as the former sidebar did (SidebarNav.vue goTo); if the
+// navigation does not reach the annual page the primed music is released again.
+async function enterAnnual() {
+  void primeAnnualBgm();
+  window.setTimeout(() => {
+    if (!window.location.pathname.includes("/account/version-summary")) releasePrimedAnnualBgm();
+  }, 1000);
+}
 </script>
 
 <template>
@@ -51,9 +63,24 @@ const localePath = useLocalePath();
         </ul>
       </nav>
     </div>
+    <ul class="list account" :aria-label="t('rework.accountMenu')">
+      <li>
+        <NuxtLink :to="localePath('/settings')">
+          <ReworkIcon name="settings" />
+          <span class="grow">{{ t("nav.settings") }}</span>
+          <svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+        </NuxtLink>
+      </li>
+      <li v-if="status === 'authenticated'">
+        <button type="button" :disabled="signingOut" :aria-busy="signingOut" data-sign-out @click="signOut">
+          <ReworkIcon name="logout" />
+          <span class="grow">{{ t("rework.account.profile.signOut") }}</span>
+        </button>
+      </li>
+    </ul>
     <ul v-if="annual" class="list annual">
       <li>
-        <NuxtLink :to="localePath(annual.path)">
+        <NuxtLink :to="localePath(annual.path)" @click="enterAnnual">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14v17H5z M8 2v4m8-4v4 M8 10h8m-8 4h5" /></svg>
           <span class="grow">{{ t(annual.label) }}</span>
           <svg class="go" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
@@ -149,8 +176,14 @@ const localePath = useLocalePath();
 .list li + li {
   border-top: 1px solid var(--line);
 }
-.list a {
+.list :is(a, button) {
   display: flex;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
   align-items: center;
   gap: 14px;
   min-height: 52px;
@@ -160,10 +193,10 @@ const localePath = useLocalePath();
   font-weight: 500;
   text-decoration: none;
 }
-.list a > svg:first-child {
+.list :is(a, button) > svg:first-child {
   color: var(--ink-2);
 }
-.list a:hover {
+.list :is(a, button):hover {
   background: var(--surface-2);
 }
 .grow {
@@ -171,7 +204,11 @@ const localePath = useLocalePath();
   min-width: 0;
   overflow-wrap: anywhere;
 }
-:is(.who, .list a):focus-visible {
+.list button:disabled {
+  color: var(--disabled-ink);
+  cursor: default;
+}
+:is(.who, .list a, .list button):focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: -2px;
 }

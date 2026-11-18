@@ -10,7 +10,7 @@
 import assert from "node:assert/strict";
 import { spawn, spawnSync } from "node:child_process";
 import { mkdir, mkdtemp, rm, writeFile } from "node:fs/promises";
-import { openSync } from "node:fs";
+import { openSync, readFileSync, unlinkSync } from "node:fs";
 import { createConnection } from "node:net";
 import { tmpdir } from "node:os";
 import { resolve } from "node:path";
@@ -51,7 +51,31 @@ export function baseEnv(data) {
   };
 }
 
-export async function runSelfcheck({ name, defaultPort, defaultOut, label, limitMs = 25 * 60 * 1000, readyPath = "/api/content/songs?view=list&page=1", prepare, run, summarize }) {
+/**
+ * Nuxt's dev lock (`.nuxt/nuxt.lock`, written by nuxi when it runs under an agent). The runner stops its dev server by
+ * terminating the process tree, so nuxi never runs its own release; the lock is then removed here, but only when it
+ * is the one this run's server wrote: same port, written after the spawn, and the port is free again. A lock from any
+ * other process is left alone.
+ */
+export const DEV_LOCK = resolve(web, ".nuxt", "nuxt.lock");
+export function releaseOwnDevLock({ port, spawnedAt, portFree }) {
+  let info;
+  try {
+    info = JSON.parse(readFileSync(DEV_LOCK, "utf8"));
+  } catch {
+    return "absent";
+  }
+  if (info?.port !== port || !(Number(info.startedAt) >= spawnedAt)) return "not ours";
+  if (!portFree) return "kept (port still busy)";
+  try {
+    unlinkSync(DEV_LOCK);
+    return "removed";
+  } catch (error) {
+    return `remove failed: ${error.code || error}`;
+  }
+}
+
+export async function runSelfcheck({ name, defaultPort, defaultOut, label, limitMs = 25 * 60 * 1000, readyPath = "/api/content/songs?view=list&page=1", launchBrowser = true, prepare, run, summarize }) {
   const port = Number(cliArg("port") || defaultPort);
   assert.ok(![3000, 3517, 3518, 3527, 3562].includes(port) && port > 1024, "use a private port");
   const out = resolve(cliArg("out") || defaultOut);
@@ -85,9 +109,11 @@ export async function runSelfcheck({ name, defaultPort, defaultOut, label, limit
     killTree();
   }, limitMs);
   let summary = { line: {}, failed: true };
+  let spawnedAt = Infinity;
   try {
     const prepared = (await prepare(data)) || {};
     const log = openSync(resolve(out, "nuxt-dev.log"), "w");
+    spawnedAt = Date.now();
     server = spawn(process.execPath, [resolve(web, "node_modules/@nuxt/cli/bin/nuxi.mjs"), "dev", "--host", "127.0.0.1", "--port", String(port)], {
       cwd: web,
       env: { ...baseEnv(data), ...(prepared.env || {}) },
@@ -103,10 +129,12 @@ export async function runSelfcheck({ name, defaultPort, defaultOut, label, limit
       if (!ready) await new Promise((r) => setTimeout(r, 1000));
     }
     assert.ok(ready, "dev server ready");
-    browserServer = await chromium.launchServer({ headless: true, executablePath: chrome });
-    report.browserPid = browserServer.process()?.pid ?? null;
-    browser = await chromium.connect(browserServer.wsEndpoint());
-    await run({ base, browser, data, prepared, report, out });
+    if (launchBrowser) {
+      browserServer = await chromium.launchServer({ headless: true, executablePath: chrome });
+      report.browserPid = browserServer.process()?.pid ?? null;
+      browser = await chromium.connect(browserServer.wsEndpoint());
+    }
+    await run({ base, browser, data, prepared, report, out, chrome });
   } catch (error) {
     report.error = String(error?.stack || error).slice(0, 1500);
     process.exitCode = 1;
@@ -119,6 +147,7 @@ export async function runSelfcheck({ name, defaultPort, defaultOut, label, limit
     killTree();
     for (let i = 0; i < 30 && (await portBusy(port)); i++) await new Promise((r) => setTimeout(r, 500));
     report.portFreeAfter = !(await portBusy(port));
+    report.devLock = releaseOwnDevLock({ port, spawnedAt, portFree: report.portFreeAfter });
     report.finishedAt = new Date().toISOString();
     await rm(data, { recursive: true, force: true }).catch(() => {});
     await writeFile(resolve(out, `${label}.json`), JSON.stringify(report, null, 2));
@@ -127,7 +156,7 @@ export async function runSelfcheck({ name, defaultPort, defaultOut, label, limit
     } catch (error) {
       summary = { line: { summarizeError: String(error) }, failed: true };
     }
-    console.log(JSON.stringify({ ...summary.line, portFreeAfter: report.portFreeAfter, browserStoppedAfter: report.browserStoppedAfter, error: report.error?.split("\n")[0] }));
+    console.log(JSON.stringify({ ...summary.line, portFreeAfter: report.portFreeAfter, browserStoppedAfter: report.browserStoppedAfter, devLock: report.devLock, error: report.error?.split("\n")[0] }));
     if (summary.failed || report.error || !report.portFreeAfter || report.browserStoppedAfter === false) process.exitCode = 1;
   }
 }

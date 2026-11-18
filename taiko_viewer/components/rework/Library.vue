@@ -478,8 +478,10 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
 }
 .lib-head h1 {
   margin: 0;
-  font-size: var(--fs-18);
-  line-height: 1.3;
+  /* slice G: the same heading size as every other page title (ReworkPageHeader) */
+  font-size: clamp(1.375rem, 2.4vw, 2rem);
+  font-weight: 800;
+  line-height: var(--lh-tight);
   scroll-margin-top: calc(var(--bar-h) + var(--sp-4));
   border-radius: var(--r-xs);
 }

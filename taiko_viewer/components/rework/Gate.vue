@@ -1,6 +1,6 @@
 <script setup lang="ts">
-// ReworkGate — the single sign-in / binding prompt of reworked pages. It replaces components/tools/AccountToolGate.vue
-// and per-page prompts as pages are reworked (slice A: the song detail score panel).
+// ReworkGate — the single sign-in / binding prompt of reworked pages. It replaced components/tools/AccountToolGate.vue
+// (removed in slice G) and per-page prompts as pages are reworked (slice A: the song detail score panel).
 //   need = null      the content (default slot) is shown
 //   need = "login"   sign-in prompt: log in (back to `redirect` afterwards) and, unless `register` is false, register
 //   need = "binding" binding prompt: go to the profile page, where the Donder Hiroba ID is bound

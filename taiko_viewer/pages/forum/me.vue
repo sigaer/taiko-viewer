@@ -46,7 +46,6 @@ definePageMeta({
   middleware: "account-auth",
   hidePageHeader: true,
   contentLayout: "wide",
-  reworkElementPlus: true,
   pageTitleKey: "forum.myCommunity",
   pageDescKey: "page.forum.me.desc",
   navKey: "/forum",

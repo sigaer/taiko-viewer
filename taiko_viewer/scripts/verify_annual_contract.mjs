@@ -56,7 +56,8 @@ const storySlideShellSource = await read("components/account/version-summary/Sto
 const annualTimelineSource = await read("composables/useAnnualTimeline.ts");
 const annualBgmSource = await read("utils/annualBgm.client.ts");
 const annualOpeningAssetsSource = await read("utils/annualOpeningAssets.client.ts");
-const sidebarSource = await read("components/SidebarNav.vue");
+// Slice G: the annual entry that primes the music moved from the removed SidebarNav.vue to the My hub (phones and desktop).
+const sidebarSource = await read("components/rework/my/Hub.vue");
 assert.equal(/AudioContext|createOscillator|createGain/.test(storyPlayer), false, "runtime synthesized audio remains");
 assert.equal(storyPlayer.includes("data:audio/wav;base64,"), true, "local one-shot drum asset is missing");
 assert.equal(storyPlayer.includes('v-if="started"'), true, "story controls are visible before the opening start action");

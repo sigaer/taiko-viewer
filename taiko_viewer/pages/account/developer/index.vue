@@ -16,7 +16,6 @@ await fetchCurrentUser(true);
 definePageMeta({
   contentLayout: "reading",
   hidePageHeader: true,
-  reworkElementPlus: true,
   middleware: "account-auth",
   pageTitleKey: "account.developer",
   pageDescKey: "page.account.developer.desc",

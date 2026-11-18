@@ -23,7 +23,6 @@ definePageMeta({
   pageDescKey: "page.account.profile.desc",
   hidePageDescription: true,
   hidePageHeader: true,
-  reworkElementPlus: true,
   navKey: "/account/profile",
   breadcrumbs: [
     { labelKey: "account.title", to: "/account/profile" },
@@ -755,22 +754,9 @@ onMounted(() => {
   }, { immediate: true });
 });
 
-// Signing out: the request and the steps of the former sidebar (components/SidebarNav.vue handleLogout), which the
-// Stage 1 shell no longer shows. A failure is ignored there too.
-const signingOut = ref(false);
-const signOut = async () => {
-  if (signingOut.value) return;
-  signingOut.value = true;
-  try {
-    await apiFetch("/api/account/auth/logout", { method: "POST" });
-    clearAccountUser();
-    await navigateTo(localePath("/account/login"));
-  } catch {
-    // Ignored, as in the former sidebar shortcut.
-  } finally {
-    signingOut.value = false;
-  }
-};
+// Signing out (also in the shell account menu since slice G): composables/useAccountSignOut.ts, the request and the
+// steps of the former sidebar.
+const { signingOut, signOut } = useAccountSignOut();
 </script>
 
 <template>

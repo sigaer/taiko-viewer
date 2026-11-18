@@ -44,7 +44,6 @@ definePageMeta({
   pageDescKey: "page.account.login.desc",
   navKey: "/account/login",
   hidePageHeader: true,
-  reworkElementPlus: true,
   breadcrumbs: [
     { labelKey: "account.title", to: "/account/profile" },
     { labelKey: "account.login", to: "/account/login" },

@@ -18,7 +18,6 @@ definePageMeta({
   pageDescKey: "page.tools.progress.desc",
   navKey: "/tools/progress",
   hidePageHeader: true,
-  reworkElementPlus: true,
   breadcrumbs: [
     { labelKey: "nav.myTaiko", to: "/my" },
     { labelKey: "tools.progress", to: "/tools/progress" }

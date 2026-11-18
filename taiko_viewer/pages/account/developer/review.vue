@@ -19,7 +19,6 @@ async function openOwnedReviewDialog<T>(open: () => Promise<T>) {
 definePageMeta({
   contentLayout: "wide",
   hidePageHeader: true,
-  reworkElementPlus: true,
   middleware: "account-auth",
   pageTitleKey: "account.developerReview",
   pageDescKey: "page.account.developerReview.desc",

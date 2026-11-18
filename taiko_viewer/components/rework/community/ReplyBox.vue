@@ -34,6 +34,12 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const field = ref<HTMLTextAreaElement | null>(null);
 const fieldId = useId();
+// Upload previews (slice G): a preview that fails to load shows the same neutral placeholder as a failed content image
+// (Blocks.vue .cb__failed: image icon, no substitute picture); ForumSafeImage fell back to an unrelated picture.
+const failedPreviews = ref<string[]>([]);
+const previewFailed = (url: string) => {
+  if (!failedPreviews.value.includes(url)) failedPreviews.value = [...failedPreviews.value, url];
+};
 defineExpose({ focus: () => field.value?.focus() });
 const open = () => {
   emit("update:expanded", true);
@@ -74,7 +80,8 @@ const open = () => {
       <template v-if="expanded">
         <div v-if="images.length" class="crb__images">
           <span v-for="(url, index) in images" :key="`${url}-${index}`" class="crb__tile">
-            <ForumSafeImage :src="url" alt="" />
+            <span v-if="failedPreviews.includes(url)" class="crb__failed" role="img" :aria-label="t('rework.forum.imageFailed')"><ReworkIcon name="image" /></span>
+            <ReworkCommunityMedia v-else :src="url" alt="" priority @failed="previewFailed" />
             <button type="button" class="crb__rm" :aria-label="`${t('rework.forum.thread.remove')} ${index + 1}`" :disabled="submitting" @click="emit('remove', index)"><ReworkIcon name="close" /></button>
           </span>
         </div>
@@ -192,6 +199,24 @@ const open = () => {
   border-radius: var(--r-ctl);
   overflow: hidden;
   background: var(--bg-sunk);
+}
+.crb__failed {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border: 1px dashed var(--line-strong);
+  border-radius: var(--r-ctl);
+  background: var(--bg-sunk);
+  color: var(--ink-3);
+}
+.crb__failed :deep(svg) {
+  width: 20px;
+  height: 20px;
+}
+.crb__tile :deep(.cmd) {
+  height: 100%;
 }
 .crb__tile :deep(img) {
   display: block;

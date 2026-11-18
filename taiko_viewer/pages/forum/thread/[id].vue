@@ -17,7 +17,6 @@ let privateGeneration = 0;
 
 definePageMeta({
   contentLayout: "wide",
-  reworkElementPlus: true,
   pageTitleKey: "forum.threadDetail",
   pageDescKey: "page.forum.thread.desc",
   navKey: "/forum",

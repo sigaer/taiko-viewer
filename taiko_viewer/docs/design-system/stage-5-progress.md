@@ -223,3 +223,152 @@ E1 回归：前两次整套运行都在同一步失败（`login` 390「pending�
 
 重新运行：`pages-selfcheck.mjs` **20/20**（0 控制台错误、0 水合警告、`portFreeAfter: true`）；RT 等工具输出比对重跑：RT 72 组全部相同，差异仍只有上面三处有意差异（`tools-after-fix1/`、`tools-capture-diff-fix1.json`）；
 `check:ds` 通过、`test:ds` 90/90、`reworkStage5` / `reworkStage2` / `officialTitles` 共 37/37。`final/` 里的截图已用这次运行（`fix1/`）的截图替换。
+
+## 切片 G：调色、全站 Element Plus 映射、复核留下的事项、清理与一致性复核
+
+2026-11-18，基于 `519bfac`，未提交、未合并、未部署，版本仍为 `1.15.0`。没有改 `server/api/**`、没有新增接口、没有数据库访问；接口的请求与响应不变。
+范围外的页面与组件（年度、`/account/version-summary`、后台、`scripts/deploy_forum_web.sh`）一行未改。**隔离验收（Linux）尚未运行**；下面除注明「真实」外都是本机开发自检。
+地址合并（`/play/*`、`/growth/*`、`/community/*`、`/login`、`/bind` 及其重定向）按负责人裁定**本轮不做**，记在 `rework-status.md` 的待决事项里。
+
+### 1. 调色（只改 token 的值）
+
+裁定与全部取值见 `viewer-ds.md`「实施调色（2026-11-18）」；差异的唯一来源 `scripts/ds/spec/tuning-2026-11-18.json`。
+
+| token | 主题 | 原值 | 新值 |
+|---|---|---|---|
+| `--bg` | 浅 | `#eaf6f5` | `#f0f4f4` |
+| `--bg-sunk` | 浅 | `#def0ee` | `#e4eaea` |
+| `--surface` | 浅 | `#f9fdfc` | `#ffffff` |
+| `--surface-2` | 浅 | `#f2f9f8` | `#f7f9f9` |
+| `--line` | 浅 | `#ccdfdc` | `#d3dcdc` |
+| `--action-bg` | 深 | `#86d9dc` | `#45aeb5` |
+| `--action-bg-hover` | 深 | `#a0e3e5` | `#5cbcc2` |
+| 新增 `--chrome-bg` / `-surface` / `-sunk` / `-line` | 浅 / 深 | — | 调色前的 `--bg` / `--surface` / `--bg-sunk` / `--line`（深色与现值相同） |
+| 新增 `--action-bg-active` | 浅 / 深 | — | `= --action-bg-hover` / `#3a9da4` |
+| 新增 `--disabled-bg` / `-ink` / `-line` | 浅 / 深 | — | `--bg-sunk` / `--ink-3` / `--line`；`#1f3d42` / `#6b8a8c` / `#2f5257` |
+
+- 外壳（左侧栏、顶栏、副页签、手机底栏、顶栏搜索框、外壳按钮悬停、跳到主要内容链接）改读 `--chrome-*`，浅色下框架保持青绿，内容区中性。
+- 禁用按钮：`.rw-btn:disabled` 与 `el-button.is-disabled` 改读 `--disabled-*`（playbook §7 已更正：深色下禁用态是低对比的底与字，不再是近黑底加亮字）。Element Plus 主按钮按下改读 `--action-bg-active`。
+- 没有改：文字、链接、品牌、选中、焦点（深色仍 `#86d9dc`）；音符、王冠、评价、难度、类型；`--line-strong`；素材；`.stage`（舞台里 `--action-bg*` 仍取舞台品牌值，新 token 在舞台里按舞台值重新声明）。
+- 检查：`check-tokens` 的快照改为「原型级联 + 调整」（2416 个解析值）；`--prototype` 另核对「生产去掉调整 = 原型」与 `04` §2.2–§2.5（211 个值 0 处不符）。`contrast-check` 416 对全部通过（新增框架底上的文字 / 链接 / 导航 / 焦点、按下态、主按钮填充对 `--surface` / `--bg` / `--surface-2`（深色 4.76 / 6.40 / 3.68）、禁用文字下限 2.5）。
+
+### 2. Element Plus 映射成为默认值
+
+- 机制（playbook §3 已改写）：`components/rework/Shell.vue` 默认在 `<html>` 上加 `rework-ep`，只跳过 `utils/rework/navigation.ts` 的 `isLegacyPage`（`LEGACY_PAGES = ['/annual']`、`LEGACY_PREFIXES = ['/admin']`）。这些页面同时保留调色前的页面底（`.rework-shell.is-legacy` 读 `--chrome-bg`）。
+  选「外壳默认 + 显式名单」而不是「meta 改成退出开关」：后者要改 `pages/annual.vue`（范围外）。只留一种机制：45 个页面里的 `reworkElementPlus: true` 已删除（`reworkStage2/3/5` 的对应断言改为「页面不再写这个 meta」）。
+- 用到默认布局的范围外页面只有 `/annual`（`pages/annual*` 其余用 `story` 或无布局；后台用 `admin-taiko` 或无布局，`/admin/taiko` 首页只做重定向）。`/about`、曲库、`/my` 父路由、重定向页现在都有映射。
+- **`/annual` 只在手机上渲染**（`middleware/annual-mobile.global.ts`：桌面浏览器被送到首页，带 `annualMobileOnly`）。所以：
+  - 「改前改后不变」的证明用手机 UA 采集（`existing-pages.mjs` 新增 `DS_USER_AGENT`）：`/annual`、`/ja/annual`、`/annual/share/<token>`（中日）、`/admin/taiko/login` × 1440 / 390 × 浅 / 深 = 20 个状态。改前在 `519bfac`（工作区改动临时存放，只保留新增的脚本）采集，改后在最终代码上采集。结果见「验证」。
+  - 各切片场景里「没有映射的页面」由 `/about` 改为 `/annual`，该场景的页面以手机 UA 打开（请求头 + `navigator.userAgent`）；曲库在详情场景里改为断言「有映射」。
+
+### 3. 复核留下的事项（playbook §7）
+
+1. **顶栏账号菜单**：登录后头像是菜单按钮（`aria-haspopup="menu"`、`aria-expanded`、`aria-controls`），菜单 `role=menu` 四项：个人档案、多端同步、设置、退出登录。Enter / 空格 / ↓ 打开并聚焦第一项，↑ 聚焦最后一项；菜单内 ↑ ↓ 循环、Home / End；Esc 关闭并把焦点还给按钮；Tab、外部点击、任何导航都关闭。未登录仍是「登录」链接（标记与改前相同）。
+   退出登录三处（菜单、手机「我的」页、档案页）共用 `composables/useAccountSignOut.ts`：旧侧栏的同一请求与步骤（`POST /api/account/auth/logout` → 清本地账号状态 → 登录页；失败静默）。档案页的入口保留。
+   手机（< 768 顶栏不显示头像）：「我的」页在分组之后加一组：设置（所有人）、退出登录（已登录）；个人档案是顶部身份行，多端同步在「常用功能」里。
+2. **折线图**（`utils/ds/charts.ts`）：x 轴标签取同一个整数步长（0、s、2s…），最后一个点总有标签，离它太近的常规标签去掉（只有最后一段可能长于步长，最多 2 倍）；y 轴 ≥ 10,000 的标签带千分位（`en-US`，小于 10,000 不分组）；刻度步长多了 4 × 10^k，在 ≤ 4 条参考线的预算内取范围最紧的一个（0–10,200 → 0–12,000，原来 0–15,000）。`dsCharts.test.ts` 新增 2 条、改 1 条（步长集合）。
+3. **首页横幅**：有成长面板时（已登录、有数据），横幅（`AnnualHero`，范围外组件，未改）放进问候一行：≥ 1100 在问候右侧（最宽 612，原尺寸不放大），两个成长链接移到问候下方；< 1100 在问候上方。其他状态（访客、未绑定、无数据、读取中）仍在页面顶部一行。图片有固定宽高，没有版面跳动；没有裁切。
+4. **「其他」歌曲的返回**：与未上架相同，详情页在地址不带 `list=` 时补 `list=other`（`replace`；服务端渲染时同样是重定向，与未上架一致），外壳返回键与面包屑只看地址，因此回到 `/songs?shelf=other`。
+5. **回复框上传预览**：改用 `ReworkCommunityMedia`；加载失败显示与内容图片失败相同的中性占位（图片图标、虚线框、`role=img` + 「图片加载失败」），不再回落到无关图片。之后 `ForumSafeImage` 没有调用者，已删除。
+6. **删除的组件**（逐个全仓库搜索：组件名、短横线名、`Lazy` 前缀、文件名）：见下表。
+7. **登录场景两次失败**：见「登录场景的失败」。
+8. **Nuxt 开发锁**：运行器结束自己的 dev 服务器（按进程号结束进程树，nuxi 来不及释放锁）后，`releaseOwnDevLock` 删除 `.nuxt/nuxt.lock`——只在锁的端口等于本次端口、写入时间不早于本次启动、端口已空闲时删除；别的进程的锁不动。每次运行在结果里记录 `devLock`（本切片所有运行都是 `removed`）。不再需要 `NUXT_IGNORE_LOCK=1`。
+
+### 删除与保留
+
+| 文件 | 处理 | 依据 / 改动的测试 |
+|---|---|---|
+| `components/SidebarNav.vue` | 删除 | 外壳替代（Stage 1）。读它源码的：`growthPassportHttp`、`growthWeeklyHttp` 改读 `utils/rework/today.ts`（成长页签含 `/my/growth`、`/my/weekly`）；`scripts/verify_annual_contract.mjs` 的「年度入口在点击里预热音乐」改读 `components/rework/my/Hub.vue`——**旧侧栏的这项行为从 Stage 1 起就丢了**，本切片在「我的」页的年度入口按原逻辑补回（`primeAnnualBgm()`，1 秒后未进入年度页则释放） |
+| `components/MobileTabBar.vue`、`components/AppMobileHeader.vue`、`components/GradeDojoShell.vue` | 删除 | 无任何引用 |
+| `components/account/AccountSongScores.vue` | 删除 | `dsUtils` 的王冠顺序断言改读 `tests/fixtures/account-song-scores-crownlabel-original.txt`（删除前的 `crownLabel` 原文） |
+| `components/my-taiko/Overview.vue` | 删除 | `homeDeepState` 中只测这个组件的 2 条测试删除（23 → 21，留注释）；`/my` 自切片 B 起是 `rework/my/Hub.vue`。`server/services/my-taiko/overview.ts` 与类型 `MyTaikoOverview` 是接口，保留 |
+| `components/RecommendationSongItem.vue` | 删除 | `recommendationSongItem` 中只测这个组件的中日 2 条删除（留注释），其余 2 条（`RecommendationGoalAction`）保留 |
+| `components/tools/AccountToolGate.vue` | 删除 | `reworkStage5` 的断言改为「文件已不存在」 |
+| `components/forum/ForumSafeImage.vue` | 删除 | 回复框改完后无调用者；`tests/fixtures/forumDiscoveryBrowserRuntime.mjs`（Linux 工装）去掉它的导入与注册——这个工装还导入切片 D 已删除的 `ForumThreadCard` 等，改前就不能运行，见 Linux 清单 |
+| `components/SongCoverImage.vue` | 保留 | 唯一的组件调用者（`RecommendationSongItem`）已删；但 `tests/songCoverFallback.test.mjs` 测它的回落规则、`DsCover` 的缓存参数说明以它为来源、Linux 工装导入它。删不删由负责人决定 |
+| `components/forum/ForumMediaViewer.vue`、`SongRelatedDiscussions.vue`、`components/account/*Dialog.vue`、`TitleBadges.vue`、`components/home/*`、`RecommendationGoalAction.vue` | 保留 | 仍被重做页面使用 |
+| 旧的 `--viewer-*` token 与全局 CSS | 保留 | 范围外页面仍在用 |
+
+### 登录场景的失败（E1 `login` 390）
+
+结论：**不是页面逻辑的竞态**，按证据判断是开发服务器一侧的停顿；本切片没有复现，没有改产品代码，场景加了诊断。
+
+- 失败时的状态（切片 F 两次失败的记录与截图）：按钮显示「继续」并保持转圈、`disabled`，没有错误提示，地址 120 秒不变，最后一个请求是 `GET /api/account/auth/me`。按钮文字「继续」说明 `POST /auth/login` 已成功、`authenticatedUserId` 已写入；仍在转圈说明 `submit()` 停在某个 `await` 上没有返回。
+- 排除：①视图票据（`useAuthFormScope`）失效——那条路径会在停用时把 `submitting` 复位，按钮不会一直转；②开发服务器重载页面——页面没有重载（表单状态还在），日志里没有 Vite 依赖重新优化或重载；③两个开发服务器争用 `.nuxt`——切片 F 那几次运行在时间上首尾相接，没有重叠；④登录页守卫跳转——会产生导航失败并显示错误，而这里没有。
+- 剩下的只有 `await navigateTo("/settings")` 没有结束（URL 只在导航确认后才变）。本切片在通过的运行里记录了这一步的请求（Playwright 跟踪 `e1-trace/loop1/…trace-login-390-zh.zip`）：放行后依次是 `auth/me` → `/_nuxt/pages/settings.vue` → **`/settings/_payload.json`**。`/settings` 没有被排除在预渲染之外，客户端把它当作预渲染页面，在路由 `beforeResolve` 里先取载荷再确认导航；开发模式下这个载荷是服务器当场渲染 `/settings` 得到的（页面 `await fetchCurrentUser()`，服务端会读账号库，本机库主机不可解析）。这一步在通过的运行里约 160 ms；它没有超时，若服务器渲染卡住，导航就一直不确认，正是失败时看到的样子。
+- 复现：同一顺序的整套 E1 跑了 3 次（`e1-trace/run1`、`final/account-run1`、`final/account`），另外每次新启动开发服务器只跑「预热 → SSR 中日 → 登录四个场景」5 次（`e1-trace/loop1–5`，即切片 F 失败时所在的位置），`login` 390 全部通过（8/8）。
+- 判断与处理：页面的登录流程在生产产物上取的是静态的预渲染载荷，不经过这条开发时的服务器渲染，所以不按产品竞态修。场景改为在失败时记录**仍在进行的请求**（`inflight`），并可用 `REWORK_TRACE=<场景前缀>` 记录跟踪；以后再出现，结果里会直接给出卡住的请求。这一判断没有被复现直接证实，Linux 生产产物上的 E1 验收仍要重点看这一步。
+
+### 一致性复核
+
+全部重做页面（`pages/` 下除后台、年度、版本摘要，48 个地址状态，其中重定向页 5 个不单列）各 1440 浅色中文、390 深色中文、1440 浅色日文，加 360 宽中日两种的横向滚动检查；数据层级同各切片（`real` 为真实服务端渲染 + 合成文件 / 合成上游，`intercepted` 为切片自己的拦截数据，截图文件名标明）。
+截图：主检出 `.claude/stage-artifacts/slice-g/pages/<地址名>__1440-light__<real|intercepted>.png`、`__390-dark__…`。量出的数据：`sweep.json`（h1 字号 / 位置、内容区左缘与宽度、当前页签文字、按钮高度 / 圆角 / 字号、面板、状态块、第一个键盘焦点的样式、横向滚动）。
+
+| 发现 | 处理 |
+|---|---|
+| 曲库的 `<h1>`（上架状态名）是 18 px，其余页面 32 px | 改为与 `ReworkPageHeader` 相同的字号与字重；位置不变（原型的版面：左侧筛选、右侧搜索与标题） |
+| 曲库组：攻略入口是 standard（左缘 262），其余 wide（172） | 攻略入口改 wide |
+| 工具组三种宽度：查配置、查物量、词云 wide，RT、TJA、工具 standard，设置、关于 reading；设置的栏 760 居中，标题比左缘缩进 20 px | 全组 standard（左缘 262）；设置、关于的栏保持 800 宽、左对齐 |
+| 帖子页 `<h1>` 36 px（其余 32 px） | 去掉帖子页的字号覆盖 |
+| Element Plus 输入框 / 下拉的键盘焦点只有 1 px 边框色（自绘输入框是 2 px 焦点环）；档案页「更换头像」外的 `el-upload` 获得焦点时没有任何焦点样式 | 映射里加同一个 2 px 焦点环（`.el-input__wrapper.is-focus`、`.el-select__wrapper.is-focused`、`.el-textarea__inner:focus-visible`、`.el-upload:focus-visible`，两组作用域各一份） |
+| `/annual` 改前改后唯一的差别：外壳「跳到主要内容」链接的底色读 `--surface`（浅色由 `#f9fdfc` 变白） | 改读 `--chrome-surface`（框架的一部分）后完全相同 |
+| 首页问候 `<h1>` 28 px、访客首页 44 px、档案页（用户名）28 px、发新帖的标题在吸顶栏里（18 px）、`/my` 的 `<h1>` 只给读屏 | 各切片有意的设计（首页与档案页的身份行、发帖页的吸顶栏），未改 |
+| 曲库页签「歌曲列表」与 `<h1>`（「实装歌曲」等上架状态名）不同 | 未改：标题跟随上架状态（Stage 1 复核时定的叫法），页签是页面名 |
+| 账号相关页面（同步、开发者、工单、审批）宽度不一（reading / standard / wide） | 未改：它们不在桌面导航的任何一组里；审批台是双栏工作台 |
+| 主页面首个焦点是年度横幅链接，焦点环 3 px（`AnnualHero` 自带样式） | 范围外组件，未改 |
+| 横向滚动、唯一 `<h1>`、旧的朱色主按钮、控制台错误 / 水合警告 | 48 个地址 × 3 组 + 360 中日：0 处 |
+| 模板里的内联中日三元 | 0 处。脚本里剩下的只有日期 / 数字格式的语言选择，以及共享组件 `RecommendationGoalAction.vue` 的文案表（测试直接编译这个组件，未迁） |
+| 按钮 | 全部 44 px、圆角 8 px；常规 14 px、`--sm` 13 px；主 / 次 / 幽灵 / 危险描边四种 |
+| 面板 | `rw-panel` 一种：圆角 14、白底、`--line` 边、上 16 / 左 20 |
+
+### 验证
+
+| 层级 | 内容 | 结果 |
+| --- | --- | --- |
+| 静态 / 单元（真实） | `npm run test:ds`、`npm run check:ds`、`npm run test:version`、`reworkStage1`…`5` | 92/92（新增 2 条图表）；通过（tokens 2416 值、EP 两作用域一致、collisions 0、对比度 416/416、token 对照表已重新生成、scoped CSS 0、ds usage 180 文件 0、ds copy 176 文件、小图标 46）；1/1；14/14、19/19、11/11、15/15、16/16 |
+| 静态（真实） | `check-tokens --prototype <redesign-v1>` | 原型 + 调整 = 生产（4832 值）；生产去掉调整 = 原型；`04` 表 211 值 0 不符 |
+| 业务测试基线（真实，逐文件，101 个文件） | 切片 C–F 记录过的文件（首页、目标、成长、论坛、OIDC、账号入口、工具等） | 逐文件与各切片记录相同，差别只有：`homeDeepState` 23 → 21（删除只测已删组件的 2 条，见下）；`recommendationSongItem` 2/2（同样删除了 2 条，以前的记录里没有这个文件）；`dsUtils` 13/13（改读 fixture）。没有记录过的 `songCoverFallback` 本机 0/1（环境）。证据：`.claude/stage-artifacts/slice-g/baseline-after/summary.txt` |
+| 范围外页面不变（真实，`existing-pages.mjs`，手机 UA） | `/annual`、`/ja/annual`、`/annual/share/<token>`、`/ja/annual/share/<token>`、`/admin/taiko/login` × 1440 / 390 × 浅 / 深：改前 `519bfac`，改后最终代码 | **20/20 完全相同**（DOM、版面、计算样式、字体与图片请求、错误；像素也相同）。中途一次比对发现「跳到主要内容」链接的底色变了，改为 `--chrome-surface` 后重采 |
+| 调色证据 | 改前（动手前）/ 改后：成绩列表、登录后首页、同步、工单（拦截），曲库、歌曲详情、登录页（真实）× 1440 / 390 × 浅 / 深 | 28 + 28 张，`.claude/stage-artifacts/slice-g/colour/before/`、`after/` |
+| 一致性复核 | 48 个地址 × 1440 浅中文（截图 + 测量 + 360 中文）、390 深中文（截图）、1440 浅日文（测量 + 360 日文） | 144/144；修正后受影响的 17 个地址重跑 51/51。唯一 `<h1>`、无横向滚动、无旧朱色主按钮、0 控制台错误 / 水合警告 |
+| 曲库（切片 1） | `catalog-selfcheck` | HTTP 57/57、SSR 失败通过、24/24 |
+| 切片 A | `detail-selfcheck` | 44/44 + SSR 失败通过（第一次 43/44：「其他」歌曲返回的断言是旧行为，按第 4 项改断言后重跑） |
+| 切片 B | `scores-selfcheck` | 25/25（第一次 14/25：「我的」页入口数 10 → 11、访客 8 → 9，按第 1 项改断言后重跑） |
+| 切片 C | `today-selfcheck` | 54/54（首页问候行断言已改为带横幅） |
+| 切片 D | `community-selfcheck` | 27/27 |
+| 切片 E1 | `account-selfcheck` | 25/25（最终代码）。此前一次 24/25：档案页 390 日文的「目录行在区块之上」——场景在页面自动滚到待确认挑战后测量吸顶的目录行（场景竞态），改为回到页顶后一次测完；`login` 390 见上节，3 次整套 + 5 次冷启动全部通过 |
+| 切片 E2 | `account2-selfcheck` | 25/25 |
+| 切片 F | `pages-selfcheck` | 20/20 |
+| Stage 0 样张 | `samples-matrix.mjs`、`charts-check.mjs`、`browser-check.mjs`（`--existing /annual`，手机 UA） | 457/457；350/350；67/72——5 条见「看到但没有改」（Element Plus 按需样式表与 `/annual` 自身的 503，与作用域无关）。`browser-check` 的根属性样例改为与 `--brand-primary` 比较（样例规则读的就是它；深色 `--action-bg` 现在低一档）；以 `/settings` 作参照时 9 条失败是因为它已经有映射 |
+| 未验证 | 生产 Nitro、Linux 浏览器、真实数据库与登录（真实退出登录）、真机（手机「我的」页、软键盘、触控）、读屏实际播报（菜单按钮只按 WAI-ARIA 写法做了键盘自检）、真实手机上的 `/annual` | — |
+
+所有运行：端口 3578、`127.0.0.1`、库主机不可解析、`no-egress` 预加载、一个浏览器、只结束自己记录的进程树；每次结束时 `portFreeAfter: true`、`browserStoppedAfter: true`、`devLock: removed`。最后检查 3578 没有监听；`adminTraffic` 测试留下的 `taiko_viewer/var/` 已删除。
+证据（不提交）：主检出 `.claude/stage-artifacts/slice-g/`：`colour/`、`outofscope/before-phone/`、`final/outofscope/after-phone/`（与 `final/outofscope-compare.txt`）、`sweep1/`、`final/sweep/`、`pages/`（最终截图 96 张与 `inconsistencies.txt`）、`final/<切片>/`（`-run1` 为第一次）、`final/stage0/`、`e1-trace/`、`baseline-after/`。
+
+### 改动的测试断言与工装（逐条）
+
+1. `reworkStage2`（3 处）、`reworkStage3`（1 处）、`reworkStage5`（2 处）：「页面带 `reworkElementPlus: true`」改为「页面不写这个 meta」（映射是外壳默认）；`reworkStage5` 的 `AccountToolGate` 一条改为文件不存在。
+2. `dsUtils`：王冠顺序改读删除前的 `crownLabel` 原文（fixture）。
+3. `homeDeepState`：删除只测 `my-taiko/Overview.vue` 的 2 条。`recommendationSongItem`：删除只测 `RecommendationSongItem.vue` 的中日 2 条，`rowComponent` 默认路径改为 `RecommendationGoalAction.vue`。
+4. `growthPassportHttp`、`growthWeeklyHttp`：导航来源由 `SidebarNav.vue` 改为 `utils/rework/today.ts`。
+5. `scripts/verify_annual_contract.mjs`：年度入口预热音乐的检查改读 `components/rework/my/Hub.vue`。
+6. `dsCharts`：步长集合加 4；新增「y 轴千分位」「x 轴等步长、最后标签固定」两条与上界取紧的三个例子。
+7. 场景模块：七个切片的 EP 开关场景改用 `/annual`（手机 UA）；详情场景「曲库没有映射」改为「有映射」；`pages-scenarios` 的「`/about` 没有映射」改为全部有；`today-scenarios` 的首页问候行几何断言加横幅（≥ 1100 在右，以下在上，链接位置随之）；`account-scenarios` 加 `REWORK_TRACE` 跟踪与失败时仍在进行的请求。
+8. `existing-pages.mjs` 加 `DS_USER_AGENT`；`selfcheck-runner.mjs` 加 `releaseOwnDevLock` 与 `launchBrowser`；新增 `sweep-scenarios.mjs`、`sweep-selfcheck.mjs`（`--mode=colour|pages|outofscope|stage0`）。
+9. `reworkStage5` 新增切片 G 4 条（12 → 16）。
+
+### 看到但没有改
+
+- `/annual` 只在手机 UA 上渲染，桌面浏览器被送到首页（`annualMobileOnly`）；范围外，未改。
+- 首页年度横幅链接的焦点环是 3 px、`--el-color-primary`（`AnnualHero` 自带样式，范围外）。
+- `components/SongCoverImage.vue` 已没有组件调用者（见删除与保留）。
+- `browser-check.mjs` 以 `/annual`（现在唯一没有映射的外壳页面）作参照时，离开样张后 `el-tooltip` / `el-message` 探针的计算样式与进入前不同：Element Plus 在第一次用到某个组件时才加载它的样式表，加载后的样式表排在 `main.css` 之后，旧页面的提示框颜色随之变化。这是生产里从任何用过这些组件的页面去 `/annual` 都会发生的情况，与 `ds-preview` 作用域无关，切片 G 之前同样存在；另 1 条是 `/annual` 自己的年度接口在无库时 503 被记在样张页上。原脚本以 `/settings` 作参照的检查前提（该页没有映射）已经不成立。
+- `tests/songCoverFallback.test.mjs` 在本机失败（esbuild 解析不了含 `%E6` 的路径与 `vue`，环境），以前的记录里没有这个文件。
+- 本工作区的检出是 CRLF（`core.autocrlf=true`），`reworkStage4` 里按 `\n` 匹配源码的 3 条在 CRLF 文件上失败；本切片改过的文件都写回 LF（提交时 git 统一为 LF，与提交内容无关）。以前的切片记录 15/15 应是在 LF 文件上跑的。
+- 社区场景开发模式下的路由切换有约 1.1 s 的几次、最长任务 1822 ms（开发模式按需编译，切片 D 记录里没有这两个数，不作结论）。
+
+### Linux 隔离验收（尚未运行）
+
+- `shell-sql.mjs --check=sweep`：在生产 Nitro 上跑 `runSweep()`（与本机同一组地址与拦截）并对比截图；登录态改为私有测试库的真实账号时，账号菜单的退出登录走真实 `POST /api/account/auth/logout`。
+- `/annual` 不变的证明：用手机 UA 在生产产物上重复 `existing-pages.mjs capture`（`DS_USER_AGENT`）改前（`519bfac` 的构建）/ 改后比对。
+- 各切片的 Linux 清单汇总在 `rework-status.md`；本切片新增的需更新项：`scripts/verify_annual_contract.mjs`（已改，读 Hub）；`tests/fixtures/forumDiscoveryBrowserRuntime.mjs`（改前即导入已删除的组件）。

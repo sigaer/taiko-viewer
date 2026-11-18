@@ -16,7 +16,6 @@ const { formatDateTime } = useViewerDateTime();
 definePageMeta({
   contentLayout: "reading",
   hidePageHeader: true,
-  reworkElementPlus: true,
   middleware: "account-auth",
   pageTitleKey: "account.sync",
   pageDescKey: "page.account.sync.desc",

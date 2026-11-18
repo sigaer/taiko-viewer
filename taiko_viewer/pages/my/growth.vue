@@ -21,7 +21,6 @@ await fetchCurrentUser();
 
 definePageMeta({
   hidePageHeader: true,
-  reworkElementPlus: true,
   contentLayout: "wide",
   pageTitleKey: "passport.title",
   pageDescKey: "passport.description",

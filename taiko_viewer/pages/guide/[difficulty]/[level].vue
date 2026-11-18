@@ -37,7 +37,6 @@ definePageMeta({
   pageDescKey: "guide.summary",
   navKey: "/guide",
   hidePageHeader: true,
-  reworkElementPlus: true,
   breadcrumbs: [
     { labelKey: "guide.title", to: "/guide" },
     { labelKey: "guide.detail" }

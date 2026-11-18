@@ -1081,8 +1081,13 @@ export async function runAccount2Scenarios({ browser, base, out, web = webRoot, 
     });
 
   // 13. Element Plus mapping on these pages, off elsewhere; the confirmation leaves no node behind
+  // Slice G: the page without the mapping is /annual (out of scope); every reworked page has it by default.
   await scenario("element-plus-switch", { width: 820 }, async ({ page, state }) => {
-    await page.goto(`${base}/about`, { waitUntil: "networkidle" });
+    // /annual renders only for phones (middleware/annual-mobile.global.ts; a desktop browser is sent to the home page),
+    // so this page presents itself as one; the shell and the reworked pages do not depend on the user agent.
+    await page.setExtraHTTPHeaders({ "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1" });
+    await page.addInitScript((ua) => Object.defineProperty(Navigator.prototype, "userAgent", { get: () => ua }), "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1");
+    await page.goto(`${base}/annual`, { waitUntil: "networkidle" });
     assert.ok(!(await htmlClasses(page)).includes("rework-ep"));
     const baseline = await page.evaluate(() => document.body.children.length);
     state.sync = "token";
@@ -1095,7 +1100,7 @@ export async function runAccount2Scenarios({ browser, base, out, web = webRoot, 
     const primary = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--el-color-primary").trim());
     await page.keyboard.press("Escape");
     await page.locator(".el-message-box").waitFor({ state: "hidden" });
-    await go(page, "zh", "/about");
+    await go(page, "zh", "/annual");
     await page.waitForFunction(() => !document.documentElement.classList.contains("rework-ep"), null, { timeout: 15000 });
     const after = await page.evaluate(() => document.body.children.length);
     assert.ok(after <= baseline + 3, `body nodes ${baseline} → ${after}`);

@@ -14,7 +14,6 @@ definePageMeta({
   pageDescKey: "page.titles.desc",
   navKey: "/titles",
   hidePageHeader: true,
-  reworkElementPlus: true,
   breadcrumbs: [{ labelKey: "nav.titles", to: "/titles" }]
 });
 

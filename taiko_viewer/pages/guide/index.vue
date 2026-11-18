@@ -13,11 +13,12 @@ if (Number.isInteger(difficulty) && difficulty > 0 && Number.isInteger(level) &&
 }
 
 definePageMeta({
+  // slice G: the same content width as the rest of the 曲库 group (library, constants, dan, guide levels, titles)
+  contentLayout: "wide",
   pageTitleKey: "guide.title",
   pageDescKey: "page.guide.index.desc",
   navKey: "/guide",
   hidePageHeader: true,
-  reworkElementPlus: true,
   breadcrumbs: [{ labelKey: "guide.title", to: "/guide" }]
 });
 

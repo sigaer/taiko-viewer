@@ -23,7 +23,7 @@ test("Weekly page presents the server DTO with localized state copy and light na
     readFile(new URL("../pages/my/weekly.vue", import.meta.url), "utf8"),
     readFile(new URL("../pages/my/index.vue", import.meta.url), "utf8"),
     readFile(new URL("../components/home/PlayerGrowthSurface.vue", import.meta.url), "utf8"),
-    readFile(new URL("../components/SidebarNav.vue", import.meta.url), "utf8"),
+    readFile(new URL("../utils/rework/today.ts", import.meta.url), "utf8"), // slice G: the shell growth tabs replaced SidebarNav.vue
     readFile(new URL("../locales/zh.json", import.meta.url), "utf8").then(JSON.parse),
     readFile(new URL("../locales/ja.json", import.meta.url), "utf8").then(JSON.parse)
   ]);

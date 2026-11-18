@@ -42,6 +42,8 @@ const paths: Record<string, string> = {
   // slice E2: copy an example or a token, a key (score token)
   copy: "M9 9h11v11H9zM15 5V4H4v11h1",
   key: "M14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0M13 13l7 7M17 17l2-2M15 15l1.5-1.5",
+  // slice G: settings in the account menu (a cog: hub and eight teeth)
+  settings: "M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1",
 };
 /** Icons drawn filled (the pressed state of like). */
 const filled = new Set(["heartFilled"]);

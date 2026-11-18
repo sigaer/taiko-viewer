@@ -334,8 +334,10 @@ export async function runDetailScenarios({ browser, base, out, web = webRoot, la
     assert.equal((await page.locator(".shape .rw-state__title").textContent()).trim(), msg(copy.zh, "rework.songDetail.shape.empty"));
     // other without rating values → no six-dimension block
     await page.goto(detailUrl(base, "zh", IDS.other), { waitUntil: "networkidle" });
+    // slice G: like removed songs, an "other" song adds list=other, so the shell back returns to its shelf
+    await page.waitForURL(/\/songs\/4\?list=other$/);
     assert.equal(await page.locator(".shape").count(), 0);
-    assert.equal(await page.locator(".rework-bar a.back").getAttribute("href"), "/songs", "song without list=: the shell back falls back by list= only");
+    assert.equal(await page.locator(".rework-bar a.back").getAttribute("href"), "/songs?shelf=other", "other song: back to /songs?shelf=other");
     // sparse: suffix stays together, missing facts are "—", no image → failed image state, no V2
     await page.goto(detailUrl(base, "zh", IDS.sparse), { waitUntil: "networkidle" });
     assert.equal(await page.locator(".title-suffix").textContent(), "(Long Version)");
@@ -483,7 +485,12 @@ export async function runDetailScenarios({ browser, base, out, web = webRoot, la
   });
 
   // 9. Element Plus mapping: on for flagged pages (SSR and client), off after leaving (also kept alive), teleports
+  // Slice G: the page without the mapping is /annual (out of scope); every reworked page has it by default.
   await scenario("element-plus-switch", { width: 820 }, async ({ page }) => {
+    // /annual renders only for phones (middleware/annual-mobile.global.ts; a desktop browser is sent to the home page),
+    // so this page presents itself as one; the shell and the reworked pages do not depend on the user agent.
+    await page.setExtraHTTPHeaders({ "user-agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1" });
+    await page.addInitScript((ua) => Object.defineProperty(Navigator.prototype, "userAgent", { get: () => ua }), "Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1");
     const probe = () =>
       page.evaluate(() => {
         const root = getComputedStyle(document.documentElement);
@@ -497,7 +504,7 @@ export async function runDetailScenarios({ browser, base, out, web = webRoot, la
         return { cls: document.documentElement.className, primary: root.getPropertyValue("--el-color-primary").trim(), msg, tip, dd, action: root.getPropertyValue("--action-bg").trim(), overlay: root.getPropertyValue("--overlay-bg").trim() };
       });
     const popups = () => page.$$eval(".el-overlay, .el-select-dropdown, .el-popper, .el-dialog", (els) => els.map((el) => String(el.className)).sort());
-    await page.goto(base + "/about", { waitUntil: "networkidle" });
+    await page.goto(base + "/annual", { waitUntil: "networkidle" });
     const baseline = await probe();
     const baselinePopups = await popups();
     assert.ok(!baseline.cls.includes("rework-ep"), "unflagged page: no rework-ep");
@@ -527,8 +534,8 @@ export async function runDetailScenarios({ browser, base, out, web = webRoot, la
     await page.keyboard.press("Escape");
     await page.waitForFunction(() => !document.querySelector(".el-dialog.ct-dialog"));
     // leave to an unflagged page (constants stays kept alive): class gone, styles back, no popup nodes left
-    await push(page, "/about");
-    await page.waitForURL(/\/about$/);
+    await push(page, "/annual");
+    await page.waitForURL(/\/annual$/);
     const after = await probe();
     assert.ok(!after.cls.includes("rework-ep"), "leave: rework-ep removed");
     assert.equal(after.primary, baseline.primary, "leave: production primary again");
@@ -540,14 +547,14 @@ export async function runDetailScenarios({ browser, base, out, web = webRoot, la
     await page.waitForURL(/\/songs\/constants$/);
     await page.locator(".ct-table").waitFor();
     assert.ok((await probe()).cls.includes("rework-ep"), "keepalive return: rework-ep restored");
-    // flagged → flagged (detail), then the library (not flagged)
+    // flagged → flagged (detail), then the library (slice G: mapped like every reworked page)
     await page.locator(".ct-table tbody tr .row-btn").first().click();
     await page.locator(".el-dialog.ct-dialog .insp a").first().click();
     await page.waitForURL(/\/songs\/\d+\?difficulty=\d$/);
     assert.ok((await probe()).cls.includes("rework-ep"));
     await push(page, "/songs");
     await page.locator(".rows").waitFor();
-    assert.ok(!(await probe()).cls.includes("rework-ep"), "library is not flagged");
+    assert.ok((await probe()).cls.includes("rework-ep"), "library has the mapping too (slice G default)");
     return { baselinePrimary: baseline.primary, flaggedPrimary: inside.primary };
   });
 

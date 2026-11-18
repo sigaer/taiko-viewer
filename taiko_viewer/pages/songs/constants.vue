@@ -12,7 +12,6 @@ definePageMeta({
   pageDescKey: "page.songs.v2Constants.desc",
   navKey: "/songs/constants",
   hidePageHeader: true,
-  reworkElementPlus: true,
   breadcrumbs: [
     { labelKey: "nav.songs", to: "/songs" },
     { labelKey: "page.songs.v2Constants.title", to: "/songs/constants" }

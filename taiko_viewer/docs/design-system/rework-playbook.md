@@ -20,7 +20,7 @@
 | D | 社区：`/forum` 全部页面 | `feature/viewer-rework-stage3` |
 | E | 账号：登录、注册、找回、资料、同步、开发者、工单、版本摘要、设置 | `feature/viewer-rework-stage4` |
 | F | 段位、攻略、称号、工具、关于、更多、别名记录、文档页、支持页 | `feature/viewer-rework-stage5` |
-| G | 全站 Element Plus 映射切换、旧样式与废弃组件清理、地址合并与重定向、全站一致性复核 | `feature/viewer-rework-stage5` |
+| G | 全站 Element Plus 映射切换、实施调色、废弃组件清理、各切片复核留下的事项、全站一致性复核（地址合并本轮不做，见 `rework-status.md`） | `feature/viewer-rework-stage5` |
 
 不在范围内，一行都不改：年度回顾（`pages/annual*`、`pages/account/annual-*`、`components/Annual*`、
 `layouts/story.vue`、相关服务端代码）、后台（`pages/admin/**`、`layouts/admin-taiko.vue`）、
@@ -38,8 +38,8 @@
   不做替身、不放占位、不写「即将上线」，记到进度文档的契约缺口里。
 - **现有功能一个不少**：重做一个页面之前先列出它现在能做的每件事（操作、链接、弹层、状态、提示），
   重做之后逐项对照。少了任何一项都要在交回时说明原因。
-- **地址不变**：切片 A–F 保持现有地址。迁移方案里的地址合并（`/play/*`、`/growth/*`、
-  `/community/*` 等）统一放到切片 G，用 `legacyCatalogLocation` 同样的方式加服务端 302。
+- **地址不变**：切片 A–G 保持现有地址。迁移方案里的地址合并（`/play/*`、`/growth/*`、
+  `/community/*` 等）本轮不做（负责人裁定，理由见 `rework-status.md`「待负责人决定」）；以后做时用 `legacyCatalogLocation` 同样的方式加服务端 302。
 
 ## 3. 设计
 
@@ -55,10 +55,12 @@
   加属性（像 `DsDiff` 的 `showConstant`），不另写一个相似组件。
 - **颜色只用 token**：新代码不写十六进制色，不引用 Primitive 层。品牌色（青绿）只用于主操作、
   链接、选中与焦点；音符色（咚 / 咔 / 连打）只表示游戏含义与数据，不做按钮和装饰。
-- **Element Plus**：只在表单与弹层内部使用。已重做的页面通过路由 meta 打开 V1.3 的 Element Plus 映射
-  （切片 A 建立这个开关，Teleport 弹层同样生效，离开页面后恢复）。全站默认值到切片 G 再切换。
-  开关：页面 `definePageMeta({ reworkElementPlus: true })`；`components/rework/Shell.vue` 按当前路由在 `<html>`
-  上加 `rework-ep`（SSR 首屏即有，切到没有这个 meta 的页面时去掉，keepalive 页面同样）。
+- **Element Plus**：只在表单与弹层内部使用。**切片 G 起 V1.3 的 Element Plus 映射是默认外壳里所有页面的默认值**：
+  `components/rework/Shell.vue` 在 `<html>` 上加 `rework-ep`（SSR 首屏即有，Teleport 弹层同样生效），只跳过
+  `utils/rework/navigation.ts` 的 `isLegacyPage` 列出的范围外页面（`LEGACY_PAGES`：`/annual`；`LEGACY_PREFIXES`：`/admin`），
+  切到这些页面时去掉（keepalive 页面同样），这些页面也保留调色前的页面底（`--chrome-bg`）。只有这一种机制：
+  页面不再写 `reworkElementPlus`（切片 A–F 的 meta 已删除）；新页面什么都不用写。选这个而不是「meta 改成退出开关」，
+  因为后者要改 `pages/annual.vue`（范围外，一行都不能改）。
   `assets/css/ds/element-plus.css` 的每条规则在 `html.ds-preview:root` 与 `html.rework-ep:root` 下各写一遍，
   `check-tokens.mjs` 检查两组选择器完全一致、没有第三种作用域。常驻弹层：`el-select` 用 `:persistent="false"`，
   对话框只在打开期间挂载（离开页面时不留节点）。
@@ -114,14 +116,19 @@
 
 ## 7. 留给切片 G 的事项（设计负责人在各切片复核时记下）
 
+切片 G 已全部处理，结果见 `stage-5-progress.md`「切片 G」；这里保留原文与处理方式。
+
 - 外壳的账号入口：顶栏头像目前没有菜单，退出登录只在资料页的「登录与关联」里（切片 E1 补回）。
-  切片 G 给顶栏头像加账号菜单：资料、同步、设置、退出登录。
-- 深色主题下禁用的主按钮是近黑底加亮字，看起来像可用的深色按钮：禁用态改成低对比的底与字。
-- 折线图：x 轴日期标签间隔不均、y 轴大数没有千分位（Stage 0 复核时记下）。
-- 首页顶部横幅在桌面上只占左侧约六成宽，右侧留空：重新安排。
-- 「其他」歌曲在没有记住曲库位置、地址也不带 `list=` 时，返回落到 `/songs` 而不是 `/songs?shelf=other`。
+  切片 G 给顶栏头像加账号菜单：资料、同步、设置、退出登录。→ 已做：顶栏头像是菜单按钮；手机在「我的」页加设置与退出登录；
+  三处共用 `composables/useAccountSignOut.ts`（旧侧栏的同一请求与步骤）。
+- 深色主题下禁用的按钮（主按钮与次按钮）不能是近黑底加亮字（看起来像可用的深色按钮）：禁用态用低对比的底与字
+  （`--disabled-bg` / `--disabled-ink` / `--disabled-line`，`.rw-btn:disabled` 与 `el-button.is-disabled` 都读它们）。→ 已做。
+- 折线图：x 轴日期标签间隔不均、y 轴大数没有千分位（Stage 0 复核时记下）。→ 已做：等整数步长、最后一个标签固定；
+  ≥ 10,000 的 y 轴标签有千分位；上界取刻度预算内最紧的一个（步长多了 4 × 10^k）。
+- 首页顶部横幅在桌面上只占左侧约六成宽，右侧留空：重新安排。→ 已做：有成长面板时横幅放进问候一行（≥ 1100 在问候右侧）。
+- 「其他」歌曲在没有记住曲库位置、地址也不带 `list=` 时，返回落到 `/songs` 而不是 `/songs?shelf=other`。→ 已做：与未上架相同，地址补 `list=other`。
 - 不再被引用的旧组件：`SidebarNav.vue`、`MobileTabBar.vue`、`AccountSongScores.vue`、
   `my-taiko/Overview.vue`、`RecommendationSongItem.vue`、`AccountToolGate`（切片 F 之后）等，
-  连同读取它们源码的测试一起处理。
-- 回复框里刚上传图片的预览失败时仍回落到一张不相关的图片（`ForumSafeImage`）。
-- 各切片交回里列出的、因选择器或类名变化需要在 Linux 一侧更新的浏览器脚本，汇总成一张清单。
+  连同读取它们源码的测试一起处理。→ 已删除（清单见切片 G）。
+- 回复框里刚上传图片的预览失败时仍回落到一张不相关的图片（`ForumSafeImage`）。→ 已改为与内容图片相同的中性占位；`ForumSafeImage` 已删除。
+- 各切片交回里列出的、因选择器或类名变化需要在 Linux 一侧更新的浏览器脚本，汇总成一张清单。→ 见 `rework-status.md`。

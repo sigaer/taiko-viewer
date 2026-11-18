@@ -1,7 +1,7 @@
 // The single "score counts → crown state" conversion for new design-system components (12 RK-05, B2.6).
-// Order follows the existing crownLabel in components/account/AccountSongScores.vue:
-// all-perfect (dondaful) > full combo > clear > played; no record → none.
-// AccountSongScores.vue keeps its own crownLabel; this file does not replace it (stage 0, C5).
+// Order follows the crownLabel of the former components/account/AccountSongScores.vue (removed in slice G, kept as
+// tests/fixtures/account-song-scores-crownlabel-original.txt): all-perfect (dondaful) > full combo > clear > played;
+// no record → none.
 
 export type DsCrownState = "dondaful" | "full" | "clear" | "played" | "none";
 

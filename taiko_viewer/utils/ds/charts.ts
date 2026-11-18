@@ -37,7 +37,7 @@ export function scaleLinear(d0: number, d1: number, r0: number, r1: number) {
   return (v: number) => r0 + ((v - d0) / span) * (r1 - r0);
 }
 
-const NICE = [1, 2, 2.5, 5];
+const NICE = [1, 2, 2.5, 4, 5];
 
 /** Decimal places needed to print every multiple of `step` exactly (0.25 → 2, 0.5 → 1, 5 → 0). */
 export function stepDecimals(step: number): number {
@@ -57,6 +57,8 @@ export interface NiceAxis {
 /**
  * A y axis with at most `maxTicks` reference lines (04 V1.2 §9.22: ≤ 4) covering [min, max].
  * Equal values get a band around them; returns null for no finite value.
+ * Slice G: of the steps 1 / 2 / 2.5 / 4 / 5 × 10^k that fit the tick budget, the one with the tightest range wins
+ * (0–10,200 → 0–12,000 instead of 0–15,000), so large ranges do not end far above the data.
  */
 export function niceAxis(values: ReadonlyArray<number | null | undefined>, maxTicks = 4): NiceAxis | null {
   const vs = values.filter(isNum);
@@ -72,21 +74,25 @@ export function niceAxis(values: ReadonlyArray<number | null | undefined>, maxTi
   const ticksWanted = Math.max(2, maxTicks);
   const raw = span / (ticksWanted - 1);
   const mag = 10 ** Math.floor(Math.log10(raw));
-  // A larger step always means fewer ticks, so this ends within a few decades.
-  for (let m = mag / 10, guard = 0; guard < 8; m *= 10, guard += 1) {
+  // A larger step always means fewer ticks; two decades above the first fit cannot give a tighter range.
+  let best: NiceAxis | null = null;
+  let fitAt = -1;
+  for (let m = mag / 10, guard = 0; guard < 8 && (fitAt < 0 || guard <= fitAt + 1); m *= 10, guard += 1) {
     for (const k of NICE) {
       const step = tidy(k * m, 12);
       if (step <= 0) continue;
       const lo = tidy(Math.floor(tidy(min / step, 9)) * step, 9);
       const hi = tidy(Math.ceil(tidy(max / step, 9)) * step, 9);
       const count = Math.round((hi - lo) / step) + 1;
-      if (count <= ticksWanted) {
+      if (count > ticksWanted) continue;
+      if (fitAt < 0) fitAt = guard;
+      if (!best || hi - lo < best.hi - best.lo - 1e-9) {
         const ticks = Array.from({ length: count }, (_, i) => tidy(lo + i * step, 9));
-        return { lo, hi, step, ticks, decimals: stepDecimals(step) };
+        best = { lo, hi, step, ticks, decimals: stepDecimals(step) };
       }
     }
   }
-  return null;
+  return best;
 }
 
 /** Approximate rendered width of a number / date label in the number font (Barlow Condensed ≈ 0.55 em per glyph). */
@@ -104,19 +110,22 @@ export function textWidth(text: string, fontSize: number): number {
 /**
  * Which x labels to print so neighbouring labels never touch (V1.2 §9.22; P0-25 "no colliding text at 390").
  * First is start-anchored, last end-anchored, the rest centred; the spacing rule covers the worst pair (1.5 × label).
+ * Slice G: the labels sit at one even integer step (0, s, 2s, …) and the last point is always labelled; a regular
+ * label too close to the last one is dropped, so only the final gap can be longer than the step (at most 2 × s).
  */
 export function xLabelIndices(n: number, plotWidth: number, maxLabelPx: number, gap = 10): number[] {
   if (n <= 0) return [];
   if (n === 1) return [0];
   const need = maxLabelPx * 1.5 + gap;
-  if (plotWidth / (n - 1) >= need) return Array.from({ length: n }, (_, i) => i);
   const per = plotWidth / (n - 1);
-  // Rounding indices can pull two labels closer than the even spacing; drop one label until every gap fits.
-  for (let k = clamp(Math.floor(plotWidth / need) + 1, 2, n); k > 2; k -= 1) {
-    const idx = [...new Set(Array.from({ length: k }, (_, i) => Math.round((i * (n - 1)) / (k - 1))))];
-    if (idx.every((v, j) => j === 0 || (v - idx[j - 1]) * per >= need)) return idx;
-  }
-  return [0, n - 1];
+  if (per >= need) return Array.from({ length: n }, (_, i) => i);
+  const step = Math.ceil(need / per - 1e-9);
+  if (step >= n - 1) return [0, n - 1];
+  const idx: number[] = [];
+  for (let i = 0; i < n - 1; i += step) idx.push(i);
+  while (idx.length > 1 && (n - 1 - idx[idx.length - 1]) * per < need) idx.pop();
+  idx.push(n - 1);
+  return idx;
 }
 
 /* ------------------------------------------------------------------ LineChart */
@@ -161,7 +170,10 @@ export function lineGeometry(values: ReadonlyArray<number | null | undefined>, w
   const axis = niceAxis(values, opts.maxTicks ?? 4);
   if (!axis) return null;
   const fontSize = opts.fontSize ?? 12;
-  const tickTexts = axis.ticks.map((t) => t.toFixed(axis.decimals));
+  // Slice G: digit grouping from 10,000 (scores), plain below (ratings, constants, counts under 10,000)
+  const tickTexts = axis.ticks.map((t) =>
+    Math.abs(t) >= 10000 ? t.toLocaleString("en-US", { minimumFractionDigits: axis.decimals, maximumFractionDigits: axis.decimals }) : t.toFixed(axis.decimals)
+  );
   const pad: ChartPad = { l: Math.max(...tickTexts.map((t) => labelWidth(t, fontSize))) + 10, r: 14, t: 14, b: 26 };
   const n = values.length;
   const x = n <= 1 ? () => (pad.l + width - pad.r) / 2 : scaleLinear(0, n - 1, pad.l, width - pad.r);

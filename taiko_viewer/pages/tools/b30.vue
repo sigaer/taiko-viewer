@@ -12,7 +12,6 @@ definePageMeta({
   pageDescKey: "page.tools.b30.desc",
   navKey: "/tools/b30",
   hidePageHeader: true,
-  reworkElementPlus: true,
   breadcrumbs: [
     { labelKey: "nav.myTaiko", to: "/my" },
     { labelKey: "tools.b30", to: "/tools/b30" }

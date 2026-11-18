@@ -9,6 +9,11 @@
  * Source of the values: docs/04-design-system.md §2 and the prototype cascade (src/styles/tokens.css + the
  * .stage remap and bottom-space tokens of base.css) resolved for data-brand=teal / data-assets=authentic.
  * Verified by scripts/ds/check-tokens.mjs; contrast by scripts/ds/contrast-check.mjs.
+ *
+ * Slice G colour tuning (docs/design-system/viewer-ds.md, section 实施调色 2026-11-18; scripts/ds/spec/tuning-2026-11-18.json):
+ * a near-neutral light page (--bg, --bg-sunk, --surface, --surface-2, --line), the teal-tinted frame kept through
+ * --chrome-*, a less luminous dark primary fill (--action-bg*), and --disabled-* for disabled controls. These values
+ * differ from the frozen prototype on purpose.
  */
 
 html.ds-preview,
@@ -270,11 +275,16 @@ html.viewer-rework:not([data-theme="dark"]) {
   --brand-on-primary: #ffffff;
   --brand-focus: #006c76;
   /* Semantic */
-  --bg: #eaf6f5;
-  --bg-sunk: #def0ee;
-  --surface: #f9fdfc;
-  --surface-2: #f2f9f8;
-  --line: #ccdfdc;
+  --bg: #f0f4f4;
+  --bg-sunk: #e4eaea;
+  --surface: #ffffff;
+  --surface-2: #f7f9f9;
+  --line: #d3dcdc;
+  /* the frame (rail, top bar, tabs, phone bottom bar) keeps the teal tint */
+  --chrome-bg: #eaf6f5;
+  --chrome-surface: #f9fdfc;
+  --chrome-sunk: #def0ee;
+  --chrome-line: #ccdfdc;
   --line-strong: #b4cecb;
   --ink: #203f43;
   --ink-2: #3d5a5e;
@@ -306,6 +316,10 @@ html.viewer-rework:not([data-theme="dark"]) {
   /* Role */
   --overlay-bg: var(--surface);
   --don-data: #e58572;
+  --action-bg-active: var(--action-bg-hover);
+  --disabled-bg: var(--bg-sunk);
+  --disabled-ink: var(--ink-3);
+  --disabled-line: var(--line);
   /* Domain */
   --judge-ng: #7648c8;
   --diff-easy: #d14019;
@@ -347,6 +361,10 @@ html.viewer-rework[data-theme="dark"] {
   --surface-2: #234a50;
   --line: #2f5257;
   --line-strong: #447378;
+  --chrome-bg: #0c2023;
+  --chrome-surface: #1a383d;
+  --chrome-sunk: #081619;
+  --chrome-line: #2f5257;
   --ink: #e4f4f1;
   --ink-2: #accbca;
   --ink-3: #a3c0c0;
@@ -377,6 +395,14 @@ html.viewer-rework[data-theme="dark"] {
   /* Role */
   --overlay-bg: #265056;
   --don-data: #e8806c;
+  /* the primary fill one step below the link / selected / focus teal (#86d9dc) */
+  --action-bg: #45aeb5;
+  --action-bg-hover: #5cbcc2;
+  --action-bg-active: #3a9da4;
+  /* disabled controls: low contrast fill and text, so they do not read as an enabled dark button */
+  --disabled-bg: #1f3d42;
+  --disabled-ink: #6b8a8c;
+  --disabled-line: #2f5257;
   /* Domain */
   --judge-ng: #a583f5;
   --diff-easy: #ff7a55;
@@ -425,6 +451,7 @@ html.viewer-rework .stage {
   /* Role tokens are declared again here: custom properties resolve where they are declared (04 §2.1) */
   --action-bg: var(--brand-primary);
   --action-bg-hover: var(--brand-hover);
+  --action-bg-active: var(--action-bg-hover);
   --action-ink: var(--brand-on-primary);
   --link: var(--brand-primary);
   --selected-bg: var(--brand-soft);
@@ -514,4 +541,7 @@ html.viewer-rework .stage {
   --roll-ink: var(--stage-roll-ink);
   --roll-wash: var(--stage-roll-wash);
   --focus-gap: var(--stage-bg);
+  --disabled-bg: var(--bg-sunk);
+  --disabled-ink: var(--ink-3);
+  --disabled-line: var(--line);
 }

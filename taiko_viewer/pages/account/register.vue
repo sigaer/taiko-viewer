@@ -49,7 +49,6 @@ definePageMeta({
   pageDescKey: "page.account.register.desc",
   navKey: "/account/register",
   hidePageHeader: true,
-  reworkElementPlus: true,
   breadcrumbs: [
     { labelKey: "account.title", to: "/account/profile" },
     { labelKey: "account.register", to: "/account/register" },

@@ -6,12 +6,11 @@ const { t } = useI18n();
 const apiFetch = useViewerApiFetch();
 
 definePageMeta({
-  contentLayout: "wide",
+  contentLayout: "standard", // slice G: one content width for the 工具 group
   pageTitleKey: "tools.chartConfig",
   pageDescKey: "page.tools.chartConfig.desc",
   navKey: "/tools/chart-config",
   hidePageHeader: true,
-  reworkElementPlus: true,
   breadcrumbs: [
     { labelKey: "nav.more", to: "/more" },
     { labelKey: "tools.chartConfig", to: "/tools/chart-config" }
