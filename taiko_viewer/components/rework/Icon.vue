@@ -33,6 +33,12 @@ const paths: Record<string, string> = {
   mention: "M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0v1.5a2.5 2.5 0 0 0 5 0V12a9 9 0 1 0-3.5 7.1",
   image: "M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15.5 9h.01",
   send: "m4 12 16-8-5 16-3-7z",
+  // slice E1: account (verified state, linked sign-in, sign out, e-mail, a warning)
+  check: "m5 12.5 4.5 4.5L19 7.5",
+  link: "M10 14a4.2 4.2 0 0 0 6 0l3-3a4.2 4.2 0 0 0-6-6l-1 1M14 10a4.2 4.2 0 0 0-6 0l-3 3a4.2 4.2 0 0 0 6 6l1-1",
+  logout: "M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10",
+  mail: "M3 6h18v12H3zM3 7l9 6.5L21 7",
+  warn: "M12 4 2.5 20h19zM12 10v4.5M12 17.5h.01",
 };
 /** Icons drawn filled (the pressed state of like). */
 const filled = new Set(["heartFilled"]);

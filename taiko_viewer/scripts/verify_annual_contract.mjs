@@ -576,7 +576,9 @@ assert.equal(weekdayHeadlineIndex("anchored", workdayMixed, 5), 5, "non-workday 
 const weekdayScene = await read("components/account/version-summary/AnnualWeekdayForestScene.vue");
 assert.ok(weekdayScene.includes("weekdayHeadlineIndex(narrative.value.archetype"), "weekday scene does not apply the workday headline rule");
 
-const profilePage = await read("pages/account/profile.vue");
+// Slice E1 moved the binding markup (onboarding card, pending challenge, manual account panel) into its section
+// component; the page keeps the state, the handlers and the scroll targets.
+const profilePage = (await read("pages/account/profile.vue")) + "\n" + (await read("components/rework/account/ProfileBindings.vue"));
 assert.ok(profilePage.includes("needsBindingOnboarding"), "unbound first-screen CTA is missing");
 assert.ok(profilePage.includes("onboarding-card"), "unbound first-screen CTA markup is missing");
 assert.ok(profilePage.includes("focusBindingForm"), "binding CTA does not reveal the real binding form");
