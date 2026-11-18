@@ -13,6 +13,7 @@ import {
 import { searchShortcut } from "~/utils/rework/search";
 import { PLAY_TABS } from "~/utils/rework/scores";
 import { GROWTH_TABS } from "~/utils/rework/today";
+import { COMMUNITY_TABS } from "~/utils/rework/community";
 const props = defineProps<{
   title: string;
   contentLayout: string;
@@ -28,6 +29,9 @@ const localePath = useLocalePath();
 const switchLocalePath = useSwitchLocalePath();
 const { theme, setTheme } = useViewerTheme();
 const { accountUser, fetchCurrentUser } = useAccountState();
+// Unread forum notifications on the bell: the existing poll (phones and tablets, 30 s; the old mobile tab bar used
+// it) and every count the notification pages confirm (useForumUnreadCount).
+const { unreadCount } = useForumNotificationPolling();
 const main = ref<HTMLElement>();
 const searchOpen = ref(false);
 const searchButton = ref<HTMLButtonElement>();
@@ -50,11 +54,7 @@ const secondary: Record<string, { key: string; to: string }[]> = {
   ],
   play: [...PLAY_TABS],
   growth: [...GROWTH_TABS],
-  community: [
-    { key: "community", to: "/forum" },
-    { key: "myPosts", to: "/forum/me" },
-    { key: "notifications", to: "/forum/notifications" },
-  ],
+  community: [...COMMUNITY_TABS],
   tools: [
     { key: "tools", to: "/more" },
     { key: "settings", to: "/settings" },
@@ -226,10 +226,11 @@ await fetchCurrentUser();
           :aria-label="t('rework.sync')"
           ><ReworkIcon name="sync" /></NuxtLink
         ><NuxtLink
-          class="icon-button"
+          class="icon-button bell"
           :to="localePath('/forum/notifications')"
-          :aria-label="t('rework.notifications')"
-          ><ReworkIcon name="bell" /></NuxtLink
+          :aria-label="unreadCount ? `${t('rework.notifications')} (${unreadCount})` : t('rework.notifications')"
+          :aria-current="path === '/forum/notifications' ? 'page' : undefined"
+          ><ReworkIcon name="bell" /><span v-if="unreadCount" class="bell-dot num" aria-hidden="true">{{ unreadCount > 99 ? "99+" : unreadCount }}</span></NuxtLink
         ><NuxtLink
           class="account-link"
           :to="localePath(accountUser ? '/account/profile' : '/account')"
@@ -393,6 +394,27 @@ await fetchCurrentUser();
 }
 .icon-button:hover {
   background: var(--bg-sunk);
+}
+.bell {
+  position: relative;
+}
+.bell[aria-current] {
+  color: var(--nav-active-text);
+}
+.bell-dot {
+  position: absolute;
+  top: 4px;
+  right: 2px;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  box-sizing: border-box;
+  border-radius: var(--r-note);
+  background: var(--action-bg);
+  color: var(--action-ink);
+  font-size: 11px;
+  line-height: 18px;
+  text-align: center;
 }
 .rework-bar {
   position: sticky;

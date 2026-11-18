@@ -3,6 +3,9 @@ definePageMeta({
   pageTitleKey: "page.forum.section.title",
   pageDescKey: "page.forum.section.desc",
   navKey: "/forum",
+  hidePageHeader: true,
+  contentLayout: "wide",
+  reworkElementPlus: true,
   breadcrumbs: [
     { labelKey: "forum.title", to: "/forum" },
     { labelKey: "page.forum.section.title" }
@@ -11,5 +14,5 @@ definePageMeta({
 </script>
 
 <template>
-  <ForumThreadListPage />
+  <ReworkCommunityListPage />
 </template>

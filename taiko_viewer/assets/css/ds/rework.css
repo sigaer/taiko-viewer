@@ -313,3 +313,9 @@ html.viewer-rework .rw-choice input:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
 }
+/* .rw-textarea  a multi-line .rw-input (slice D: reply box and composer); grows vertically only */
+html.viewer-rework .rw-textarea {
+  padding: 10px var(--sp-3);
+  line-height: 1.6;
+  resize: vertical;
+}

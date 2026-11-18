@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // Related discussions of the selected chart on the song detail page: components/forum/SongRelatedDiscussions.vue
-// (request, links and states unchanged; the forum area is reworked in slice D) with the reworked page's tokens.
+// (request, links and states unchanged) with the reworked page's tokens. Slice D: each discussion is the community's
+// thread row (ReworkCommunityThreadRow, compact), the same as in the forum lists.
 defineProps<{ songId: number; difficultyType: number }>();
 </script>
 
@@ -28,7 +29,9 @@ defineProps<{ songId: number; difficultyType: number }>();
   line-height: var(--lh-snug);
   color: var(--ink);
 }
-.disc :deep(.related-discussions--song-detail a) {
+.disc :deep(.related-discussions--song-detail .related-discussions__head a),
+.disc :deep(.related-discussions--song-detail > a),
+.disc :deep(.related-discussions--song-detail .related-discussions__empty-row a) {
   color: var(--link);
   font-size: var(--fs-14);
 }
@@ -41,22 +44,6 @@ defineProps<{ songId: number; difficultyType: number }>();
 .disc :deep(.related-discussions--song-detail .related-discussions__list) {
   gap: 0;
   border-top: 1px solid var(--line-strong);
-}
-.disc :deep(.related-discussions--song-detail .related-discussions__list li a) {
-  gap: var(--sp-1);
-  padding: var(--sp-3) 0;
-  border-bottom: 1px solid var(--line);
-}
-.disc :deep(.related-discussions--song-detail .related-discussions__list span) {
-  color: var(--ink);
-  font-size: var(--fs-14);
-}
-.disc :deep(.related-discussions--song-detail .related-discussions__list a:hover span) {
-  color: var(--link);
-}
-.disc :deep(.related-discussions--song-detail .related-discussions__list small) {
-  font-size: var(--fs-12);
-  color: var(--ink-3);
 }
 .disc :deep(.related-discussions--song-detail a:focus-visible) {
   outline: 2px solid var(--focus-ring);

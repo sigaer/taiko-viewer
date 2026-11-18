@@ -196,9 +196,29 @@ watch(
   }
 );
 
-const syncKeyboard = () => { keyboardOpen.value = Boolean(window.visualViewport && window.innerHeight - window.visualViewport.height > 150 && /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || '')); };
+// Soft keyboard: the same detection as before hides the bottom navigation. It is also written on <html> for the
+// community reply box (components/rework/community/ReplyBox.vue: `html[data-kb] .crb`): data-kb while open and
+// --kb-h = the height the keyboard covers (innerHeight − visualViewport height − offsetTop; 0 when the browser
+// resizes the layout instead). Values are only written when they change. Not verified on real devices yet (P0).
+let keyboardInsetPx = -1;
+const syncKeyboard = () => {
+  keyboardOpen.value = Boolean(window.visualViewport && window.innerHeight - window.visualViewport.height > 150 && /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || ''));
+  const viewport = window.visualViewport;
+  const inset = keyboardOpen.value && viewport ? Math.max(0, Math.round(window.innerHeight - (viewport.height + viewport.offsetTop))) : -1;
+  if (inset === keyboardInsetPx) return;
+  keyboardInsetPx = inset;
+  const root = document.documentElement;
+  if (inset >= 0) {
+    root.setAttribute('data-kb', '');
+    root.style.setProperty('--kb-h', `${inset}px`);
+  } else {
+    root.removeAttribute('data-kb');
+    root.style.removeProperty('--kb-h');
+  }
+};
 onMounted(() => {
   window.visualViewport?.addEventListener('resize',syncKeyboard);
+  window.visualViewport?.addEventListener('scroll',syncKeyboard);
   stopPageLoading();
   trackGooglePageView(route.fullPath);
 });
@@ -207,6 +227,9 @@ onBeforeUnmount(() => {
   stopPageLoading();
   if (!process.client) return;
   window.visualViewport?.removeEventListener('resize',syncKeyboard);
+  window.visualViewport?.removeEventListener('scroll',syncKeyboard);
+  document.documentElement.removeAttribute('data-kb');
+  document.documentElement.style.removeProperty('--kb-h');
   removeStartHook();
   removeFinishHook();
 });

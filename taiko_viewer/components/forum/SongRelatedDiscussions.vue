@@ -21,7 +21,7 @@ const allDiscussionsLocation = computed(() => ({ path: '/forum/discussions', que
     <div class="related-discussions__head"><component :is="appearance === 'song-detail' ? 'h2' : 'h3'" :id="`related-discussions-${songId}`" class="related-discussions__title">{{ appearance === 'song-detail' ? t("rework.songDetail.discussions.title") : t("community.relatedDiscussions") }}</component><NuxtLink v-if="compactEmpty" class="related-discussions__compose" :to="localePath({ path: '/forum/new', query: composeQuery })">{{ t("community.discussThisChart") }}</NuxtLink><NuxtLink v-else :to="localePath(allDiscussionsLocation)">{{ t("community.viewAllDiscussions") }}</NuxtLink></div>
     <div v-if="pending" class="related-discussions__loading">{{ t("layout.loading") }}</div>
     <ul v-else-if="items.length" class="related-discussions__list">
-      <li v-for="thread in items" :key="thread.id"><NuxtLink :to="localePath(`/forum/thread/${thread.id}`)"><span>{{ thread.title }}</span><small>{{ thread.replyCount }} {{ t("forum.stats.reply") }}<template v-if="thread.song?.difficultyType"> · {{ thread.song.difficultyLabel }}</template></small></NuxtLink></li>
+      <li v-for="thread in items" :key="thread.id"><ReworkCommunityThreadRow :thread="thread" compact /></li>
     </ul>
     <template v-else>
       <div v-if="compactEmpty" class="related-discussions__empty-row"><p class="related-discussions__empty">{{ t("community.noRelatedDiscussions") }}</p><NuxtLink :to="localePath(allDiscussionsLocation)">{{ t("rework.songDetail.discussions.all") }} →</NuxtLink></div>
@@ -37,10 +37,7 @@ const allDiscussionsLocation = computed(() => ({ path: '/forum/discussions', que
 .related-discussions__title { margin: 0; font-size: 16px; }
 .related-discussions a { color:var(--viewer-accent-strong); text-decoration: none; }
 .related-discussions__head a, .related-discussions__compose { font-size: 12px; }
-.related-discussions__list { display: grid; gap: 5px; margin: 0; padding: 0; list-style: none; }
-.related-discussions__list li a { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; color:var(--viewer-text); border-bottom: 1px solid var(--viewer-border); }
-.related-discussions__list span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.related-discussions__list small { flex: 0 0 auto; color:var(--viewer-text-muted); }
+.related-discussions__list { display: grid; gap: 0; margin: 0; padding: 0; list-style: none; }
 .related-discussions__loading { color:var(--viewer-text-muted); font-size: 13px; }
 </style>
 
@@ -52,8 +49,5 @@ const allDiscussionsLocation = computed(() => ({ path: '/forum/discussions', que
 .related-discussions--song-detail .related-discussions__head>a {padding:8px 0;}
 .related-discussions--song-detail .related-discussions__empty {font-size:15px;line-height:1.7;margin:0;color:var(--viewer-text-muted);}
 .related-discussions--song-detail .related-discussions__empty-row {display:flex;align-items:center;justify-content:space-between;gap:8px 16px;flex-wrap:wrap;}
-.related-discussions--song-detail .related-discussions__list li a {display:grid;width:100%;gap:8px;padding:12px 0;}
-.related-discussions--song-detail .related-discussions__list span {white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere;color:var(--viewer-text);}
-.related-discussions--song-detail .related-discussions__list small {font-size:14px;}
 .related-discussions--song-detail a:focus-visible {outline:3px solid var(--viewer-link);outline-offset:3px;}
 </style>

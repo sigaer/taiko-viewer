@@ -25,12 +25,22 @@ const paths: Record<string, string> = {
   open: "M14 4h6v6M20 4l-9 9M18 14v6H4V6h6",
   // slice C: a row that opens something (right), week / point stepping
   forward: "m9 4 8 8-8 8",
+  // slice D: community (reply, like, views, mention, image, send)
+  reply: "M5 5.5h14v10H9l-4 3z",
+  heart: "M12 20.2 4.8 13a4.6 4.6 0 0 1 6.5-6.5l.7.7.7-.7A4.6 4.6 0 0 1 19.2 13z",
+  heartFilled: "M12 20.2 4.8 13a4.6 4.6 0 0 1 6.5-6.5l.7.7.7-.7A4.6 4.6 0 0 1 19.2 13z",
+  eye: "M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12M12 9a3 3 0 1 0 0 6 3 3 0 1 0 0-6",
+  mention: "M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0v1.5a2.5 2.5 0 0 0 5 0V12a9 9 0 1 0-3.5 7.1",
+  image: "M4 5h16v14H4zM4 16l5-5 4 4 3-3 4 4M15.5 9h.01",
+  send: "m4 12 16-8-5 16-3-7z",
 };
+/** Icons drawn filled (the pressed state of like). */
+const filled = new Set(["heartFilled"]);
 </script>
 <template>
   <svg
     viewBox="0 0 24 24"
-    fill="none"
+    :fill="filled.has(name) ? 'currentColor' : 'none'"
     stroke="currentColor"
     stroke-width="1.7"
     stroke-linecap="round"
