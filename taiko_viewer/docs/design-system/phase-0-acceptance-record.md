@@ -265,7 +265,9 @@ FOUT = 字体全部到达时间 − 首次内容绘制时间（`font-display: sw
 9. 每一步结束：确认开发服务器与浏览器进程退出、端口释放；记录 cgroup 峰值与时长（`run_qa.sh` 的输出）。
 10. 结果写回本文：把对应项从「Windows 开发自检」改为「已在 Linux 隔离环境验证」，附命令输出位置。
 
-## 10. 验收清单（`23` §5）
+## 10. 验收清单（`23` §5；截至第 13 节的历史状态）
+
+当前状态以第 14.6 节为准。以下保留 Schema/1536 MiB 构建阻塞时的记录。
 
 三档：**Linux 隔离验证通过** · **仅 Windows 开发自检** · **未验证或阻塞**。本轮新增 Linux 单元与静态检查证据（第 13 节）；浏览器、PWA 与生产形态服务结果不得随之升级。
 
@@ -637,3 +639,198 @@ FATAL ERROR: Ineffective mark-compacts near heap limit Allocation failed - JavaS
 六个隔离 unit 均已 inactive、ControlGroup 为空，预留端口 35251/35252 无监听；没有启动开发服务器、Nitro 或浏览器，没有生产数据库访问/写入。两树构建结束后 Git 状态均干净，业务代码、类型文件、包版本和锁文件无变化。
 
 清理前扫描进程 cwd/exe、参数/环境路径、maps 和打开文件，只保存匹配摘要，不输出环境内容；检查无权限错误。上一轮 `/var/tmp/ds-phase0-linux-retry` 已无引用且无未提交内容，已非强制删除；本轮 baseline 亦已非强制删除。final 的依赖仍被宿主 `YDService`（PID 3926598，检查时 1838 个文件）读取，保留 `<QA_ROOT>/final/checkout` 和证据；没有停止该服务、移动其文件或强制清理。实施分支已切换到本轮 final 工作树，后续文档提交推送后停止等待审查。
+
+
+## 14. Infrastructure V2 后的 Linux 验收恢复（2026-11-17–18）
+
+本节更新当前状态；第 11–13 节保留当时失败事实。基础设施与 Annual 退役在独立
+`feature/viewer-engineering-infrastructure-v2` 分支，本设计系统分支只补验收记录，
+没有合并基础设施、退役、阶段 1 页面替换，也没有部署。
+
+### 14.1 隔离、身份与标准构建
+
+专用根 `/var/tmp/viewer-task-build-recovery-20261117`，两树分别为
+`baseline/checkout`（原始 main `f9b39e640061663170b103a926f9b5774c4c8916`）与
+`final/checkout`（Phase 0 `c2510fd0a0e83e08518af3e4cf1cd085af79e9d6`）。
+依赖同源，固定 Schema 位于该根 `schemas/annual-summary-v4.schema.json`，
+来源 commit `a632913dfbdbec1d465f8eaccc0bb80c35e25745`，blob
+`d1661791fc49f9a2ddfc86da61621139359fcce3`，17171 bytes；两边解析与标准命令
+的 `generate_annual_types.mjs --check` 均通过，没有覆盖跟踪类型。
+
+使用 V2 候选 `scripts/memory/run_build.sh`，独立网络 namespace，串行执行
+未经替换的 `npm run build`；Node heap 4096 MiB，development-build.slice
+High/Max 4/5 GiB，保留父级 development.slice 6/8 GiB。没有部署切换或重启。
+禁用 core dump，显式测试配置，无生产 DB/外网连接。所有 OOM/high/max 事件为 0。
+
+| 构建 | Run | 秒 | 采样 cgroup 峰值 MiB | 进程树 RSS 峰值 KiB | Nitro |
+| --- | --- | ---: | ---: | ---: | --- |
+| main | qa-d9a1150668ba | 166.499 | 4074.30 | 4141112 | 64.7 MB，成功 |
+| Phase 0 正常 | qa-7303a32507fb | 169.639 | 4071.97 | 4171600 | 64.7 MB，成功 |
+| Phase 0 样张 | qa-24652456955f | 179.035 | 4074.22 | 4193140 | 成功 |
+
+峰值是周期采样值，不能当作硬件级瞬时峰值；完整 runner cgroup 记录另存 Vault。
+原先 1536 MiB heap 的共享 SSR 失败不再是本轮阻塞；并非无限提高内存上限。
+
+### 14.2 产物对照
+
+正常构建对照通过（qa-3ba569909702）：入口 CSS 均 26916 bytes；页面路由模式
+133 个、页面入口 76 个相同。实际 Nitro viewerPageRoutePatterns 均 77 条且完全
+一致；原报告脚本未识别当前 Nitro 导出格式返回 null，另行解析实际数组确认。
+正常构建没有样张路径/标记。Nuxt 文件均 295 个，总量 5006928 → 5010352 bytes
+（+3424，locale 文案）；public 文件 199 → 245（46 个新增小图标）。每路由 JS
+有 -6 bytes 的工作树绝对路径长度差，旧绝对路径问题没有修复。
+
+**测试构建对照未通过**（qa-19a84971dd1f）：样张路由 46 个（23×中日），总路由
+179，入口 CSS 不变；但报告 6 项旧路由差异，包括 account/profile CSS
+62161→58982、account/songs 85236→82057、version-summary 新 el-drawer CSS
+218819→222306、tools/progress 新 el-segmented CSS 22515→25839 等。完整失败
+保存在 compare-samples 输出；未擅自修改 Phase 0 或把 chunk 重组推断为无影响。
+
+PWA 静态清单两边均 3 个：builds/latest.json、builds/meta/<build-id>.json、
+manifest.webmanifest；manifest theme-color 均 #eaf6f5。导航回退被 [/./] denylist
+禁用，不能把这些元数据预缓存描述为所有页面离线可用。
+
+### 14.3 浏览器与数据库证据边界
+
+运行使用重建后的 Nitro、系统 Chromium、独立网络 namespace、空白私有 MySQL。
+先验证实际 SELECT DATABASE() = viewer1_security_test、私有 datadir，只有显式
+mutation opt-in 后才创建合成账号/帖子/通知/称号；没有生产数据拷贝或生产访问。
+后台使用本地合成管理 API，不能据此宣称真实管理后端全链路通过。
+
+未改动的 main/Phase 0 Nitro 含旧 owned-QA 路径守卫，因此运行验证使用其原有
+隔离 runner/Vault scratch 路径；没有绕过守卫。构建与 V2 并发测试使用新准入。
+旧 wrapper 的维护锁只在这些兼容性运行窗口持有；不与构建重叠。
+
+首轮原子检查 71/72，失败为离线远程封面；首次完整矩阵因总时长主动拆分并
+通过 owner abort 停止，不能算通过。首个宽屏矩阵 249/273，24 个失败均为
+远程 cover/song-cell 图片离线。随后使用明确标记的本地合成 SVG 图片响应
+重验样张，API 未 mock，其他外网仍阻断；保留原失败结果。
+
+样张最终结果：宽屏 qa-d62ebf602a50、窄屏 qa-6857d1a6810a 各 273/273，
+按检查名去重 457 项全通过。原子组件 qa-90ebbe737ad3 72/72，图表同 run
+350/350。使用 Chromium 113.0.5672.126，图表脚本结尾的 Windows 文案为历史
+硬编码，真实进程是在本轮 Linux 隔离 unit；没有修改检测断言。
+
+字体只测已裁定 B，没有引入完整 Noto：中/日文各正常/慢速网络各 3 轮，共
+12 轮均 6 个请求、135684 bytes（132.5 KiB），满足 ≤150 KiB / ≤12 请求。
+FOUT 代理指标最大 1198 ms（字体到达与 FCP 的差，不是人工逐帧视觉测量）。
+中日文继续系统字体；首次正式页面集成仍需重新验证实际加载和 FOUT。
+
+旧页首次采集 qa-20c310f3680f 因 Chromium 113 不支持新版 Playwright 遮罩
+的 hidePopover 失败，owner abort 退出 125；已保留日志。随后采用已安装、
+与 Playwright revision 1228 对应的 Chromium 149.0.7827.55，不改页面/断言。
+HTTP 回环采集 qa-c1bae3755364 完成截图，但生产 Secure cookie 未发送，
+账号 profile/通知是 401，因此不能记为登录页面通过。随后采用临时本地证书
+与 HTTPS 代理，要求实际登录后 auth/me authenticated=true 且 cookie Secure；
+不会将 HTTP 首轮误标的 authenticated 截图当作登录证据。
+
+### 14.4 登录旧页、样式与请求对照
+
+HTTPS 采集 main（qa-6c1f697f3ef7）、Phase 0（qa-f72ae1a32301）、同版本复采
+（qa-9d104183703e）、回退 main（qa-5702c57202c2）均完成 100 个状态：18 个
+公开页 × 两宽度 × 两主题，加 7 个登录页 × 四状态。登录页包含账号资料、成绩、
+同步、个人主页、社区帖子、通知、后台 dashboard；实际 Secure 会话与私有测试库
+确认，未发生采集错误。后台只覆盖合成管理 API，外部曲库等只覆盖隔离下状态。
+
+main→Phase 0 的 100 个计算样式集合完全一致；auth/me、profile、通知、帖子、
+admin/auth/me 五个响应均 200，内容 SHA-256 完全一致。同版本复采和回退也一致。
+这只是合成测试数据覆盖范围内的证据，不代表所有业务返回值已穷尽。
+
+**严格截图/原始资源 URL 对照未通过**：qa-61b58539b57f 公开页 27、登录页 6 个
+状态报差异；同版本复采 qa-32a7b3530466 仍有 26/6 个；main→回退
+qa-9ecee7f8ccce 也有 26/6 个。24 个公开状态包含原有封面 URL 五分钟缓存键
+`v=Math.floor(Date.now()/300000)` 的变化；另外有 About 的 1–8 像素差异，
+同版本还出现 Forum 34 像素差异。登录页差异集中在后台实时时间戳及帖子浏览次数。
+人工检查帖子截图证实计数不同；不能把这些严格断言失败改写为通过。
+
+只去掉已定位的 cover 缓存键后，main→Phase 0 和同版本复采的 100 组字体/图片
+请求集合一致；该结果仅作诊断，未修改原验收断言。完整原始失败截图、日志、
+请求清单和诊断 JSON 均保留。一个控制台差异只是相同离线/TLS 消息的顺序变化。
+
+| HTTPS 采集 | 采样 cgroup 峰值 bytes | RSS 合计峰值 KiB |
+| --- | ---: | ---: |
+| main | 1447301120 | 2171148 |
+| Phase 0 | 1540878336 | 2139056 |
+| Phase 0 复采 | 1441697792 | 2034660 |
+| main 回退 | 1582501888 | 2103160 |
+
+采样间隔 500 ms；宿主内核不提供 memory.peak，RSS 合计可能重复计算共享页。
+这些运行 OOM/high/max 均为 0。早期样张/原子/字体运行没有记录峰值，只能确认
+旧隔离 runner 的硬上限和退出结果，不能从后续运行推算其峰值。
+
+### 14.5 PWA 与隔离回退
+
+qa-d479273600c5 在可信 HTTP 回环 origin 分别启动 main、正常 Phase 0、退役
+候选及回退 main，Chromium 149 实际注册 Service Worker，四者均 active，
+实际 CacheStorage 均只有上述 3 个预缓存对象。离线 manifest 为 200，离线新导航
+无法完成（记录为 0），与原导航 denylist 一致。正常构建样张路径均为 404。
+HTTP 检查只验证 PWA；登录检查使用前述 HTTPS，不降低 Secure cookie 策略。
+
+本次 PWA cgroup 采样峰值 866222080 bytes，RSS 1237812 KiB，事件全 0。
+第一次因旧维护锁返回 75；确认锁已释放、压力恢复后重试，没有终止其他任务。
+自签 HTTPS 下空注册结果保留为测试证书限制，不计通过证据。
+
+回退是在隔离环境重新服务已重建的原始 main，验证登录/API/PWA；结合第 12 节
+源码回退 tree 相同的证据，完成运行回退检查。没有切换生产目录或重启生产服务。
+回退截图仍有上述严格差异，不能据此声称像素完全一致。
+
+### 14.6 当前验收状态（覆盖第 10 节历史表）
+
+| 项 | 当前档 | 证据与限制 |
+| --- | --- | --- |
+| 0-A1、0-A2 | 仅 Windows 开发自检 | 原设计批准与开工决策文档核对；不是 Linux 运行项 |
+| 0-A3 | Linux 隔离验证通过 | 已裁定 B；12 轮 6 请求/132.5 KiB；正式首次集成需复验 FOUT |
+| 0-B1、B2、B3、B5 | Linux 隔离验证通过 | test:ds 85/85，368 对比度；不包含真实成绩抽样 |
+| 0-B4 | 未验证或阻塞 | 原子组件文本模式通过；没有完成灰度人工复核 |
+| 0-B6、B7 | Linux 隔离验证通过 | 样张矩阵、原子组件和图表；Teleport/token 作用域覆盖 |
+| 0-B8 | Linux 隔离验证通过 | 静态领域颜色规则通过；未逐张人工复核全部图像 |
+| 0-C1、C2 | Linux 隔离验证通过 | 冻结 main 原素材校验、46 文件重新生成字节一致；人工素材复核仍为 Windows |
+| 0-C3、C5、C8 | Linux 隔离验证通过 | 原子组件 72/72；图片使用明确隔离夹具，不宣称真实 CDN 联调 |
+| 0-C4 | 未验证或阻塞 | 未核对 Bot 评价选图源码 |
+| 0-C6、C7 | Linux 隔离验证通过 | scoped/usage 与 assets 检查 |
+| 0-D1、D2、D3、D5 | Linux 隔离验证通过 | 原子组件与图表浏览器断言；没有完整人工读屏审计 |
+| 0-D4、D6 | Linux 隔离验证通过 | 51 文案文件/75 key、54 usage 文件；全部规则通过 |
+| 0-D7 | Linux 隔离验证通过 | 所有浏览器经过隔离 runner；早期样张峰值未采集，已披露 |
+| 0-E1、E2 | Linux 隔离验证通过 | Nitro 样张矩阵 457 项去重通过，正常 Nitro 样张 404 |
+| 0-E3 | Linux 隔离验证通过 | 实际 SW/CacheStorage/manifest/离线行为，14.5 |
+| 0-E4 | 未验证或阻塞 | 100 组样式相同；严格截图失败，同版本复采也失败，14.4 |
+| 0-E5 | 未验证或阻塞 | 正常构建对照通过；测试构建 6 项旧路由 CSS 差异，14.2 |
+| 0-E6 | 未验证或阻塞 | 未观察到新增资源；原始 URL 对照因既有缓存键失败，诊断不代替门禁 |
+| 0-E7 | 未验证或阻塞 | DS 检查通过；未全跑所有 test:*；route-assets 旧问题保留 |
+| 0-F1 | Linux 隔离验证通过 | 源码 tree、重建 main、登录/API/PWA 回退；严格像素相等仍未通过 |
+| 0-F2、F3 | 未验证或阻塞 | 本轮没有合并/部署授权，未上线抽查 |
+
+本轮最终静态 run qa-f7f06191dd66：test:ds 85/85、check:ds 通过，保留原 chart-ugc
+5 个深色 CSS 旧问题。npm 锁漂移、Keepalive/Teleport、settings 水合、route-assets、
+绝对路径继续独立登记；Keepalive + Teleport 必须在阶段 1 导航替换前针对性修复回归。
+本次没有扩大 Phase 0 代码范围。**阶段 0 不能标记完整验收通过，停止等待审查。**
+
+### 14.7 证据与清理
+
+持久证据根：`/home/sigaer/taiko/qa-vault/runs/qa-1160a6030e71/evidence/delivery/`。
+包含构建日志/指标、build reports、所有成功和失败的浏览器截图/清单、请求对照、
+PWA/回退 summary、隔离 harness、固定 Schema 与来源审计。652 文件、70289601
+bytes，manifest.json 为逐文件 SHA-256；各 run 的独立 Vault 另保留 runner/SQL 日志。
+秘密与临时数据库不进入 Git；本记录只提交摘要和证据定位。
+
+清理结果见本节最后的收尾记录。原 IDE 所在工作树保留；历史未知目录不删除。
+
+
+收尾：qa-e63d4bd20d1a 先只读复查，qa-1842af427b5e 清理前再次确认 inode、
+mtime/ctime、归档 hash、Git HEAD/状态、进程/FD/服务/外部 symlink 引用，
+移除本轮 baseline/final 两棵 detached 工作树与重建产物。合计回收 allocated
+1234755584 bytes；清理后卷可用 35239546880 bytes。未强制删除、未清理未知
+历史目录。原 IDE 工作树保留；main 原有业务数据更新与其他未跟踪目录未动。
+本轮登记簿为空，无运行中的 taiko-qa-* 服务，35251/35252 无监听；测试库 daemon
+和子进程退出已由各 runner 确认。没有停止 YDService 或生产服务。
+
+基础设施分支已独立推送三个提交：`7a0f024a`（准入/并发）、`53e0c37e`
+（临时存储）、`3e674114`（Annual 退役）。源码树与已验证最终树 SHA 完全一致，
+压缩 fixup 没有改变测试后的代码。原 Phase 0 分支本次仅提交此验收记录。
+
+推送后 qa-562adb122fbb 再次确认基础设施源码树无未提交改动、HEAD 与已推送
+remote tracking 一致、无活动引用，移除该独立工作树与已归档的创建者脚本，
+另回收 allocated 235786240 bytes。本轮两次清理共 1470541824 bytes（约
+1.37 GiB）；最后卷可用 35471003648 bytes。证据、已推送分支、用户 IDE 工作树
+均保留。安装在主机上的旧基础设施入口未替换，推广仍需独立审查；没有合并、
+部署、生产重启或阶段 1 工作。
