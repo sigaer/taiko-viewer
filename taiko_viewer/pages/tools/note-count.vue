@@ -10,6 +10,8 @@ definePageMeta({
   pageTitleKey: "tools.noteCount",
   pageDescKey: "page.tools.noteCount.desc",
   navKey: "/tools/note-count",
+  hidePageHeader: true,
+  reworkElementPlus: true,
   breadcrumbs: [
     { labelKey: "nav.more", to: "/more" },
     { labelKey: "tools.noteCount", to: "/tools/note-count" }
@@ -28,8 +30,11 @@ const errorMessage = ref("");
 const items = ref<Array<{ title: string; course: string }>>([]);
 const total = ref(0);
 const truncated = ref(false);
+// The empty result is shown once a search has run (before the first search there is no result to describe).
+const searched = ref(false);
 
 const submit = async () => {
+  searched.value = true;
   loading.value = true;
   errorMessage.value = "";
   items.value = [];
@@ -47,7 +52,8 @@ const submit = async () => {
     items.value = result.items;
     truncated.value = result.truncated;
   } catch (error: unknown) {
-    errorMessage.value = await resolveViewerError(error, t("errors.queryFailed"));
+    // slice F: pass the setup-time `t` (without it resolveViewerError calls useI18n() outside setup, throws, and no error is shown)
+    errorMessage.value = await resolveViewerError(error, t("errors.queryFailed"), t);
   } finally {
     loading.value = false;
   }
@@ -55,70 +61,23 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="page-stack">
-    <el-card class="panel-card">
-      <p class="hint">{{ t("page.tools.noteCount.hint", "输入目标物量（total），将返回匹配的谱面列表，最多显示 20 条。") }}</p>
-      <el-form label-position="top" @submit.prevent="submit">
-        <el-form-item :label="t('tools.noteCount')">
-          <el-input-number v-model="count" :min="0" :max="99999" controls-position="right" />
-        </el-form-item>
-        <el-button type="primary" :loading="loading" native-type="submit">{{ t("common.search") }}</el-button>
-      </el-form>
-      <el-alert
-        v-if="errorMessage"
-        :title="errorMessage"
-        :type="viewerErrorAlertType(errorMessage)"
-        show-icon
-        :closable="false"
-        class="result-alert viewer-friendly-alert"
-      />
-      <div v-else-if="total > 0" class="result-box">
-        <p>{{ t("page.tools.noteCount.summary", { total, suffix: truncated ? t('page.tools.noteCount.truncated', '（仅显示前 20 条）') : '' }) }}</p>
-        <ul>
-          <li v-for="(item, index) in items" :key="`${item.title}-${item.course}-${index}`">
-            {{ item.title }} {{ item.course }}
-          </li>
-        </ul>
-      </div>
-      <el-alert
-        v-else-if="!loading && total === 0 && items.length === 0 && !errorMessage"
-        :title="t('page.tools.noteCount.empty', '没有找到对应物量的谱面')"
-        type="info"
-        :closable="false"
-        show-icon
-        class="result-alert"
-      />
-    </el-card>
+  <div class="rw-stack">
+    <ReworkPageHeader :title="t('tools.noteCount')" />
+    <ReworkPanel :label="t('tools.noteCount')">
+      <form class="rw-form" @submit.prevent="submit">
+        <label class="rw-field">
+          <span class="rw-field__label">{{ t("tools.noteCount") }}</span>
+          <input v-model.number="count" class="rw-input num" type="number" inputmode="numeric" min="0" max="99999" step="1" aria-describedby="note-count-hint" />
+        </label>
+        <button type="submit" class="rw-btn rw-btn--primary" :class="{ 'is-busy': loading }" :disabled="loading" :aria-busy="loading">{{ t("common.search") }}</button>
+      </form>
+      <p id="note-count-hint" class="rw-field__hint">{{ t("page.tools.noteCount.hint", "输入目标物量（total），将返回匹配的谱面列表，最多显示 20 条。") }}</p>
+    </ReworkPanel>
+    <p v-if="errorMessage" class="rw-alert" :class="{ 'rw-alert--warn': viewerErrorAlertType(errorMessage) === 'warning' }" role="alert">{{ errorMessage }}</p>
+    <ReworkPanel v-else-if="total > 0" :title="t('rework.toolPages.result')">
+      <p class="rw-count" role="status">{{ t("page.tools.noteCount.summary", { total, suffix: truncated ? t('page.tools.noteCount.truncated', '（仅显示前 20 条）') : '' }) }}</p>
+      <ReworkToolsCharts :items="items" />
+    </ReworkPanel>
+    <ReworkState v-else-if="searched && !loading && total === 0 && items.length === 0 && !errorMessage" kind="empty" :title="t('page.tools.noteCount.empty', '没有找到对应物量的谱面')" />
   </div>
 </template>
-
-<style scoped>
-.page-stack {
-  display: grid;
-  gap: 20px;
-}
-
-.hint {
-  margin: 0 0 14px;
-  color:var(--viewer-text-muted);
-}
-
-.result-alert {
-  margin-top: 16px;
-}
-
-.result-box {
-  margin-top: 16px;
-  padding: 14px 16px;
-  border-radius: 12px;
-  background:var(--viewer-surface-subtle);
-  border: 1px solid var(--viewer-surface-subtle);
-}
-
-.result-box ul {
-  margin: 10px 0 0;
-  padding-left: 18px;
-  line-height: 1.7;
-  font-size: 13px;
-}
-</style>

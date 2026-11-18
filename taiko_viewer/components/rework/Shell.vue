@@ -9,6 +9,9 @@ import {
   activeDestination,
   withoutLocale,
   alternateLocale,
+  SONGS_TABS,
+  TOOLS_TABS,
+  tabCurrent,
 } from "~/utils/rework/navigation";
 import { searchShortcut } from "~/utils/rework/search";
 import { PLAY_TABS } from "~/utils/rework/scores";
@@ -60,21 +63,14 @@ const moduleTitle = computed(() =>
   active.value ? t(`rework.${active.value}`) : props.title,
 );
 const path = computed(() => withoutLocale(route.path));
-const secondary: Record<string, { key: string; to: string }[]> = {
-  songs: [
-    { key: "catalog", to: "/songs" },
-    { key: "constants", to: "/songs/constants" },
-    { key: "guide", to: "/guide" },
-    { key: "titles", to: "/titles" },
-  ],
+// Secondary tabs per destination. `labelKey` (slice F) labels a tab with its page's own title; otherwise rework.<key>.
+// `prefix` tabs stay current on their sub-pages (the dan courses, the guide star pages).
+const secondary: Record<string, { key: string; to: string; labelKey?: string; prefix?: boolean }[]> = {
+  songs: [...SONGS_TABS],
   play: [...PLAY_TABS],
   growth: [...GROWTH_TABS],
   community: [...COMMUNITY_TABS],
-  tools: [
-    { key: "tools", to: "/more" },
-    { key: "settings", to: "/settings" },
-    { key: "about", to: "/about" },
-  ],
+  tools: [...TOOLS_TABS],
 };
 const tabs = computed(() =>
   route.meta.composerHeader ||
@@ -207,8 +203,8 @@ await fetchCurrentUser();
           v-for="tab in tabs"
           :key="tab.to"
           :to="localePath(tab.to)"
-          :aria-current="path === tab.to ? 'page' : undefined"
-          >{{ t(`rework.${tab.key}`) }}</NuxtLink
+          :aria-current="tabCurrent(tab, path) ? 'page' : undefined"
+          >{{ t(tab.labelKey || `rework.${tab.key}`) }}</NuxtLink
         >
       </nav>
       <button
@@ -272,8 +268,8 @@ await fetchCurrentUser();
         v-for="tab in tabs"
         :key="tab.to"
         :to="localePath(tab.to)"
-        :aria-current="path === tab.to ? 'page' : undefined"
-        >{{ t(`rework.${tab.key}`) }}</NuxtLink
+        :aria-current="tabCurrent(tab, path) ? 'page' : undefined"
+        >{{ t(tab.labelKey || `rework.${tab.key}`) }}</NuxtLink
       >
     </nav>
     <main

@@ -3282,6 +3282,151 @@
         "error502": "上流からのスコア取得に失敗しました",
         "tokenPlaceholder": "ユーザーの48文字token"
       }
+    },
+    "grade": "段位",
+    "danCourse": {
+      "years": "バージョン",
+      "grades": "段位一覧",
+      "group": {
+        "kyu": "級位",
+        "dan": "段位",
+        "jin": "達人位"
+      },
+      "source": "元のページ",
+      "neighbours": "前後の段位とバージョン",
+      "near": {
+        "prevGrade": "前の段位",
+        "nextGrade": "次の段位",
+        "prevYear": "前のバージョン",
+        "nextYear": "次のバージョン"
+      },
+      "songs": "課題曲",
+      "totalCombo": "最大コンボ数 合計",
+      "combo": "最大コンボ",
+      "wikiAria": "{title} の wiki ページ（新しいウィンドウ）",
+      "conditions": "合格条件",
+      "condition": "条件",
+      "tier": {
+        "pass": "赤合格",
+        "gold": "金合格"
+      }
+    },
+    "guidePage": {
+      "levelAria": "{difficulty} ★{level}",
+      "more": "さらに 30 件表示"
+    },
+    "titlesPage": {
+      "search": "称号・入手条件で検索",
+      "summary": "{total} 件 · {page} / {pages} ページ",
+      "noMatch": "該当する称号はありません",
+      "clear": "検索をクリア"
+    },
+    "toolPages": {
+      "result": "検索結果",
+      "examples": "例",
+      "chartConfig": {
+        "note": "分音符を省略すると 16 分として扱います"
+      },
+      "rt": {
+        "song": "楽曲",
+        "search": "曲名・IDで検索",
+        "difficulty": "難易度",
+        "version": "計算方式",
+        "notes": "ノーツ数",
+        "good": "良",
+        "ok": "可",
+        "bad": "不可",
+        "auto": "自動補完",
+        "manual": "手動入力",
+        "full": "全良",
+        "accuracy": "精度",
+        "rating": "総合 RT",
+        "result": "計算結果",
+        "choose": "楽曲を選択してください",
+        "empty": "この難易度の定数はありません",
+        "invalid": "判定数は0以上の整数で、合計をノーツ数に合わせてください。",
+        "below": "精度が75%未満のため、Ratingの対象外です。",
+        "failed": "楽曲データを読み込めませんでした。",
+        "retry": "再試行",
+        "searchFailed": "検索に失敗しました。入力し直してください。",
+        "noSongs": "該当する楽曲はありません",
+        "loading": "読み込み中…",
+        "source": "V2 定数の出典",
+        "detail": "楽曲詳細",
+        "v2Failed": "V2 定数を読み込めませんでした。",
+        "v1": {
+          "0": "大歌力",
+          "1": "体力",
+          "2": "高速処理",
+          "3": "精度力",
+          "4": "リズム処理",
+          "5": "複合処理"
+        },
+        "v2": {
+          "0": "体力",
+          "1": "手速",
+          "2": "瞬発力",
+          "3": "精度",
+          "4": "リズム",
+          "5": "複合"
+        }
+      },
+      "wordCloud": {
+        "hint": "現在連携中のアカウントのプレイ記録からワードクラウドを生成します。先に同期を完了してください。",
+        "submit": "ワードクラウドを生成",
+        "imageAlt": "太鼓ワードクラウド"
+      }
+    },
+    "aboutPage": {
+      "teamTitle": "開発チーム",
+      "teamDesc": "Taiko プロジェクトに参加したすべてのメンバーに感謝します。",
+      "stackTitle": "技術スタック",
+      "stackDesc": "フロントエンドとバックエンドの主要技術です。",
+      "linksTitle": "関連リンク",
+      "roles": {
+        "maru": "プロダクト・企画",
+        "sigaer": "フロントエンド / UI デザイン",
+        "sutari": "翻訳",
+        "baili": "バックエンド"
+      }
+    },
+    "aliasLogPage": {
+      "subtitle": "全 {total} 件",
+      "loadFailed": "読み込みに失敗しました。しばらくしてから再試行してください。",
+      "reload": "再読み込み",
+      "empty": "別名変更記録はまだありません",
+      "time": "時刻",
+      "song": "楽曲",
+      "alias": "別名",
+      "user": "操作ユーザー",
+      "source": "来源",
+      "action": "操作",
+      "view": "見る",
+      "privateChat": "個別チャット",
+      "searchPlaceholder": "曲名、ID、別名、ユーザーを検索",
+      "search": "検索",
+      "keyword": "楽曲別名"
+    },
+    "practice": {
+      "title": "プレイ練習",
+      "back": "楽曲に戻る",
+      "loading": "プレイヤーを読み込み中…",
+      "loadingBundle": "譜面と音源をダウンロード中…",
+      "loadingChart": "譜面と音源を準備中…",
+      "bundleFailed": "譜面と音源をダウンロードできませんでした。再読み込みしてください。",
+      "playerFailed": "プレイヤーを読み込めませんでした。再読み込みしてください。",
+      "playerDownloadFailed": "プレイヤーをダウンロードできませんでした。再読み込みしてください。",
+      "playerBootFailed": "プレイヤーを起動できませんでした。再読み込みしてください。",
+      "chartFailed": "譜面または音源を読み込めませんでした。再読み込みしてください。",
+      "failed": "読み込めませんでした。再試行してください。",
+      "missing": "この難易度の譜面はありません。",
+      "retry": "再読み込み",
+      "volume": "打音の音量",
+      "fullscreen": "全画面",
+      "exitFullscreen": "全画面を終了",
+      "finished": "練習が終了しました。",
+      "exited": "練習を終了しました。",
+      "ready": "プレイヤー内で開始してください。"
     }
   }
 }

@@ -3336,6 +3336,151 @@
         "error502": "上游成绩拉取失败",
         "tokenPlaceholder": "用户的48位token"
       }
+    },
+    "grade": "段位",
+    "danCourse": {
+      "years": "版本",
+      "grades": "段位一览",
+      "group": {
+        "kyu": "级位",
+        "dan": "段位",
+        "jin": "达人位"
+      },
+      "source": "原始页面",
+      "neighbours": "相邻的段位与版本",
+      "near": {
+        "prevGrade": "上一段位",
+        "nextGrade": "下一段位",
+        "prevYear": "上一版本",
+        "nextYear": "下一版本"
+      },
+      "songs": "课题曲",
+      "totalCombo": "最大连击合计",
+      "combo": "最大连击",
+      "wikiAria": "{title} 的 wiki 页面（新窗口）",
+      "conditions": "合格条件",
+      "condition": "条件",
+      "tier": {
+        "pass": "红合格",
+        "gold": "金合格"
+      }
+    },
+    "guidePage": {
+      "levelAria": "{difficulty} ★{level}",
+      "more": "再显示 30 条"
+    },
+    "titlesPage": {
+      "search": "搜索称号或获取条件",
+      "summary": "共 {total} 个称号 · 第 {page} / {pages} 页",
+      "noMatch": "没有符合的称号",
+      "clear": "清除搜索"
+    },
+    "toolPages": {
+      "result": "查询结果",
+      "examples": "示例",
+      "chartConfig": {
+        "note": "省略分音符时默认 16 分"
+      },
+      "rt": {
+        "song": "歌曲",
+        "search": "搜索曲名或 ID",
+        "difficulty": "难度",
+        "version": "计算版本",
+        "notes": "音符数",
+        "good": "良",
+        "ok": "可",
+        "bad": "不可",
+        "auto": "自动补齐",
+        "manual": "手动输入",
+        "full": "全良",
+        "accuracy": "精度",
+        "rating": "综合 RT",
+        "result": "计算结果",
+        "choose": "请选择歌曲",
+        "empty": "暂无该难度的定数",
+        "invalid": "判定数须为非负整数，且合计等于谱面音符数。",
+        "below": "精度低于 75%，不计入 Rating。",
+        "failed": "歌曲数据加载失败。",
+        "retry": "重试",
+        "searchFailed": "搜索失败，请重新输入。",
+        "noSongs": "没有找到歌曲",
+        "loading": "加载中…",
+        "source": "V2 定数来源",
+        "detail": "歌曲详情",
+        "v2Failed": "V2 定数加载失败。",
+        "v1": {
+          "0": "大歌力",
+          "1": "体力",
+          "2": "高速处理",
+          "3": "精度力",
+          "4": "节奏处理",
+          "5": "复合处理"
+        },
+        "v2": {
+          "0": "体力",
+          "1": "手速",
+          "2": "爆发",
+          "3": "精度",
+          "4": "节奏",
+          "5": "复合"
+        }
+      },
+      "wordCloud": {
+        "hint": "根据当前绑定账号的游玩记录生成词云，需先完成多端同步。",
+        "submit": "生成词云",
+        "imageAlt": "太鼓词云"
+      }
+    },
+    "aboutPage": {
+      "teamTitle": "开发团队",
+      "teamDesc": "感谢所有参与 Taiko 项目的成员。",
+      "stackTitle": "技术栈",
+      "stackDesc": "前端与后端主要技术。",
+      "linksTitle": "友情链接",
+      "roles": {
+        "maru": "产品与策划",
+        "sigaer": "前端开发/UI设计",
+        "sutari": "翻译",
+        "baili": "后端"
+      }
+    },
+    "aliasLogPage": {
+      "subtitle": "共 {total} 条记录",
+      "loadFailed": "加载失败，请稍后重试",
+      "reload": "重新加载",
+      "empty": "暂无别名记录",
+      "time": "时间",
+      "song": "歌曲",
+      "alias": "别名",
+      "user": "操作人",
+      "source": "来源",
+      "action": "操作",
+      "view": "查看",
+      "privateChat": "私聊",
+      "searchPlaceholder": "搜索曲名、ID、别名或用户",
+      "search": "搜索",
+      "keyword": "歌曲别名"
+    },
+    "practice": {
+      "title": "游玩练习",
+      "back": "返回歌曲",
+      "loading": "正在加载播放器…",
+      "loadingBundle": "正在下载谱面与音乐…",
+      "loadingChart": "正在准备谱面与音乐…",
+      "bundleFailed": "谱面与音乐下载失败，请重新加载。",
+      "playerFailed": "播放器加载失败，请重新加载。",
+      "playerDownloadFailed": "播放器下载失败，请重新加载。",
+      "playerBootFailed": "播放器启动失败，请重新加载。",
+      "chartFailed": "谱面或音乐读取失败，请重新加载。",
+      "failed": "加载失败，请重试。",
+      "missing": "此难度暂无可用谱面。",
+      "retry": "重新加载",
+      "volume": "鼓音音量",
+      "fullscreen": "全屏",
+      "exitFullscreen": "退出全屏",
+      "finished": "练习已结束。",
+      "exited": "已退出练习。",
+      "ready": "请在播放器中点击开始。"
     }
   }
 }

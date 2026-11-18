@@ -142,7 +142,9 @@ test('slice pages: own header, Element Plus mapping, ReworkGate instead of Accou
   for (const page of ['pages/tools/b30.vue', 'pages/tools/trend.vue', 'pages/tools/progress.vue', 'pages/tools/recommend.vue']) {
     assert.match(await read(page), /<ReworkGate :need="accountUser \? null : 'login'">/, page);
   }
-  assert.match(await read('pages/tools/word-cloud.vue'), /AccountToolGate/, 'word cloud (slice F) keeps the old gate');
+  // slice F reworked the word cloud: ReworkGate replaces the old gate (was: keeps AccountToolGate, belonged to slice F)
+  assert.doesNotMatch(await read('pages/tools/word-cloud.vue'), /<AccountToolGate|import AccountToolGate/, 'word cloud (slice F): no old gate');
+  assert.match(await read('pages/tools/word-cloud.vue'), /<ReworkGate :need="accountUser \? null : 'login'">/, 'word cloud (slice F): ReworkGate');
   // slice C reworked the two growth pages: they carry the mapping now (was: not flagged, belonged to slice C)
   for (const growth of ['pages/my/growth.vue', 'pages/my/weekly.vue']) assert.match(await read(growth), /reworkElementPlus: true/, growth + ' (slice C)');
 });
