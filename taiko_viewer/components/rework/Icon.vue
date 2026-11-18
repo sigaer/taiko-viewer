@@ -39,6 +39,9 @@ const paths: Record<string, string> = {
   logout: "M14 4h5v16h-5M10 8l-4 4 4 4M6 12h10",
   mail: "M3 6h18v12H3zM3 7l9 6.5L21 7",
   warn: "M12 4 2.5 20h19zM12 10v4.5M12 17.5h.01",
+  // slice E2: copy an example or a token, a key (score token)
+  copy: "M9 9h11v11H9zM15 5V4H4v11h1",
+  key: "M14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0M13 13l7 7M17 17l2-2M15 15l1.5-1.5",
 };
 /** Icons drawn filled (the pressed state of like). */
 const filled = new Set(["heartFilled"]);

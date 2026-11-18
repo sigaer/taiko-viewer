@@ -496,3 +496,48 @@ html.viewer-rework .rw-tag svg {
     flex: 1 1 100%;
   }
 }
+/*
+ * Slice E2 (sync, developer pages, support).
+ * .rw-lead            the lead paragraph under a page's <h1> (inside ReworkPageHeader)
+ * .rw-facts           label / value pairs in a wrapping grid: <dl class="rw-facts"><div><dt>…</dt><dd>…</dd></div></dl>
+ * .rw-alert--warn     a warning notice; .rw-alert--info a neutral notice (role=note / status, not an error)
+ */
+html.viewer-rework .rw-lead {
+  max-width: 68ch;
+  margin: var(--sp-2) 0 0;
+  font-size: var(--fs-14);
+  line-height: var(--lh-body);
+  color: var(--ink-2);
+  overflow-wrap: anywhere;
+}
+html.viewer-rework .rw-facts {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr));
+  gap: var(--sp-3) var(--sp-5);
+  min-width: 0;
+  margin: 0;
+}
+html.viewer-rework .rw-facts > div {
+  display: grid;
+  align-content: start;
+  gap: 2px;
+  min-width: 0;
+}
+html.viewer-rework .rw-facts dt {
+  font-size: var(--fs-13);
+  color: var(--ink-2);
+}
+html.viewer-rework .rw-facts dd {
+  margin: 0;
+  font-size: var(--fs-14);
+  color: var(--ink);
+  overflow-wrap: anywhere;
+}
+html.viewer-rework .rw-alert--warn {
+  border-color: var(--warn);
+  background: var(--warn-wash);
+}
+html.viewer-rework .rw-alert--info {
+  border-color: var(--info-line);
+  background: var(--info-wash);
+}

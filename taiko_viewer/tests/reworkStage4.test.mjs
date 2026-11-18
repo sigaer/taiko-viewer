@@ -1,3 +1,4 @@
+// Slice E2 (sync, developer pages, support) adds its checks at the end of this file.
 // Slice E1 (account: sign-in, registration, recovery, profile, settings) — source-level checks that the rework kept the
 // behaviour: request bodies, guards and confirmations, autofill attributes, the moved copy, the showcase labels.
 import test from "node:test";
@@ -149,4 +150,210 @@ test("settings: the site's cookie theme (no system option), the shell's language
   assert.doesNotMatch(view.slice(view.indexOf("<template>")), /system|prefers-color-scheme/);
   assert.equal((view.match(/emit\('update:theme', '(light|dark)'\)/g) || []).length, 2, "two choices: light, dark");
   assert.match(view, /emit\('update:theme', 'dark'\)/);
+});
+
+// ---------- Slice E2: sync, developer, support ----------
+const E2_ORIGINAL = JSON.parse(await read("tests/fixtures/e2-copy-original.json"));
+const E2_DROPPED = {
+  sync: ["intro", "targetsDesc", "lastSyncDesc", "cooldownStatus"],
+  developer: ["stateDesc", "historyDesc"],
+  developerReview: ["pendingDesc", "historyDesc"],
+  support: ["formDesc", "historyDesc", "loading"],
+  supportReview: ["pendingDesc", "historyDesc", "selectTicket"],
+  grants: []
+};
+const E2_PAGES = {
+  "pages/account/sync.vue": ["SYNC_COPY_KEYS", "rework.account.sync"],
+  "pages/account/developer/index.vue": ["DEVELOPER_COPY_KEYS", "rework.account.developer"],
+  "pages/account/developer/review.vue": ["REVIEW_COPY_KEYS", "rework.account.developerReview"],
+  "pages/account/developer/grants.vue": ["GRANTS_COPY_KEYS", "rework.account.grants"],
+  "pages/support.vue": ["SUPPORT_COPY_KEYS", "rework.account.support"],
+  "pages/account/support/review.vue": ["SUPPORT_REVIEW_COPY_KEYS", "rework.account.supportReview"],
+  "pages/docs/score-token.vue": [null, "rework.account.scoreTokenDocs"]
+};
+const E2_COMPONENTS = [
+  ...["Overview", "LastSync", "ScoreToken", "Kinoko", "GoalResult", "NextSteps", "IndicatorSource"].map((n) => `components/rework/sync/${n}.vue`),
+  ...["Status", "ApplyForm", "Applications", "Review", "ApiGuide"].map((n) => `components/rework/developer/${n}.vue`),
+  ...["Tickets", "Review"].map((n) => `components/rework/support/${n}.vue`),
+  "components/rework/ScoreTokenDocs.vue"
+];
+const loadTs = async (path) => {
+  const code = stripTypeScriptTypes(await read(path), { mode: "strip" });
+  return import(`data:text/javascript;base64,${Buffer.from(code).toString("base64")}`);
+};
+
+test("E2 copy: the moved zh / ja tables are verbatim; only the listed explanatory subtitles were dropped", () => {
+  for (const lang of ["zh", "ja"]) {
+    const L = lang === "zh" ? zh : ja;
+    const acc = L.rework.account;
+    const o = E2_ORIGINAL;
+    for (const [ns, table] of [["sync", o.sync[lang].copy], ["developer", o.developer[lang].copy], ["grants", o.grants[lang].copy], ["developerReview", o.developerReview[lang].copy], ["support", o.support[lang].copy], ["supportReview", o.supportReview[lang].copy]]) {
+      for (const [key, text] of Object.entries(table)) {
+        if (E2_DROPPED[ns].includes(key)) assert.equal(acc[ns][key], undefined, `${lang} ${ns}.${key} dropped`);
+        else assert.equal(acc[ns][key], text, `${lang} ${ns}.${key}`);
+      }
+    }
+    assert.deepEqual(acc.sync.goal, o.sync[lang].goalCopy);
+    for (const { value, label } of o.support[lang].categoryOptions) assert.equal(acc.support.categories[value], label);
+    assert.deepEqual(acc.support.categories, o.supportReview[lang].categoryLabels, "both support pages had the same category names");
+    const docs = o.scoreTokenDocs[lang].copy;
+    assert.deepEqual([1, 2, 3, 4].map((n) => acc.scoreTokenDocs[`step${n}`]), docs.steps);
+    assert.deepEqual([1, 2, 3].map((n) => acc.scoreTokenDocs[`note${n}`]), docs.notes);
+    for (const key of ["title", "lead", "userTitle", "safetyTitle", "safety", "devTitle", "requestTitle", "responseTitle", "responseNote", "errorsTitle", "notesTitle", "back"]) assert.equal(acc.scoreTokenDocs[key], docs[key], `${lang} docs.${key}`);
+  }
+  // Security wording, word for word
+  assert.equal(zh.rework.account.sync.scoreTokenReveal, "明文只在本次生成后展示。刷新页面或再次生成后，无法找回当前明文。");
+  assert.equal(zh.rework.account.sync.scoreTokenConfirm, "所有正在使用此 token 的网页和工具会立即失去访问权限。");
+  assert.equal(ja.rework.account.sync.scoreTokenConfirm, "この token を使用中のすべてのサイトやツールから直ちにアクセスできなくなります。");
+  assert.equal(zh.rework.account.sync.kinokoDesc, "使用 API 密钥从默认账号迁移当前最佳成绩或完整成绩历史，只允许写入 ID 相同的当前绑定账号。密钥不会保存。");
+  assert.equal(zh.rework.account.scoreTokenDocs.safety, "token 等同于成绩读取密码。不要发到群聊、截图、前端源码或公开仓库。Viewer 和 bot 管理的是同一个 token，在任意一端重新生成都会让旧 token 失效。");
+  assert.equal(zh.rework.account.scoreTokenDocs.error401, "token 无效、已轮换或已撤销");
+});
+
+test("E2 copy: every key a page lists or a component reads exists in zh and ja; no inline bilingual tables remain", async () => {
+  const has = (key) => typeof get(zh, key) === "string" && typeof get(ja, key) === "string";
+  for (const [file, [listName, base]] of Object.entries(E2_PAGES)) {
+    const src = await read(file);
+    if (listName) {
+      const list = JSON.parse(src.match(new RegExp(`const ${listName}\\s*=\\s*(\\[[^\\]]*\\])`))[1]);
+      for (const key of list) assert.ok(has(`${base}.${key}`), `${file}: ${base}.${key}`);
+      for (const [, key] of src.matchAll(/\bcopy(?:\.value)?\.(\w+)/g)) assert.ok(list.includes(key) || key === "replace", `${file}: copy.${key} is listed`);
+    }
+    for (const [, key] of src.matchAll(/\bt\(\s*["'](rework\.account\.[\w.-]+)["']/g)) assert.ok(has(key), `${file}: ${key}`);
+    assert.doesNotMatch(src, /(?:locale(?:\.value)?\s*===\s*["']ja["']|ja\.value)\s*\?\s*(?:\{|\(\s*\{|["'`][^"'`]*[぀-ヿ一-鿿])/, `${file}: no inline bilingual tables or strings`);
+  }
+  const prefixes = { "components/rework/sync/": "rework.account.sync", "components/rework/developer/Review.vue": "rework.account.developerReview", "components/rework/developer/": "rework.account.developer", "components/rework/support/Tickets.vue": "rework.account.support", "components/rework/support/Review.vue": "rework.account.supportReview" };
+  for (const file of E2_COMPONENTS) {
+    const src = await read(file);
+    const base = file.endsWith("GoalResult.vue") ? "rework.account.sync.goal" : Object.entries(prefixes).find(([p]) => file.startsWith(p))?.[1];
+    for (const [, key] of src.matchAll(/\bt\(\s*["'](rework\.[\w.-]+)["']/g)) assert.ok(has(key), `${file}: ${key}`);
+    if (base) for (const [, key] of src.matchAll(/\b[kg]\(\s*["']([\w.-]+)["']/g)) assert.ok(has(`${base}.${key}`), `${file}: ${base}.${key}`);
+    assert.doesNotMatch(src, /(?:locale(?:\.value)?\s*===\s*["']ja["']|ja\.value)\s*\?\s*(?:\{|\(\s*\{|["'`][^"'`]*[぀-ヿ一-鿿])/, `${file}: no inline bilingual tables or strings`);
+  }
+  for (const kind of ["running", "unbound", "attention", "never", "failed", "partial", "ok", "manual"]) assert.ok(has(`rework.account.sync.indicator.${kind}`));
+  for (const outcome of ["success", "partial", "failed"]) assert.ok(has(`rework.account.sync.outcome.${outcome}`));
+  for (const code of ["400", "401", "404", "502"]) assert.ok(has(`rework.account.scoreTokenDocs.error${code}`));
+});
+
+test("E2 sync: readiness follows the start button's own disabled condition; the shell indicator only reflects what the page read", async () => {
+  const { syncReadiness, syncIndicatorKind, syncIndicatorMark, syncOutcome } = await loadTs("utils/rework/sync.ts");
+  const page = await read("pages/account/sync.vue");
+  const DISABLED = "pending || !overview.currentBinding || overview.canSyncFromWahlap === false || cooldown > 0 || !overview.targets.length";
+  assert.ok(page.includes(`:start-disabled="${DISABLED}"`), "the start button keeps the original disabled expression");
+  const binding = (extra = {}) => ({ id: 1, taikoId: "A", isManual: false, requiresReverification: false, ...extra });
+  const cases = [];
+  for (const currentBinding of [null, binding(), binding({ requiresReverification: true })])
+    for (const canSyncFromWahlap of [true, false])
+      for (const cooldown of [0, 5])
+        for (const targets of [[], [{ id: "t" }]]) cases.push({ overview: { currentBinding, canSyncFromWahlap, targets, lastSync: null }, cooldown });
+  for (const { overview, cooldown } of cases) {
+    const disabled = !overview.currentBinding || overview.canSyncFromWahlap === false || cooldown > 0 || !overview.targets.length;
+    assert.equal(syncReadiness(overview, cooldown) === "ready", !disabled, JSON.stringify({ overview, cooldown }));
+  }
+  assert.equal(syncReadiness({ currentBinding: binding({ isManual: true }), canSyncFromWahlap: false, targets: [], lastSync: null }, 0), "manual");
+  assert.equal(syncReadiness({ currentBinding: binding({ requiresReverification: true }), canSyncFromWahlap: false, targets: [{}], lastSync: null }, 0), "reverify");
+  assert.equal(syncReadiness({ currentBinding: binding(), canSyncFromWahlap: false, targets: [{}], lastSync: null }, 0), "unavailable");
+  assert.deepEqual(["success", "partial", "failed", "unknown", "running", ""].map(syncOutcome), ["success", "partial", "failed", "failed", "failed", "failed"]);
+  const ov = (extra) => ({ currentBinding: binding(), canSyncFromWahlap: true, targets: [{}], lastSync: null, ...extra });
+  assert.equal(syncIndicatorKind(null, false), null, "nothing read yet: the plain control");
+  assert.equal(syncIndicatorKind(null, true), "running");
+  assert.equal(syncIndicatorKind(ov({ currentBinding: null }), false), "unbound");
+  assert.equal(syncIndicatorKind(ov({ currentBinding: binding({ isManual: true }) }), false), "manual");
+  assert.equal(syncIndicatorKind(ov({ canSyncFromWahlap: false }), false), "attention");
+  assert.equal(syncIndicatorKind(ov({}), false), "never");
+  for (const [status, kind] of [["success", "ok"], ["partial", "partial"], ["failed", "failed"], ["unknown", "failed"]]) assert.equal(syncIndicatorKind(ov({ lastSync: { status } }), false), kind);
+  assert.deepEqual(["ok", "manual", "running", null, "never", "unbound", "attention", "partial", "failed"].map(syncIndicatorMark), [null, null, null, null, "warn", "warn", "warn", "warn", "danger"]);
+  // The shell reads the shared state only; it never fetches the sync API.
+  const shell = await read("components/rework/Shell.vue");
+  assert.doesNotMatch(shell, /\/api\/account\/sync/);
+  assert.match(shell, /SYNC_INDICATOR_KEY/);
+  assert.match(shell, /s\.userId === user\.id && s\.generation === bindingGeneration\.value/);
+  const source = await read("components/rework/sync/IndicatorSource.vue");
+  assert.doesNotMatch(source, /apiFetch|useViewerApiFetch|setInterval|setTimeout/);
+});
+
+test("E2 sync: handlers, request bodies, the revoke confirmation and the one-time token display are unchanged", async () => {
+  const page = await read("pages/account/sync.vue");
+  for (const needle of [
+    '"/api/account/sync", {\n      method: "POST",\n      body: {\n        profileId: String(overview.value?.currentBinding?.id || ""),\n        targetIds: selectedTargetIds.value\n      }',
+    '"/api/account/sync/kinoko-import", {\n      method: "POST",\n      body: {\n        apiKey: kinokoApiKey.value.trim()\n      }',
+    '"/api/account/sync/kinoko-history-import", {\n      method: "POST",\n      body: {\n        apiKey: kinokoApiKey.value.trim()\n      }',
+    '"/api/account/score-token", {\n      method: "POST",\n      body: { action }',
+    "if (submitting.value || pending.value || evaluatingGoal.value) return;",
+    "if (importingKinoko.value || importingKinokoHistory.value || pending.value) return;",
+    "if (scoreTokenBusy.value || scoreTokenDialogOwner || pending.value) return;",
+    'issuedScoreToken.value = action === "issue" ? String(response.token || "") : "";',
+    "await navigator.clipboard.writeText(issuedScoreToken.value);",
+    'kinokoApiKey.value = "";'
+  ]) assert.ok(page.includes(needle), needle.slice(0, 60));
+  // Revoke: confirmation first (warning dialog), then the request
+  const revoke = page.indexOf('if (action === "revoke") {');
+  assert.ok(revoke > 0 && page.indexOf("ElMessageBox.confirm(copy.value.scoreTokenConfirm, copy.value.scoreTokenConfirmTitle", revoke) > revoke);
+  assert.ok(page.indexOf('type: "warning"', revoke) < page.indexOf('"/api/account/score-token"', revoke));
+  // The plaintext token goes to the token section only, and is not part of the shell indicator
+  const template = page.slice(page.indexOf("<template>"));
+  assert.equal(template.match(/issuedScoreToken/g)?.length, 1);
+  assert.match(template, /:issued="issuedScoreToken"/);
+  const token = await read("components/rework/sync/ScoreToken.vue");
+  assert.equal(token.match(/\{\{ issued \}\}/g)?.length, 1, "rendered once, in the one-time block");
+  assert.match(token, /<div v-if="issued" class="rs-token__reveal token-reveal" role="status">/);
+  assert.match(token, /class="rw-btn rw-btn--danger rs-token__revoke"/);
+  assert.match(token, /:disabled="pending \|\| busy"/);
+  const kinoko = await read("components/rework/sync/Kinoko.vue");
+  assert.match(kinoko, /:type="show \? 'text' : 'password'"/);
+  assert.match(kinoko, /autocomplete="off"/);
+  assert.match(kinoko, /:disabled="!hasBinding \|\| cooldown > 0 \|\| importingHistory \|\| importing"/);
+  assert.match(kinoko, /:disabled="!hasBinding \|\| cooldown > 0 \|\| importing \|\| importingHistory"/);
+  const overview = await read("components/rework/sync/Overview.vue");
+  assert.match(overview, /<fieldset class="rs-over__targets" :disabled="pending \|\| submitting">/);
+  assert.match(overview, /:disabled="startDisabled \|\| submitting"/);
+  assert.match(overview, /class="target-item"/, "Linux training-loop script hook");
+  assert.match(await read("components/rework/sync/GoalResult.vue"), /class="goal-sync-result rs-goal"[\s\S]*class="goal-return rw-link"/);
+});
+
+test("E2 developer, grants and review: request bodies, prompts, confirmations and guards are unchanged; destructive actions are outlined danger", async () => {
+  const index = await read("pages/account/developer/index.vue");
+  for (const needle of ['body.append("reason", form.value.reason.trim());', 'body.append("replyEmail", form.value.replyEmail.trim());', 'body.append("images", file);', '"/api/account/developer/apply"', "imageFiles.value = files.slice(0, 4);", "if (submitting.value || !canSubmitApplication.value) return;"]) assert.ok(index.includes(needle), needle);
+  assert.ok(index.includes('import DeveloperApiGuide from "~/components/rework/developer/ApiGuide.vue";'));
+  assert.doesNotMatch(index, /developer\/grants/, "the developer page has no link to grants (developerApiGuideUi)");
+  const form = await read("components/rework/developer/ApplyForm.vue");
+  assert.match(form, /type="file" accept="image\/\*" multiple/);
+  assert.match(form, /maxlength="4000"/);
+  const guide = await read("components/rework/developer/ApiGuide.vue");
+  for (const hook of ["data-developer-guide", 'class="api-overview-item"', ':data-api="api.id"', "data-token-help", "data-examples", ':data-example="kind"', 'data-example="json"', "data-common", '<el-tabs v-model="activeExamples[api.id]"', 'role="status"']) assert.ok(guide.includes(hook), hook);
+  assert.match(guide, /pre \{[\s\S]*?overflow-x: auto;[\s\S]*?white-space: pre;/, "code blocks scroll inside themselves");
+  const review = await read("pages/account/developer/review.vue");
+  for (const needle of ["ElMessageBox.prompt(\n      copy.value.approvePrompt", "ElMessageBox.prompt(\n      copy.value.rejectPrompt", 'inputValidator: (value) => (String(value || "").trim() ? true : copy.value.rejectValidation)', 'action: "approve",', 'action: "reject",', "if (processingId.value || reviewDialogOwner) return;", "`Token: ${result.issuedToken}\\n"]) assert.ok(review.includes(needle), needle);
+  const reviewView = await read("components/rework/developer/Review.vue");
+  assert.match(reviewView, /class="rw-btn rw-btn--danger"[\s\S]*?:disabled="processingId !== null"/);
+  const grants = await read("pages/account/developer/grants.vue");
+  for (const needle of ["window.confirm(copy.value.disableConfirm+' '+client.displayName)", "body:{bindingId:bindingId.value,clientId:clientId.value,consent:true,consentVersion:data.consentVersion,audience:data.audience}", "'/api/account/developer/grants/'+grantId,{method:'DELETE'}", 'id="grant-app"', 'id="grant-binding"', 'id="client-name"', ":data-grant-id=\"grant.grantId\"", ":data-client-id=\"client.clientId\"", 'data-grants-page :aria-busy="pending||busy"']) assert.ok(grants.includes(needle), needle);
+  assert.doesNotMatch(grants.slice(grants.indexOf("<template>")), /<Rework|<Ds|<el-/, "native markup only (the Linux checks compile this file alone)");
+  assert.doesNotMatch(grants.slice(grants.indexOf("<style")), /var\(--(?!el-)/, "only Element Plus variables in a page");
+  assert.equal(grants.match(/rw-btn--danger/g)?.length, 2, "revoke grant, disable app");
+});
+
+test("E2 support: fields, limits, request bodies and every moderator action are unchanged", async () => {
+  const page = await read("pages/support.vue");
+  for (const needle of ['category: form.category,\n        title: form.title,\n        contact: form.contact,\n        content: form.content', "`/api/support/tickets/${ticketId}/messages`", "body: { content }", 'maxlength="120"', 'maxlength="255"', 'maxlength="8000"', "if (submitting.value) return;", "if (followUpSubmittingId.value) return;"]) assert.ok(page.includes(needle), needle);
+  assert.match(page, /<button\s+type="button"\s+class="rw-btn rw-btn--primary"[\s\S]*?@click="submit"/, "no implicit submission (as before)");
+  const tickets = await read("components/rework/support/Tickets.vue");
+  assert.match(tickets, /:disabled="followUpSubmittingId === ticket\.id"/);
+  assert.match(tickets, /:disabled="loadingDetailId === ticket\.id"/);
+  assert.match(tickets, /white-space: pre-wrap;\s*overflow-wrap: anywhere;/);
+  const review = await read("pages/account/support/review.vue");
+  for (const needle of ["`/api/account/support/review/${selectedTicketId.value}/reply`", "body: { content, close }", "`/api/account/support/review/${selectedTicketId.value}/close`", "if (!selectedTicketId.value || submitting.value) return;", '@reply="submitReply(false)"', '@reply-close="submitReply(true)"', '@close="closeTicket"']) assert.ok(review.includes(needle), needle);
+  const view = await read("components/rework/support/Review.vue");
+  assert.equal(view.match(/:disabled="submitting"/g)?.length, 3);
+});
+
+test("E2 score-token docs: public, server-rendered, code blocks scroll in place, no real token in the examples", async () => {
+  const page = await read("pages/docs/score-token.vue");
+  assert.doesNotMatch(page, /middleware/);
+  assert.match(page, /hidePageHeader: true/);
+  assert.match(page, /\{ labelKey: "account.sync", to: "\/account\/sync" \}/);
+  const docs = await read("components/rework/ScoreTokenDocs.vue");
+  assert.match(docs, /\.rtd-code \{[\s\S]*?overflow-x: auto;[\s\S]*?white-space: pre;/);
+  assert.equal(docs.match(/<pre class="rtd-code" tabindex="0"/g)?.length, 2);
+  assert.doesNotMatch(page, /[0-9a-f]{48}/i, "no 48-character token in the examples");
 });

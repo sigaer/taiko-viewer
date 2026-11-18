@@ -14,6 +14,7 @@ import { searchShortcut } from "~/utils/rework/search";
 import { PLAY_TABS } from "~/utils/rework/scores";
 import { GROWTH_TABS } from "~/utils/rework/today";
 import { COMMUNITY_TABS } from "~/utils/rework/community";
+import { SYNC_INDICATOR_KEY, syncIndicatorMark, type SyncIndicatorState } from "~/utils/rework/sync";
 const props = defineProps<{
   title: string;
   contentLayout: string;
@@ -32,6 +33,20 @@ const { accountUser, fetchCurrentUser } = useAccountState();
 // Unread forum notifications on the bell: the existing poll (phones and tablets, 30 s; the old mobile tab bar used
 // it) and every count the notification pages confirm (useForumUnreadCount).
 const { unreadCount } = useForumNotificationPolling();
+// The sync control shows what /account/sync last read for this account and binding (slice E2): a dot when the next
+// step is the player's or the last sync failed, a turning icon while the page's request runs. It never reads the sync
+// API itself (no polling); before the sync page has been opened it is the plain link, as before.
+const bindingGeneration = useState("account-binding-generation", () => 0);
+const syncIndicator = useState<SyncIndicatorState | null>(SYNC_INDICATOR_KEY, () => null);
+const syncKind = computed(() => {
+  const s = syncIndicator.value;
+  const user = accountUser.value;
+  return s && user && s.userId === user.id && s.generation === bindingGeneration.value ? s.kind : null;
+});
+const syncMark = computed(() => syncIndicatorMark(syncKind.value));
+const syncLabel = computed(() =>
+  syncKind.value ? t("rework.account.sync.indicator.label", { state: t(`rework.account.sync.indicator.${syncKind.value}`) }) : t("rework.sync"),
+);
 const main = ref<HTMLElement>();
 const searchOpen = ref(false);
 const searchButton = ref<HTMLButtonElement>();
@@ -221,10 +236,14 @@ await fetchCurrentUser();
         >
           <ReworkIcon name="search" /></button
         ><NuxtLink
-          class="icon-button"
+          class="icon-button sync-control"
+          :class="syncKind ? `is-${syncKind}` : undefined"
           :to="localePath('/account/sync')"
-          :aria-label="t('rework.sync')"
-          ><ReworkIcon name="sync" /></NuxtLink
+          :aria-label="syncLabel"
+          :aria-current="path === '/account/sync' ? 'page' : undefined"
+          data-sync-control
+          :data-sync-state="syncKind || undefined"
+          ><ReworkIcon name="sync" /><span v-if="syncMark" class="sync-dot" :class="`is-${syncMark}`" aria-hidden="true" /></NuxtLink
         ><NuxtLink
           class="icon-button bell"
           :to="localePath('/forum/notifications')"
@@ -395,8 +414,38 @@ await fetchCurrentUser();
 .icon-button:hover {
   background: var(--bg-sunk);
 }
-.bell {
+.bell,
+.sync-control {
   position: relative;
+}
+.sync-control[aria-current],
+.sync-control.is-running {
+  color: var(--nav-active-text);
+}
+.sync-dot {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--bg);
+}
+.sync-dot.is-warn {
+  background: var(--warn);
+}
+.sync-dot.is-danger {
+  background: var(--danger);
+}
+@media (prefers-reduced-motion: no-preference) {
+  .sync-control.is-running svg {
+    animation: rework-sync-turn 1.2s linear infinite;
+  }
+}
+@keyframes rework-sync-turn {
+  to {
+    transform: rotate(360deg);
+  }
 }
 .bell[aria-current] {
   color: var(--nav-active-text);
