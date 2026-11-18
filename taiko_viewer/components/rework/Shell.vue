@@ -13,7 +13,8 @@ const props = defineProps<{
   title: string;
   contentLayout: string;
   showMobileNav: boolean;
-  backPath?: string;
+  /** Localized parent location for the mobile back button */
+  backHref?: string;
 }>();
 const route = useRoute();
 const nuxtApp = useNuxtApp();
@@ -35,10 +36,8 @@ const moduleTitle = computed(() =>
 const path = computed(() => withoutLocale(route.path));
 const secondary: Record<string, { key: string; to: string }[]> = {
   songs: [
-    { key: "catalog", to: "/songs/available" },
-    { key: "removed", to: "/songs/removed" },
-    { key: "other", to: "/songs/other" },
-    { key: "constants", to: "/songs/v2-constants" },
+    { key: "catalog", to: "/songs" },
+    { key: "constants", to: "/songs/constants" },
     { key: "guide", to: "/guide" },
     { key: "titles", to: "/titles" },
   ],
@@ -170,8 +169,8 @@ await fetchCurrentUser();
     </nav>
     <header v-if="!route.meta.composerHeader" class="rework-bar">
       <NuxtLink
-        v-if="backPath"
-        :to="localePath(backPath)"
+        v-if="backHref"
+        :to="backHref"
         class="icon-button back"
         :aria-label="t('rework.back')"
         ><ReworkIcon name="back" /></NuxtLink

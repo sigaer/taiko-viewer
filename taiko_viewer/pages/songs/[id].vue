@@ -8,6 +8,7 @@ import type { RatingContentItem, SongCatalogItem } from "~/types/content";
 import type { ChartDifficultyCode } from "~/types/ugc";
 import { buildPageDescription } from "~/utils/seo";
 import { buildSongCoverThumbnailUrl } from "~/utils/songCover";
+import { catalogLocation, detailFallbackShelf, locationHref } from "~/utils/rework/catalog";
 
 const route = useRoute();
 const { t, locale } = useI18n();
@@ -42,7 +43,7 @@ definePageMeta({
   contentLayout: "wide",
   pageTitleKey: "songs.detail",
   pageDescKey: "page.songs.detail.desc",
-  navKey: "/songs/available",
+  navKey: "/songs",
   hidePageHeader: true
 });
 
@@ -105,18 +106,13 @@ const normalizedShelfStatus = (value: SongCatalogItem["shelf_status"]) => {
   const parsed = Number(value);
   return Number.isNaN(parsed) ? 0 : parsed;
 };
-const songListPath = computed(() => {
-  if (route.query.list === "removed") return "/songs/removed";
-  if (route.query.list === "other") return "/songs/other";
-  if (route.query.list === "available") return "/songs/available";
-  const status = normalizedShelfStatus(song.value?.shelf_status);
-  if (status === 1) return "/songs/removed";
-  if (status === 2) return "/songs/other";
-  return "/songs/available";
-});
+const songListShelf = computed(() => detailFallbackShelf(route.query.list, song.value?.shelf_status));
+const songListPath = computed(() => locationHref(catalogLocation({ shelf: songListShelf.value })));
+// "Back to list" returns to the library state this tab came from; otherwise the song's shelf.
+const songListReturn = useLibraryReturn(() => localePath(songListPath.value));
 const songListLabelKey = computed(() => {
-  if (songListPath.value === "/songs/removed") return "nav.songsRemoved";
-  if (songListPath.value === "/songs/other") return "nav.songsOther";
+  if (songListShelf.value === "removed") return "nav.songsRemoved";
+  if (songListShelf.value === "other") return "nav.songsOther";
   return "nav.songsAvailable";
 });
 
@@ -458,10 +454,10 @@ useViewerSeo(() => ({
   <div class="song-detail-page">
     <el-card v-if="pending" class="panel-card"><el-skeleton :rows="8" animated /></el-card>
     <el-card v-else-if="error || !song" class="panel-card">
-      <el-result icon="error" :title="copy.errorTitle" :sub-title="copy.errorSubtitle"><template #extra><NuxtLink :to="localePath(songListPath)"><el-button type="primary">{{ copy.backToList }}</el-button></NuxtLink></template></el-result>
+      <el-result icon="error" :title="copy.errorTitle" :sub-title="copy.errorSubtitle"><template #extra><NuxtLink :to="songListReturn"><el-button type="primary">{{ copy.backToList }}</el-button></NuxtLink></template></el-result>
     </el-card>
     <template v-else>
-      <NuxtLink class="back-link" :to="localePath(songListPath)">{{ copy.back }}</NuxtLink>
+      <NuxtLink class="back-link" :to="songListReturn">{{ copy.back }}</NuxtLink>
       <header class="song-heading">
         <SongCoverImage :song-id="song.id" :alt="getSongPrimaryTitle(song)" sizes="(max-width: 767px) 80px, 112px" fit="contain" priority class="cover-image" @error="coverError = true" />
         <div class="song-title-group">

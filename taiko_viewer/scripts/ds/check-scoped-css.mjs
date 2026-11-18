@@ -17,7 +17,7 @@ import postcss from "postcss";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const ROOT = resolve(here, "..", "..");
-export const STRICT_DIRS = ["components/ds", "ds-samples"];
+export const STRICT_DIRS = ["components/ds", "components/rework", "ds-samples"];
 const SKIP_DIRS = new Set(["node_modules", ".nuxt", ".output", ".tja-runtime", "vendor", "reference"]);
 
 const posix = (p) => p.split(sep).join("/");

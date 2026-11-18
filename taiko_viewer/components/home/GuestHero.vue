@@ -33,7 +33,7 @@ const appVersion = String(runtimeConfig.public.appVersion || "").trim() || "dev"
           {{ t("page.home.guest.accountCta") }}
         </NuxtLink>
         <NuxtLink
-          :to="localePath('/songs/available')"
+          :to="localePath('/songs')"
           class="guest-hero__cta guest-hero__cta--secondary"
           @click="trackViewerEvent('home_browse_songs_click', { home_state: accountStatusUnavailable ? 'error' : 'guest', source: 'hero' })"
         >

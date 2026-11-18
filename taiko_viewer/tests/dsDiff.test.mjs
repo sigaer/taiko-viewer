@@ -48,3 +48,12 @@ test("diff SSR: 5 difficulties × 2 sizes × with / without constant", async () 
 test("diff SSR: an invalid difficulty renders nothing", async () => {
   for (const difficulty of [0, 6, "x", ""]) assert.equal(await render("Diff", { difficulty }), "<!---->");
 });
+
+test("diff SSR: showConstant=false renders no constant slot and no constant in the name", async () => {
+  for (const locale of ["zh", "ja"]) {
+    const html = await render("Diff", { difficulty: 4, star: "9", showConstant: false }, { locale });
+    assert.equal(attrs(html, "span")[0]["aria-label"], `${t(locale, "difficulty.4")} ${t(locale, "ds.diff.star").replace("{n}", "9")}`);
+    assert.doesNotMatch(html, /ds-diff__constant/);
+    assert.match(html, /★9/);
+  }
+});

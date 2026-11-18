@@ -4,8 +4,8 @@
     <circle
       v-for="i in 12"
       :key="i"
-      :cx="20 + Math.cos((i * Math.PI) / 6) * 16.2"
-      :cy="20 + Math.sin((i * Math.PI) / 6) * 16.2"
+      :cx="(20 + Math.cos((i * Math.PI) / 6) * 16.2).toFixed(3)"
+      :cy="(20 + Math.sin((i * Math.PI) / 6) * 16.2).toFixed(3)"
       r="1.15"
       fill="var(--note-outline)"
       opacity=".7"

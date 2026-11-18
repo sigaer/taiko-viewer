@@ -22,7 +22,7 @@ const getSubtitle = (song: SongCatalogItem) =>
       heading-id="guest-latest-title"
       :title="t('home.latestSongs')"
       :link-label="t('common.viewAll')"
-      :link-to="localePath('/songs/available')"
+      :link-to="localePath('/songs')"
     />
     <div v-if="pending" class="guest-latest__rail" aria-hidden="true">
       <div v-for="index in 5" :key="index" class="guest-song-card guest-song-card--loading shimmer-card">

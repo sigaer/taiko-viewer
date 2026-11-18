@@ -37,7 +37,9 @@ const props = defineProps({
   star: { type: [Number, String] as PropType<number | string | null>, default: null },
   /** V2 constant (hard / oni / edit only) */
   constant: { type: [Number, String] as PropType<number | string | null>, default: null },
-  size: { type: String as PropType<DsDiffSize>, default: "md" }
+  size: { type: String as PropType<DsDiffSize>, default: "md" },
+  /** false where the data source has no constants (the song library list): no "—" slot, no constant in the name */
+  showConstant: { type: Boolean, default: true }
 });
 
 const { t } = useI18n();
@@ -51,7 +53,7 @@ const label = computed(() =>
   [
     fullName.value,
     star.value !== null ? t("ds.diff.star", { n: star.value }) : "",
-    constant.value !== null ? t("ds.diff.constant", { value: constant.value }) : t("ds.diff.noConstant")
+    !props.showConstant ? "" : constant.value !== null ? t("ds.diff.constant", { value: constant.value }) : t("ds.diff.noConstant")
   ]
     .filter(Boolean)
     .join(" ")
@@ -73,8 +75,10 @@ const label = computed(() =>
     </span>
     <span v-if="difficulty === 5" class="ds-diff__ura">{{ t("ds.diff.ura") }}</span>
     <span v-if="star !== null" class="ds-diff__star num">★{{ star }}</span>
-    <span v-if="constant !== null" class="ds-diff__constant num">{{ constant }}</span>
-    <span v-else class="ds-diff__constant is-missing">—</span>
+    <template v-if="showConstant">
+      <span v-if="constant !== null" class="ds-diff__constant num">{{ constant }}</span>
+      <span v-else class="ds-diff__constant is-missing">—</span>
+    </template>
   </span>
 </template>
 

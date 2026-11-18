@@ -20,25 +20,25 @@ definePageMeta({
   contentLayout: "wide",
   pageTitleKey: "page.songs.v2Constants.title",
   pageDescKey: "page.songs.v2Constants.desc",
-  navKey: "/songs/v2-constants",
+  navKey: "/songs/constants",
   breadcrumbs: [
-    { labelKey: "nav.songs", to: "/songs/available" },
-    { labelKey: "page.songs.v2Constants.title", to: "/songs/v2-constants" }
+    { labelKey: "nav.songs", to: "/songs" },
+    { labelKey: "page.songs.v2Constants.title", to: "/songs/constants" }
   ]
 });
 
 useViewerSeo(() => ({
   title: t("page.songs.v2Constants.title"),
   description: buildPageDescription(t("page.songs.v2Constants.desc")),
-  path: "/songs/v2-constants",
+  path: "/songs/constants",
   keywords: [
     t("page.songs.v2Constants.title"),
     t("page.songs.v2Constants.keyword")
   ],
   breadcrumbs: [
     { name: t("nav.home"), path: "/" },
-    { name: t("nav.songs"), path: "/songs/available" },
-    { name: t("page.songs.v2Constants.title"), path: "/songs/v2-constants" }
+    { name: t("nav.songs"), path: "/songs" },
+    { name: t("page.songs.v2Constants.title"), path: "/songs/constants" }
   ]
 }));
 

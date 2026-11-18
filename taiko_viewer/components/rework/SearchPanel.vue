@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SongCatalogItem, SongCatalogPagePayload } from "~/types/content";
-import { songSearchRequest, songTitle } from "~/utils/rework/catalog";
+import { catalogLocation, searchAllState, songSearchRequest, songTitle } from "~/utils/rework/catalog";
 import { desktopDestinations } from "~/utils/rework/navigation";
 import { searchSelection } from "~/utils/rework/search";
 const props = defineProps<{ open: boolean }>();
@@ -12,6 +12,7 @@ const dialog = ref<HTMLDialogElement>();
 const input = ref<HTMLInputElement>();
 const query = ref("");
 const songs = ref<SongCatalogItem[]>([]);
+const total = ref(0);
 const loading = ref(false);
 const failed = ref(false);
 const selected = ref(-1);
@@ -37,17 +38,31 @@ const actions = computed(() =>
         normalize(x.label).includes(normalize(query.value)),
     ),
 );
+const shownSongs = computed(() => songs.value.slice(0, 8));
+// Last option: every match in the library, only when the panel shows fewer songs than the API found.
+const viewAll = computed(() =>
+  total.value > shownSongs.value.length && query.value.trim()
+    ? [
+        {
+          id: "all-results",
+          label: t("rework.viewAll", { count: total.value }),
+          to: catalogLocation(searchAllState(query.value.trim()), localePath),
+          kind: "all",
+          song: null,
+        },
+      ]
+    : [],
+);
 const results = computed(() => [
-  ...songs.value
-    .slice(0, 8)
-    .map((song) => ({
-      id: "song-" + song.id,
-      label: songTitle(song, locale.value),
-      to: localePath("/songs/" + song.id),
-      kind: "song",
-      song,
-    })),
+  ...shownSongs.value.map((song) => ({
+    id: "song-" + song.id,
+    label: songTitle(song, locale.value),
+    to: localePath("/songs/" + song.id),
+    kind: "song",
+    song,
+  })),
   ...actions.value,
+  ...viewAll.value,
 ]);
 const optionId = (index: number) => `${id}-option-${index}`;
 function cancelRequest() {
@@ -59,6 +74,7 @@ function cancelRequest() {
 function search() {
   cancelRequest();
   songs.value = [];
+  total.value = 0;
   failed.value = false;
   selected.value = -1;
   if (!props.open || !query.value.trim()) return;
@@ -74,6 +90,7 @@ function search() {
       });
       if (current === generation) {
         songs.value = payload.songs.slice(0, 8);
+        total.value = Number(payload.total) || 0;
         selected.value = -1;
       }
     } catch {
@@ -180,7 +197,7 @@ onBeforeUnmount(() => {
               ? t("rework.loading")
               : failed
                 ? t("rework.searchError")
-                : t("rework.results", { count: results.length })
+                : t("rework.results", { count: results.length - viewAll.length })
           }}
         </p>
         <ul
@@ -203,9 +220,10 @@ onBeforeUnmount(() => {
               v-if="result.song"
               :song-id="result.song.id"
               size="md"
-            /><ReworkIcon v-else name="tools" /><span class="result-label"
+            /><ReworkIcon v-else :name="result.kind === 'all' ? 'songs' : 'tools'" /><span
+              class="result-label"
               >{{ result.label
-              }}<small>{{
+              }}<small v-if="result.kind !== 'all'">{{
                 result.kind === "song" ? t("rework.song") : t("rework.page")
               }}</small></span
             ><span aria-hidden="true">↵</span>

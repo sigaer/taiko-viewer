@@ -823,6 +823,11 @@
         "keyword": "その他の楽曲",
         "panelDesc": "通常の番号体系に含まれないその他の楽曲を表示します。曲名と分類で検索できます。"
       },
+      "all": {
+        "title": "すべての楽曲",
+        "desc": "中国版太鼓の達人の全楽曲（実装曲・未収録曲・その他）。曲名、分類、ID で検索できます。",
+        "keyword": "太鼓の達人 楽曲一覧"
+      },
       "v2Constants": {
         "title": "V2 定数",
         "desc": "太鼓の達人の譜面ごとの V2 定数、ノーツ数、能力値を確認できます。定数は、対応する精度を達成するために必要な相対的な難易度を表します。",
@@ -2170,9 +2175,7 @@
     "sync": "同期",
     "notifications": "通知",
     "login": "ログイン",
-    "catalog": "収録曲",
-    "removed": "削除曲",
-    "other": "その他",
+    "catalog": "楽曲一覧",
     "constants": "定数表",
     "guide": "攻略",
     "titles": "称号",
@@ -2182,6 +2185,62 @@
     "weekly": "週報",
     "myPosts": "自分の投稿",
     "settings": "設定",
-    "about": "このサイトについて"
+    "about": "このサイトについて",
+    "viewAll": "{count} 曲の結果をすべて表示",
+    "library": {
+      "search": "楽曲を検索",
+      "searchPlaceholder": "曲名・分類・ID",
+      "clearKeyword": "キーワードをクリア",
+      "shelfLabel": "収録状況",
+      "sortLabel": "並び順",
+      "shelf": {
+        "available": "実装",
+        "removed": "未収録",
+        "other": "その他",
+        "all": "すべて"
+      },
+      "sort": {
+        "open-day-desc": "新着順",
+        "catalog": "楽曲データ順"
+      },
+      "title": {
+        "available": "実装曲",
+        "removed": "中国版未収録曲",
+        "other": "その他の楽曲",
+        "all": "すべての楽曲"
+      },
+      "summary": "全 {total} 曲・{page} / {pages} ページ",
+      "summaryNone": "全 0 曲",
+      "loading": "読み込み中…",
+      "columns": {
+        "song": "楽曲",
+        "genre": "ジャンル",
+        "difficulty": "難易度",
+        "bpm": "BPM",
+        "openDay": "実装日",
+        "shelf": "状況"
+      },
+      "noMatch": "「{q}」に一致する楽曲はありません",
+      "searchAll": "すべての楽曲から検索",
+      "emptyShelf": "楽曲はありません",
+      "failed": "読み込みに失敗しました",
+      "retry": "再試行",
+      "beyond": "{page} ページはありません（全 {pages} ページ）",
+      "firstPage": "1 ページ目へ",
+      "pager": "ページ",
+      "prev": "前へ",
+      "next": "次へ",
+      "pageN": "{n} ページ",
+      "genre": {
+        "namco": "ナムコオリジナル",
+        "pops": "ポップス",
+        "kids": "キッズ",
+        "classic": "クラシック",
+        "variety": "バラエティ",
+        "game": "ゲームミュージック",
+        "vocaloid": "ボーカロイド",
+        "anime": "アニメ"
+      }
+    }
   }
 }

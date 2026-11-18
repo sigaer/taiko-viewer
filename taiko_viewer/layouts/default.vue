@@ -6,6 +6,7 @@ import { SITE_TITLE } from "~/utils/seo";
 import { buildAnalyticsRouteTemplate, buildAnonymousPageLocation } from "~/utils/analytics";
 import { resolveHomePresentation, shouldHideHomeChrome } from "~/utils/homePresentation";
 import { isImmersiveRoute, resolveMobileTab } from "~/utils/navigation";
+import { catalogLocation, detailFallbackShelf, locationHref } from "~/utils/rework/catalog";
 
 declare global {
   interface Window {
@@ -44,6 +45,12 @@ const hideGuestHomeChrome = computed(
 );
 const hidePageHeader = computed(() => Boolean(route.meta.hidePageHeader));
 const mobileParent = computed(() => [...breadcrumbItems.value].reverse().find(item => item.to && item.to !== '/' && localePath(item.to) !== route.path));
+// Song detail returns to the library state this tab came from (applied after mount; fallback by list/shelf).
+const isSongDetail = computed(() => /^\/(?:ja\/)?songs\/\d+\/?$/.test(route.path));
+const libraryReturn = useLibraryReturn(() => catalogLocation({ shelf: detailFallbackShelf(route.query.list, undefined) }, localePath));
+const mobileBackHref = computed(() =>
+  isSongDetail.value ? libraryReturn.value : mobileParent.value?.to ? localePath(mobileParent.value.to) : undefined
+);
 const keyboardOpen = ref(false);
 const showMobileTabBar = computed(
   () => !keyboardOpen.value && Boolean(mobileActiveTab.value) && !isImmersiveRoute(route.path, route.meta.mobileNav)
@@ -143,14 +150,13 @@ const buildBreadcrumbs = () => {
     if (firstLabel === t("nav.home")) return items;
     return [{ labelKey: "nav.home", to: "/" }, ...items];
   }
-  if (/^\/(?:ja\/)?songs\/[^/]+$/.test(route.path)) {
-    const isRemovedList = route.query.list === "removed";
-    const isOtherList = route.query.list === "other";
+  if (isSongDetail.value) {
+    const shelf = detailFallbackShelf(route.query.list, undefined);
     return [
       { labelKey: "nav.home", to: "/" },
       {
-        labelKey: isRemovedList ? "nav.songsRemoved" : isOtherList ? "nav.songsOther" : "nav.songsAvailable",
-        to: isRemovedList ? "/songs/removed" : isOtherList ? "/songs/other" : "/songs/available"
+        labelKey: shelf === "removed" ? "nav.songsRemoved" : shelf === "other" ? "nav.songsOther" : "nav.songsAvailable",
+        to: locationHref(catalogLocation({ shelf }))
       },
       { labelKey: "songs.detail" }
     ];
@@ -208,7 +214,7 @@ onBeforeUnmount(() => {
 
 <template>
   <el-config-provider :locale="elementLocale">
-    <ReworkShell :title="pageTitle" :content-layout="contentLayout" :show-mobile-nav="showMobileTabBar" :back-path="mobileParent?.to">
+    <ReworkShell :title="pageTitle" :content-layout="contentLayout" :show-mobile-nav="showMobileTabBar" :back-href="mobileBackHref">
       <header v-if="!hideGuestHomeChrome && !hidePageHeader" class="page-header">
         <h1>{{ pageTitle }}</h1><p v-if="!route.meta.hidePageDescription">{{ pageDesc }}</p>
       </header>

@@ -22,6 +22,9 @@ assert.ok(
 const web = resolve(fileURLToPath(new URL("../..", import.meta.url)));
 const repo = resolve(web, "..");
 const output = process.argv.find((x) => x.startsWith("--output="))?.slice(9);
+// --check=catalog runs the song library acceptance (catalog-check.mjs) instead of the shell check.
+const check = process.argv.find((x) => x.startsWith("--check="))?.slice(8) || "shell";
+assert.ok(["shell", "catalog"].includes(check), "Unknown --check");
 assert.ok(
   output?.startsWith("/var/tmp/"),
   "An isolated Nitro output is required",
@@ -234,7 +237,7 @@ try {
   );
   const result = await run(
     process.execPath,
-    [web + "/scripts/rework/shell-check.mjs", output],
+    [web + `/scripts/rework/${check}-check.mjs`, output],
     "runtime",
     testEnv,
     800000,

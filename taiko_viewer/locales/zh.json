@@ -824,6 +824,11 @@
         "keyword": "其他歌曲",
         "panelDesc": "展示未纳入常规编号的其他歌曲，支持按名称与分类搜索。"
       },
+      "all": {
+        "title": "全部歌曲",
+        "desc": "国行太鼓达人全部歌曲，含实装、未上架与其他歌曲，支持按曲名、分类与 ID 搜索。",
+        "keyword": "太鼓达人歌曲列表"
+      },
       "v2Constants": {
         "title": "V2 定数",
         "desc": "查看太鼓达人谱面的 V2 定数、物量与五项能力值；定数表示达到对应良率所需要的相对难度。",
@@ -2224,9 +2229,7 @@
     "sync": "同步",
     "notifications": "通知",
     "login": "登录",
-    "catalog": "在架歌曲",
-    "removed": "已移除",
-    "other": "其他歌曲",
+    "catalog": "歌曲列表",
     "constants": "定数表",
     "guide": "攻略",
     "titles": "称号",
@@ -2236,6 +2239,62 @@
     "weekly": "周报",
     "myPosts": "我的帖子",
     "settings": "设置",
-    "about": "关于"
+    "about": "关于",
+    "viewAll": "查看全部 {count} 首结果",
+    "library": {
+      "search": "搜索曲库",
+      "searchPlaceholder": "曲名、分类或 ID",
+      "clearKeyword": "清空关键词",
+      "shelfLabel": "上架状态",
+      "sortLabel": "排序",
+      "shelf": {
+        "available": "实装",
+        "removed": "未上架",
+        "other": "其他",
+        "all": "全部"
+      },
+      "sort": {
+        "open-day-desc": "最新上架",
+        "catalog": "曲库顺序"
+      },
+      "title": {
+        "available": "实装歌曲",
+        "removed": "国行未上架歌曲",
+        "other": "其他歌曲",
+        "all": "全部歌曲"
+      },
+      "summary": "共 {total} 首 · 第 {page} / {pages} 页",
+      "summaryNone": "共 0 首",
+      "loading": "正在加载…",
+      "columns": {
+        "song": "歌曲",
+        "genre": "分类",
+        "difficulty": "难度",
+        "bpm": "BPM",
+        "openDay": "上架日期",
+        "shelf": "状态"
+      },
+      "noMatch": "没有匹配“{q}”的歌曲",
+      "searchAll": "在全部歌曲中搜索",
+      "emptyShelf": "暂无歌曲",
+      "failed": "加载失败",
+      "retry": "重试",
+      "beyond": "第 {page} 页没有歌曲，共 {pages} 页",
+      "firstPage": "回到第 1 页",
+      "pager": "分页",
+      "prev": "上一页",
+      "next": "下一页",
+      "pageN": "第 {n} 页",
+      "genre": {
+        "namco": "南梦宫原创音乐",
+        "pops": "流行音乐",
+        "kids": "儿童音乐",
+        "classic": "古典音乐",
+        "variety": "综合音乐",
+        "game": "游戏音乐",
+        "vocaloid": "博歌乐音乐",
+        "anime": "动漫音乐"
+      }
+    }
   }
 }
