@@ -17,3 +17,14 @@
 验证：qa-68c6a0f98af6 经 Linux static 隔离 runner，4 项 Node 测试通过，覆盖
 分组边界、日文/旧 URL 查询保留、服务端分页字段及键盘/输入保护。尚未接入
 页面，因此这不是 Stage 1 完成或浏览器验收声明。Phase 0 收口见父提交 3b1bf598。
+
+
+Keepalive 前置修复：NuxtPage 显式 prop 会优先于路由 meta，导致 `keepalive:false`
+失效；改用 Nuxt app 默认配置，保留 PracticePlayerPage 排除与普通页面缓存。
+隔离真实 Nuxt/Element Plus 浏览器 qa-3a0db8518560 证实修复前不缓存声明失效；
+qa-9f98f83f8625 修复后 5 项通过：同布局状态保留、跨布局/head、无布局缓存页的
+Teleport 卸载、显式禁止缓存、零生命周期异常。当前 Vue 3.5.43/Nuxt 3.21.11/
+Element Plus 2.13.2 未复现历史 Windows nextSibling 异常，不能声称复现并修复了
+相同框架异常；未改依赖或删除样张既有保护。测试不连接数据库、使用独立网络。
+参考 Nuxt 本地 page.js 的 `props.keepalive ?? route.meta.keepalive` 优先级及
+[Vue KeepAlive 生命周期](https://vuejs.org/guide/built-ins/keep-alive)。

@@ -48,6 +48,9 @@ export default defineNuxtConfig({
     vueI18n: "./i18n.config.ts"
   },
   app: {
+    // A NuxtPage prop overrides per-page metadata, including keepalive: false.
+    // The app default preserves caching while letting immersive pages opt out.
+    keepalive: { exclude: ["PracticePlayerPage"] },
     head: {
       title: SITE_TITLE,
       meta: [
