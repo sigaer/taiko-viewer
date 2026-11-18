@@ -459,5 +459,12 @@
     "runningQaUnits": 0,
     "testListeners": 0,
     "productionServicesModified": false
+  },
+  "artifactRetention": {
+    "date": "2026-11-18",
+    "fullRawArchiveAvailable": false,
+    "policy": "Completed regenerable screenshots, build outputs and verbose logs removed by user-authorized closeout. Small reports and hashes retained; historical manifest is not proof originals remain.",
+    "index": "/home/sigaer/taiko/qa-vault/EVIDENCE-RETENTION.json",
+    "cleanupRun": "qa-14600655c2ef"
   }
 }

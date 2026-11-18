@@ -1,5 +1,8 @@
 # Annual Report Retirement — Viewer source candidate
 
+2026-11-18 保留策略更新：下文归档数量为历史记录。可再生原件已按授权清理，
+不再宣称完整原件可复验；当前索引与占用见 `vault-closeout-20261118.md`。
+
 范围是本仓库 Viewer 的年度报告产品。没有部署、停止线上 Worker、操作生产库，
 也没有改年度算法或仓库外 taiko-bot 安装包。退役 API 是不兼容变更，候选版本
 从 1.14.2 提升为 2.0.0；这不是生产发布。
