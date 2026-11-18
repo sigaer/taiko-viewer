@@ -41,7 +41,9 @@ export const FAMILY_RULES = [
   {
     family: /--(?:don|ka|roll)(?:-[\w-]+)?(?![\w-])/g,
     name: "--don* / --ka* / --roll*",
-    allow: [/^components\/ds\/(Note|JudgeBar)\w*\.vue$/, /^components\/ds\/charts\//, /^components\/ds\/\w*Lane\w*\.vue$/]
+    allow: [/^components\/ds\/(Note|JudgeBar)\w*\.vue$/, /^components\/ds\/charts\//, /^components\/ds\/\w*Lane\w*\.vue$/],
+    // V1.3 §7.9: the drum mark and mobile centre search retain their approved drumhead.
+    except: [{ file: /^components\/rework\/(Brand|Shell)\.vue$/, token: /^--don$/ }]
   }
 ];
 const PRIMITIVE = /--(?:ai|shu|asagi|yamabuki)-\d+/g;

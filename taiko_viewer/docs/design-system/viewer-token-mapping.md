@@ -21,13 +21,13 @@ alias keeps the look: 6 · alias changes the look: 38 · no equivalent: 19
 | `--viewer-text` | `--ink` | #203f43 → #203f43 | #e4f4f1 → #e4f4f1 | same | same | 58 | alias keeps the look |
 | `--viewer-text-muted` | `--ink-3` | #4d696c → #4d696c | #accbca → #a3c0c0 | same | differs | 77 | alias changes the look |
 | `--viewer-text-disabled` | `--ink-3` | #72888b → #4d696c | #829fa1 → #a3c0c0 | differs | differs | 2 | alias changes the look |
-| `--viewer-border` | `--line` | #ccdfdc → #ccdfdc | #35575a → #2f5257 | same | differs | 60 | alias changes the look |
+| `--viewer-border` | `--line` | #ccdfdc → #ccdfdc | #35575a → #2f5257 | same | differs | 59 | alias changes the look |
 | `--viewer-control-border` | `--ctl-border` | #6e8c8e → #6e8c8e | #719b9d → #779fa1 | same | differs | 9 | alias changes the look |
-| `--viewer-primary` | `--action-bg` | #bd352f → #006c76 | #ff9a8e → #86d9dc | differs | differs | 30 | alias changes the look |
+| `--viewer-primary` | `--action-bg` | #bd352f → #006c76 | #ff9a8e → #86d9dc | differs | differs | 29 | alias changes the look |
 | `--viewer-primary-hover` | `--action-bg-hover` | #ac302b → #005860 | #ffa99f → #a0e3e5 | differs | differs | 7 | alias changes the look |
 | `--viewer-on-primary` | `--action-ink` | #ffffff → #ffffff | #193438 → #0b2a2d | same | differs | 21 | alias changes the look |
-| `--viewer-link` | `--link` | #006c76 → #006c76 | #86d9dc → #86d9dc | same | same | 46 | alias keeps the look |
-| `--viewer-selected` | `--selected-bg` | #d7ece9 → #d7ece9 | #244b4e → #2a565a | same | differs | 4 | alias changes the look |
+| `--viewer-link` | `--link` | #006c76 → #006c76 | #86d9dc → #86d9dc | same | same | 45 | alias keeps the look |
+| `--viewer-selected` | `--selected-bg` | #d7ece9 → #d7ece9 | #244b4e → #2a565a | same | differs | 3 | alias changes the look |
 | `--viewer-primary-surface` | `--selected-bg` | #fbece9 → #d7ece9 | #493638 → #2a565a | differs | differs | 0 | alias changes the look |
 | `--viewer-success` | `--ok` | #26724e → #26724e | #86d3a8 → #4ccb8a | same | differs | 4 | alias changes the look |
 | `--viewer-success-surface` | `--ok-wash` | #edf6f0 → #e4f3ea | #233c31 → #153527 | differs | differs | 2 | alias changes the look |
@@ -37,7 +37,7 @@ alias keeps the look: 6 · alias changes the look: 38 · no equivalent: 19
 | `--viewer-error-surface` | `--danger-wash` | #fceef1 → #fde4de | #422b34 → #3b1f24 | differs | differs | 3 | alias changes the look |
 | `--viewer-info` | `--ink-2` | #426785 → #3d5a5e | #a4c8e3 → #accbca | differs | differs | 2 | alias changes the look |
 | `--viewer-info-surface` | `--bg-sunk` | #edf3f8 → #def0ee | #273b4b → #081619 | differs | differs | 0 | alias changes the look |
-| `--viewer-overlay` | `--scrim` | #0f1b21/42% → #0f1b21/46% | #00080d/65% → #050e10/62% | differs | differs | 7 | alias changes the look |
+| `--viewer-overlay` | `--scrim` | #0f1b21/42% → #0f1b21/46% | #00080d/65% → #050e10/62% | differs | differs | 6 | alias changes the look |
 | `--viewer-shadow` | — | #162b30/6% → — | #00080d/22% → — | — | — | 18 | no equivalent |
 | `--viewer-tooltip-bg` | `--overlay-bg` | #24494d → #f9fdfc | #31565b → #265056 | differs | differs | 1 | alias changes the look |
 | `--viewer-tooltip-text` | `--ink` | #f1fbf9 → #203f43 | #f1fbf9 → #e4f4f1 | differs | differs | 1 | alias changes the look |

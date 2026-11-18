@@ -65,8 +65,8 @@ export function structureProblems(css) {
     }
     if (block.media && !/^\(max-width:\s*767px\)$/.test(block.media)) problems.push(`unexpected media query: ${block.media}`);
     for (const sel of splitTop(block.selector)) {
-      if (!/^html\.ds-preview(?:\[data-theme="dark"\]|:not\(\[data-theme="dark"\]\))?(?::lang\(ja\)| :lang\(ja\))?(?: \.stage)?$/.test(sel.replace(/'/g, '"'))) {
-        problems.push(`selector outside the ds-preview scope rules: ${sel}`);
+      if (!/^html\.(?:ds-preview|viewer-rework)(?:\[data-theme="dark"\]|:not\(\[data-theme="dark"\]\))?(?::lang\(ja\)| :lang\(ja\))?(?: \.stage)?$/.test(sel.replace(/'/g, '"'))) {
+        problems.push(`selector outside the explicit DS/shell scope rules: ${sel}`);
       }
     }
     for (const d of declarations(block.body)) {

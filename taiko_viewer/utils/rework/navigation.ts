@@ -28,6 +28,8 @@ export function activeDestination(path: string): DestinationKey | null {
   if (under('/account/songs') || ['/tools/b30','/tools/trend','/tools/progress','/tools/recommend'].includes(value)) return 'play';
   if (under('/my/growth') || under('/my/weekly')) return 'growth';
   if (under('/forum')) return 'community';
-  if (value === '/more' || under('/tools')) return 'tools';
+  if (['/more','/settings','/about'].includes(value) || under('/tools')) return 'tools';
   return null;
 }
+
+export const alternateLocale = (locale: string): "zh" | "ja" => locale === "ja" ? "zh" : "ja";

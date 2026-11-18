@@ -29,3 +29,7 @@ export function legacyCatalogLocation(path: string, query: Record<string, RouteV
 export function songSearchRequest(keyword: string) {
   return catalogRequest({ q: keyword, shelf: 'all' }, 8);
 }
+
+export function songTitle(song: {song_name: string; song_name_jp?: string}, locale: string) {
+  return locale === "ja" ? song.song_name_jp || song.song_name : song.song_name;
+}

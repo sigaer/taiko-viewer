@@ -2,7 +2,7 @@
 import { existsSync, readdirSync, statSync } from "node:fs";
 import { join, relative, sep } from "node:path";
 
-export const DS_DIRS = ["components/ds", "ds-samples", "assets/css/ds", "utils/ds"];
+export const DS_DIRS = ["components/rework", "utils/rework", "components/ds", "ds-samples", "assets/css/ds", "utils/ds"];
 const EXT = /\.(vue|css|ts|mjs|js)$/;
 
 const posix = (p) => p.split(sep).join("/");

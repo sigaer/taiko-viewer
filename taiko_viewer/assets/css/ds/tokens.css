@@ -1,7 +1,8 @@
 /*
  * Viewer Design System V1.3 tokens (C+: real game assets + Viewer Teal).
  *
- * Stage 0 scoping rule (D0-2): every declaration lives under html.ds-preview. Nothing here is on :root,
+ * Stage 1: viewer-rework opts the default shell into tokens only.
+ * Stage 0 scoping rule (D0-2): every declaration lives under html.ds-preview or html.viewer-rework. Nothing here is on :root,
  * so pages without that class never see these values, however long this stylesheet stays in the document.
  * Only custom properties; no element styles. Existing --viewer-* tokens are untouched and are not aliased.
  *
@@ -10,7 +11,8 @@
  * Verified by scripts/ds/check-tokens.mjs; contrast by scripts/ds/contrast-check.mjs.
  */
 
-html.ds-preview {
+html.ds-preview,
+html.viewer-rework {
   /* ---------- Primitive (only this file may reference these) ---------- */
   --ai-950: #0b1120;
   --ai-900: #101728;
@@ -259,7 +261,8 @@ html.ds-preview {
 }
 
 /* ============ Light ============ */
-html.ds-preview:not([data-theme="dark"]) {
+html.ds-preview:not([data-theme="dark"]),
+html.viewer-rework:not([data-theme="dark"]) {
   /* Brand: Viewer Teal */
   --brand-primary: #006c76;
   --brand-hover: #005860;
@@ -329,7 +332,8 @@ html.ds-preview:not([data-theme="dark"]) {
 }
 
 /* ============ Dark ============ */
-html.ds-preview[data-theme="dark"] {
+html.ds-preview[data-theme="dark"],
+html.viewer-rework[data-theme="dark"] {
   /* Brand: Viewer Teal */
   --brand-primary: #86d9dc;
   --brand-hover: #a0e3e5;
@@ -400,20 +404,24 @@ html.ds-preview[data-theme="dark"] {
 
 /* ============ Japanese UI: Latin and digits stay Barlow, CJK falls back to the Japanese stack ============ */
 html.ds-preview:lang(ja),
-html.ds-preview :lang(ja) {
+html.viewer-rework:lang(ja),
+html.ds-preview :lang(ja),
+html.viewer-rework :lang(ja) {
   --font-ui: 'Barlow', var(--font-cjk-jp);
   --font-num: 'Barlow Condensed', 'Barlow', var(--font-cjk-jp);
 }
 
 /* ============ Narrow screens (breakpoint 767, utils/ds/breakpoints.ts) ============ */
 @media (max-width: 767px) {
-  html.ds-preview {
+  html.ds-preview,
+  html.viewer-rework {
     --gutter: 16px;
   }
 }
 
 /* ============ Stage surface (.stage; dark teal in both themes) ============ */
-html.ds-preview .stage {
+html.ds-preview .stage,
+html.viewer-rework .stage {
   /* Role tokens are declared again here: custom properties resolve where they are declared (04 §2.1) */
   --action-bg: var(--brand-primary);
   --action-bg-hover: var(--brand-hover);

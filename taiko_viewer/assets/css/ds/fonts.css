@@ -6,10 +6,8 @@
  * (@fontsource 5.3.0, provenance in docs/design-system/viewer-ds.md; SIL Open Font License 1.1, OFL-Barlow.txt / OFL-Barlow-Condensed.txt).
  *
  * @font-face is a global at-rule and cannot be scoped by a selector. It requests nothing until an element asks
- * for these families, which only happens under html.ds-preview through --font-ui / --font-num, and only the
- * sample pages import this file. Option A of D0-4 (self-hosted Noto Sans SC / JP) belongs in a separate
- * fonts-cjk.css declaring 'Noto Sans SC Variable' / 'Noto Sans JP Variable', the families already first in the
- * token stacks, so the A/B comparison needs no token change.
+ * for these families under html.ds-preview or html.viewer-rework through --font-ui / --font-num.
+ * Only samples and the Stage 1 shell import this file. D0-4 uses option B: CJK remains system-hosted.
  */
 
 @font-face {

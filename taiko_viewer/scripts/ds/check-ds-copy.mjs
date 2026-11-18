@@ -63,7 +63,7 @@ export function checkFile(file, text, locales) {
     }
   }
   for (const m of code.matchAll(/\blocale(?:\.value)?\s*={2,3}\s*["'](?:ja|zh)["']|["'](?:ja|zh)["']\s*={2,3}\s*locale\b|\blocale(?:\.value)?\.startsWith\(\s*["']ja/g)) {
-    if (file.startsWith("utils/ds/")) continue; // pure helpers may take a locale argument (rankName)
+    if ((file.startsWith("utils/ds/") || file.startsWith("utils/rework/"))) continue; // pure helpers may take a locale argument (rankName)
     add(lineAt(code, m.index), "inline language branch", m[0]);
   }
   for (const m of code.matchAll(/\{\s*zh\s*:\s*["'`][^}]*\bja\s*:/g)) add(lineAt(code, m.index), "inline bilingual literal", m[0].slice(0, 80));
@@ -75,7 +75,7 @@ export function checkFile(file, text, locales) {
   }
   if (!isSample) {
     for (const m of code.matchAll(/(?<![\w.$])\$?t\(\s*`([^`]*\$\{[^`]*)`/g)) {
-      if (!/^ds\.|^difficulty\./.test(m[1])) add(lineAt(code, m.index), "dynamic locale key outside ds.* / difficulty.*", m[1]);
+      if (!/^ds\.|^difficulty\.|^rework\./.test(m[1])) add(lineAt(code, m.index), "dynamic locale key outside ds.* / difficulty.* / rework.*", m[1]);
     }
   }
   return findings;
@@ -83,8 +83,8 @@ export function checkFile(file, text, locales) {
 
 export function localeFindings(zh, ja) {
   const findings = [];
-  const a = new Map(flatten(zh.ds, "ds."));
-  const b = new Map(flatten(ja.ds, "ds."));
+  const a = new Map([...flatten(zh.ds, "ds."), ...flatten(zh.rework, "rework.")]);
+  const b = new Map([...flatten(ja.ds, "ds."), ...flatten(ja.rework, "rework.")]);
   for (const [k, v] of a) {
     if (!b.has(k)) findings.push({ file: "locales/ja.json", line: 0, rule: "ds key missing", detail: k });
     if (typeof v !== "string" || !v.trim()) findings.push({ file: "locales/zh.json", line: 0, rule: "empty ds string", detail: k });
@@ -108,8 +108,8 @@ const isMain = process.argv[1] && resolve(process.argv[1]) === fileURLToPath(imp
 if (isMain) {
   const { files, findings, zh, ja } = run();
   if (process.argv.includes("--list")) {
-    const jaMap = new Map(flatten(ja.ds, "ds."));
-    for (const [k, v] of flatten(zh.ds, "ds.")) console.log(`${k.padEnd(28)} ${v}  |  ${jaMap.get(k)}`);
+    const jaMap = new Map([...flatten(ja.ds, "ds."), ...flatten(ja.rework, "rework.")]);
+    for (const [k, v] of [...flatten(zh.ds, "ds."), ...flatten(zh.rework, "rework.")]) console.log(`${k.padEnd(28)} ${v}  |  ${jaMap.get(k)}`);
   }
   for (const f of findings) console.log(`FAIL  ${f.file}${f.line ? `:${f.line}` : ""}  ${f.rule}: ${f.detail}`);
   console.log(findings.length ? `\n${findings.length} finding(s)` : `\nds copy OK: ${files.length} files, ${flatten(zh.ds).length} ds keys in both locales`);
