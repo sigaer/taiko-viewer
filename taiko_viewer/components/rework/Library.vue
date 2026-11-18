@@ -286,32 +286,21 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
     </div>
 
     <section class="lib-results" :aria-busy="busy">
-      <div v-if="view === 'failed'" class="lib-state" role="alert">
-        <p>{{ t("rework.library.failed") }}</p>
-        <button type="button" class="btn" @click="load">{{ t("rework.library.retry") }}</button>
-      </div>
-      <div v-else-if="view === 'noMatch'" class="lib-state">
-        <p>{{ t("rework.library.noMatch", { q: state.q }) }}</p>
-        <div class="actions">
-          <NuxtLink v-slot="{ href: to, navigate }" :to="href(keywordSwitch(state, ''))" custom>
-            <a class="btn" :href="to" @click="navigate">{{ t("rework.library.clearKeyword") }}</a>
-          </NuxtLink>
-          <NuxtLink v-if="state.shelf !== 'all'" v-slot="{ href: to, navigate }" :to="href(shelfSwitch(state, 'all'))" custom>
-            <a class="btn" :href="to" @click="navigate">{{ t("rework.library.searchAll") }}</a>
-          </NuxtLink>
-        </div>
-      </div>
-      <div v-else-if="view === 'empty'" class="lib-state">
-        <p>{{ t("rework.library.emptyShelf") }}</p>
-      </div>
-      <div v-else-if="view === 'beyond'" class="lib-state">
-        <p>{{ t("rework.library.beyond", { page: state.page, pages }) }}</p>
-        <div class="actions">
-          <NuxtLink v-slot="{ href: to, navigate }" :to="pageHref(1)" custom>
-            <a class="btn" :href="to" @click="navigate">{{ t("rework.library.firstPage") }}</a>
-          </NuxtLink>
-        </div>
-      </div>
+      <ReworkState v-if="view === 'failed'" kind="failed" class="lib-state" :title="t('rework.library.failed')" :retry-label="t('rework.library.retry')" @retry="load" />
+      <ReworkState v-else-if="view === 'noMatch'" kind="empty" class="lib-state" :title="t('rework.library.noMatch', { q: state.q })">
+        <NuxtLink v-slot="{ href: to, navigate }" :to="href(keywordSwitch(state, ''))" custom>
+          <a class="btn" :href="to" @click="navigate">{{ t("rework.library.clearKeyword") }}</a>
+        </NuxtLink>
+        <NuxtLink v-if="state.shelf !== 'all'" v-slot="{ href: to, navigate }" :to="href(shelfSwitch(state, 'all'))" custom>
+          <a class="btn" :href="to" @click="navigate">{{ t("rework.library.searchAll") }}</a>
+        </NuxtLink>
+      </ReworkState>
+      <ReworkState v-else-if="view === 'empty'" kind="empty" class="lib-state" :title="t('rework.library.emptyShelf')" />
+      <ReworkState v-else-if="view === 'beyond'" kind="empty" class="lib-state" :title="t('rework.library.beyond', { page: state.page, pages })">
+        <NuxtLink v-slot="{ href: to, navigate }" :to="pageHref(1)" custom>
+          <a class="btn" :href="to" @click="navigate">{{ t("rework.library.firstPage") }}</a>
+        </NuxtLink>
+      </ReworkState>
       <template v-else>
         <div class="cols" aria-hidden="true">
           <span class="c-song">{{ t("rework.library.columns.song") }}</span>
@@ -633,25 +622,9 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
   color: var(--ink-3);
 }
 /* ---------- States ---------- */
+/* States are ReworkState; the list keeps its rule above them */
 .lib-state {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: var(--sp-3);
-  padding: var(--sp-8) var(--sp-4);
   border-top: 1px solid var(--line);
-  color: var(--ink-2);
-}
-.lib-state p {
-  margin: 0;
-  font-size: var(--fs-16);
-  color: var(--ink);
-  overflow-wrap: anywhere;
-}
-.actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-2);
 }
 .btn {
   display: inline-flex;

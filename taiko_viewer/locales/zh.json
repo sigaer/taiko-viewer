@@ -2295,6 +2295,130 @@
         "vocaloid": "博歌乐音乐",
         "anime": "动漫音乐"
       }
+    },
+    "state": {
+      "loading": "正在加载…",
+      "failed": "加载失败",
+      "retry": "重试"
+    },
+    "gate": {
+      "loginTitle": "登录后查看",
+      "bindingTitle": "绑定鼓众广场 ID 后查看",
+      "login": "登录",
+      "register": "注册账号",
+      "bind": "去绑定"
+    },
+    "songDetail": {
+      "backToList": "返回歌曲列表",
+      "missing": "没有找到这首歌",
+      "failed": "歌曲加载失败",
+      "facts": {
+        "artists": "作曲 / 演唱",
+        "openDay": "上架",
+        "subtitle": "副标题"
+      },
+      "side": {
+        "label": "谱面类型",
+        "single": "单人"
+      },
+      "chart": {
+        "title": "谱面",
+        "notes": "最大物量",
+        "practice": "练习播放器",
+        "open": "完整谱面",
+        "openNew": "在新标签页打开完整谱面",
+        "download": "下载 TJA+OGG",
+        "excerpt": "谱面节选",
+        "expand": "展开",
+        "collapse": "收起",
+        "region": "谱面节选，可横向滚动",
+        "loading": "正在读取谱面…",
+        "failed": "谱面暂时无法读取"
+      },
+      "audio": {
+        "title": "试听",
+        "drum": "鼓点",
+        "mix": "混音",
+        "pure": "纯音乐",
+        "missing": "音源不存在",
+        "baseMissing": "基础音源不存在",
+        "pureMissing": "纯音乐音源不存在",
+        "mute": "静音",
+        "unmute": "取消静音",
+        "volume": "鼓点音量"
+      },
+      "data": {
+        "title": "谱面数据",
+        "main": "主定数",
+        "low": "75% 定数",
+        "high": "99% 定数",
+        "notes": "物量",
+        "metrics": {
+          "stamina": "体力",
+          "handspeed": "手速",
+          "burst": "爆发",
+          "complex": "复合",
+          "rhythm": "节奏"
+        },
+        "radar": "五项能力",
+        "source": "数据来源",
+        "unsupported": "V2 定数支持困难、魔王和里魔王",
+        "empty": "暂无该难度的 V2 定数",
+        "failed": "V2 定数加载失败"
+      },
+      "shape": {
+        "title": "六维雷达",
+        "range": "坐标范围 0–{max}",
+        "level": "层级 {level}",
+        "empty": "暂无该歌曲 ID 对应的六维数据",
+        "axes": {
+          "complex": "复合处理",
+          "avgDensity": "平均密度",
+          "peakDensity": "瞬间密度",
+          "rhythm": "叩き分け",
+          "bpm": "BPM变化",
+          "hs": "hs变化"
+        }
+      },
+      "mine": {
+        "title": "我的成绩",
+        "signIn": "登录后查看这张谱面的成绩",
+        "empty": "这张谱面还没有同步到成绩记录",
+        "unavailable": "当前绑定 ID 暂无可用成绩，请检查个人档案与同步状态",
+        "score": "分数",
+        "combo": "最大连击",
+        "drumroll": "连打",
+        "plays": "游玩次数",
+        "updated": "最好成绩于",
+        "others": "其他难度",
+        "all": "全部成绩 →"
+      },
+      "discussions": {
+        "title": "谱面讨论",
+        "all": "全部讨论"
+      }
+    },
+    "constantsTable": {
+      "search": "搜索谱面",
+      "difficulty": "难度",
+      "allDifficulties": "全部",
+      "clear": "清除筛选",
+      "sortLabel": "排序",
+      "sortBy": "按{column}",
+      "asc": "当前升序，改为降序",
+      "desc": "当前降序，改为升序",
+      "pageSize": "每页",
+      "pageSizeOption": "{n} 条",
+      "jump": "跳至第",
+      "jumpUnit": "页",
+      "jumpGo": "跳转",
+      "song": "歌曲",
+      "open": "打开歌曲",
+      "rt": "用 RT 计算器",
+      "inspector": "谱面定数",
+      "scale": "按准确率区分的定数",
+      "select": "查看 {title} {difficulty} 的定数",
+      "close": "关闭"
     }
   }
 }

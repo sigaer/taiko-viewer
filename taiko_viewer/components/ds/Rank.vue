@@ -7,6 +7,7 @@
 //   compact  slot 20 / draw 24 + name (--fs-11, phone list rows)
 //   table    slot 24 / draw 28 + name (--fs-12, dense desktop table; the image is hidden from screen readers)
 //   upgrade  previous 24 → new 30 with an --ink-3 arrow
+// `named` (default / detail): the name as text beside the image, like compact / table (song detail score panel).
 // A slot under 24 px (`slotPx` prop, default/detail only) shows the name instead of the image. Never colour alone:
 // the asset carries its glyph (粋 / 雅 / 極) and every variant has the name as text or accessible name.
 import { formatScoreRank } from "~/utils/scoreRank";
@@ -59,13 +60,15 @@ const props = defineProps({
   /** upgrade only: the rank before */
   previous: { type: [Number, String] as PropType<number | string | null>, default: null },
   /** default / detail: slot override in px (under 24 → name only) */
-  slotPx: { type: Number, default: 0 }
+  slotPx: { type: Number, default: 0 },
+  /** default / detail: show the name as text beside the image (the image is then hidden from screen readers) */
+  named: { type: Boolean, default: false }
 });
 
 const { t, locale } = useI18n();
 const name = computed(() => rankLabel(props.value, locale.value));
-const withName = computed(() => (props.variant === "compact" || props.variant === "table") && hasRankImage(props.value));
 const mark = computed(() => rankMark(props.value, props.variant === "upgrade" ? "default" : props.variant, props.variant === "upgrade" ? 30 : props.slotPx));
+const withName = computed(() => (props.variant === "compact" || props.variant === "table" || props.named) && hasRankImage(props.value) && !mark.value.textOnly);
 const before = computed(() => rankMark(props.previous, "default", 24));
 const beforeName = computed(() => rankLabel(props.previous, locale.value));
 const upgradeName = computed(() => t("ds.rank.upgrade", { from: beforeName.value, to: name.value }));

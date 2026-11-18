@@ -1,10 +1,7 @@
 <script setup lang="ts">
 import { computed, ref, watch } from "vue";
-import SongDifficultyTabs from "~/components/song/SongDifficultyTabs.vue";
-import SongChartPreview from "~/components/song/SongChartPreview.vue";
-import SongAudioPreview from "~/components/song/SongAudioPreview.vue";
 import type { AccountSongScoresPayload } from "~/types/account-song";
-import type { RatingContentItem, SongCatalogItem } from "~/types/content";
+import type { RatingContentItem, SongCatalogItem, V2ConstantsItem } from "~/types/content";
 import type { ChartDifficultyCode } from "~/types/ugc";
 import { buildPageDescription } from "~/utils/seo";
 import { buildSongCoverThumbnailUrl } from "~/utils/songCover";
@@ -32,9 +29,12 @@ const levelTrackMap: Record<ChartDifficultyCode, string> = {
 const requestedDifficulty = Number(route.query.difficulty) as ChartDifficultyCode;
 const selectedTrack = ref(levelTrackMap[requestedDifficulty] || "ONI");
 const selectedSide = ref<'single' | 'p1' | 'p2'>('single');
-watch(() => route.query.difficulty, value => { selectedTrack.value = levelTrackMap[Number(value) as ChartDifficultyCode] || "ONI"; });
-
-const songId = computed(() => Number(route.params.id));
+// The page is kept alive per song (its key includes the id), so an instance stays on its own song and only follows
+// the address while that address is its own: other routes (another song, any page) must not refetch or rewrite it.
+const instanceSongId = Number(route.params.id);
+const songId = computed(() => instanceSongId);
+const isOwnRoute = () => Number(route.params.id) === instanceSongId;
+watch(() => route.query.difficulty, value => { if (isOwnRoute()) selectedTrack.value = levelTrackMap[Number(value) as ChartDifficultyCode] || "ONI"; });
 const selectedDifficultyCode = computed(() => trackLevelMap[selectedTrack.value] || 4);
 const apiFetch = useViewerApiFetch();
 const { accountUser, resolveAccountUser } = useAccountAuthStatus();
@@ -44,14 +44,15 @@ definePageMeta({
   pageTitleKey: "songs.detail",
   pageDescKey: "page.songs.detail.desc",
   navKey: "/songs",
-  hidePageHeader: true
+  hidePageHeader: true,
+  reworkElementPlus: true
 });
 
 const [songDetailState, chartUgcState] = await Promise.all([
   useSongDetail(songId),
   useChartUgc(songId, selectedDifficultyCode)
 ]);
-const { data: songDetail, pending, error } = songDetailState;
+const { data: songDetail, pending, error, refresh: refreshSongDetail } = songDetailState;
 if (songDetail.value.song && Number(songDetail.value.song.id) !== songId.value) {
   await navigateTo(localePath({ path: `/songs/${songDetail.value.song.id}`, query: route.query }), { redirectCode: 301, replace: true });
 }
@@ -99,6 +100,14 @@ const { data: accountScores, pending: accountScoresPending } = useLazyAsyncData<
     server: false
   }
 );
+// V2 constants of every chart of the song (was fetched inside SongV2Constants.vue; same request and key). The page
+// owns it now so the difficulty tabs show each chart's constant.
+const { data: v2Constants, pending: v2Pending, error: v2Error, refresh: refreshV2Constants } = useLazyAsyncData(
+  () => `song-v2-constants-${songId.value}`,
+  () => apiFetch<{ items: V2ConstantsItem[] }>(`/api/content/songs/${songId.value}/v2`),
+  { default: () => ({ items: [] }), watch: [songId] }
+);
+const v2Chart = (track: string) => v2Constants.value.items.find((item) => item.difficulty === track.toLowerCase());
 const branchAudioVariants = computed(() => songDetail.value.branchAudioVariants || {});
 const tjaBundleUrl = computed(() => songDetail.value.tjaBundleUrl || "");
 const normalizedShelfStatus = (value: SongCatalogItem["shelf_status"]) => {
@@ -119,7 +128,7 @@ const songListLabelKey = computed(() => {
 watch(
   () => [song.value?.shelf_status, route.query.list] as const,
   async ([shelfStatus, listQuery]) => {
-    if (!song.value || listQuery === "removed" || listQuery === "available") return;
+    if (!song.value || !isOwnRoute() || listQuery === "removed" || listQuery === "available") return;
     if (normalizedShelfStatus(shelfStatus) !== 1) return;
     await navigateTo(
       {
@@ -133,43 +142,8 @@ watch(
 );
 const getSongPrimaryTitle = (target: SongCatalogItem | null) =>
   target ? (locale.value === "ja" && target.song_name_jp ? target.song_name_jp : target.song_name) : "";
-const getSongSecondaryTitle = (target: SongCatalogItem | null) =>
-  target ? (locale.value === "ja" ? target.song_name || "-" : target.song_name_jp || "-") : "-";
-const copy = computed(() =>
-  locale.value === "ja"
-    ? {
-        detailTitle: "楽曲詳細",
-        errorTitle: "楽曲が存在しないか、読み込みに失敗しました",
-        errorSubtitle: "楽曲一覧へ戻って再試行してください。",
-        backToList: "楽曲一覧へ戻る",
-        back: "← 一覧へ戻る",
-        releaseDate: "公開日",
-        subtitle: "サブタイトル",
-        version: "実装バージョン",
-        artists: "作曲 / 歌唱",
-        radar: "六次元レーダー",
-        radarAria: "六次元レーダーチャート",
-        radarRange: "座標範囲",
-        radarLevel: "レベル",
-        radarEmpty: "この楽曲 ID に対応する六次元データはありません"
-      }
-    : {
-        detailTitle: "歌曲详情",
-        errorTitle: "歌曲不存在或加载失败",
-        errorSubtitle: "请返回歌曲列表后重试。",
-        backToList: "返回歌曲列表",
-        back: "← 返回列表",
-        releaseDate: "发布日期",
-        subtitle: "副标题",
-        version: "实装版本",
-        artists: "作曲/演唱",
-        radar: "六维雷达",
-        radarAria: "六维雷达图",
-        radarRange: "坐标范围",
-        radarLevel: "层级",
-        radarEmpty: "暂无该歌曲 ID 对应的六维数据"
-      }
-);
+// SEO title only; the visible copy is in rework.songDetail.*.
+const copy = computed(() => ({ detailTitle: t("songs.detail") }));
 
 const coverUrl = computed(() => {
   const id = coverError.value || !song.value ? coverFallbackId : song.value.id;
@@ -220,9 +194,11 @@ const formatStar = (value?: number | string) => {
   return `${value}★`;
 };
 
-const getTrackStarLabel = (key: string) => formatStar(selectedSide.value === 'single'
+/** Star value of a track for the selected side (raw, as the catalog has it). */
+const getTrackStar = (key: string) => selectedSide.value === 'single'
   ? levelMap.value[key as keyof typeof levelMap.value]
-  : song.value?.ourtaiko_difficulties?.find(row => row.difficulty === trackLevelMap[key] && row.side === selectedSide.value)?.level);
+  : song.value?.ourtaiko_difficulties?.find(row => row.difficulty === trackLevelMap[key] && row.side === selectedSide.value)?.level;
+const getTrackStarLabel = (key: string) => formatStar(getTrackStar(key));
 
 const fumenKeyMap: Record<string, keyof typeof levelMap.value> = {
   easy: "EASY",
@@ -240,11 +216,6 @@ const comboIndexMap: Record<string, number> = {
   hard: 2,
   oni: 3,
   inner: 4
-};
-
-const formatList = (input?: string[]) => {
-  if (!input || !input.length) return "-";
-  return input.join(" / ");
 };
 
 const getFumenComboLabel = (key: string) => {
@@ -270,11 +241,8 @@ const fumenDefs = computed(() => {
 const practiceDifficulty: Record<string, number> = { easy: 1, normal: 2, hard: 3, oni: 4, inner: 5 };
 
 const radarDataKeys = ["复合处理", "平均密度", "瞬间密度", "叩き分け", "BPM变化", "hs变化"] as const;
-const radarLabels = computed(() =>
-  locale.value === "ja"
-    ? ["複合処理", "平均密度", "瞬間密度", "叩き分け", "BPM変化", "HS変化"]
-    : ["复合处理", "平均密度", "瞬间密度", "叩き分け", "BPM变化", "hs变化"]
-);
+const radarLabelKeys = ["complex", "avgDensity", "peakDensity", "rhythm", "bpm", "hs"] as const;
+const radarLabels = computed(() => radarLabelKeys.map((key) => t(`rework.songDetail.shape.axes.${key}`)));
 
 const toNumber = (value: unknown) => {
   const parsed = Number(value);
@@ -307,110 +275,31 @@ const radarMax = computed(() => {
   if (maxValue <= 0) return 10;
   return Math.ceil(maxValue / 10) * 10;
 });
-
-const radarSize = 260;
-const radarCenter = radarSize / 2;
-const radarRadius = 86;
-const radarAngleOffset = -Math.PI / 2;
-const radarLevels = [0.25, 0.5, 0.75, 1];
-
-const getRadarPoint = (ratio: number, index: number, extra = 0) => {
-  const angle = (Math.PI * 2 * index) / radarLabels.value.length + radarAngleOffset;
-  const radius = radarRadius * ratio + extra;
-  return {
-    x: radarCenter + radius * Math.cos(angle),
-    y: radarCenter + radius * Math.sin(angle)
-  };
-};
-
-const radarGridPolygons = computed(() =>
-  radarLevels.map((level) =>
-    radarLabels.value
-      .map((_, index) => {
-        const point = getRadarPoint(level, index);
-        return `${point.x},${point.y}`;
-      })
-      .join(" ")
-  )
-);
-
-const radarAxisLines = computed(() =>
-  radarLabels.value.map((_, index) => {
-    const start = getRadarPoint(0, index);
-    const end = getRadarPoint(1, index);
-    return {
-      x1: start.x,
-      y1: start.y,
-      x2: end.x,
-      y2: end.y
-    };
-  })
-);
-
-const radarDataPoints = computed(() =>
-  radarLabels.value.map((_, index) => {
-    const value = radarValues.value[index];
-    const ratio = Math.min(1, value / radarMax.value);
-    const point = getRadarPoint(ratio, index);
-    return {
-      x: point.x,
-      y: point.y,
-      value
-    };
-  })
-);
-
-const radarDataPolygon = computed(() => radarDataPoints.value.map((point) => `${point.x},${point.y}`).join(" "));
-
-const radarLabelPoints = computed(() =>
-  radarLabels.value.map((label, index) => {
-    const point = getRadarPoint(1, index, 22);
-    const deltaX = point.x - radarCenter;
-    const anchor = deltaX > 10 ? "start" : deltaX < -10 ? "end" : "middle";
-    return {
-      label,
-      x: point.x,
-      y: point.y + 4,
-      anchor
-    };
-  })
-);
-
-const radarSummary = computed(() =>
-  radarLabels.value.map((label, index) => ({
-    label,
-    value: radarValues.value[index]
-  }))
-);
-
-const formatRadarValue = (value: number) => {
-  if (Number.isInteger(value)) return `${value}`;
-  return value.toFixed(2);
-};
+// The six values on the shared DS radar (same values, same 0 – radarMax range as before).
+const radarAxes = computed(() => radarLabelKeys.map((key, index) => ({ key, label: radarLabels.value[index]!, value: radarValues.value[index]! })));
 
 // Invalid EDIT deep links fall back to an available chart, including after route changes.
 watch([hasEditDifficulty, selectedTrack], ([hasEdit, track]) => {
   if (!hasEdit && track === "EDIT") selectedTrack.value = "ONI";
 }, { immediate: true });
 const selectedFumen = computed(() => fumenDefs.value.find(item => practiceDifficulty[item.key] === selectedDifficultyCode.value));
-const difficultyTabs = computed(() => trackDefs.value.map(track => ({ ...track, star: getTrackStarLabel(track.key) })));
+// DsDiffTabs: one entry per available chart — star for the selected side, V2 constant where the source has one.
+const difficultyTabs = computed(() => trackDefs.value.map(track => ({
+  difficulty: trackLevelMap[track.key]!,
+  star: getTrackStar(track.key) ?? null,
+  constant: v2Chart(track.key)?.mainConstant ?? null
+})));
+const selectDifficulty = (difficulty: number) => {
+  const track = levelTrackMap[difficulty as ChartDifficultyCode];
+  if (track) selectedTrack.value = track;
+};
 const selectedAccountScores = computed(() => accountScores.value.items.filter(item => item.level === selectedDifficultyCode.value));
-const titleParts = computed(() => {
-  const full = getSongPrimaryTitle(song.value), suffix = full.match(/\([^()]*\)$/)?.[0] || "";
-  return { name: suffix ? full.slice(0, -suffix.length) : full, suffix };
-});
-// Match the existing song-list taxonomy without changing catalog values.
-const songCategory = computed(() => {
-  const category = song.value?.type || "";
-  const japaneseLabels: Record<string, string> = {
-    南梦宫原创音乐: "ナムコオリジナル", 流行音乐: "ポップス", 儿童音乐: "キッズ", 古典音乐: "クラシック",
-    综合音乐: "バラエティ", 游戏音乐: "ゲームミュージック", 博歌乐音乐: "ボーカロイド", 动漫音乐: "アニメ"
-  };
-  return locale.value === "ja" ? japaneseLabels[category] || category : category;
-});
-const sectionCopy = computed(() => locale.value === "ja" ? {
-  analysis: "譜面の特徴と分析", info: "楽曲情報", personal: "自分の成績", empty: "この譜面の成績はまだ同期されていません", signIn: "ログインして、この譜面の成績を確認できます。", login: "ログイン", allScores: "すべての成績 →", volume: "打音の音量"
-} : { analysis: "谱面特征与分析", info: "歌曲资料", personal: "我的成绩", empty: "这张谱面还没有同步到成绩记录", signIn: "登录后查看这张谱面的成绩。", login: "登录", allScores: "全部成绩 →", volume: "鼓点音量" });
+const rtCalculatorTo = computed(() => localePath({ path: "/tools/rt-calculator", query: { songId: String(songId.value), level: String(selectedDifficultyCode.value) } }));
+const detailState = computed(() => (pending.value ? "loading" : error.value ? "failed" : !song.value ? "missing" : "ready"));
+const loginRedirect = computed(() => `${localePath(`/songs/${songId.value}`)}?difficulty=${selectedDifficultyCode.value}`);
+const showRecommendationGoal = computed(() =>
+  Boolean(accountUser.value) && typeof route.query.recommendation === 'string' && selectedDifficultyCode.value === Number(route.query.difficulty)
+);
 
 const pageDescription = computed(() => {
   if (!song.value) return buildPageDescription(t("page.songs.detail.desc"));
@@ -451,213 +340,104 @@ useViewerSeo(() => ({
 </script>
 
 <template>
-  <div class="song-detail-page">
-    <el-card v-if="pending" class="panel-card"><el-skeleton :rows="8" animated /></el-card>
-    <el-card v-else-if="error || !song" class="panel-card">
-      <el-result icon="error" :title="copy.errorTitle" :sub-title="copy.errorSubtitle"><template #extra><NuxtLink :to="songListReturn"><el-button type="primary">{{ copy.backToList }}</el-button></NuxtLink></template></el-result>
-    </el-card>
-    <template v-else>
-      <NuxtLink class="back-link" :to="songListReturn">{{ copy.back }}</NuxtLink>
-      <header class="song-heading">
-        <SongCoverImage :song-id="song.id" :alt="getSongPrimaryTitle(song)" sizes="(max-width: 767px) 80px, 112px" fit="contain" priority class="cover-image" @error="coverError = true" />
-        <div class="song-title-group">
-          <p class="song-category">{{ songCategory }}</p>
-          <h1>{{ titleParts.name }}<wbr v-if="titleParts.suffix"><span class="song-title-version">{{ titleParts.suffix }}</span></h1>
-        </div>
-        <p class="secondary-title" :lang="locale === 'ja' ? 'zh-CN' : 'ja'">{{ getSongSecondaryTitle(song) }}</p>
-        <div class="song-meta"><span>BPM {{ song.bpm || '—' }}</span><span>ID {{ song.id }}</span><span>{{ copy.releaseDate }} {{ song.open_day || '—' }}</span></div>
-      </header>
-
-      <SongDifficultyTabs v-model="selectedTrack" :tracks="difficultyTabs" />
-      <div v-if="availableSides.some(side => side !== 'single')" class="chart-side-options" role="group" :aria-label="locale === 'ja' ? 'プレイヤー側' : '谱面类型'">
-        <button v-for="side in availableSides" :key="side" type="button" :aria-pressed="selectedSide === side" @click="selectedSide = side">{{ side === 'single' ? (locale === 'ja' ? 'シングル' : '单人') : side.toUpperCase() }}</button>
-      </div>
-      <NuxtLink class="rt-calculator-link" :to="localePath({ path: '/tools/rt-calculator', query: { songId: String(songId), level: String(selectedDifficultyCode) } })">{{ t('tools.rtCalculator') }} →</NuxtLink>
-
-      <div class="song-reading-layout">
-        <div class="song-main-column">
-          <SongChartPreview v-if="selectedFumen" :song-id="songId" :song-title="getSongPrimaryTitle(song)" :difficulty="selectedDifficultyCode" :side="selectedSide" :track="selectedTrack" :label="selectedFumen.label" :star="getFumenStarLabel(selectedFumen.key)" :combo="getFumenComboLabel(selectedFumen.key)" :folder="selectedFumen.folder" :tja-bundle-url="tjaBundleUrl">
-            <SongAudioPreview :song-id="songId" :selected-track="selectedTrack" :branch-variants="branchAudioVariants" />
-          </SongChartPreview>
-
-          <details class="song-analysis">
-            <summary>{{ sectionCopy.analysis }}</summary>
-            <SongV2Constants :key="songId" :song-id="songId" :track="selectedTrack" />
-          <div v-if="normalizedShelfStatus(song.shelf_status) !== 2 || hasRadarData" class="radar-card">
-            <div class="section-title">
-              <span class="title-icon radar-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M12 4l7 4v8l-7 4-7-4V8l7-4z M12 4v16 M5 8l14 8 M19 8L5 16"
-                    stroke="currentColor"
-                    stroke-width="1.4"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  />
-                </svg>
-              </span>
-              <span>{{ copy.radar }}</span>
-            </div>
-            <template v-if="hasRadarData">
-              <svg class="radar-chart" viewBox="-48 0 356 260" role="img" :aria-label="copy.radarAria">
-                <polygon
-                  v-for="(polygon, index) in radarGridPolygons"
-                  :key="`grid-${index}`"
-                  class="radar-grid"
-                  :points="polygon"
-                />
-                <line
-                  v-for="(line, index) in radarAxisLines"
-                  :key="`axis-${index}`"
-                  class="radar-axis"
-                  :x1="line.x1"
-                  :y1="line.y1"
-                  :x2="line.x2"
-                  :y2="line.y2"
-                />
-                <polygon class="radar-area" :points="radarDataPolygon" />
-                <circle
-                  v-for="(point, index) in radarDataPoints"
-                  :key="`point-${index}`"
-                  class="radar-point"
-                  :cx="point.x"
-                  :cy="point.y"
-                  r="3.2"
-                />
-                <text
-                  v-for="label in radarLabelPoints"
-                  :key="label.label"
-                  class="radar-label"
-                  :x="label.x"
-                  :y="label.y"
-                  :text-anchor="label.anchor"
-                >
-                  {{ label.label }}
-                </text>
-              </svg>
-              <div class="radar-meta">
-                <span>{{ copy.radarRange }}: 0 - {{ radarMax }}</span>
-                <span v-if="selectedRating?.level">{{ copy.radarLevel }}: {{ selectedRating.level }}</span>
-              </div>
-              <ul class="radar-values">
-                <li v-for="item in radarSummary" :key="item.label">
-                  <span>{{ item.label }}</span>
-                  <strong>{{ formatRadarValue(item.value) }}</strong>
-                </li>
-              </ul>
-            </template>
-            <div v-else class="radar-empty">
-              <img src="/radar-empty.svg" :alt="copy.radarEmpty" class="radar-empty-image" />
-              <p>{{ copy.radarEmpty }}</p>
-            </div>
-          </div>
-          </details>
-          <details class="song-information">
-            <summary>{{ sectionCopy.info }}</summary>
-            <dl class="song-facts"><div><dt>{{ copy.subtitle }}</dt><dd>{{ song.subtitle || '—' }}</dd></div><div><dt>{{ copy.version }}</dt><dd>{{ formatList(song.version) }}</dd></div><div><dt>{{ copy.artists }}</dt><dd>{{ formatList(song.artists) }}</dd></div></dl>
-          </details>
-        </div>
-
-        <aside class="song-reading-rail">
-          <div class="song-personal">
-            <AccountSongScores v-if="accountUser" :items="selectedAccountScores" :pending="accountScoresPending" :unavailable="accountScores.unavailable" :empty-text="sectionCopy.empty" appearance="song-detail">
-              <template #heading-action><NuxtLink class="all-scores-link" :to="localePath('/account/songs')">{{ sectionCopy.allScores }}</NuxtLink></template>
-            </AccountSongScores>
-            <section v-else class="song-sign-in"><h2>{{ sectionCopy.personal }}</h2><p>{{ sectionCopy.signIn }}</p><button type="button" class="song-login" @click="goToChartUgcLogin">{{ sectionCopy.login }}</button></section>
-            <RecommendationGoalAction v-if="accountUser && typeof route.query.recommendation === 'string' && selectedDifficultyCode === Number(route.query.difficulty)" :key="route.query.recommendation" :token="route.query.recommendation" :song-id="songId" :difficulty-type="selectedDifficultyCode" />
-          </div>
-          <ForumSongRelatedDiscussions :key="`${songId}-${selectedDifficultyCode}`" :song-id="songId" :difficulty-type="selectedDifficultyCode" appearance="song-detail" />
-        </aside>
-      </div>
-      <div class="song-community">
-      <ChartUgcSection
-        v-if="chartUgcSummary"
-        appearance="song-detail"
-        :summary="chartUgcSummary"
-        :viewer-state="chartUgcViewerState"
-        :authenticated="Boolean(accountUser)"
-        :interaction-pending="chartUgcInteractionPending"
-        :interaction-unavailable="chartUgcInteractionUnavailable"
-        :difficulty-saving="chartUgcDifficultySaving"
-        :tag-saving="chartUgcTagSaving"
-        :difficulty-error-key="chartUgcDifficultyError"
-        :tag-error-key="chartUgcTagError"
-        :tip-saving="chartUgcTipSaving"
-        :tip-error-key="chartUgcTipError"
-        :helpful-saving-by-id="chartUgcHelpfulSavingById"
-        :helpful-error-by-id="chartUgcHelpfulErrorById"
-        :report-saving-by-id="chartUgcReportSavingById"
-        :report-error-by-id="chartUgcReportErrorById"
-        :report-success-by-id="chartUgcReportSuccessById"
-        :difficulty-label="t(`difficulty.${selectedDifficultyCode}`)"
-        @difficulty-change="setChartUgcDifficultyVote"
-        @tags-change="setChartUgcTagSlugs"
-        @tip-save="saveChartUgcTip"
-        @tip-delete="deleteChartUgcTip"
-        @helpful-change="setChartUgcHelpful"
-        @report="reportChartUgcTip"
-        @login="goToChartUgcLogin"
-      />
-      </div>
+  <ReworkSongDetailFrame
+    :state="detailState"
+    :back-href="songListReturn"
+    panel-id="song-chart-workspace"
+    :tab-id="`song-chart-workspace-tab-${selectedDifficultyCode}`"
+    :side-narrow="Boolean(accountUser)"
+    @retry="refreshSongDetail()"
+  >
+    <template #head>
+      <ReworkSongDetailHead v-if="song" :song="song" />
     </template>
-  </div>
-</template>
+    <template #tabs>
+      <DsDiffTabs :charts="difficultyTabs" :model-value="selectedDifficultyCode" controls="song-chart-workspace" @update:model-value="selectDifficulty" />
+    </template>
+    <template #side>
+      <ReworkSongMyScore
+        :items="accountScores.items"
+        :difficulty="selectedDifficultyCode"
+        :star="getTrackStar(selectedTrack) ?? null"
+        :constant="v2Chart(selectedTrack)?.mainConstant ?? null"
+        :signed-in="Boolean(accountUser)"
+        :pending="accountScoresPending"
+        :unavailable="Boolean(accountScores.unavailable)"
+        :redirect="loginRedirect"
+        @select="selectDifficulty"
+      >
+        <RecommendationGoalAction
+          v-if="showRecommendationGoal"
+          :key="String(route.query.recommendation)"
+          :token="String(route.query.recommendation)"
+          :song-id="songId"
+          :difficulty-type="selectedDifficultyCode"
+        />
+      </ReworkSongMyScore>
+    </template>
 
-<style scoped>
-.chart-side-options{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0;}
-.chart-side-options button{min-height:44px;min-width:48px;padding:8px 14px;border:1px solid var(--viewer-control-border);border-radius:8px;background:var(--viewer-surface);color:var(--viewer-text);font:inherit;cursor:pointer;}
-.chart-side-options button[aria-pressed="true"]{border-color:var(--viewer-primary);background:var(--viewer-primary);color:var(--viewer-on-primary);}
-.chart-side-options button:focus-visible{outline:3px solid var(--viewer-link);outline-offset:2px;}
-.rt-calculator-link { justify-self: start; color: var(--viewer-link); font-size: 14px; padding: 10px 0; }
-.song-detail-page {
-  --el-bg-color:var(--viewer-surface);--el-text-color-primary:var(--viewer-text);--el-border-color:var(--viewer-text-muted);
-  padding:8px 0 32px; color:var(--viewer-text); min-width:0;
-}
-.back-link{display:inline-flex;align-items:center;min-height:44px;margin-bottom:18px;color:var(--viewer-link);font-size:14px;text-decoration:none;}
-.song-heading{display:grid;grid-template-columns:112px minmax(0,1fr);gap:0 26px;align-items:center;}
-.cover-image{width:112px;height:112px;grid-row:1/4;border-radius:10px;overflow:hidden;background:var(--viewer-surface);}
-.song-title-group{min-width:0;}
-.song-category{margin:0 0 8px;color:var(--viewer-text-muted);font-size:14px;}
-h1{font-size:30px;line-height:1.4;font-weight:600;letter-spacing:-.015em;margin:0;overflow-wrap:anywhere;}
-.song-title-version{white-space:nowrap;}
-.secondary-title{font-size:15px;line-height:1.7;color:var(--viewer-text-muted);margin:8px 0 0;overflow-wrap:anywhere;grid-column:2;}
-.secondary-title:lang(zh-CN){font-family:var(--viewer-font-zh);}
-.secondary-title:lang(ja){font-family:var(--viewer-font-ja);}
-.song-meta{display:flex;flex-wrap:wrap;gap:8px 22px;margin-top:12px;font-size:14px;line-height:1.6;color:var(--viewer-text-muted);}
-.song-reading-layout{display:grid;grid-template-columns:minmax(0,1fr) 264px;gap:40px;align-items:start;}
-.song-main-column{min-width:0;}
-.song-reading-rail{display:grid;gap:36px;min-width:0;align-content:start;}
-.song-personal{min-width:0;background:var(--viewer-surface);padding:22px 24px 12px;border-radius:14px;}
-.all-scores-link{display:inline-flex;align-items:center;min-height:44px;color:var(--viewer-link);font-size:14px;text-decoration:none;}
-.song-sign-in h2{font-size:18px;line-height:1.5;margin:0 0 16px;font-weight:600;}.song-sign-in p{font-size:15px;line-height:1.7;color:var(--viewer-text-muted);margin:0 0 12px;}
-.song-login{min-height:44px;padding:9px 16px;border:1px solid var(--viewer-control-border);border-radius:7px;color:var(--viewer-text);background:var(--viewer-surface);font:inherit;font-size:15px;cursor:pointer;}
-.song-personal :deep(.recommendation-goal-action){margin-top:18px;}
-.song-analysis,.song-information{padding:0;margin-top:8px;}
-summary{display:list-item;min-height:48px;align-content:center;cursor:pointer;font-size:15px;color:var(--viewer-text);}
-.song-analysis[open],.song-information[open]{padding-bottom:24px;}
-.song-facts{font-size:14px;display:grid;gap:16px;margin:18px 0 0;}.song-facts>div{display:grid;grid-template-columns:100px minmax(0,1fr);gap:16px;}.song-facts dt{color:var(--viewer-text-muted);}.song-facts dd{margin:0;overflow-wrap:anywhere;}
-.radar-card{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 24px;margin-top:16px;}
-.section-title{grid-column:1/-1;display:flex;gap:8px;align-items:center;font-size:17px;font-weight:600;margin-bottom:14px;}.title-icon{display:none;}
-.radar-chart{width:100%;max-width:356px;display:block;grid-row:2/5;}.radar-grid{fill:none;stroke:var(--viewer-border);stroke-width:1;}.radar-axis{stroke:var(--viewer-border);stroke-width:1;}.radar-area{fill:var(--viewer-chart-fill);stroke:var(--viewer-link);stroke-width:1.8;}.radar-point{fill:var(--viewer-link);}.radar-label{font-size:14px;fill:var(--viewer-text-muted);}
-.radar-meta{display:flex;flex-wrap:wrap;gap:8px 18px;font-size:14px;color:var(--viewer-text-muted);}.radar-values{margin:16px 0 0;padding:0;list-style:none;display:grid;gap:10px;font-size:14px;}.radar-values li{display:flex;justify-content:space-between;gap:12px;}.radar-values strong{font-weight:500;}.radar-empty{grid-column:1/-1;font-size:14px;color:var(--viewer-text-muted);}.radar-empty-image{display:none;}
-.song-community{margin-top:36px;}
-.back-link:focus-visible,.all-scores-link:focus-visible,summary:focus-visible,.song-login:focus-visible{outline:3px solid var(--viewer-link);outline-offset:3px;}
-@media(max-width:1190px){.song-reading-layout{grid-template-columns:minmax(0,1fr);gap:32px}.song-reading-rail{grid-template-columns:repeat(2,minmax(0,1fr));gap:36px}.song-heading h1{font-size:28px}}
-@media(max-width:960px){.back-link{display:none;}}
-@media(max-width:767px){
- .song-detail-page{padding:0 0 24px;}
- .song-heading{grid-template-columns:80px minmax(0,1fr);gap:0 16px;align-items:center;}
- .cover-image{width:80px;height:80px;grid-row:1;}
- .song-category{font-size:14px;margin-bottom:6px;line-height:1.5;}
- .song-heading h1{font-size:22px;line-height:1.4;}
- .secondary-title{grid-column:1/-1;font-size:14px;line-height:1.7;margin-top:16px;}
- .song-meta{grid-column:1/-1;font-size:14px;gap:6px 16px;margin-top:10px;}
- .song-reading-rail{grid-template-columns:1fr;gap:24px;}
- .song-reading-layout{gap:24px;}
- .song-personal{padding:20px 20px 12px;}
- .song-analysis,.song-information{margin-top:4px;}
- .radar-card{grid-template-columns:1fr;gap:16px;}.radar-chart{grid-row:auto;margin:auto;}.radar-meta{grid-column:1;}.radar-values{margin:0;}
- .song-facts>div{grid-template-columns:80px minmax(0,1fr);gap:12px;}
- .song-community{margin-top:32px;}
-}
-</style>
+    <ReworkSongChartSection
+      v-if="song"
+      v-model:side="selectedSide"
+      :song-id="songId"
+      :song-title="getSongPrimaryTitle(song)"
+      :difficulty="selectedDifficultyCode"
+      :track="selectedTrack"
+      :sides="availableSides"
+      :label="selectedFumen?.label || ''"
+      :star-label="getTrackStarLabel(selectedTrack)"
+      :combo-label="selectedFumen ? getFumenComboLabel(selectedFumen.key) : '—'"
+      :tja-bundle-url="tjaBundleUrl"
+      :branch-variants="branchAudioVariants"
+    />
+    <ReworkSongMyScore
+      placement="inline"
+      :items="[]"
+      :difficulty="selectedDifficultyCode"
+      :signed-in="Boolean(accountUser)"
+      :redirect="loginRedirect"
+    />
+    <ReworkSongDataSection
+      v-if="song"
+      :key="songId"
+      :track="selectedTrack"
+      :chart="v2Chart(selectedTrack)"
+      :pending="v2Pending"
+      :failed="Boolean(v2Error)"
+      :rt-to="rtCalculatorTo"
+      :show-shape="normalizedShelfStatus(song.shelf_status) !== 2 || hasRadarData"
+      :shape-axes="hasRadarData ? radarAxes : []"
+      :shape-max="radarMax"
+      :shape-level="selectedRating?.level ?? null"
+      @retry="refreshV2Constants()"
+    />
+    <ReworkSongChartUgc
+      v-if="chartUgcSummary"
+      :summary="chartUgcSummary"
+      :viewer-state="chartUgcViewerState"
+      :authenticated="Boolean(accountUser)"
+      :interaction-pending="chartUgcInteractionPending"
+      :interaction-unavailable="chartUgcInteractionUnavailable"
+      :difficulty-saving="chartUgcDifficultySaving"
+      :tag-saving="chartUgcTagSaving"
+      :difficulty-error-key="chartUgcDifficultyError"
+      :tag-error-key="chartUgcTagError"
+      :tip-saving="chartUgcTipSaving"
+      :tip-error-key="chartUgcTipError"
+      :helpful-saving-by-id="chartUgcHelpfulSavingById"
+      :helpful-error-by-id="chartUgcHelpfulErrorById"
+      :report-saving-by-id="chartUgcReportSavingById"
+      :report-error-by-id="chartUgcReportErrorById"
+      :report-success-by-id="chartUgcReportSuccessById"
+      :difficulty-label="t(`difficulty.${selectedDifficultyCode}`)"
+      @difficulty-change="setChartUgcDifficultyVote"
+      @tags-change="setChartUgcTagSlugs"
+      @tip-save="saveChartUgcTip"
+      @tip-delete="deleteChartUgcTip"
+      @helpful-change="setChartUgcHelpful"
+      @report="reportChartUgcTip"
+      @login="goToChartUgcLogin"
+    />
+    <ReworkSongDiscussions :key="`${songId}-${selectedDifficultyCode}`" :song-id="songId" :difficulty-type="selectedDifficultyCode" />
+  </ReworkSongDetailFrame>
+</template>

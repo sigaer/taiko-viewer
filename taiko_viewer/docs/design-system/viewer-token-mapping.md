@@ -10,45 +10,45 @@ alias keeps the look: 6 · alias changes the look: 38 · no equivalent: 19
 
 | old | new | light old → new | dark old → new | light | dark | readers | verdict |
 |---|---|---|---|---|---|---|---|
-| `--viewer-font-zh` | `--font-cjk-sc` | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | differs | differs | 2 | alias changes the look |
-| `--viewer-font-ja` | `--font-cjk-jp` | -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, 'Noto Sans CJK JP', 'Noto Sans JP', sans-serif → 'Noto Sans JP Variable', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif | -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, 'Noto Sans CJK JP', 'Noto Sans JP', sans-serif → 'Noto Sans JP Variable', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif | differs | differs | 2 | alias changes the look |
+| `--viewer-font-zh` | `--font-cjk-sc` | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | differs | differs | 1 | alias changes the look |
+| `--viewer-font-ja` | `--font-cjk-jp` | -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, 'Noto Sans CJK JP', 'Noto Sans JP', sans-serif → 'Noto Sans JP Variable', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif | -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, 'Noto Sans CJK JP', 'Noto Sans JP', sans-serif → 'Noto Sans JP Variable', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif | differs | differs | 1 | alias changes the look |
 | `--viewer-font-family` | `--font-ui` | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Barlow', 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Barlow', 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | differs | differs | 24 | alias changes the look |
 | `--viewer-display-font` | `--font-ui` | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Barlow', 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Barlow', 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | differs | differs | 36 | alias changes the look |
 | `--viewer-bg` | `--bg` | #eaf6f5 → #eaf6f5 | #10282b → #0c2023 | same | differs | 4 | alias changes the look |
-| `--viewer-surface` | `--surface` | #f9fdfc → #f9fdfc | #193338 → #1a383d | same | differs | 38 | alias changes the look |
-| `--viewer-surface-subtle` | `--bg-sunk` | #def0ee → #def0ee | #234247 → #081619 | same | differs | 50 | alias changes the look |
+| `--viewer-surface` | `--surface` | #f9fdfc → #f9fdfc | #193338 → #1a383d | same | differs | 34 | alias changes the look |
+| `--viewer-surface-subtle` | `--bg-sunk` | #def0ee → #def0ee | #234247 → #081619 | same | differs | 46 | alias changes the look |
 | `--viewer-surface-hover` | `--surface-2` | #d2e9e6 → #f2f9f8 | #2b5054 → #234a50 | differs | differs | 8 | alias changes the look |
-| `--viewer-text` | `--ink` | #203f43 → #203f43 | #e4f4f1 → #e4f4f1 | same | same | 57 | alias keeps the look |
-| `--viewer-text-muted` | `--ink-3` | #4d696c → #4d696c | #accbca → #a3c0c0 | same | differs | 76 | alias changes the look |
+| `--viewer-text` | `--ink` | #203f43 → #203f43 | #e4f4f1 → #e4f4f1 | same | same | 50 | alias keeps the look |
+| `--viewer-text-muted` | `--ink-3` | #4d696c → #4d696c | #accbca → #a3c0c0 | same | differs | 70 | alias changes the look |
 | `--viewer-text-disabled` | `--ink-3` | #72888b → #4d696c | #829fa1 → #a3c0c0 | differs | differs | 2 | alias changes the look |
-| `--viewer-border` | `--line` | #ccdfdc → #ccdfdc | #35575a → #2f5257 | same | differs | 58 | alias changes the look |
-| `--viewer-control-border` | `--ctl-border` | #6e8c8e → #6e8c8e | #719b9d → #779fa1 | same | differs | 9 | alias changes the look |
-| `--viewer-primary` | `--action-bg` | #bd352f → #006c76 | #ff9a8e → #86d9dc | differs | differs | 29 | alias changes the look |
+| `--viewer-border` | `--line` | #ccdfdc → #ccdfdc | #35575a → #2f5257 | same | differs | 53 | alias changes the look |
+| `--viewer-control-border` | `--ctl-border` | #6e8c8e → #6e8c8e | #719b9d → #779fa1 | same | differs | 7 | alias changes the look |
+| `--viewer-primary` | `--action-bg` | #bd352f → #006c76 | #ff9a8e → #86d9dc | differs | differs | 24 | alias changes the look |
 | `--viewer-primary-hover` | `--action-bg-hover` | #ac302b → #005860 | #ffa99f → #a0e3e5 | differs | differs | 7 | alias changes the look |
-| `--viewer-on-primary` | `--action-ink` | #ffffff → #ffffff | #193438 → #0b2a2d | same | differs | 21 | alias changes the look |
-| `--viewer-link` | `--link` | #006c76 → #006c76 | #86d9dc → #86d9dc | same | same | 44 | alias keeps the look |
-| `--viewer-selected` | `--selected-bg` | #d7ece9 → #d7ece9 | #244b4e → #2a565a | same | differs | 3 | alias changes the look |
+| `--viewer-on-primary` | `--action-ink` | #ffffff → #ffffff | #193438 → #0b2a2d | same | differs | 18 | alias changes the look |
+| `--viewer-link` | `--link` | #006c76 → #006c76 | #86d9dc → #86d9dc | same | same | 38 | alias keeps the look |
+| `--viewer-selected` | `--selected-bg` | #d7ece9 → #d7ece9 | #244b4e → #2a565a | same | differs | 2 | alias changes the look |
 | `--viewer-primary-surface` | `--selected-bg` | #fbece9 → #d7ece9 | #493638 → #2a565a | differs | differs | 0 | alias changes the look |
-| `--viewer-success` | `--ok` | #26724e → #26724e | #86d3a8 → #4ccb8a | same | differs | 4 | alias changes the look |
-| `--viewer-success-surface` | `--ok-wash` | #edf6f0 → #e4f3ea | #233c31 → #153527 | differs | differs | 2 | alias changes the look |
-| `--viewer-warning` | `--warn` | #8b5c16 → #906200 | #edc57e → #ffd568 | differs | differs | 8 | alias changes the look |
-| `--viewer-warning-surface` | `--warn-wash` | #fbf4e4 → #fdf0c8 | #3b3526 → #38301a | differs | differs | 7 | alias changes the look |
-| `--viewer-error` | `--danger` | #b22d40 → #c42b13 | #ff9eac → #ff8266 | differs | differs | 10 | alias changes the look |
+| `--viewer-success` | `--ok` | #26724e → #26724e | #86d3a8 → #4ccb8a | same | differs | 2 | alias changes the look |
+| `--viewer-success-surface` | `--ok-wash` | #edf6f0 → #e4f3ea | #233c31 → #153527 | differs | differs | 1 | alias changes the look |
+| `--viewer-warning` | `--warn` | #8b5c16 → #906200 | #edc57e → #ffd568 | differs | differs | 7 | alias changes the look |
+| `--viewer-warning-surface` | `--warn-wash` | #fbf4e4 → #fdf0c8 | #3b3526 → #38301a | differs | differs | 6 | alias changes the look |
+| `--viewer-error` | `--danger` | #b22d40 → #c42b13 | #ff9eac → #ff8266 | differs | differs | 9 | alias changes the look |
 | `--viewer-error-surface` | `--danger-wash` | #fceef1 → #fde4de | #422b34 → #3b1f24 | differs | differs | 3 | alias changes the look |
 | `--viewer-info` | `--ink-2` | #426785 → #3d5a5e | #a4c8e3 → #accbca | differs | differs | 2 | alias changes the look |
 | `--viewer-info-surface` | `--bg-sunk` | #edf3f8 → #def0ee | #273b4b → #081619 | differs | differs | 0 | alias changes the look |
 | `--viewer-overlay` | `--scrim` | #0f1b21/42% → #0f1b21/46% | #00080d/65% → #050e10/62% | differs | differs | 6 | alias changes the look |
-| `--viewer-shadow` | — | #162b30/6% → — | #00080d/22% → — | — | — | 18 | no equivalent |
+| `--viewer-shadow` | — | #162b30/6% → — | #00080d/22% → — | — | — | 17 | no equivalent |
 | `--viewer-tooltip-bg` | `--overlay-bg` | #24494d → #f9fdfc | #31565b → #265056 | differs | differs | 1 | alias changes the look |
 | `--viewer-tooltip-text` | `--ink` | #f1fbf9 → #203f43 | #f1fbf9 → #e4f4f1 | differs | differs | 1 | alias changes the look |
 | `--viewer-media-overlay` | — | #091b1f/90% → — | #091b1f/90% → — | — | — | 1 | no equivalent |
 | `--viewer-media-text` | — | #f1fbf9 → — | #f1fbf9 → — | — | — | 1 | no equivalent |
 | `--viewer-pattern` | — | #006c76/12% → — | #86d9dc/12% → — | — | — | 1 | no equivalent |
-| `--viewer-chart-fill` | — | #006c76/13% → — | #86d9dc/13% → — | — | — | 1 | no equivalent |
-| `--viewer-constant-comprehensive` | — | #a63868 → — | #f1a8cd → — | — | — | 2 | no equivalent |
-| `--viewer-constant-comprehensive-surface` | — | #fceaf2 → — | #412e3d → — | — | — | 1 | no equivalent |
-| `--viewer-constant-star` | — | #6d3c97 → — | #ceb5ef → — | — | — | 1 | no equivalent |
-| `--viewer-constant-star-surface` | — | #f2eafd → — | #35334b → — | — | — | 1 | no equivalent |
+| `--viewer-chart-fill` | — | #006c76/13% → — | #86d9dc/13% → — | — | — | 0 | no equivalent |
+| `--viewer-constant-comprehensive` | — | #a63868 → — | #f1a8cd → — | — | — | 1 | no equivalent |
+| `--viewer-constant-comprehensive-surface` | — | #fceaf2 → — | #412e3d → — | — | — | 0 | no equivalent |
+| `--viewer-constant-star` | — | #6d3c97 → — | #ceb5ef → — | — | — | 0 | no equivalent |
+| `--viewer-constant-star-surface` | — | #f2eafd → — | #35334b → — | — | — | 0 | no equivalent |
 | `--viewer-difficulty-easy` | `--diff-easy` | #c84440 → #d14019 | #f49c93 → #ff7a55 | differs | differs | 1 | alias changes the look |
 | `--viewer-difficulty-normal` | `--diff-normal` | #9b6900 → #448208 | #e8c674 → #8fcb5a | differs | differs | 1 | alias changes the look |
 | `--viewer-difficulty-hard` | `--diff-hard` | #287c48 → #2876b8 | #88cda7 → #5aa9ea | differs | differs | 1 | alias changes the look |

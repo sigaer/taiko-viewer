@@ -2241,6 +2241,130 @@
         "vocaloid": "ボーカロイド",
         "anime": "アニメ"
       }
+    },
+    "state": {
+      "loading": "読み込み中…",
+      "failed": "読み込みに失敗しました",
+      "retry": "再試行"
+    },
+    "gate": {
+      "loginTitle": "ログインすると表示されます",
+      "bindingTitle": "ドンダーひろば ID を連携すると表示されます",
+      "login": "ログイン",
+      "register": "新規登録",
+      "bind": "連携する"
+    },
+    "songDetail": {
+      "backToList": "楽曲一覧へ戻る",
+      "missing": "この楽曲は見つかりません",
+      "failed": "楽曲を読み込めませんでした",
+      "facts": {
+        "artists": "作曲 / 歌唱",
+        "openDay": "収録日",
+        "subtitle": "サブタイトル"
+      },
+      "side": {
+        "label": "プレイヤー側",
+        "single": "シングル"
+      },
+      "chart": {
+        "title": "譜面",
+        "notes": "最大ノーツ",
+        "practice": "練習プレイヤー",
+        "open": "譜面全体",
+        "openNew": "譜面全体を新しいタブで開く",
+        "download": "TJA+OGG をダウンロード",
+        "excerpt": "譜面の一部",
+        "expand": "表示を広げる",
+        "collapse": "表示を戻す",
+        "region": "譜面の一部（横にスクロールできます）",
+        "loading": "譜面を読み込み中…",
+        "failed": "譜面を読み込めませんでした"
+      },
+      "audio": {
+        "title": "試聴",
+        "drum": "打音",
+        "mix": "ミックス",
+        "pure": "インスト",
+        "missing": "音源が見つかりません",
+        "baseMissing": "基本音源が見つかりません",
+        "pureMissing": "インスト音源が見つかりません",
+        "mute": "ミュート",
+        "unmute": "ミュート解除",
+        "volume": "打音の音量"
+      },
+      "data": {
+        "title": "譜面データ",
+        "main": "主定数",
+        "low": "75% 定数",
+        "high": "99% 定数",
+        "notes": "ノーツ数",
+        "metrics": {
+          "stamina": "体力",
+          "handspeed": "速度",
+          "burst": "瞬発力",
+          "complex": "複合",
+          "rhythm": "リズム"
+        },
+        "radar": "5 項目の能力",
+        "source": "データ出典",
+        "unsupported": "V2 定数はむずかしい・おに・裏おにに対応しています",
+        "empty": "この難易度の V2 定数はありません",
+        "failed": "V2 定数を読み込めませんでした"
+      },
+      "shape": {
+        "title": "六次元レーダー",
+        "range": "座標範囲 0–{max}",
+        "level": "レベル {level}",
+        "empty": "この楽曲 ID に対応する六次元データはありません",
+        "axes": {
+          "complex": "複合処理",
+          "avgDensity": "平均密度",
+          "peakDensity": "瞬間密度",
+          "rhythm": "叩き分け",
+          "bpm": "BPM変化",
+          "hs": "HS変化"
+        }
+      },
+      "mine": {
+        "title": "自分の成績",
+        "signIn": "ログインすると、この譜面の成績を確認できます",
+        "empty": "この譜面の成績はまだ同期されていません",
+        "unavailable": "連携中の ID に成績データがありません。プロフィールと同期状態を確認してください",
+        "score": "スコア",
+        "combo": "最大コンボ",
+        "drumroll": "連打",
+        "plays": "プレイ回数",
+        "updated": "達成日",
+        "others": "他の難易度",
+        "all": "すべての成績 →"
+      },
+      "discussions": {
+        "title": "この譜面の話題",
+        "all": "すべて見る"
+      }
+    },
+    "constantsTable": {
+      "search": "譜面を検索",
+      "difficulty": "難易度",
+      "allDifficulties": "すべて",
+      "clear": "条件をクリア",
+      "sortLabel": "並び替え",
+      "sortBy": "{column}順",
+      "asc": "昇順（降順に切り替え）",
+      "desc": "降順（昇順に切り替え）",
+      "pageSize": "表示件数",
+      "pageSizeOption": "{n} 件",
+      "jump": "移動",
+      "jumpUnit": "ページ",
+      "jumpGo": "移動",
+      "song": "楽曲",
+      "open": "楽曲を開く",
+      "rt": "RT 計算で開く",
+      "inspector": "譜面の定数",
+      "scale": "精度帯ごとの定数",
+      "select": "{title} {difficulty} の定数を見る",
+      "close": "閉じる"
     }
   }
 }

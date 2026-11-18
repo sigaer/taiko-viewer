@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { pagerItems } from "~/utils/rework/catalog";
-// Numbered pages from 820 px up; previous / next with "x / y" below that. Every page is a real link
-// (NuxtLink custom: RouterLink would mark every /songs?… link as the current page).
-const props = defineProps<{ page: number; count: number; href: (page: number) => string }>();
+// Numbered pages from 820 px up; previous / next with "x / y" below that.
+// Link mode (`href` given): every page is a real link (NuxtLink custom: RouterLink would mark every /songs?… link
+// as the current page). Button mode (no `href`): for pages whose paging is not in the address; emits `select`.
+const props = defineProps<{ page: number; count: number; href?: (page: number) => string }>();
+const emit = defineEmits<{ select: [page: number] }>();
 const { t } = useI18n();
 const items = computed(() => pagerItems(props.page, props.count));
 </script>
 <template>
-  <nav class="pager" :aria-label="t('rework.library.pager')">
+  <nav v-if="href" class="pager" :aria-label="t('rework.library.pager')">
     <NuxtLink v-if="page > 1" v-slot="{ href: to, navigate }" :to="href(page - 1)" custom
       ><a class="pg-step" :href="to" rel="prev" :aria-label="t('rework.library.prev')" @click="navigate"
         ><ReworkIcon name="back" /><span class="pg-step-text">{{ t("rework.library.prev") }}</span></a
@@ -34,6 +36,30 @@ const items = computed(() => pagerItems(props.page, props.count));
         ><span class="pg-step-text">{{ t("rework.library.next") }}</span><ReworkIcon name="back" class="pg-flip" /></a
       ></NuxtLink
     ><span v-else class="pg-step pg-next is-off" aria-hidden="true"><span class="pg-step-text">{{ t("rework.library.next") }}</span><ReworkIcon name="back" class="pg-flip" /></span>
+  </nav>
+  <nav v-else class="pager" :aria-label="t('rework.library.pager')">
+    <button type="button" class="pg-step" :class="{ 'is-off': page <= 1 }" :disabled="page <= 1" :aria-label="t('rework.library.prev')" @click="emit('select', page - 1)">
+      <ReworkIcon name="back" /><span class="pg-step-text">{{ t("rework.library.prev") }}</span>
+    </button>
+    <ol class="pg-pages">
+      <li v-for="(item, index) in items" :key="item === 'gap' ? `gap-${index}` : item">
+        <span v-if="item === 'gap'" class="pg-gap" aria-hidden="true">…</span>
+        <button
+          v-else
+          type="button"
+          class="pg-num"
+          :aria-label="t('rework.library.pageN', { n: item })"
+          :aria-current="item === page ? 'page' : undefined"
+          @click="item !== page && emit('select', item)"
+        >
+          {{ item }}
+        </button>
+      </li>
+    </ol>
+    <span class="pg-compact">{{ page }} / {{ count }}</span>
+    <button type="button" class="pg-step pg-next" :class="{ 'is-off': page >= count }" :disabled="page >= count" :aria-label="t('rework.library.next')" @click="emit('select', page + 1)">
+      <span class="pg-step-text">{{ t("rework.library.next") }}</span><ReworkIcon name="back" class="pg-flip" />
+    </button>
   </nav>
 </template>
 <style scoped>
@@ -62,10 +88,14 @@ const items = computed(() => pagerItems(props.page, props.count));
   min-width: var(--hit);
   min-height: var(--hit);
   padding: 0 var(--sp-3);
+  border: 0;
   border-radius: var(--r-ctl);
+  background: transparent;
   color: var(--link);
+  font: inherit;
   font-size: var(--fs-14);
   text-decoration: none;
+  cursor: pointer;
 }
 .pg-num {
   padding: 0 var(--sp-2);

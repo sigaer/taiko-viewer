@@ -1,20 +1,23 @@
 /*
  * Element Plus → Design System V1.3 mapping (P0-08, D0-3 = A).
  *
- * Scope: only html.ds-preview (the sample pages put that class on <html>, so popups teleported to <body>
- * are covered too). Without the class nothing here matches and production keeps its own mapping from
- * assets/css/tokens.css + main.css (vermilion primary).
+ * Scope: two root classes, both on <html> so popups teleported to <body> are covered too:
+ *   html.ds-preview  the sample pages (ds-samples/_shared/useDsPreviewScope.ts)
+ *   html.rework-ep   reworked pages whose route meta has `reworkElementPlus: true` (set by components/rework/Shell.vue)
+ * Every rule lists the same selectors once per class (checked by scripts/ds/check-tokens.mjs). Without either class
+ * nothing here matches and production keeps its own mapping from assets/css/tokens.css + main.css (vermilion primary).
  *
  * Specificity: production declares --el-* on `html:root` (0,1,1) and overrides components in main.css with up to
- * (0,3,1). Every rule here starts with `html.ds-preview:root` (0,2,1) and repeats the production selector after it,
- * so it wins regardless of stylesheet order.
+ * (0,3,1). Every rule here starts with `html.ds-preview:root` / `html.rework-ep:root` (0,2,1) and repeats the
+ * production selector after it, so it wins regardless of stylesheet order.
  *
  * Primary = brand (Viewer Teal) through the Role tokens; info = neutral (--ink-2 on --bg-sunk);
  * success / warning / danger = status tokens. No note colours (--don*, --ka*, --roll*) anywhere in this file.
  * Every production-mapped variable has a counterpart below (checked by scripts/ds/token-mapping.mjs).
  */
 
-html.ds-preview:root {
+html.ds-preview:root,
+html.rework-ep:root {
   --el-color-primary: var(--action-bg);
   --el-color-primary-dark-2: var(--action-bg-hover);
   --el-color-primary-light-3: color-mix(in srgb, var(--action-bg) 70%, var(--surface));
@@ -107,10 +110,12 @@ html.ds-preview:root {
 
 /* ---------------- Component overrides that production makes in main.css, remapped ---------------- */
 
-html.ds-preview:root .el-button {
+html.ds-preview:root .el-button,
+html.rework-ep:root .el-button {
   font-family: var(--font-ui);
 }
-html.ds-preview:root .el-button.el-button--primary {
+html.ds-preview:root .el-button.el-button--primary,
+html.rework-ep:root .el-button.el-button--primary {
   --el-button-bg-color: var(--action-bg);
   --el-button-border-color: var(--action-bg);
   --el-button-text-color: var(--action-ink);
@@ -121,7 +126,8 @@ html.ds-preview:root .el-button.el-button--primary {
   --el-button-active-bg-color: var(--action-bg-hover);
   --el-button-active-border-color: var(--action-bg-hover);
 }
-html.ds-preview:root .el-button.el-button--primary.is-plain {
+html.ds-preview:root .el-button.el-button--primary.is-plain,
+html.rework-ep:root .el-button.el-button--primary.is-plain {
   --el-button-text-color: var(--link);
   --el-button-bg-color: var(--surface);
   --el-button-border-color: var(--link);
@@ -131,7 +137,9 @@ html.ds-preview:root .el-button.el-button--primary.is-plain {
 }
 /* Secondary (default type): neutral outline (04 §5) */
 html.ds-preview:root .el-button:not([class*="el-button--"]),
-html.ds-preview:root .el-button.el-button--default {
+html.ds-preview:root .el-button.el-button--default,
+html.rework-ep:root .el-button:not([class*="el-button--"]),
+html.rework-ep:root .el-button.el-button--default {
   --el-button-bg-color: var(--surface);
   --el-button-border-color: var(--ctl-border);
   --el-button-text-color: var(--ink);
@@ -143,7 +151,8 @@ html.ds-preview:root .el-button.el-button--default {
   --el-button-active-text-color: var(--ink);
 }
 /* Destructive: danger outline, never a solid red block (04 §2.3 / §3, 12 B2.7) */
-html.ds-preview:root .el-button.el-button--danger:not(.is-link):not(.is-text) {
+html.ds-preview:root .el-button.el-button--danger:not(.is-link):not(.is-text),
+html.rework-ep:root .el-button.el-button--danger:not(.is-link):not(.is-text) {
   --el-button-bg-color: var(--surface);
   --el-button-border-color: var(--danger);
   --el-button-text-color: var(--danger);
@@ -156,18 +165,23 @@ html.ds-preview:root .el-button.el-button--danger:not(.is-link):not(.is-text) {
 }
 /* Text button */
 html.ds-preview:root .el-button.is-text,
-html.ds-preview:root .el-button.is-link {
+html.ds-preview:root .el-button.is-link,
+html.rework-ep:root .el-button.is-text,
+html.rework-ep:root .el-button.is-link {
   --el-button-text-color: var(--link);
   --el-button-hover-text-color: var(--link);
   --el-button-hover-link-text-color: var(--link);
 }
 html.ds-preview:root .el-button.is-disabled,
-html.ds-preview:root .el-button.is-disabled:hover {
+html.ds-preview:root .el-button.is-disabled:hover,
+html.rework-ep:root .el-button.is-disabled,
+html.rework-ep:root .el-button.is-disabled:hover {
   --el-button-disabled-text-color: var(--ink-3);
   --el-button-disabled-bg-color: var(--bg-sunk);
   --el-button-disabled-border-color: var(--line);
 }
-html.ds-preview:root .el-button:focus-visible {
+html.ds-preview:root .el-button:focus-visible,
+html.rework-ep:root .el-button:focus-visible {
   outline: none;
   box-shadow: var(--focus);
 }
@@ -175,7 +189,11 @@ html.ds-preview:root .el-button:focus-visible {
 html.ds-preview:root .el-input,
 html.ds-preview:root .el-textarea,
 html.ds-preview:root .el-select,
-html.ds-preview:root .el-input-number {
+html.ds-preview:root .el-input-number,
+html.rework-ep:root .el-input,
+html.rework-ep:root .el-textarea,
+html.rework-ep:root .el-select,
+html.rework-ep:root .el-input-number {
   --el-input-bg-color: var(--surface);
   --el-input-text-color: var(--ink);
   --el-input-placeholder-color: var(--ink-3);
@@ -186,11 +204,14 @@ html.ds-preview:root .el-input-number {
   --el-select-input-focus-border-color: var(--input-focus-line);
 }
 html.ds-preview:root .el-input-number__increase,
-html.ds-preview:root .el-input-number__decrease {
+html.ds-preview:root .el-input-number__decrease,
+html.rework-ep:root .el-input-number__increase,
+html.rework-ep:root .el-input-number__decrease {
   color: var(--ink-2);
   background: var(--bg-sunk);
 }
-html.ds-preview:root .el-form-item__label {
+html.ds-preview:root .el-form-item__label,
+html.rework-ep:root .el-form-item__label {
   color: var(--ink);
 }
 
@@ -201,7 +222,14 @@ html.ds-preview:root .el-message-box,
 html.ds-preview:root .el-select-dropdown,
 html.ds-preview:root .el-dropdown-menu,
 html.ds-preview:root .el-popper.is-light,
-html.ds-preview:root .el-popper.is-dark {
+html.ds-preview:root .el-popper.is-dark,
+html.rework-ep:root .el-dialog,
+html.rework-ep:root .el-drawer,
+html.rework-ep:root .el-message-box,
+html.rework-ep:root .el-select-dropdown,
+html.rework-ep:root .el-dropdown-menu,
+html.rework-ep:root .el-popper.is-light,
+html.rework-ep:root .el-popper.is-dark {
   --el-dialog-bg-color: var(--overlay-bg);
   --el-drawer-bg-color: var(--overlay-bg);
   --el-messagebox-title-color: var(--ink);
@@ -211,32 +239,43 @@ html.ds-preview:root .el-popper.is-dark {
   border-color: var(--overlay-line);
 }
 html.ds-preview:root .el-popper.is-light,
-html.ds-preview:root .el-popper.is-dark {
+html.ds-preview:root .el-popper.is-dark,
+html.rework-ep:root .el-popper.is-light,
+html.rework-ep:root .el-popper.is-dark {
   --el-popper-border-radius: var(--r-ctl);
   box-shadow: var(--shadow-pop);
 }
 html.ds-preview:root .el-popper.is-light > .el-popper__arrow::before,
-html.ds-preview:root .el-popper.is-dark > .el-popper__arrow::before {
+html.ds-preview:root .el-popper.is-dark > .el-popper__arrow::before,
+html.rework-ep:root .el-popper.is-light > .el-popper__arrow::before,
+html.rework-ep:root .el-popper.is-dark > .el-popper__arrow::before {
   background: var(--overlay-bg);
   border-color: var(--overlay-line);
 }
-html.ds-preview:root .el-select-dropdown__item {
+html.ds-preview:root .el-select-dropdown__item,
+html.rework-ep:root .el-select-dropdown__item {
   color: var(--ink);
 }
 /* Selected row on an overlay uses the sunk level; brand-soft is indistinguishable from --overlay-bg (04 §5) */
 html.ds-preview:root .el-select-dropdown__item.is-selected,
 html.ds-preview:root .el-dropdown-menu__item:not(.is-disabled):focus,
-html.ds-preview:root .el-dropdown-menu__item:not(.is-disabled):hover {
+html.ds-preview:root .el-dropdown-menu__item:not(.is-disabled):hover,
+html.rework-ep:root .el-select-dropdown__item.is-selected,
+html.rework-ep:root .el-dropdown-menu__item:not(.is-disabled):focus,
+html.rework-ep:root .el-dropdown-menu__item:not(.is-disabled):hover {
   color: var(--link);
   background: var(--bg-sunk);
 }
-html.ds-preview:root .el-select-dropdown__item.is-hovering:not(.is-selected) {
+html.ds-preview:root .el-select-dropdown__item.is-hovering:not(.is-selected),
+html.rework-ep:root .el-select-dropdown__item.is-hovering:not(.is-selected) {
   background: var(--bg-sunk);
 }
-html.ds-preview:root .el-overlay {
+html.ds-preview:root .el-overlay,
+html.rework-ep:root .el-overlay {
   background: var(--scrim);
 }
-html.ds-preview:root .el-message {
+html.ds-preview:root .el-message,
+html.rework-ep:root .el-message {
   --el-message-bg-color: var(--toast-surface);
   --el-message-border-color: var(--overlay-line);
   --el-message-text-color: var(--toast-text);
@@ -245,12 +284,17 @@ html.ds-preview:root .el-message {
 html.ds-preview:root .el-message--success,
 html.ds-preview:root .el-message--warning,
 html.ds-preview:root .el-message--error,
-html.ds-preview:root .el-message--info {
+html.ds-preview:root .el-message--info,
+html.rework-ep:root .el-message--success,
+html.rework-ep:root .el-message--warning,
+html.rework-ep:root .el-message--error,
+html.rework-ep:root .el-message--info {
   --el-message-bg-color: var(--toast-surface);
   --el-message-border-color: var(--overlay-line);
   --el-message-text-color: var(--toast-text);
 }
-html.ds-preview:root .el-notification {
+html.ds-preview:root .el-notification,
+html.rework-ep:root .el-notification {
   --el-notification-bg-color: var(--overlay-bg);
   --el-notification-border-color: var(--overlay-line);
   --el-notification-title-color: var(--ink);
@@ -258,24 +302,29 @@ html.ds-preview:root .el-notification {
 }
 
 html.ds-preview:root .el-checkbox,
-html.ds-preview:root .el-radio {
+html.ds-preview:root .el-radio,
+html.rework-ep:root .el-checkbox,
+html.rework-ep:root .el-radio {
   --el-checkbox-input-border-color-hover: var(--input-focus-line);
   --el-radio-input-border-color-hover: var(--input-focus-line);
   --el-checkbox-text-color: var(--ink);
   --el-radio-text-color: var(--ink);
 }
-html.ds-preview:root .el-switch {
+html.ds-preview:root .el-switch,
+html.rework-ep:root .el-switch {
   --el-switch-on-color: var(--action-bg);
   --el-switch-off-color: var(--ctl-border);
 }
-html.ds-preview:root .el-segmented {
+html.ds-preview:root .el-segmented,
+html.rework-ep:root .el-segmented {
   --el-segmented-bg-color: var(--bg-sunk);
   --el-segmented-item-selected-bg-color: var(--seg-on-bg);
   --el-segmented-item-selected-color: var(--seg-on-ink);
   --el-segmented-item-hover-bg-color: var(--surface-2);
   --el-segmented-color: var(--ink-2);
 }
-html.ds-preview:root .el-table {
+html.ds-preview:root .el-table,
+html.rework-ep:root .el-table {
   --el-table-bg-color: var(--surface);
   --el-table-tr-bg-color: var(--surface);
   --el-table-header-bg-color: var(--surface-2);
@@ -285,12 +334,15 @@ html.ds-preview:root .el-table {
   --el-table-row-hover-bg-color: var(--surface-2);
   --el-table-current-row-bg-color: var(--row-sel-bg);
 }
-html.ds-preview:root .el-tag.el-tag--info {
+html.ds-preview:root .el-tag.el-tag--info,
+html.rework-ep:root .el-tag.el-tag--info {
   --el-tag-bg-color: var(--tag-info-bg);
   --el-tag-border-color: var(--line);
   --el-tag-text-color: var(--tag-info-ink);
 }
 html.ds-preview:root input[type="radio"],
-html.ds-preview:root input[type="checkbox"] {
+html.ds-preview:root input[type="checkbox"],
+html.rework-ep:root input[type="radio"],
+html.rework-ep:root input[type="checkbox"] {
   accent-color: var(--accent);
 }

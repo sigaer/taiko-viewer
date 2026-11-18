@@ -9,7 +9,7 @@ import { checkFile as usageCheck, run as usageRun } from "../scripts/ds/check-ds
 import { checkFile as copyCheck, localeFindings, run as copyRun } from "../scripts/ds/check-ds-copy.mjs";
 import { readsInFile, run as collisionRun } from "../scripts/ds/check-token-collisions.mjs";
 import { run as contrastRun } from "../scripts/ds/contrast-check.mjs";
-import { structureProblems, resolveContexts, productionFiles, PROD_CONTEXTS, diffResolved, SNAPSHOT } from "../scripts/ds/check-tokens.mjs";
+import { structureProblems, resolveContexts, productionFiles, PROD_CONTEXTS, diffResolved, SNAPSHOT, elementPlusScopeProblems } from "../scripts/ds/check-tokens.mjs";
 import { build as mappingBuild } from "../scripts/ds/token-mapping.mjs";
 import { compareReports, normalizeManifestKey, normalizePrecacheUrl } from "../scripts/ds/build-report.mjs";
 import { dsSamplePages, dsSamplesEnabled, sectionOrder, sectionSlug } from "../ds-samples/routes.ts";
@@ -115,6 +115,15 @@ test("tokens: scoped structure only, and equal to the committed C+ snapshot", ()
   assert.ok(structureProblems("html.ds-preview{color:red}").length > 0, "element styles are rejected");
   const snap = JSON.parse(readFileSync(SNAPSHOT, "utf8"));
   assert.deepEqual(diffResolved(snap.contexts, resolveContexts(productionFiles(), PROD_CONTEXTS), "snapshot"), []);
+});
+
+test("element plus mapping: only the two root scopes, every rule mirrored under both", () => {
+  assert.deepEqual(elementPlusScopeProblems(read("assets/css/ds/element-plus.css")), []);
+  assert.deepEqual(elementPlusScopeProblems("html.ds-preview:root .a,\nhtml.rework-ep:root .a{color:red}"), []);
+  assert.ok(elementPlusScopeProblems("html.ds-preview:root .a{color:red}").length > 0, "a rule only for the samples is rejected");
+  assert.ok(elementPlusScopeProblems("html.ds-preview:root .a,html.rework-ep:root .b{color:red}").length > 0, "different selectors are rejected");
+  assert.ok(elementPlusScopeProblems(":root .el-button{color:red}").length > 0, "unscoped selectors are rejected");
+  assert.ok(elementPlusScopeProblems("html.rework-ep .a,html.ds-preview .a{color:red}").length > 0, "the scope must include :root");
 });
 
 /* ---------------- P0-07 contrast ---------------- */

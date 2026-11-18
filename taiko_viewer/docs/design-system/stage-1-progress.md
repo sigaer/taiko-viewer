@@ -255,3 +255,145 @@ bash scripts/memory/run_qa.sh /usr/bin/node \
   开发模式的数字不作结论，但也不能当作达标；以 Linux 上生产产物的实测为准，超出再处理。
 - 版本号保持 1.15.0：分支尚未发布，这个版本号已经覆盖整个 Stage 1 相对 `main` 的范围。
 - 结论：实现完成，本机自检通过；**隔离验收未运行**，本切片不能记为验收通过。
+
+## 切片 A：页面基础件、歌曲详情、定数表
+
+2026-11-18，同一分支，未提交、未合并、未部署，版本仍为 `1.15.0`。没有改 `server/api/**`、没有新增接口、没有数据库访问。
+**隔离验收（Linux）尚未运行**；下面除注明「真实」外都是本机开发自检。
+
+### 基础件
+
+- **Element Plus 映射开关**：路由 meta `reworkElementPlus: true` → `components/rework/Shell.vue` 用 `useHead` 在 `<html>`
+  上加 `rework-ep`（SSR 首屏即有；当前路由没有这个 meta 时去掉，keepalive 的页面也一样）。`element-plus.css` 的每条规则
+  在 `html.ds-preview:root` 与 `html.rework-ep:root` 下各列一遍（特异度不变）；Shell 现在导入 `element-plus.css` 与新的
+  `rework.css`。`check-tokens.mjs` 新增 `elementPlusScopeProblems`：只允许这两个作用域，且两组选择器必须完全一致
+  （`dsChecks.test.mjs` 有正反例）。本切片打开开关的页面：`/songs/:id`、`/songs/constants`。规则写进了 playbook §3。
+  常驻弹层：`el-select` 用 `:persistent="false"`，对话框只在打开期间挂载、页面停用时卸载。
+- `components/rework/`：`PageHeader`（页面自己的 `<h1>`，lead / eyebrow / actions 插槽；页面同时设 `hidePageHeader: true`，
+  默认布局的 `.page-header` 对旧页面不变）、`Panel`（带标题区块，`plain` 无底面，h2/h3）、`State`（loading 骨架、empty、
+  failed + 重试，`role=status` / `role=alert`）、`Gate`（`need = login | binding | null`；`variant = block | row`，row 为一行文字加操作、无卡片与标题；登录带 `redirect`、可选注册；绑定去
+  `/account/profile`，与 `AccountToolGate`、`/account/songs` 绑定提示的去向相同）、`Pager` 加按钮模式（没有 `href` 时发
+  `select`；曲库仍用链接模式）。`assets/css/ds/rework.css`（`html.viewer-rework` 下）：`.num`、`.rw-btn`（默认 / `--primary`
+  / `--ghost` / `--sm`，≥44 px）、`.rw-link`、`.rw-vh`。注意 `.num` 现在对所有外壳页面生效，曲库里 `DsDiff` 的星级数字因此
+  用 Barlow Condensed（样张页本来就是这样）。
+- `Library.vue` 的四种状态改用 `ReworkState`（小改动：保留 `lib-state` 类、文案与按钮；曲库场景只把 SSR 失败断言的正则
+  放宽为允许多个 class）。`AccountToolGate` 未替换（它的页面属于切片 B）。没有加样张页。
+- DS 组件加属性：`DsRank` 的 `named`（default / detail 尺寸旁显示评价名称，图对读屏隐藏；`dsRank.test` 新增用例）；
+  `DsDiffTabs` 的 `controls`（tab 的 `id` / `aria-controls`，面板用 `aria-labelledby`）。
+- 两个页面的呈现在 `components/rework/song/*`、`components/rework/constants/*`，页面文件只留取数、SEO、状态
+  （`check-token-collisions` 不允许 `pages/` 直接读 DS token）。文案在 `rework.state / gate / songDetail / constantsTable`
+  （`rework.song`、`rework.constants` 已是导航文案，所以没用这两个名字）。
+
+### 歌曲详情 `/songs/:id`：功能对照（改前 → 改后）
+
+| 改前 | 改后 |
+| --- | --- |
+| SSR 取歌曲详情、谱面 UGC 公共摘要；客户端取个人成绩、UGC 个人状态；旧 id 301 到规范 id | 不变（`useSongDetail` 见「改动的数据代码」） |
+| `shelf_status=1` 且没有 `list=removed/available` 时 replace 加 `list=removed` | 不变（只在本实例自己的地址上执行） |
+| `?difficulty=` 读入选中难度（加载与地址变化），切换不写地址；无里谱回落魔王；只列存在的难度 | 不变；没有新增地址状态 |
+| 加载 el-skeleton；不存在或失败：el-result + 返回列表 | 加载：保持版面的骨架；**不存在**（`song: null`）与**失败**分开，失败 `role=alert` + 重试 + 返回列表 |
+| 返回列表（≤960 隐藏），去向 `useLibraryReturn`；外壳栏的返回键（默认布局，同样 `useLibraryReturn`）在所有宽度都显示 | 页内链接删除，只留外壳栏返回键（设计复核：两个返回入口留一个）。差别：外壳的回落只看 `list=`，没有记住的曲库地址、又没有 `list=` 的「其他」歌曲回到 `/songs`（页内链接原来按歌曲上架状态回到 `?shelf=other`）；未上架歌曲页面会自动加 `list=removed`，不受影响 |
+| 曲绘 `SongCoverImage`（含回落图；SEO 图回落 1384） | `DsCover`（同曲缩略图 → 原图 → 占位）；SEO 图逻辑不变 |
+| 分类、主标题（末尾「(…)」不断行）、另一语言名、BPM / ID / 发布日期；折叠的「歌曲资料」：副标题、实装版本、作曲/演唱 | 全在页头：分类（`--genre-*` 圆点）、上架状态、版本标签、标题、另一语言名（`lang`）、作曲/演唱、BPM、上架日（YYYY-MM-DD）、ID、副标题；缺失为「—」 |
+| 难度页签（左右 / Home / End）带星级 | `DsDiffTabs`：图标、名称、星级（随单人/P1/P2）、V2 主定数（困难/魔王/里，其余「—」） |
+| 单人 / P1 / P2（有 P1/P2 谱时） | 不变，在「谱面」区标题右侧 |
+| 单曲 RT 计算器链接 | 不变，在「谱面数据」区标题右侧 |
+| 谱面：难度 + 星级、最大物量（目录 → rating；P1/P2 为「—」）、练习播放器（有 TJA 包，新标签页）、完整谱面 ↗、节选展开/收起、加载/失败、点图开新页 | 全部保留 |
+| 下载 TJA+OGG（有包时） | 保留（谱面区操作行） |
+| 试听（折叠）：鼓点（分歧变体或基础）+ 静音 + 音量、混音、纯音乐、各自的音源错误 | 保留（`AudioPreview`） |
+| 「谱面特征与分析」折叠：V2 定数卡（仅困难/魔王/里；加载；失败重试；75/主/99 + 五项 + 物量；OurTaiko 来源；无数据） | 不再折叠（`05` §3 的依据）：区块开头是主定数（最大）与 75% / 99% / 物量一行；下面一行两个雷达（五项能力 + 六维），≥1100 并排、以下上下排，各带说明行（五项：来源链接；六维：范围与层级）；状态与来源链接保留 |
+| 六维雷达（非「其他」或有数据时；范围、层级、数值列表；无数据文案） | 同条件，`DsRadar`（数值标在轴旁，代替单独数值列表），与五项雷达同一行 |
+| 我的成绩（登录）：骨架、空、「绑定 ID 无成绩」、分数、王冠文字、良/可/不可、明细（连击、连打、次数、更新日）、「全部成绩 →」 | `MyScore`：`DsCrown` 全名文字（P1）、`DsRank` + 名称、分数、`DsJudgeBar`、连击 / 连打 / 次数 / 最好成绩日、「全部成绩 →」；状态同前。**新增**：其他有成绩的难度一行一条（短名王冠、评价、分数），点击切到那个难度 |
+| 未登录：「我的成绩」+ 登录（回到本页本难度） | `ReworkGate`（登录链接，同一 `redirect`）：≥1100 右栏卡片；<1100 不显示右栏，改为谱面区之后的一行（`variant="row"`，无卡片标题与难度徽章），访客在手机上先看到歌曲内容 |
+| 推荐目标（登录、`?recommendation=`、所选难度等于 `?difficulty=`） | 不变，在成绩面板内 |
+| 谱面讨论（3 条、全部、发帖、空态） | 不变（`ForumSongRelatedDiscussions`；song-detail 外观的标题改为 h2，两处行内中日文案迁到 `rework.songDetail.discussions.*`；DS 外观由 `rework/song/Discussions.vue` 覆盖） |
+| 玩家谱面体验：体感分布与投票（单选组、方向键、清除、保存中、不可用、错误）、标签（公共列表、编辑、5 个上限、停用标签、完成）、提示（列表、有帮助、举报与原因、写/改/删、隐藏状态、字数） | 全部保留（`ChartUgc`，脚本未改；选中用 `--vote-on*`，头像 `DsPlayerAvatar`） |
+| SEO（标题、描述、canonical、图、关键词、面包屑） | 不变 |
+
+### 定数表 `/songs/constants`：功能对照
+
+| 改前 | 改后 |
+| --- | --- |
+| SSR 取 `/api/content/v2-constants`（keyword / difficulty / page / pageSize / sortBy / sortOrder），参数变化重取；没有地址参数 | 不变（取数与状态留在页面；没有新增地址状态） |
+| 标题、说明段、「共 N 条」、生成时间（原样的 ISO 字符串） | 页头 `<h1>`、「共 N 条」（`role=status`）、生成时间：`<time datetime>`，服务端与水合时为固定的「YYYY-MM-DD HH:mm UTC」，挂载后改为页面语言、访问者时区的日期与时分（水合 0 警告）；说明段删去（实现说明「按本地曲库匹配远端…」，AGENTS 文案规则；SEO 描述不变） |
+| 关键词（300 ms 防抖，回第 1 页）、难度下拉 | 搜索框；难度改为分段按钮（`aria-pressed`，带难度图标）；**新增**「清除筛选」 |
+| 远端过期 / 部分数据提示 | 保留 |
+| 失败 el-empty + 重试；空：表格空文案 | `ReworkState` failed + 重试；空 + 清除筛选 |
+| el-table：ID、歌曲名（宽屏固定列）、难度、物量、75/95/99、五项；全部列服务端排序，默认 ID 升序，排序回第 1 页 | 自绘 `<table>`：歌曲（`DsSongCell`）、ID、难度（`DsDiff`）、95%（主）、75%、99%、物量、五项（数值 + 细条）；表头按钮 + `aria-sort`；新列：ID / 曲名 / 难度先升序，数值先降序，同列再点反向。≥1240 全列；1100–1239 去 75/99；768–1099 再去五项；<768 列表行 + 排序下拉与方向键，行内显示当前排序值 |
+| 分页：总数、每页 25/50/100、上下页、页码、跳页 | `ReworkPager`（按钮模式）、每页条数（`el-select`，Teleport）、跳至第 N 页 |
+| 没有到歌曲详情的链接 | **新增**检视：≥1240 右栏，以下为 `el-dialog`；雷达、75/95/99 刻度、物量与五项；「打开歌曲」（`/songs/:id?difficulty=N`）、「用 RT 计算器」 |
+| SEO、面包屑 | 不变 |
+
+### 与原型的偏离与原因
+
+- 详情：曲绘 112 / 72 px（原型 V2 的压缩头部）；页头不放「游玩练习 / 收藏」：练习播放器按难度给出，放在谱面区；收藏没有接口。
+  手机没有底部操作条（「想练这首」没有接口，练习入口在谱面区）。<1100 单栏、成绩面板在前（访客在 <1100 时没有这一栏，见上表；原型 768–1239 保留 300 px 侧栏，
+  主栏只剩约 350 px，谱面节选太窄）；DOM 中成绩面板在主栏之前，所以宽屏焦点顺序是 页签 → 成绩 → 谱面。页面不再有自己的返回链接（外壳栏返回键）。分析内容不再折叠。
+  六维雷达是生产已有的数据，原型没有，放在谱面数据区下部。页签上不显示王冠（`DsDiffTabs` 没有这个形态，由成绩面板「其他难度」代替）。
+- 定数表：难度只能单选（API 只接受一个）；没有定数区间、「只看没全连」、CSV 导出（页面可用的接口都没有）。默认排序保持 ID 升序
+  （原型主定数降序；保持现有行为）。难度徽章没有星级（V2 行无星级）。曲名是 `song_name`（中文名），日文页面也是，已标 `lang="zh-CN"`。
+- 共同：品牌青绿只用于主操作、链接、选中、焦点；分布条与能力细条 `--series-alt`；投票选中 `--vote-on*`。
+
+### 契约缺口（生产没有，界面不放替身）
+
+- 详情：每小节音符密度（`DensityStrip`）、小节定位 `m`、分歧谱面图（图只有单人 / P1 / P2）、连打时间与气球数、别名、收藏、
+  准确率、单曲 RT、最好成绩变化曲线、「设为这次想练」（只有带推荐 token 时的目标动作）、讨论的帖子类型 / 作者。
+- 定数表：星级、日文曲名、别名 / 艺术家搜索、定数区间筛选、个人王冠与评价列、CSV 导出、无定数谱面数量。
+
+### 改动的数据代码（请重点复核）
+
+- `composables/useSongDetail.ts`：`useViewerApiFetch()` 提到 setup 中调用。原来在 handler 内调用，`refresh()`（新的「失败 → 重试」）
+  在 setup 之外执行时取不到 i18n，重试什么都不发。请求与 key 不变。
+- `pages/songs/[id].vue`：歌曲 id 固定为本实例的 id（页面 key 本来就含 id），`?difficulty=` 与 `list=removed` 的 watcher 只在地址是
+  本实例自己的歌曲时执行（playbook §4「只响应自己路由的变化」）。原来 keepalive 的旧详情实例会跟着新地址的 id 取数（同 key
+  双份请求），共享 key 时重试失效。V2 定数请求从 `SongV2Constants.vue` 移到页面（同一地址与 key），页签要用。
+- `pages/songs/constants.vue`：关键词回到当前已生效的值时不再起防抖计时器（否则「清除筛选」后计时器会把翻好的页码改回 1）。
+- 移入 `components/rework/song/` 并重写呈现、原文件删除：`components/ChartUgcSection.vue`、`components/SongV2Constants.vue`、
+  `components/song/SongAudioPreview.vue`、`SongChartPreview.vue`；`SongDifficultyTabs.vue` 删除（`DsDiffTabs` 代替）。
+  `components/account/AccountSongScores.vue` 已无引用，但 `dsUtils.test.ts` 读它的源码核对王冠顺序，未删，留给切片 G。
+
+### 验证
+
+| 层级 | 内容 | 结果 |
+| --- | --- | --- |
+| 静态 / 单元（真实） | `npm run test:ds` | 90/90（新增 Element Plus 作用域正反例、`DsRank named`） |
+| 静态 / 单元（真实） | `npm run check:ds` | 通过：tokens + EP 两作用域一致；collisions 无新增；对比度 368/368；token 对照表已重新生成；scoped CSS 设计系统目录 0；ds usage 80 文件 0；ds copy 76 文件 |
+| 静态 / 单元（真实） | `npm run test:version`、`tests/reworkStage1.test.mjs` | 1/1、14/14 |
+| 静态（真实） | `detail-fixtures.ts` 用 tsc strict 按真实响应类型检查 | 该文件 0 错误（它导入的 composable 因在 Nuxt tsconfig 之外有自动导入全局名报错，与 fixture 无关） |
+| 本机真实 HTTP / SSR（`nuxt dev` + 合成文件） | 详情、V2、谱面图（image/png）、TJA 包（application/zip）、定数列表都走真实接口；`/songs/99` → 301 `/songs/100`；歌曲文件损坏时 SSR 渲染失败态、水合 0 警告、恢复后重试成功 | 通过 |
+| 本机开发自检（合成文件 + 真实接口） | 详情 16 组（360/390/820/1440 × 浅深 × 中日：SSR h1 = 水合 h1、服务端 HTML 有 `rework-ep`、页签与默认魔王、页签定数、无横向溢出、谱面图加载；访客：≥1100 右栏卡片、<1100 谱面区之后的一行且顺序为 谱面 → 提示 → 数据；两个雷达 ≥1100 同一行、以下上下排）；难度切换（点击、End/Home/←、`?difficulty=5`、无里回落、不写地址）；功能清单逐项；单人/P1/P2、未上架加 `list=removed`、其他无六维、长标题缺字段 360 无溢出；不存在、失败 → 重试中骨架 → 内容；焦点顺序（唯一 tab stop → 登录 → 单人/P1/P2 → 完整谱面 → 展开 → 节选区 → 试听 → RT → 来源 → 讨论，每站有焦点样式）；曲库 → 详情 → 返回（不重新请求）；EP 开关；定数表 16 组（含生成时间：服务端 HTML 为固定 UTC 文本，挂载后为本地时分）+ 功能（筛选、排序、关键词、清除、翻页、跳页、每页条数、检视链接、空、失败重试、过期提示）+ 手机（排序下拉、方向、对话框） | 44/44 + SSR 失败 1/1（`slice-a-selfcheck.json`） |
+| 拦截数据的自检（intercepted） | 登录态：服务端渲染游客后，把应用已有的账号状态设为 fixture 用户（与登录写入的状态相同），再客户端导航；成绩面板（王冠全名、评价名称、分数、判定条、明细、其他难度切换）、推荐目标只在请求的难度出现、UGC（投票 PUT、有帮助 PUT、标签编辑器）、相关讨论 2 条；1440 中浅 / 390 中深 / 390 日浅。定数接口失败与过期提示也是拦截 | 通过（含在 44 内） |
+| EP 开关（820） | /about 无 `rework-ep` → 定数表有（`--el-color-primary` 为品牌色；探针 `.el-message`、`.el-popper.is-dark`、`.el-select-dropdown` 计算样式改变）；真实 Teleport：每页条数下拉背景 = 映射后的浮层色，检视对话框已映射；离开到 /about：类去掉、样式回到基线、`<body>` 弹层节点与基线相同；keepalive 返回恢复；定数 → 详情保持；→ 曲库去掉 | 通过 |
+| 曲库回归（共享文件改动） | `catalog-selfcheck.mjs`（改用共享运行器） | HTTP 57/57、SSR 失败通过、场景 24/24 |
+| 指示性计时（dev） | 页签切换 101 ms；路由切换 43 ms；筛选 / 排序 129、142 ms；最长任务 176 ms（设计复核修改后的运行） | 筛选 / 排序超 100 ms 预算；开发模式只作参考 |
+| 未验证 | 生产 Nitro、Linux 浏览器、真实数据规模、真实数据库与登录、真机触控、读屏播报、音频实际播放（静态资源域名被拦） | — |
+
+运行：`node scripts/rework/detail-selfcheck.mjs --port=3571 --out=<目录> [--only=<场景前缀,…>]`；曲库
+`node scripts/rework/catalog-selfcheck.mjs --port=3561 --out=<目录>`。两者共用 `scripts/rework/selfcheck-runner.mjs`
+（127.0.0.1、`TAIKO_DB_HOST=invalid.invalid`、`no-egress.mjs` 预加载、一个系统 Chrome、同时一个页面、总时限、`finally`
+结束进程树并确认端口空闲）。本次没有改 `vendor/`（`.tja-runtime` 已存在，运行器直接启动 `nuxi dev`）。
+证据（不提交）：主检出 `.claude/stage-artifacts/slice-a/`（`slice-a-selfcheck.json`、截图、`console.txt`、`nuxt-dev.log`；
+`catalog-rerun/`；`dialog-rerun/` 是等对话框动画结束后重拍的两张对话框截图，主目录里同名两张拍在动画中途）。目录里两张
+`FAILED-*.png` 来自修正场景脚本之前的一次运行（SSR 失败检查改动了歌曲文件时间使 TJA 索引失效——已移到最后；返回曲库后
+未等行渲染——已加等待），最终运行没有失败。
+
+### 设计复核后的修改（2026-11-18）
+
+1. 未登录、<1100：「我的成绩」卡片不再排在谱面之前；改为谱面区之后的一行（`ReworkGate` 新增 `variant="row"`，文案与操作仍来自 Gate），
+   右栏 <1100 不显示（`DetailFrame` 的 `sideNarrow`）。登录后与桌面右栏不变。
+2. 「谱面数据」：主定数与三个数字作为开头一行，两个雷达 ≥1100 并排、各带说明行，以下上下排；显示的数据不变。
+3. 页内「返回列表」删除，只留外壳栏返回键（同为 `useLibraryReturn`）；回落差别见功能对照。场景脚本（含曲库的详情返回）改用 `.rework-bar a.back`。
+4. 定数表生成时间改为 `<time datetime>`，SSR / 水合固定 UTC 文本，挂载后本地时分。
+
+重新运行：切片 A 44/44 + SSR 失败 1/1；曲库 HTTP 57/57、SSR 失败通过、24/24；`test:ds` 90/90、`check:ds` 通过、`test:version` 1/1、
+`reworkStage1` 14/14。替换的截图：`detail-zh-1440-light`（未登录）、`detail-signed-in-intercepted-zh-1440-light`、`detail-zh-390-dark`
+（整页；访客一行在整页截图里被固定的底部导航盖住，位置与可见性由场景断言）、`constants-zh-1440-light`。
+
+### Linux 隔离验收（尚未运行）
+
+在 `shell-sql.mjs` 加 `--check=detail`（照 `--check=catalog`），新建 `detail-check.mjs`：在 scratch 写入 `detail-data.mjs` 的
+`writeDetailFiles()`（歌曲、rating、分歧音源清单、谱面图、TJA 包与索引缓存、V2 快照；`TAIKO_REPO_ROOT` / `TAIKO_VIEWER_CACHE_DIR`
+指向 scratch），用生产 Nitro 运行 `runDetailScenarios()`，最后 `detailSsrFailureCheck()`。私有测试库可用时，登录态改为真实测试账号
+（`SELECT DATABASE()` 以 `_test` 结尾 + `--allow-test-db-mutation`，写入合成成绩与 UGC）代替拦截；做不到时保留拦截并标明。
+通过标准：场景全部通过、SSR 失败 `pass`、截图 `acceptance_*`、计时与预算对比、私有 MySQL / Nitro 退出、scratch 回收。
+`detail-check.mjs` 与 `--check=detail` 本切片没有写。

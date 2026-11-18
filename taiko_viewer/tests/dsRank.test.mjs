@@ -74,6 +74,22 @@ test("rank SSR: compact and table show the name as text and hide the image from 
   }
 });
 
+test("rank SSR: named default / detail show the name beside the image, read once", async () => {
+  for (const locale of ["zh", "ja"]) {
+    for (const variant of ["default", "detail"]) {
+      for (let value = 2; value <= 8; value++) {
+        const html = await render("Rank", { value, variant, named: true }, { locale });
+        assert.equal(attrs(html, "span")[1]["aria-hidden"], "true");
+        assert.equal(attrs(html, "span")[1].role, undefined);
+        assert.match(html, new RegExp(`ds-rank__name"[^>]*>${nameOf(value, locale)}<`));
+      }
+      const none = await render("Rank", { value: 1, variant, named: true }, { locale });
+      assert.equal(attrs(none, "span")[1]["aria-label"], nameOf(1, locale), "no image: the name stays the accessible name");
+      assert.equal(text(none), "—");
+    }
+  }
+});
+
 test("rank SSR: upgrade reads 'previous → new' once, previous 24 / new 30", async () => {
   for (const locale of ["zh", "ja"]) {
     const html = await render("Rank", { value: 7, previous: 3, variant: "upgrade" }, { locale });

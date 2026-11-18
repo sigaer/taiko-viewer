@@ -430,9 +430,9 @@ export async function runScenarios({ browser, base, out, dataset, stub = false, 
     const t0 = Date.now();
     await page.locator(".rows > li .row-link").nth(14).click();
     await page.waitForURL(new RegExp(`/songs/${ids[14]}\\?list=removed$`));
-    await page.locator(".back-link, .el-result a").first().waitFor();
+    await page.locator(".rework-bar a.back").first().waitFor();
     timings.routeSwitchMs.push(Date.now() - t0);
-    await page.waitForFunction(() => /shelf=removed&page=2$/.test(document.querySelector(".back-link, .el-result a")?.getAttribute("href") || ""));
+    await page.waitForFunction(() => /shelf=removed&page=2$/.test(document.querySelector(".rework-bar a.back")?.getAttribute("href") || ""));
     const requestsBefore = apiRequests.length;
     await page.goBack();
     await page.waitForURL(/\/songs\?shelf=removed&page=2$/);
@@ -451,8 +451,8 @@ export async function runScenarios({ browser, base, out, dataset, stub = false, 
     // the detail page's own link back, then the mobile back button on the detail page
     await page.locator(".rows > li .row-link").first().click();
     await page.waitForURL(/\/songs\/\d+\?list=removed$/);
-    await page.waitForFunction(() => /shelf=removed&page=2$/.test(document.querySelector(".back-link, .el-result a")?.getAttribute("href") || ""));
-    await page.locator(".back-link, .el-result a").first().click();
+    await page.waitForFunction(() => /shelf=removed&page=2$/.test(document.querySelector(".rework-bar a.back")?.getAttribute("href") || ""));
+    await page.locator(".rework-bar a.back").first().click();
     await page.waitForURL(/\/songs\?shelf=removed&page=2$/);
     await waitRows(page, ids);
     return { scrollBefore, scrollAfter };
@@ -486,7 +486,7 @@ export async function ssrFailureCheck({ browser, base, out, dataset, breakData, 
   const { page } = handle;
   try {
     const html = await (await fetch(base + "/songs", { signal: AbortSignal.timeout(60000) })).text();
-    assert.match(html, /class="lib-state"[^>]*role="alert"/, "server rendered the error state");
+    assert.match(html, /class="[^"]*\blib-state\b[^"]*"[^>]*role="alert"/, "server rendered the error state");
     assert.doesNotMatch(html, /class="row-link"/);
     await page.goto(base + "/songs", { waitUntil: "networkidle" });
     await page.locator('.lib-state[role="alert"]').waitFor();

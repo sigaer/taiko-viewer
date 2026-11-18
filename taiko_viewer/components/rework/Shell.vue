@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import "~/assets/css/ds/tokens.css";
 import "~/assets/css/ds/fonts.css";
+import "~/assets/css/ds/element-plus.css";
+import "~/assets/css/ds/rework.css";
 import {
   desktopDestinations,
   mobileDestinations,
@@ -28,7 +30,10 @@ const main = ref<HTMLElement>();
 const searchOpen = ref(false);
 const searchButton = ref<HTMLButtonElement>();
 let trigger: HTMLElement | null = null;
-useHead({ htmlAttrs: { class: "viewer-rework" } });
+// `rework-ep` turns on the V1.3 Element Plus mapping (assets/css/ds/element-plus.css) for pages whose route meta
+// has `reworkElementPlus: true`. It sits on <html>, so popups teleported to <body> follow it, and it follows the
+// current route, so it is gone as soon as a page without the flag is shown (also when that page is kept alive).
+useHead(() => ({ htmlAttrs: { class: route.meta.reworkElementPlus === true ? "viewer-rework rework-ep" : "viewer-rework" } }));
 const active = computed(() => activeDestination(route.path));
 const moduleTitle = computed(() =>
   active.value ? t(`rework.${active.value}`) : props.title,

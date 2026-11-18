@@ -76,6 +76,34 @@ export function structureProblems(css) {
   return problems;
 }
 
+export const EP_FILE = join(ROOT, "assets", "css", "ds", "element-plus.css");
+const EP_SCOPES = ["html.ds-preview:root", "html.rework-ep:root"];
+
+/**
+ * Scope rules for the Element Plus mapping (assets/css/ds/element-plus.css): every selector starts with one of the
+ * two root scopes — the sample pages (`ds-preview`) and reworked pages that opt in through route meta
+ * `reworkElementPlus` (`rework-ep`, set by components/rework/Shell.vue) — and every rule lists exactly the same
+ * selectors under both, so the opted-in pages get the sample pages' mapping and nothing else.
+ */
+export function elementPlusScopeProblems(css) {
+  const problems = [];
+  for (const block of parseBlocks(css)) {
+    if (block.atRule || block.media) {
+      problems.push(`at-rule or media query not allowed: ${block.atRule ? block.selector : block.media}`);
+      continue;
+    }
+    const tails = { [EP_SCOPES[0]]: [], [EP_SCOPES[1]]: [] };
+    for (const sel of splitTop(block.selector)) {
+      const scope = EP_SCOPES.find((s) => sel === s || sel.startsWith(`${s} `));
+      if (!scope) problems.push(`selector outside the Element Plus scopes: ${sel}`);
+      else tails[scope].push(sel.slice(scope.length));
+    }
+    const [a, b] = EP_SCOPES.map((s) => tails[s].slice().sort().join(" | "));
+    if (a !== b) problems.push(`rule not mirrored under both scopes: ${block.selector.replace(/\s+/g, " ").slice(0, 120)}`);
+  }
+  return problems;
+}
+
 function prototypeFiles(dir) {
   return [
     { name: "src/styles/tokens.css", css: readFileSync(join(dir, "src", "styles", "tokens.css"), "utf8") },
@@ -272,7 +300,10 @@ if (isMain) {
   const protoDir = args.includes("--prototype") ? resolve(args[args.indexOf("--prototype") + 1]) : null;
   const css = readFileSync(TOKEN_FILE, "utf8");
   const problems = structureProblems(css);
-  const prod = resolveContexts(productionFiles(), PROD_CONTEXTS);
+  const epProblems = elementPlusScopeProblems(readFileSync(EP_FILE, "utf8"));
+  problems.push(...epProblems.map((p) => `element-plus.css: ${p}`));
+  if (!epProblems.length) console.log(`element-plus.css: every rule mirrored under ${EP_SCOPES.join(" and ")}`);
+  const prod =resolveContexts(productionFiles(), PROD_CONTEXTS);
   let compared = 0;
 
   if (protoDir) {

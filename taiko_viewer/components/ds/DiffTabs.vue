@@ -5,6 +5,8 @@
 // Phone (≤ 767): unselected tabs show the one-character short name; the bar scrolls sideways with edge fades and the
 // selected tab is scrolled into view. Arrow keys / Home / End move the selection (tablist). Tabs are ≥ 44 × 44.
 // It only emits the chosen difficulty (v-model); it never reads or writes the URL.
+// `controls`: id of the tab panel the tabs switch; each tab then gets aria-controls and the id
+// `<controls>-tab-<difficulty>`, which the panel uses for aria-labelledby.
 import { normalizeDifficultyType, type DifficultyType } from "~/utils/difficulty";
 import { diffIconSrc } from "~/utils/ds/gameAssets";
 import { diffConstant, diffStar } from "./Diff.vue";
@@ -53,7 +55,9 @@ import { useI18n } from "vue-i18n";
 const props = defineProps({
   charts: { type: Array as PropType<DsDiffTabChart[]>, required: true },
   /** Selected difficulty 1–5 */
-  modelValue: { type: [Number, String] as PropType<number | string | null>, default: null }
+  modelValue: { type: [Number, String] as PropType<number | string | null>, default: null },
+  /** id of the controlled tab panel */
+  controls: { type: String, default: "" }
 });
 const emit = defineEmits<{ "update:modelValue": [difficulty: DifficultyType] }>();
 
@@ -136,6 +140,8 @@ watch(selected, () => nextTick(() => reveal(true)));
         class="ds-difftab"
         :aria-selected="item.difficulty === selected ? 'true' : 'false'"
         :tabindex="index === tabIndex ? 0 : -1"
+        :id="controls ? `${controls}-tab-${item.difficulty}` : undefined"
+        :aria-controls="controls || undefined"
         :data-difficulty="item.difficulty"
         @click="choose(item.difficulty)"
         @keydown="onKeydown($event, index)"
