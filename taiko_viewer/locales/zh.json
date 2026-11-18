@@ -2199,6 +2199,47 @@
     }
   },
   "rework": {
+    "passport": "成长档案",
+    "home": {
+      "allRecommendations": "全部推荐",
+      "choose": "设为目标",
+      "viewChart": "查看谱面",
+      "syncAfter": "练后同步",
+      "goalSet": "{date} 设定",
+      "pickTitle": "选择另一首歌",
+      "pickEmpty": "当前推荐中没有其他可设为目标的歌曲。",
+      "pickMore": "查看更多推荐",
+      "bestScore": "最好成绩",
+      "daily": {
+        "title": "今日进展",
+        "count": "游玩 {count} 张谱面",
+        "recorded": "已记录游玩",
+        "quiet": "已记录游玩，暂无可确认的成绩变化。"
+      },
+      "feed": {
+        "title": "动态",
+        "profile": "查看 B 站主页",
+        "previewAlt": "预览",
+        "empty": "暂无动态",
+        "collapse": "收起全文",
+        "expand": "查看全文",
+        "forward": "转发",
+        "comment": "评论",
+        "like": "点赞",
+        "source": "来源：Bilibili",
+        "tenThousand": "{value}万"
+      }
+    },
+    "growthPage": {
+      "now": "现在",
+      "since": "{date} 的记录",
+      "points": "{count} 条记录"
+    },
+    "weeklyPage": {
+      "previous": "上一周",
+      "next": "下一周",
+      "range": "{from} — {to}"
+    },
     "nextLanguage": "日",
     "exampleSong": "千本桜",
     "exampleCategory": "ナムコ",
@@ -2236,7 +2277,7 @@
     "scores": "全部成绩",
     "progress": "歌曲进度",
     "recommend": "推荐歌曲",
-    "weekly": "周报",
+    "weekly": "这一周",
     "myPosts": "我的帖子",
     "settings": "设置",
     "about": "关于",

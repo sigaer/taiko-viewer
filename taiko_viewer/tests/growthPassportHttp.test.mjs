@@ -32,11 +32,15 @@ test("Passport page is localized, separated single-series charts, accessible and
     readFile(new URL("../locales/ja.json", import.meta.url), "utf8")
   ]);
   assert.match(page, /\/api\/account\/growth\/passport/);
-  const chart = await readFile(new URL("../components/PassportMetricChart.vue", import.meta.url), "utf8");
+  // Slice C: the hand-written SVG chart became components/rework/growth/MetricChart.vue on DsLineChart; separate
+  // comparable runs are kept apart by a gap in the line (metricLine) instead of one <g> per run.
+  const chart = await readFile(new URL("../components/rework/growth/MetricChart.vue", import.meta.url), "utf8");
   assert.match(chart, /role="group"/);
   assert.match(chart, /tabindex="0"/);
   assert.match(page, /aria-pressed/);
-  assert.match(chart, /passport-chart__segment/);
+  assert.match(chart, /passportMetricRuns\(/);
+  assert.match(chart, /metricLine\(/);
+  assert.match(chart, /<DsChartsLineChart/);
   assert.doesNotMatch(page, /modelRevision|algorithmVersion|scoreRevision/);
   assert.doesNotMatch(page, /kpi-grid/i);
   for (const source of [weekly, home, my, sidebar]) assert.match(source, /\/my\/growth/);

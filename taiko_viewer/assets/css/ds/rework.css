@@ -255,3 +255,61 @@ html.viewer-rework .rw-result-image {
   margin-inline: auto;
   border-radius: var(--r-ctl);
 }
+/*
+ * Native <dialog> of reworked pages (slice C: the goal picker on the home page). Overlay level (04 §5): --overlay-bg
+ * and --overlay-line; the backdrop is the scrim. Only rendered while the page is shown; no node left in <body>.
+ * .rw-dialog            the dialog element; .rw-dialog__title its heading; .rw-dialog__actions the button row
+ * .rw-choice            a radio choice row inside a dialog (44 px target)
+ */
+html.viewer-rework .rw-dialog {
+  width: min(460px, calc(100vw - 32px));
+  max-height: min(80dvh, 640px);
+  overflow-y: auto;
+  box-sizing: border-box;
+  padding: var(--sp-5);
+  border: 1px solid var(--overlay-line);
+  border-radius: var(--r-panel);
+  background: var(--overlay-bg);
+  color: var(--ink);
+  box-shadow: var(--shadow-pop);
+  font-family: var(--font-ui);
+}
+html.viewer-rework .rw-dialog::backdrop {
+  background: var(--scrim);
+}
+html.viewer-rework .rw-dialog__title {
+  margin: 0 0 var(--sp-3);
+  font-size: var(--fs-18);
+  font-weight: 700;
+  line-height: var(--lh-snug);
+}
+html.viewer-rework .rw-dialog__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: var(--sp-2);
+  margin-top: var(--sp-4);
+}
+html.viewer-rework .rw-choice {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  min-height: var(--hit);
+  padding: 0 var(--sp-2);
+  border-radius: var(--r-ctl);
+  font-size: var(--fs-14);
+  cursor: pointer;
+}
+html.viewer-rework .rw-choice:hover {
+  background: var(--bg-sunk);
+}
+html.viewer-rework .rw-choice input {
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  accent-color: var(--action-bg);
+}
+html.viewer-rework .rw-choice input:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}

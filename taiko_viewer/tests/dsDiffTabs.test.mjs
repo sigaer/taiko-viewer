@@ -66,4 +66,11 @@ test("song cell: lang only when the title's language differs from the page", asy
   const same = await render("SongCell", { songId: 410, title: "c", subtitle: "c" }, { locale: "ja", components });
   assert.doesNotMatch(same, /ds-songcell__sub/, "the same name in both languages is shown once");
   assert.doesNotMatch(same, /ds-diff/);
+  // showConstant passes through to DsDiff (slice C: plan items have no constant): no constant slot
+  const withSlot = await render("SongCell", { songId: 12, title: "d", difficulty: 4, star: 8 }, { locale: "zh", components });
+  const noSlot = await render("SongCell", { songId: 12, title: "d", difficulty: 4, star: 8, showConstant: false }, { locale: "zh", components });
+  assert.notEqual(withSlot, noSlot);
+  assert.match(withSlot, /ds-diff__const/);
+  assert.doesNotMatch(noSlot, /ds-diff__const/);
+  assert.match(noSlot, /aria-label="魔王 星级 8"/);
 });

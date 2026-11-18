@@ -29,6 +29,8 @@ const props = defineProps({
   difficulty: { type: [Number, String] as PropType<number | string | null>, default: null },
   star: { type: [Number, String] as PropType<number | string | null>, default: null },
   constant: { type: [Number, String] as PropType<number | string | null>, default: null },
+  /** false where the data source has no constants (DsDiff showConstant): no "—" slot */
+  showConstant: { type: Boolean, default: true },
   coverSize: { type: String as PropType<"sm" | "md" | "lg">, default: "md" }
 });
 
@@ -44,7 +46,7 @@ const sub = computed(() => (props.subtitle && props.subtitle !== props.title ? p
     <div class="ds-songcell__body">
       <span class="ds-songcell__title" :lang="titleAttr" :title="title">{{ title }}</span>
       <span v-if="sub" class="ds-songcell__sub" :lang="subtitleAttr" :title="sub">{{ sub }}</span>
-      <DsDiff v-if="difficulty !== null && difficulty !== ''" class="ds-songcell__diff" :difficulty="difficulty" :star="star" :constant="constant" />
+      <DsDiff v-if="difficulty !== null && difficulty !== ''" class="ds-songcell__diff" :difficulty="difficulty" :star="star" :constant="constant" :show-constant="showConstant" />
     </div>
   </div>
 </template>

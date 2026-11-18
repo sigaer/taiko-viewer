@@ -12,6 +12,7 @@ import {
 } from "~/utils/rework/navigation";
 import { searchShortcut } from "~/utils/rework/search";
 import { PLAY_TABS } from "~/utils/rework/scores";
+import { GROWTH_TABS } from "~/utils/rework/today";
 const props = defineProps<{
   title: string;
   contentLayout: string;
@@ -48,10 +49,7 @@ const secondary: Record<string, { key: string; to: string }[]> = {
     { key: "titles", to: "/titles" },
   ],
   play: [...PLAY_TABS],
-  growth: [
-    { key: "growth", to: "/my/growth" },
-    { key: "weekly", to: "/my/weekly" },
-  ],
+  growth: [...GROWTH_TABS],
   community: [
     { key: "community", to: "/forum" },
     { key: "myPosts", to: "/forum/me" },

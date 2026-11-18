@@ -1,4 +1,5 @@
 // Stage 2 slice B: the signed-in player's score pages (helpers, contracts the pages rely on, source rules).
+// Stage 2 slice C: 今日 / 成长 / 这一周 / goals (helpers, contracts, source rules) — tests at the end of the file.
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
@@ -8,6 +9,14 @@ import {
   scoreDate, scoreDateTime, scoreTitles, starOf, fitPercent, deviationText, fitPosition, FIT_SCALE, progressShare, PLAY_TABS
 } from '../utils/rework/scores.ts';
 import { crownFromCounts } from '../utils/ds/crown.ts';
+import {
+  GROWTH_TABS, factCrown, isRankFact, rankValue, radarAxes, radarHasData, metricLine, deltaRows, signedFixed, shiftDay,
+  weekNavigation, dimensionLabelKey, intlLocale, shortDay, GOAL_TYPE_KEYS, GOAL_COMPLETED_KEYS, RECOVERY_KEYS,
+  WEEKLY_TOTAL_KEYS, WEEKLY_REASON_KEYS, WEEKLY_METHOD_KEYS, keyOf
+} from '../utils/rework/today.ts';
+import { catalogLocation, searchAllState, songSearchRequest } from '../utils/rework/catalog.ts';
+import { passportMetricRuns } from '../utils/passportNarrative.ts';
+import { GROWTH_DIMENSION_ORDER } from '../utils/playerGrowth.ts';
 
 const read = (path) => readFile(new URL('../' + path, import.meta.url), 'utf8');
 const locale = async (lang) => JSON.parse(await read(`locales/${lang}.json`));
@@ -134,7 +143,8 @@ test('slice pages: own header, Element Plus mapping, ReworkGate instead of Accou
     assert.match(await read(page), /<ReworkGate :need="accountUser \? null : 'login'">/, page);
   }
   assert.match(await read('pages/tools/word-cloud.vue'), /AccountToolGate/, 'word cloud (slice F) keeps the old gate');
-  for (const growth of ['pages/my/growth.vue', 'pages/my/weekly.vue']) assert.doesNotMatch(await read(growth), /reworkElementPlus/, growth + ' belongs to slice C');
+  // slice C reworked the two growth pages: they carry the mapping now (was: not flagged, belonged to slice C)
+  for (const growth of ['pages/my/growth.vue', 'pages/my/weekly.vue']) assert.match(await read(growth), /reworkElementPlus: true/, growth + ' (slice C)');
 });
 
 test('server images are kept: the same endpoints and parameters', async () => {
@@ -165,4 +175,143 @@ test('every slice B locale key exists in both languages with the same shape', as
   for (const source of sources) for (const [, key] of source.matchAll(/\bt\(["'](rework\.[\w.]+)["']/g)) {
     assert.ok(get(zh, key) !== undefined && get(ja, key) !== undefined, key);
   }
+});
+
+// ---------- slice C ----------
+
+test('slice C: crowns and ranks from growth facts; rank values are 0–8 only', () => {
+  assert.equal(factCrown('df'), 'dondaful');
+  assert.equal(factCrown('fc'), 'full');
+  assert.equal(factCrown('clear'), 'clear');
+  assert.equal(factCrown('clear-upgrade'), 'clear');
+  for (const type of ['score-pb', 'ng-reduced', 'rank-upgrade', 'played', 'goal-completed', null, undefined]) assert.equal(factCrown(type), null);
+  assert.ok(isRankFact('rank-upgrade'));
+  assert.ok(!isRankFact('fc'));
+  assert.deepEqual([0, 5, 8, '6'].map(rankValue), [0, 5, 8, 6]);
+  for (const value of [null, undefined, 9, -1, 2.5, 'x', '']) assert.equal(rankValue(value), null);
+});
+
+test('slice C: radar axes keep missing values as missing (never zero) and only compare when there is a previous value', () => {
+  const label = (k) => k.toUpperCase();
+  const axes = radarAxes(GROWTH_DIMENSION_ORDER, label, { big_song: 9.4, stamina: null, speed: 7.9, accuracy_power: 9.8, rhythm: Number.NaN });
+  assert.deepEqual(axes.map((a) => a.key), GROWTH_DIMENSION_ORDER);
+  assert.deepEqual(axes.map((a) => a.value), [9.4, null, 7.9, 9.8, null, null]);
+  assert.ok(axes.every((a) => !('prev' in a)), 'no dashed outline without a previous measurement');
+  assert.equal(axes[0].label, 'BIG_SONG');
+  assert.ok(radarHasData(axes));
+  assert.ok(!radarHasData(axes.map((a, i) => ({ ...a, value: i < 2 ? a.value : null }))));
+  const compared = radarAxes(GROWTH_DIMENSION_ORDER, label, { speed: 8 }, { speed: 7.5, stamina: 6 });
+  assert.equal(compared.find((a) => a.key === 'speed').prev, 7.5);
+  assert.equal(compared.find((a) => a.key === 'big_song').prev, null);
+  assert.equal(dimensionLabelKey('big_song'), 'rework.ratingDims.big');
+  assert.equal(dimensionLabelKey('accuracy_power'), 'rework.ratingDims.accuracy');
+  assert.equal(dimensionLabelKey('speed'), 'rework.ratingDims.speed');
+});
+
+test('slice C: the metric line shows exactly the measured points, separated runs break the line', () => {
+  const point = (id, day, rating, speed) => ({ id, day, rating, dimensions: { speed } });
+  const segments = [
+    { id: 'a', points: [point('1', '2026-09-01', 8.5, 7), point('2', '2026-09-08', 8.6, null)] },
+    { id: 'b', points: [point('3', '2026-10-01', 8.9, 7.4), point('4', '2026-10-05', 9.0, 7.6)] }
+  ];
+  const rating = metricLine(passportMetricRuns(segments, 'rating'), (d) => d.slice(5));
+  assert.deepEqual(rating.points, [{ label: '09-01', value: 8.5 }, { label: '09-08', value: 8.6 }, { label: '10-01', value: 8.9 }, { label: '10-05', value: 9.0 }]);
+  const speed = metricLine(passportMetricRuns(segments, 'speed'), (d) => d.slice(5));
+  assert.deepEqual(speed.points.map((p) => p.value), [7, null, 7.4, 7.6], 'a missing value starts a new run: a gap, not a zero');
+  assert.deepEqual(speed.index.map((p) => [p.id, p.at]), [['1', 0], ['3', 2], ['4', 3]]);
+  assert.deepEqual(metricLine([], String), { points: [], index: [] });
+});
+
+test('slice C: weekly dimension change rows, signed values and week navigation over ?week=', () => {
+  const rows = deltaRows(GROWTH_DIMENSION_ORDER, { big_song: 0.1, stamina: -0.2, speed: 0.4, accuracy_power: null, rhythm: 0, complex: 0.4 });
+  assert.deepEqual(rows.map((r) => r.share), [25, 50, 100, 0, 0, 100]);
+  assert.deepEqual(rows.filter((r) => r.top).map((r) => r.key), ['speed', 'complex'], 'the largest increase is marked (ties too)');
+  assert.equal(rows[3].delta, null);
+  assert.deepEqual(deltaRows(GROWTH_DIMENSION_ORDER, null).map((r) => [r.delta, r.share, r.top]), GROWTH_DIMENSION_ORDER.map(() => [null, 0, false]));
+  assert.deepEqual([0.18, -0.04, 0, null, undefined, Number.NaN].map((v) => signedFixed(v)), ['+0.18', '−0.04', '0.00', '—', '—', '—']);
+  assert.equal(shiftDay('2026-11-16', -7), '2026-11-09');
+  assert.equal(shiftDay('2026-12-28', 7), '2027-01-04');
+  assert.equal(shiftDay('2026-3-1', 1), null);
+  assert.deepEqual(weekNavigation({ from: '2026-11-16', to: '2026-11-18', isCompleteWeek: false }), { previous: '2026-11-09', next: null });
+  assert.deepEqual(weekNavigation({ from: '2026-11-09', to: '2026-11-15', isCompleteWeek: true }), { previous: '2026-11-02', next: '2026-11-16' });
+  assert.deepEqual(weekNavigation(null), { previous: null, next: null });
+});
+
+test('slice C: dates in the page language on the growth calendar', () => {
+  assert.equal(intlLocale('ja'), 'ja-JP');
+  assert.equal(intlLocale('zh'), 'zh-CN');
+  assert.equal(shortDay('2026-11-12', 'zh'), '11/12');
+  assert.equal(shortDay('2026-11-11T20:00:00.000Z', 'zh'), '11/12', 'Asia/Shanghai day');
+  assert.equal(shortDay('', 'zh'), '');
+  assert.equal(shortDay(null, 'ja'), '');
+});
+
+test('slice C: every static locale key the reworked components use exists in both languages', async () => {
+  const [zh, ja] = [await locale('zh'), await locale('ja')];
+  const tables = [GOAL_TYPE_KEYS, GOAL_COMPLETED_KEYS, RECOVERY_KEYS, WEEKLY_TOTAL_KEYS, WEEKLY_REASON_KEYS, WEEKLY_METHOD_KEYS];
+  for (const table of tables) for (const key of Object.values(table)) for (const [lang, messages] of [['zh', zh], ['ja', ja]]) assert.equal(typeof get(messages, key), 'string', `${lang}: ${key}`);
+  for (const key of GROWTH_DIMENSION_ORDER.map(dimensionLabelKey)) assert.equal(typeof get(zh, key), 'string', key);
+  assert.equal(keyOf(GOAL_TYPE_KEYS, 'fc'), 'home.goal.types.fc');
+  assert.equal(keyOf(RECOVERY_KEYS, 'unknown-stage', RECOVERY_KEYS.auth), 'home.recovery.auth');
+  assert.equal(keyOf(GOAL_TYPE_KEYS, null), '');
+  const shape = (obj, prefix = '') => Object.entries(obj).flatMap(([k, v]) => (v && typeof v === 'object' ? shape(v, `${prefix}${k}.`) : [`${prefix}${k}`])).sort();
+  for (const area of ['home', 'growthPage', 'weeklyPage']) {
+    assert.deepEqual(shape(zh.rework[area]), shape(ja.rework[area]), `rework.${area}`);
+    for (const key of shape(zh.rework[area])) assert.ok(String(get(ja.rework[area], key)).trim(), `ja rework.${area}.${key}`);
+  }
+});
+
+test('slice C: the 成长 tabs are the two growth pages, named like their own <h1>', async () => {
+  const [zh, ja, shell] = [await locale('zh'), await locale('ja'), await read('components/rework/Shell.vue')];
+  assert.deepEqual(GROWTH_TABS.map((t) => t.to), ['/my/growth', '/my/weekly']);
+  assert.ok(GROWTH_TABS.every((t) => activeDestination(t.to) === 'growth'));
+  for (const messages of [zh, ja]) {
+    assert.equal(get(messages, 'rework.passport'), get(messages, 'passport.title'));
+    assert.equal(get(messages, 'rework.weekly'), get(messages, 'weekly.title'));
+  }
+  assert.match(shell, /growth: \[\.\.\.GROWTH_TABS\]/);
+  assert.doesNotMatch(shell, /today: \[/, '今日 is a single page without section tabs');
+});
+
+test('slice C: the guest search uses the global search contract and the same "view all" into the library', async () => {
+  const source = await read('components/rework/today/SongSearch.vue');
+  assert.match(source, /songSearchRequest\(keyword\)/);
+  assert.match(source, /catalogLocation\(searchAllState\(q\), localePath\)/);
+  assert.doesNotMatch(source, /shelfStatus|pageSize/, 'no second query semantics');
+  assert.deepEqual(songSearchRequest('天狗'), { view: 'list', page: 1, pageSize: 8, keyword: '天狗', sort: 'catalog' });
+  assert.deepEqual(catalogLocation(searchAllState('天狗')), { path: '/songs', query: { q: '天狗', shelf: 'all' } });
+  const search = await read('components/rework/SearchPanel.vue');
+  assert.match(search, /songSearchRequest\(/);
+  assert.match(search, /catalogLocation\(searchAllState\(/);
+});
+
+test('slice C pages: own header, Element Plus mapping, gates, no hand-written growth chart', async () => {
+  for (const path of ['pages/index.vue', 'pages/my/growth.vue', 'pages/my/weekly.vue']) {
+    const source = await read(path);
+    assert.match(source, /hidePageHeader: true/, path);
+    assert.match(source, /reworkElementPlus: true/, path);
+  }
+  const growth = await read('pages/my/growth.vue');
+  const weekly = await read('pages/my/weekly.vue');
+  assert.match(growth, /contentLayout: "wide"/);
+  assert.match(weekly, /contentLayout: "wide"/, 'the two 成长 tabs share one content width');
+  for (const source of [growth, weekly]) assert.match(source, /<ReworkGate v-if="!accountUser"[^>]*need="login"/);
+  assert.doesNotMatch(growth, /PassportMetricChart|<svg/);
+  const chart = await read('components/rework/growth/MetricChart.vue');
+  assert.match(chart, /<DsChartsLineChart/);
+  const signedIn = await read('components/rework/today/SignedIn.vue');
+  assert.match(signedIn, /need="binding"/);
+  assert.match(signedIn, /localePath\('\/account\/sync'\)/);
+  const home = await read('pages/index.vue');
+  assert.match(home, /resolveHomePresentation\(homeStateStatus\.value, homeState\.value\)/, 'home state resolution unchanged');
+  for (const name of ['ReworkTodayGuest', 'ReworkTodayPublic', 'ReworkTodaySignedIn']) assert.match(home, new RegExp(`<${name}`));
+});
+
+test('slice C: charts draw only values the APIs return', async () => {
+  const profile = await read('components/rework/today/Profile.vue');
+  assert.match(profile, /<DsDrumDial :value="rating"/);
+  assert.match(profile, /<DsRadar v-if="showRadar"/);
+  const value = await read('components/rework/today/AccountValue.vue');
+  assert.doesNotMatch(value, /12,840|--bar/, 'no invented Rating card on the guest home');
+  for (const path of ['components/rework/today/Board.vue', 'components/rework/weekly/Hero.vue']) assert.doesNotMatch(await read(path), /<DsLane|ReworkLane/, path + ': no lane without per-day data');
 });

@@ -7,6 +7,8 @@
 // variant = "block" (default) title, text and actions stacked; "row" one line of text and the action(s) beside it,
 //   wrapping only when the line is too narrow (a guest prompt inside the page flow, without a card or heading).
 // The caller decides `need` from its own account state; the gate does not fetch anything.
+// `primary` is emitted when the main action (log in / bind) is followed (analytics of the caller); extra actions go
+// in the `actions` slot after the built-in ones (slice C: the home page's "my scores" link).
 import type { PropType } from "vue";
 
 const props = defineProps({
@@ -19,6 +21,7 @@ const props = defineProps({
   compact: { type: Boolean, default: false },
   variant: { type: String as PropType<"block" | "row">, default: "block" }
 });
+const emit = defineEmits<{ primary: [] }>();
 const { t } = useI18n();
 const route = useRoute();
 const localePath = useLocalePath();
@@ -33,10 +36,11 @@ const heading = computed(() => props.title || t(props.need === "binding" ? "rewo
     <p v-if="text" class="rw-gate__text">{{ text }}</p>
     <div class="rw-gate__actions">
       <template v-if="need === 'login'">
-        <NuxtLink class="rw-btn rw-btn--primary" :class="{ 'rw-btn--sm': variant === 'row' }" :to="loginTo">{{ t("rework.gate.login") }}</NuxtLink>
+        <NuxtLink class="rw-btn rw-btn--primary" :class="{ 'rw-btn--sm': variant === 'row' }" :to="loginTo" @click="emit('primary')">{{ t("rework.gate.login") }}</NuxtLink>
         <NuxtLink v-if="register" class="rw-btn" :to="localePath('/account/register')">{{ t("rework.gate.register") }}</NuxtLink>
       </template>
-      <NuxtLink v-else class="rw-btn rw-btn--primary" :to="localePath('/account/profile')">{{ t("rework.gate.bind") }}</NuxtLink>
+      <NuxtLink v-else class="rw-btn rw-btn--primary" :to="localePath('/account/profile')" @click="emit('primary')">{{ t("rework.gate.bind") }}</NuxtLink>
+      <slot name="actions" />
     </div>
   </div>
 </template>

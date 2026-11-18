@@ -1,7 +1,9 @@
 // Shared Windows development self-check runner for the rework slices. NOT acceptance.
 // Starts its own `nuxt dev` on 127.0.0.1:<port> over a temporary data directory the slice fills, with unresolvable
 // database hosts and the no-egress preload; one system Chrome; a total time limit; everything is stopped in finally
-// (dev server process tree, browser) and the port is checked free at the end. The slice supplies:
+// and the port is checked free at the end. Only processes this runner started are stopped, by their recorded PIDs:
+// the dev server tree (spawn pid) and the browser tree (launchServer pid, reported as report.browserPid). Never stop
+// processes by name or command-line match (AGENTS.md memory rules). The slice supplies:
 //   prepare(dataDir)            → { env?: extra environment, ...anything the run needs }   (writes synthetic files)
 //   run({ base, browser, data, prepared, report, out })                                    (fills `report`)
 //   summarize(report)           → { line: object for the console, failed: boolean }
@@ -60,13 +62,26 @@ export async function runSelfcheck({ name, defaultPort, defaultOut, label, limit
   const data = await mkdtemp(resolve(tmpdir(), `taiko-${name}-selfcheck-`));
   let server;
   let browser;
+  let browserServer;
   const report = { kind: "development self-check (nuxt dev, Windows); not acceptance", label, base, startedAt: new Date().toISOString() };
+  const killPid = (pid) => {
+    if (pid) spawnSync("taskkill", ["/pid", String(pid), "/T", "/F"], { stdio: "ignore" });
+  };
   const killTree = () => {
-    if (server?.pid && server.exitCode === null) spawnSync("taskkill", ["/pid", String(server.pid), "/T", "/F"], { stdio: "ignore" });
+    if (server?.pid && server.exitCode === null) killPid(server.pid);
+  };
+  const alive = (pid) => {
+    try {
+      process.kill(pid, 0);
+      return true;
+    } catch {
+      return false;
+    }
   };
   const deadline = setTimeout(() => {
     report.timedOut = true;
     browser?.close().catch(() => {});
+    killPid(report.browserPid);
     killTree();
   }, limitMs);
   let summary = { line: {}, failed: true };
@@ -88,7 +103,9 @@ export async function runSelfcheck({ name, defaultPort, defaultOut, label, limit
       if (!ready) await new Promise((r) => setTimeout(r, 1000));
     }
     assert.ok(ready, "dev server ready");
-    browser = await chromium.launch({ headless: true, executablePath: chrome });
+    browserServer = await chromium.launchServer({ headless: true, executablePath: chrome });
+    report.browserPid = browserServer.process()?.pid ?? null;
+    browser = await chromium.connect(browserServer.wsEndpoint());
     await run({ base, browser, data, prepared, report, out });
   } catch (error) {
     report.error = String(error?.stack || error).slice(0, 1500);
@@ -96,6 +113,9 @@ export async function runSelfcheck({ name, defaultPort, defaultOut, label, limit
   } finally {
     clearTimeout(deadline);
     await browser?.close().catch(() => {});
+    await browserServer?.close().catch(() => {});
+    if (report.browserPid && alive(report.browserPid)) killPid(report.browserPid);
+    report.browserStoppedAfter = report.browserPid ? !alive(report.browserPid) : null;
     killTree();
     for (let i = 0; i < 30 && (await portBusy(port)); i++) await new Promise((r) => setTimeout(r, 500));
     report.portFreeAfter = !(await portBusy(port));
@@ -107,7 +127,7 @@ export async function runSelfcheck({ name, defaultPort, defaultOut, label, limit
     } catch (error) {
       summary = { line: { summarizeError: String(error) }, failed: true };
     }
-    console.log(JSON.stringify({ ...summary.line, portFreeAfter: report.portFreeAfter, error: report.error?.split("\n")[0] }));
-    if (summary.failed || report.error || !report.portFreeAfter) process.exitCode = 1;
+    console.log(JSON.stringify({ ...summary.line, portFreeAfter: report.portFreeAfter, browserStoppedAfter: report.browserStoppedAfter, error: report.error?.split("\n")[0] }));
+    if (summary.failed || report.error || !report.portFreeAfter || report.browserStoppedAfter === false) process.exitCode = 1;
   }
 }

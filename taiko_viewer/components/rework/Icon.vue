@@ -23,6 +23,8 @@ const paths: Record<string, string> = {
   upload: "M12 16V4m-5 5 5-5 5 5M4 20h16",
   download: "M12 4v12m-5-5 5 5 5-5M4 20h16",
   open: "M14 4h6v6M20 4l-9 9M18 14v6H4V6h6",
+  // slice C: a row that opens something (right), week / point stepping
+  forward: "m9 4 8 8-8 8",
 };
 </script>
 <template>

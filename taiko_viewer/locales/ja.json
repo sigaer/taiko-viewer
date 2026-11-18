@@ -2145,6 +2145,47 @@
     }
   },
   "rework": {
+    "passport": "成長の記録",
+    "home": {
+      "allRecommendations": "おすすめをすべて見る",
+      "choose": "目標に設定",
+      "viewChart": "譜面を見る",
+      "syncAfter": "プレイ後に同期",
+      "goalSet": "{date} に設定",
+      "pickTitle": "次の楽曲を選ぶ",
+      "pickEmpty": "現在のおすすめに、ほかに目標を設定できる楽曲はありません。",
+      "pickMore": "ほかのおすすめを見る",
+      "bestScore": "自己ベスト",
+      "daily": {
+        "title": "今日の進捗",
+        "count": "{count}譜面をプレイ",
+        "recorded": "プレイ記録あり",
+        "quiet": "プレイ記録はありますが、成績の変化はまだ確認できません。"
+      },
+      "feed": {
+        "title": "投稿",
+        "profile": "Bilibili ホームを見る",
+        "previewAlt": "プレビュー",
+        "empty": "投稿はまだありません",
+        "collapse": "折りたたむ",
+        "expand": "全文を見る",
+        "forward": "転送",
+        "comment": "コメント",
+        "like": "いいね",
+        "source": "出典：Bilibili",
+        "tenThousand": "{value}万"
+      }
+    },
+    "growthPage": {
+      "now": "現在",
+      "since": "{date} の記録",
+      "points": "{count} 件の記録"
+    },
+    "weeklyPage": {
+      "previous": "前の週",
+      "next": "次の週",
+      "range": "{from} — {to}"
+    },
     "nextLanguage": "中",
     "exampleSong": "千本桜",
     "exampleCategory": "ナムコ",
@@ -2182,7 +2223,7 @@
     "scores": "全成績",
     "progress": "楽曲進捗",
     "recommend": "おすすめ楽曲",
-    "weekly": "週報",
+    "weekly": "この一週間",
     "myPosts": "自分の投稿",
     "settings": "設定",
     "about": "このサイトについて",

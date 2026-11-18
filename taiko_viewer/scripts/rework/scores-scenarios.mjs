@@ -802,10 +802,13 @@ export async function runScoresScenarios({ browser, base, out, web = webRoot, la
       await page.waitForURL((u) => u.pathname === path);
       await page.waitForFunction(() => document.documentElement.classList.contains("rework-ep"), null, { timeout: 15000 });
     }
+    // slice C reworked /my/growth: it carries the mapping too (was: not flagged); /about does not
     await push(page, "/my/growth");
     await page.waitForURL(/\/my\/growth$/);
+    await page.waitForFunction(() => document.documentElement.classList.contains("rework-ep"), null, { timeout: 15000 });
+    await push(page, "/about");
+    await page.waitForURL(/\/about$/);
     await page.waitForFunction(() => !document.documentElement.classList.contains("rework-ep"), null, { timeout: 15000 });
-    assert.ok(!(await probe()).cls.includes("rework-ep"), "/my/growth (slice C) is not flagged");
     return { dropdownMapped: ddBg };
   });
 
