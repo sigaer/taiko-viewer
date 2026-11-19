@@ -55,7 +55,7 @@ for(const [file,method] of [['AccountSongEditorDialog','submit'],['AccountScoreI
 test('actual binding switch hides old results while pending, preserves old binding on failure, then refreshes the new source',async()=>fixture(async({mount,pending,binding,states})=>{
  const m=await mount('pages/account/songs.vue');m.openCreator();assert.equal(m.editorVisible,true);
  let op=m.changeBinding(2);assert.equal(m.rows.length,0);assert.equal(m.editorVisible,false);assert.equal(pending[0].path,'/api/account/bindings/current');pending.shift().reject({data:{statusMessage:'Synthetic binding failure'}});await op;assert.equal(m.currentBinding.id,1);assert.equal(m.rows.length,1);
- op=m.changeBinding(2);binding({id:2,taikoId:'synthetic-manual',isManual:true,source:'manual'});states.get('account-binding-generation').value++;pending.shift().resolve({});await op;await settle();assert.equal(m.currentBinding.id,2);assert.equal(m.resultReady,true);assert.equal(m.sourceHint,'rework.scoreList.hintManual');
+ op=m.changeBinding(2);binding({id:2,taikoId:'synthetic-manual',isManual:true,source:'manual'});states.get('account-binding-generation').value++;pending.shift().resolve({});await op;await settle();assert.equal(m.currentBinding.id,2);assert.equal(m.resultReady,true);assert.match(m.sourceHint,/手动/);
 }));
 test('pending binding switch cannot leave another account busy or emit its completion',async()=>fixture(async({mount,pending,messages,states})=>{
  const m=await mount('pages/account/songs.vue');const op=m.changeBinding(2),late=pending.shift();states.get('account-user').value={id:2};await settle();assert.equal(m.switchingBinding,false);const count=messages.length;late.resolve({});await op;assert.equal(messages.length,count);assert.equal(m.switchingBinding,false);

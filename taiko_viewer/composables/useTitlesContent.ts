@@ -5,10 +5,7 @@ const createDefaultPayload = (): TitlesPagePayload => ({
   total: 0
 });
 
-// The fetcher is created in setup (slice F, as useGuideContent): refresh() from the retry works. Same request and key.
-export const useTitlesContent = () => {
-  const apiFetch = useViewerApiFetch();
-  return useAsyncData("content-titles-page", () => apiFetch<TitlesPagePayload>("/api/content/titles"), {
+export const useTitlesContent = () =>
+  useAsyncData("content-titles-page", () => useViewerApiFetch()<TitlesPagePayload>("/api/content/titles"), {
     default: createDefaultPayload
   });
-};

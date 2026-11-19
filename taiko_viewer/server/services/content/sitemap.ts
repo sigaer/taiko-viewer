@@ -6,9 +6,9 @@ import { buildCanonicalUrl, getSongCatalog } from "./index";
 
 const STATIC_ROUTES = [
   "/",
-  "/songs",
-  "/songs?shelf=removed",
-  "/songs/constants",
+  "/songs/available",
+  "/songs/removed",
+  "/songs/v2-constants",
   "/titles",
   "/guide",
   "/grade",
@@ -37,8 +37,8 @@ type SitemapEntry = {
 
 const STATIC_ROUTE_META: Record<string, Pick<SitemapEntry, "changefreq" | "priority">> = {
   "/": { priority: "1.0", changefreq: "daily" },
-  "/songs": { priority: "0.9", changefreq: "daily" },
-  "/songs/constants": { priority: "0.8", changefreq: "daily" },
+  "/songs/available": { priority: "0.9", changefreq: "daily" },
+  "/songs/v2-constants": { priority: "0.8", changefreq: "daily" },
   "/guide": { priority: "0.9", changefreq: "weekly" },
   "/forum": { priority: "0.8", changefreq: "daily" },
   "/grade": { priority: "0.8", changefreq: "weekly" },
@@ -46,7 +46,7 @@ const STATIC_ROUTE_META: Record<string, Pick<SitemapEntry, "changefreq" | "prior
   "/titles": { priority: "0.7", changefreq: "weekly" },
   "/about": { priority: "0.5", changefreq: "monthly" },
   "/alias-log": { priority: "0.4", changefreq: "weekly" },
-  "/songs?shelf=removed": { priority: "0.6", changefreq: "weekly" },
+  "/songs/removed": { priority: "0.6", changefreq: "weekly" },
   "/grade/2023": { priority: "0.6", changefreq: "monthly" },
   "/grade/2024": { priority: "0.6", changefreq: "monthly" }
 };
@@ -170,9 +170,7 @@ export const getPublicSitemapPaths = async () => {
 };
 
 const renderUrlEntry = (entry: SitemapEntry) => {
-  // The library shelf is a query of /songs; keep it in the location.
-  const search = entry.path.match(/\?[^#]*/)?.[0] ?? "";
-  const parts = [`<loc>${xmlEscape(buildCanonicalUrl(entry.path) + search)}</loc>`];
+  const parts = [`<loc>${xmlEscape(buildCanonicalUrl(entry.path))}</loc>`];
   if (entry.lastmod) parts.push(`<lastmod>${xmlEscape(entry.lastmod)}</lastmod>`);
   if (entry.changefreq) parts.push(`<changefreq>${entry.changefreq}</changefreq>`);
   if (entry.priority) parts.push(`<priority>${entry.priority}</priority>`);

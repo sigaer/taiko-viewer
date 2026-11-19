@@ -178,7 +178,7 @@ await test('successful creation preserves chart identity, tags and content order
 });
 await test('all paragraph blocks remain editable after switching away from guide mode', async () => {
   const h = await composer(); h.paragraphBlocks.value = ['Original']; h.form.threadType = 'discussion';
-  assert.match(h.source, /<ol v-if="paragraphBlocks.length" class="block-list">/);
+  assert.match(h.source, /<div v-if="paragraphBlocks.length" class="block-list">/);
   assert.match(h.source, /v-model="paragraphBlocks\[index\]"/);
   h.paragraphBlocks.value[0] = 'Edited'; const task = h.submit();
   assert.equal(h.calls[0].input.body.contentBlocks[0].text, 'Edited'); h.calls[0].reject(new Error('503')); await task;

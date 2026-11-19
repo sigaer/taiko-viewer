@@ -56,8 +56,7 @@ const storySlideShellSource = await read("components/account/version-summary/Sto
 const annualTimelineSource = await read("composables/useAnnualTimeline.ts");
 const annualBgmSource = await read("utils/annualBgm.client.ts");
 const annualOpeningAssetsSource = await read("utils/annualOpeningAssets.client.ts");
-// Slice G: the annual entry that primes the music moved from the removed SidebarNav.vue to the My hub (phones and desktop).
-const sidebarSource = await read("components/rework/my/Hub.vue");
+const sidebarSource = await read("components/SidebarNav.vue");
 assert.equal(/AudioContext|createOscillator|createGain/.test(storyPlayer), false, "runtime synthesized audio remains");
 assert.equal(storyPlayer.includes("data:audio/wav;base64,"), true, "local one-shot drum asset is missing");
 assert.equal(storyPlayer.includes('v-if="started"'), true, "story controls are visible before the opening start action");
@@ -577,9 +576,7 @@ assert.equal(weekdayHeadlineIndex("anchored", workdayMixed, 5), 5, "non-workday 
 const weekdayScene = await read("components/account/version-summary/AnnualWeekdayForestScene.vue");
 assert.ok(weekdayScene.includes("weekdayHeadlineIndex(narrative.value.archetype"), "weekday scene does not apply the workday headline rule");
 
-// Slice E1 moved the binding markup (onboarding card, pending challenge, manual account panel) into its section
-// component; the page keeps the state, the handlers and the scroll targets.
-const profilePage = (await read("pages/account/profile.vue")) + "\n" + (await read("components/rework/account/ProfileBindings.vue"));
+const profilePage = await read("pages/account/profile.vue");
 assert.ok(profilePage.includes("needsBindingOnboarding"), "unbound first-screen CTA is missing");
 assert.ok(profilePage.includes("onboarding-card"), "unbound first-screen CTA markup is missing");
 assert.ok(profilePage.includes("focusBindingForm"), "binding CTA does not reveal the real binding form");

@@ -1,7 +1,7 @@
 {
   "name": "taiko",
   "private": true,
-  "version": "1.15.0",
+  "version": "1.14.3",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 0.0.0.0 --port 3000",
@@ -28,13 +28,6 @@
     "test:oidc:db": "node scripts/test_oidc_isolated.mjs --allow-test-db-mutation",
     "oidc:migrate": "node --experimental-strip-types scripts/migrate_oidc_schema.ts",
     "test:version": "node --test tests/versionProjection.test.mjs",
-    "test:ds": "node --experimental-strip-types --test \"tests/ds*.test.*\"",
-    "check:ds-contrast": "node scripts/ds/contrast-check.mjs",
-    "check:scoped-css": "node scripts/ds/check-scoped-css.mjs",
-    "check:ds": "node scripts/ds/check-tokens.mjs && node scripts/ds/check-token-collisions.mjs && node scripts/ds/contrast-check.mjs && node scripts/ds/token-mapping.mjs && node scripts/ds/check-scoped-css.mjs && node scripts/ds/check-ds-usage.mjs && node scripts/ds/check-ds-copy.mjs && node scripts/ds/generate_small_game_icons.mjs --check",
-    "ds:icons": "node scripts/ds/generate_small_game_icons.mjs",
-    "ds:build-report": "node scripts/ds/build-report.mjs",
-    "ds:browser-check": "node scripts/ds/browser-check.mjs",
     "test:forum": "node --test tests/forumI18n.test.mjs",
     "test:admin-auth": "node --test tests/adminAuthTrustBoundary.test.mjs",
     "test:ugc": "node --test tests/ugcCatalog.test.mjs && node --experimental-strip-types --test tests/ugcAggregate.test.ts tests/ugcVerifiedPlay.test.ts tests/ugcWriteValidation.test.ts",

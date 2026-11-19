@@ -23,8 +23,7 @@ test("page keeps official inventory and IDs while restoring local conditions and
   const payload = await getTitlesPageContent();
   assert.deepEqual(payload, { titles: [item(134, "765の達人", 2, "本地条件", [20, 38]), official.titles[1]], total: 2 });
   assert.deepEqual(official.titles[0], item(134, "765の達人", 2));
-  // slice F: the table markup moved from pages/titles.vue to its presentation component (same cell)
-  const page = readFileSync(new URL("../components/rework/titles/List.vue", import.meta.url), "utf8");
+  const page = readFileSync(new URL("../pages/titles.vue", import.meta.url), "utf8");
   assert.match(page, /<td>\{\{ title.condition \}\}<\/td>/);
 });
 

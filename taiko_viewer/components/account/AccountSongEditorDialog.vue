@@ -519,13 +519,6 @@ const submit = async () => {
   margin-bottom: 14px;
 }
 
-.dialog-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 12px;
-}
-
 .catalog-autocomplete {
   width: 100%;
 }

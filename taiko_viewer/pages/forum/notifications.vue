@@ -16,13 +16,14 @@ type NotificationState = {
   error: string;
 };
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const localePath = useLocalePath();
 const route = useRoute();
 const apiFetch = useViewerApiFetch();
 const { accountUser } = useAccountState();
 const { setUnreadCount } = useForumUnreadCount();
 const guard = useAccountRequestGuard(false);
+const { formatDateTime, formatDate } = useViewerDateTime();
 const forumHome = useNuxtData<ForumHomePayload>("forum-home").data;
 const forumMeHome = useNuxtData<ForumHomePayload>("forum-me-home").data;
 const page = ref(1);
@@ -34,12 +35,9 @@ const openingNotificationId = ref<number | null>(null);
 let active = true;
 let disposed = false;
 let refreshQueued = false;
-// Visible text moved from the inline zh / ja table to locales (rework.forum.notifications.*).
-const copy = computed(() => ({
-  failed: t("rework.forum.notifications.failed"),
-  retry: t("rework.forum.notifications.retry"),
-  pages: (n: number, total: number) => t("rework.forum.notifications.pages", { page: n, total })
-}));
+const copy = computed(() => locale.value === 'ja'
+  ? { loading: '通知を読み込み中', failed: '通知を読み込めませんでした', retry: '再試行', previous: '前へ', next: '次へ', pages: (n: number, total: number) => `${n} / ${total} ページ` }
+  : { loading: '正在加载通知', failed: '通知加载失败', retry: '重试', previous: '上一页', next: '下一页', pages: (n: number, total: number) => `第 ${n} / ${total} 页` });
 
 // Each accepted write is reflected only after its response. Single-read and
 // mark-all share one lock, so an older failure cannot roll back a newer success.
@@ -55,8 +53,6 @@ const syncUnreadCount = (unreadCount: number) => {
 
 definePageMeta({
   middleware: "account-auth",
-  hidePageHeader: true,
-  contentLayout: "wide",
   pageTitleKey: "forum.notifications",
   pageDescKey: "page.forum.notifications.desc",
   navKey: "/forum",
@@ -157,6 +153,12 @@ const markAllRead = async () => {
   }
 };
 
+const typeLabelMap = computed<Record<string, string>>(() => ({
+  reply: t("forum.notificationsType.reply"),
+  mention: t("forum.notificationsType.mention"),
+  like: t("forum.notificationsType.like"),
+  system: t("forum.notificationsType.system")
+}));
 const getNotificationTarget = (item: ForumNotification) => {
   if (!item.threadId) return null;
   return localePath({ path: `/forum/thread/${item.threadId}`, hash: item.postId ? `#reply-${item.postId}` : undefined });
@@ -204,56 +206,166 @@ const openNotification = async (item: ForumNotification) => {
   }
 };
 
-const selectPage = (value: number) => movePage(value - page.value);
-// Relative times ("{n} 分钟前" / yesterday / date) are drawn by ReworkCommunityTime after mount.
+const formatNotificationTime = (value: string) => {
+  const timestamp = new Date(value).getTime();
+  const ageMinutes = Math.max(0, Math.floor((Date.now() - timestamp) / 60000));
+  if (ageMinutes < 60) return t("forum.relativeMinutes", { count: ageMinutes });
+  if (ageMinutes < 1440) return t("forum.relativeHours", { count: Math.floor(ageMinutes / 60) });
+  if (ageMinutes < 2880) return t("forum.relativeYesterday");
+  return formatDate(value);
+};
 </script>
 
 <template>
   <div class="forum-notifications-page" :aria-busy="pending || mutationBusy || undefined">
-    <ReworkPageHeader class="notification-head" :title="t('rework.notifications')">
-      <p v-if="data && !loadError" class="notification-count rw-count" aria-live="polite">{{ t("page.forum.notifications.summary", { unread: data.unreadCount, total: data.total }) }}</p>
-      <template v-if="data && !loadError && data.unreadCount" #actions>
-        <button type="button" class="rw-btn" :disabled="actionsDisabled" @click="markAllRead">{{ t("forum.markAllRead") }}</button>
-      </template>
-    </ReworkPageHeader>
-    <ReworkState v-if="pending" kind="loading" :lines="6" />
-    <ReworkState v-else-if="loadError" kind="failed" :text="loadError" :retry-label="copy.retry" @retry="retry" />
+    <section v-if="data && !loadError" class="panel-card notification-head">
+      <p class="notification-count" aria-live="polite">{{ t("page.forum.notifications.summary", { unread: data.unreadCount, total: data.total }) }}</p>
+      <el-button v-if="data.unreadCount" type="primary" plain :disabled="actionsDisabled" @click="markAllRead">{{ t("forum.markAllRead") }}</el-button>
+    </section>
+    <p v-if="pending" role="status">{{ copy.loading }}</p>
+    <section v-else-if="loadError" class="notification-error" role="alert">
+      <p>{{ loadError }}</p>
+      <el-button :disabled="mutationBusy" @click="retry">{{ copy.retry }}</el-button>
+    </section>
     <template v-else-if="data">
-      <ReworkState v-if="!data.items.length" kind="empty" :title="t('forum.emptyNotifications')" />
-      <ul v-else class="notification-list">
-        <ReworkCommunityNotificationItem
+      <section class="notification-list">
+        <el-empty v-if="!data.items.length" :description="t('forum.emptyNotifications')" />
+        <article
           v-for="item in data.items"
           :key="item.id"
-          :item="item"
-          :disabled="actionsDisabled"
-          :busy="openingNotificationId === item.id"
-          @open="openNotification(item)"
-        />
-      </ul>
-      <ReworkPager v-if="totalPages > 1 || page > 1" class="notification-pager" :page="page" :count="totalPages" @select="selectPage" />
+          class="notification-card"
+          :class="{ unread: !item.isRead }"
+          :tabindex="actionsDisabled ? -1 : 0"
+          :role="item.threadId ? 'link' : 'button'"
+          :aria-label="item.title"
+          :aria-disabled="actionsDisabled || undefined"
+          :aria-busy="openingNotificationId === item.id"
+          @click="openNotification(item)"
+          @keydown.enter.prevent="openNotification(item)"
+          @keydown.space="!item.threadId && ($event.preventDefault(), openNotification(item))"
+        >
+          <div class="notification-card__main">
+            <div class="notification-card__meta">
+              <span class="notification-type"><span aria-hidden="true">{{ item.type === 'reply' ? '↩' : item.type === 'like' ? '♡' : item.type === 'mention' ? '@' : '!' }}</span> {{ typeLabelMap[item.type] || item.type }}</span>
+              <span :title="formatDateTime(item.createdAt)">{{ formatNotificationTime(item.createdAt) }}</span>
+            </div>
+            <h3>{{ item.title }}</h3>
+            <p>{{ item.body }}</p>
+          </div>
+          <span v-if="item.threadId" class="notification-card__arrow" aria-hidden="true">→</span>
+        </article>
+      </section>
+      <nav v-if="totalPages > 1 || page > 1" class="notification-pager" :aria-label="copy.pages(page, totalPages)">
+        <el-button :disabled="actionsDisabled || page <= 1" @click="movePage(-1)">{{ copy.previous }}</el-button>
+        <span aria-live="polite">{{ copy.pages(page, totalPages) }}</span>
+        <el-button :disabled="actionsDisabled || page >= totalPages" @click="movePage(1)">{{ copy.next }}</el-button>
+      </nav>
     </template>
   </div>
 </template>
 
 <style scoped>
-/* Layout only; colours and type come from the reworked components. */
+.notification-error { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.notification-pager { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 12px; }
+.notification-pager :deep(button) { min-height: 44px; }
+.notification-card[aria-disabled="true"] { cursor: wait; }
+.notification-card:focus-visible { outline: 2px solid var(--viewer-accent-strong); outline-offset: 2px; }
+
 .forum-notifications-page {
   display: grid;
-  gap: 20px;
-  min-width: 0;
-  max-width: 760px;
+  gap: 18px;
 }
-.notification-count {
-  margin: 6px 0 0;
+
+.notification-head,
+.notification-card {
+  padding: 14px 4px;
 }
+
+.notification-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.notification-count { margin: 0; color:var(--viewer-text-muted); font-size: 14px; }
+
+.notification-head p,
+.notification-card p {
+  margin: 8px 0 0;
+  color:var(--viewer-text-muted);
+  line-height: 1.8;
+}
+
 .notification-list {
   display: grid;
-  margin: 0;
-  padding: 0;
+  gap: 0;
+  border-top: 1px solid var(--viewer-border);
 }
-@media (max-width: 767px) {
-  .notification-head :deep(.rw-head__actions) {
-    flex-basis: auto;
+
+.notification-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--viewer-border);
+  border-left: 3px solid transparent;
+  cursor: pointer;
+  transition: background .18s ease, border-color .18s ease;
+}
+
+.notification-card:hover, .notification-card:focus-visible { background:color-mix(in srgb, var(--viewer-accent-strong) 8%, var(--viewer-surface)); }
+
+.notification-card.unread {
+  border-left-color:var(--viewer-primary);
+}
+
+.notification-card__main {
+  display: grid;
+  gap: 5px;
+}
+
+.notification-card__meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 12px;
+  color:var(--viewer-text-muted);
+}
+
+.notification-type {
+  padding: 2px 7px;
+  border-radius: 999px;
+  color:var(--viewer-on-primary);
+  background:linear-gradient(135deg, var(--viewer-primary), var(--viewer-primary-hover));
+}
+
+.notification-card h3 {
+  margin: 0;
+  font-size: 16px;
+}
+
+.notification-card p { overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; font-size: 13px; line-height: 1.5; }
+
+.notification-card__arrow { color:var(--viewer-accent-strong); font-size: 22px; }
+
+body.theme-dark .notification-head p,
+body.theme-dark .notification-card p,
+body.theme-dark .notification-card__meta {
+  color:var(--viewer-text-muted);
+}
+
+@media (min-width: 861px) {
+  .notification-list, .notification-head { max-width: 760px; }
+}
+
+@media (max-width: 860px) {
+  .notification-head,
+  .notification-card {
+    flex-direction: column;
+    align-items: flex-start;
   }
+
+  .notification-card__arrow { align-self: flex-end; }
 }
 </style>

@@ -27,20 +27,16 @@ test("Passport page is localized, separated single-series charts, accessible and
     readFile(new URL("../pages/my/weekly.vue", import.meta.url), "utf8"),
     readFile(new URL("../components/home/PlayerGrowthSurface.vue", import.meta.url), "utf8"),
     readFile(new URL("../pages/my/index.vue", import.meta.url), "utf8"),
-    readFile(new URL("../utils/rework/today.ts", import.meta.url), "utf8"), // slice G: the shell growth tabs replaced SidebarNav.vue
+    readFile(new URL("../components/SidebarNav.vue", import.meta.url), "utf8"),
     readFile(new URL("../locales/zh.json", import.meta.url), "utf8"),
     readFile(new URL("../locales/ja.json", import.meta.url), "utf8")
   ]);
   assert.match(page, /\/api\/account\/growth\/passport/);
-  // Slice C: the hand-written SVG chart became components/rework/growth/MetricChart.vue on DsLineChart; separate
-  // comparable runs are kept apart by a gap in the line (metricLine) instead of one <g> per run.
-  const chart = await readFile(new URL("../components/rework/growth/MetricChart.vue", import.meta.url), "utf8");
+  const chart = await readFile(new URL("../components/PassportMetricChart.vue", import.meta.url), "utf8");
   assert.match(chart, /role="group"/);
   assert.match(chart, /tabindex="0"/);
   assert.match(page, /aria-pressed/);
-  assert.match(chart, /passportMetricRuns\(/);
-  assert.match(chart, /metricLine\(/);
-  assert.match(chart, /<DsChartsLineChart/);
+  assert.match(chart, /passport-chart__segment/);
   assert.doesNotMatch(page, /modelRevision|algorithmVersion|scoreRevision/);
   assert.doesNotMatch(page, /kpi-grid/i);
   for (const source of [weekly, home, my, sidebar]) assert.match(source, /\/my\/growth/);

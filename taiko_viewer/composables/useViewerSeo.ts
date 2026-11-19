@@ -22,10 +22,6 @@ type ViewerSeoInput = {
   keywords?: string[];
   breadcrumbs?: BreadcrumbJsonLdItem[];
   siteSchema?: boolean;
-  /** Query kept in the canonical URL (pages whose state is a query, e.g. the song library shelf). */
-  query?: Record<string, string>;
-  /** robots meta, e.g. "noindex, follow" for keyword results */
-  robots?: string;
 };
 
 const normalizeCanonicalPath = (path: string) => {
@@ -46,8 +42,7 @@ const buildBreadcrumbJsonLd = (items: BreadcrumbJsonLdItem[]) => ({
     "@type": "ListItem",
     position: index + 1,
     name: item.name,
-    // keep a query (library shelf) that is part of the breadcrumb target
-    item: buildCanonicalUrl(item.path) + (item.path.match(/\?[^#]*/)?.[0] ?? "")
+    item: buildCanonicalUrl(item.path)
   }))
 });
 
@@ -55,10 +50,7 @@ export const useViewerSeo = (input: MaybeRefOrGetter<ViewerSeoInput>) => {
   const { locale, t, tm } = useI18n();
   const localePath = useLocalePath();
   const payload = computed(() => toValue(input));
-  const canonicalUrl = computed(() => {
-    const search = new URLSearchParams(payload.value.query || {}).toString();
-    return buildCanonicalUrl(localePath(payload.value.path)) + (search ? `?${search}` : "");
-  });
+  const canonicalUrl = computed(() => buildCanonicalUrl(localePath(payload.value.path)));
   const imageUrl = computed(() => payload.value.image || DEFAULT_OG_IMAGE);
   const pageTitle = computed(() =>
     formatViewerTitle(payload.value.title, {
@@ -84,8 +76,7 @@ export const useViewerSeo = (input: MaybeRefOrGetter<ViewerSeoInput>) => {
     ogImage: () => imageUrl.value,
     ogUrl: () => canonicalUrl.value,
     ogSiteName: SITE_TITLE,
-    ogLocale: () => locale.value === "ja" ? "ja_JP" : "zh_CN",
-    robots: () => payload.value.robots
+    ogLocale: () => locale.value === "ja" ? "ja_JP" : "zh_CN"
   });
 
   useHead(() => {

@@ -26,17 +26,12 @@ const authenticatedHomeState = computed(() => {
   return "authenticated_unbound";
 });
 const latestSongs = computed(() => homeContent.value.latestSongs || []);
-// Slice G: with the growth surface shown, the annual banner sits in the greeting row (components/rework/today/Hello.vue:
-// beside the greeting from 1100 px, above it below that) instead of a row of its own that left 40 % of it empty.
-const bannerInGreeting = computed(() => homePresentation.value === "authenticated" && authenticatedHomeState.value === "authenticated_ready");
-provide("rework-home-banner", bannerInGreeting);
 const eventSlides = computed(() => [
   { image: "/optimized/touhou-2026-800.webp", title: t("page.home.eventTouhou") },
   { image: "/optimized/rewards-winter-2026-800.webp", title: t("page.home.eventWinter") }
 ]);
 
 definePageMeta({
-  hidePageHeader: true,
   pageTitleKey: "site.homeTitle",
   pageDescKey: "page.home.desc",
   navKey: "/",
@@ -59,8 +54,8 @@ useViewerSeo(() => ({
     :data-home-state-status="homeStateStatus"
     :data-home-presentation="homePresentation"
   >
-    <div v-if="!bannerInGreeting" class="home-annual"><AnnualHero /></div>
-    <ReworkTodayGuest
+    <AnnualHero />
+    <HomeGuestHome
       v-if="homePresentation === 'guest'"
       :latest-songs="latestSongs"
       :content-pending="pending"
@@ -68,17 +63,19 @@ useViewerSeo(() => ({
       :account-status-unavailable="homePresentation === 'public_error'"
       :events="eventSlides"
     />
-    <ReworkTodayPublic
-      v-else-if="homePresentation === 'loading' || homePresentation === 'public_error'"
-      :presentation="homePresentation"
-      :stage="homeStateResolver.error.value?.stage || null"
-      :latest-songs="latestSongs"
-      :content-pending="pending"
-      :content-failed="!!error"
-      :events="eventSlides"
-      @retry="homeStateResolver.refresh()"
-    />
-    <ReworkTodaySignedIn
+
+    <div v-else-if="homePresentation === 'loading' || homePresentation === 'public_error'" class="home-recovery">
+      <section class="home-account-status" :role="homePresentation === 'public_error' ? 'alert' : 'status'" :aria-busy="homePresentation === 'loading'">
+        <p>{{ homePresentation === 'loading' ? t('layout.loading') : t(`home.recovery.${homeStateResolver.error.value?.stage || 'auth'}`) }}</p>
+        <button v-if="homePresentation === 'public_error'" type="button" @click="homeStateResolver.refresh()">{{ t('home.growth.recent.retry') }}</button>
+      </section>
+      <HomeLatestSongs :songs="latestSongs" :pending="pending" :failed="!!error" />
+      <HomeCurrentEvents :events="eventSlides" />
+      <HomeDanSummary />
+      <HomePublicTools />
+    </div>
+
+    <HomeAuthenticatedHome
       v-else
       :state="authenticatedHomeState"
       :user="accountUser"
@@ -91,6 +88,10 @@ useViewerSeo(() => ({
 </template>
 
 <style scoped>
-.home-page { display: grid; gap: 24px; width: 100%; min-width: 0; }
-.home-annual { width: 100%; max-width: 612px; }
+.home-page { display: grid; gap: 16px; width: 100%; min-width: 0;  }
+.home-recovery { display:grid; gap:var(--viewer-space-group); min-width:0; }
+.home-account-status { display:flex; flex-wrap:wrap; gap:12px 20px; align-items:center; padding:16px 0; border-bottom:1px solid var(--viewer-border); }
+.home-account-status p { margin:0; color:var(--viewer-text-muted); }
+.home-account-status button { min-height:44px; padding:8px 16px; border:1px solid var(--viewer-border); border-radius:10px; background:var(--viewer-surface); color:var(--viewer-link); font:inherit; cursor:pointer; }
+.home-account-status button:focus-visible { outline:3px solid var(--viewer-link); outline-offset:3px; }
 </style>

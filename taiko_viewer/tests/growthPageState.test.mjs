@@ -62,7 +62,7 @@ if(!source)test('actual SVG chart retains frozen runs across metadata revisions,
  Object.assign(globalThis,{useAccountDataRefresh,ref,computed,watch,onBeforeUnmount,useI18n:()=>({t:k=>k,locale:ref('zh')})});
  try{
   const payload=buildSkillPassport(finalBrowserInput('singletons'));const props=reactive({segments:payload.segments,dimension:'rating',label:'Rating long label',from:'2026-07-11',to:'2026-10-08'});
-  app=await mount(await component('components/rework/growth/MetricChart.vue'),props);const m=app.model;
+  app=await mount(await component('components/PassportMetricChart.vue'),props);const m=app.model;
   assert.equal(m.points.length,4);assert.equal(m.runs.length,1,'model revisions do not break frozen lines');const values=m.points.map(p=>p.value);
   assert.equal(m.selectedIndex,3);m.stepPoint(-1);await settle();assert.equal(m.selectedIndex,2);m.stepPoint(1);await settle();assert.equal(m.selectedIndex,3);assert.deepEqual(m.points.map(p=>p.value),values);
   props.segments[1].points[0].dimensions.speed=null;props.dimension='speed';await settle();assert.equal(m.runs.length,2);assert.equal(m.points.length,3);assert.equal(m.selectedId,'');

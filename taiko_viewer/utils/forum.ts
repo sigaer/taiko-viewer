@@ -20,6 +20,3 @@ export const resolveForumSectionDescription = (
   const value = translate(key, fallback);
   return value === key || value.startsWith("forum.") ? fallback : value;
 };
-
-/** The masked Taiko ID the forum API returns for a user without a binding (server/internal/forum/shared.ts). */
-export const FORUM_UNBOUND_TAIKO_ID = "未绑定";

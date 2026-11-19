@@ -1,12 +1,8 @@
 <script setup lang="ts">
-// Changes since the last sync on the signed-in home. Logic unchanged (what is shown, the presentation acknowledgement
-// after render); the markup is styled by components/rework/today/Board.vue. Crown facts show the crown with its name,
-// rank facts the rank with its name.
 import type { GrowthFact, RecentGrowthResponse } from "~/types/player-growth";
 import { composeRecentGrowthCopy } from "~/utils/growthVoice";
 import { difficultyLabelKey } from "~/utils/difficulty";
 import { formatScoreRank } from "~/utils/scoreRank";
-import { factCrown, rankValue } from "~/utils/rework/today";
 
 const props = defineProps<{ recent: RecentGrowthResponse; facts?: GrowthFact[]; suppressedCount?: number; pending?: boolean; failed?: boolean; appearance?: "home" }>();
 const emit = defineEmits<{ presented: [token: string]; retry: [] }>();
@@ -57,7 +53,9 @@ watch(() => [props.recent.profileId, props.recent.boundary.currentToken, props.r
 <template>
   <section v-if="pending || failed || (recent.state !== 'unavailable' && !shownElsewhere)" class="recent-growth" :class="{ 'recent-growth--quiet': appearance === 'home' && !pending && !failed && !visibleFacts.length }" :aria-labelledby="appearance !== 'home' || pending || failed || visibleFacts.length ? 'recent-growth-title' : undefined" :aria-busy="pending || undefined">
     <div v-if="appearance !== 'home' || pending || failed || visibleFacts.length" class="recent-growth__head">
-      <h2 id="recent-growth-title">{{ t("home.growth.recent.title") }}</h2>
+      <div>
+        <h2 id="recent-growth-title">{{ t("home.growth.recent.title") }}</h2>
+      </div>
       <time v-if="observedLabel" :datetime="recent.observedAt || undefined">{{ observedLabel }}</time>
     </div>
     <div v-if="pending && !recent.profileId" class="recent-growth__loading" aria-hidden="true">
@@ -65,7 +63,7 @@ watch(() => [props.recent.profileId, props.recent.boundary.currentToken, props.r
     </div>
     <div v-else-if="failed" class="recent-growth__state" role="alert">
       <span>{{ t("home.growth.recent.failed") }}</span>
-      <button type="button" class="rw-btn rw-btn--sm" @click="emit('retry')">{{ t("home.growth.recent.retry") }}</button>
+      <button type="button" @click="emit('retry')">{{ t("home.growth.recent.retry") }}</button>
     </div>
     <div v-if="visibleFacts.length" class="recent-growth__list">
       <p v-if="recent.boundary.recovered" class="recent-growth__more">{{ t(narrative.key) }}</p>
@@ -75,20 +73,50 @@ watch(() => [props.recent.profileId, props.recent.boundary.currentToken, props.r
         :to="fact.songId ? localePath({ path: `/songs/${fact.songId}`, query: fact.difficultyType ? { difficulty: String(fact.difficultyType) } : undefined }) : localePath('/my/growth')"
         class="recent-growth__fact"
       >
-        <DsCover v-if="fact.songId" :song-id="fact.songId" size="sm" />
-        <span v-else class="recent-growth__pulse" aria-hidden="true"></span>
+        <span class="recent-growth__pulse" aria-hidden="true"></span>
         <span class="recent-growth__copy">
           <strong>{{ fact.title || t("home.growth.recent.goal") }}</strong>
-          <small>
-            <template v-if="fact.difficultyType">{{ t(difficultyLabelKey(fact.difficultyType)) }} · </template>
-            <DsCrown v-if="factCrown(fact.type)" :state="factCrown(fact.type)!" size="chip" text="full" />
-            <template v-else-if="fact.type === 'rank-upgrade' && rankValue(fact.after) !== null">{{ t("home.growth.factLabels.rank-upgrade") }} <DsRank :value="rankValue(fact.after)" named /></template>
-            <template v-else>{{ factText(fact) }}</template>
-          </small>
+          <small><template v-if="fact.difficultyType">{{ t(difficultyLabelKey(fact.difficultyType)) }} · </template>{{ factText(fact) }}</small>
         </span>
+        <span class="recent-growth__arrow" aria-hidden="true">↗</span>
       </NuxtLink>
       <p v-if="hiddenCount" class="recent-growth__more">{{ t("home.growth.recent.more", { count: hiddenCount }) }}</p>
     </div>
     <p v-else-if="(!pending || recent.profileId) && !failed" class="recent-growth__empty">{{ t(narrative.key) }}</p>
   </section>
 </template>
+
+<style scoped>
+.recent-growth.recent-growth--quiet { padding: 0; border: 0; border-radius: 0; background: transparent; }
+.recent-growth--quiet::before { display: none; }
+.recent-growth.recent-growth--quiet .recent-growth__empty { font-size: 14px; }
+
+.recent-growth { position: relative; display: grid; gap: 16px; min-width: 0; padding: clamp(18px, 3vw, 26px); overflow: hidden; border: 1px solid var(--viewer-border); border-radius: 20px; background:var(--viewer-surface-subtle); }
+.recent-growth::before { content: ""; position: absolute; inset: 0 auto 0 0; width: 4px; background:var(--viewer-primary); }
+.recent-growth__head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+.recent-growth__eyebrow { margin: 0 0 4px; color:var(--viewer-link); font-size: 11px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+.recent-growth h2 { margin: 0; color:var(--viewer-text); font: 800 clamp(20px, 2.4vw, 27px)/1.15 var(--viewer-display-font); }
+.recent-growth time { flex: 0 0 auto; color:var(--viewer-text-muted); font-size: 12px; font-variant-numeric: tabular-nums; }
+.recent-growth__list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
+.recent-growth__fact { min-width: 0; display: grid; grid-template-columns: 12px minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 58px; padding: 10px 12px; border-radius: 13px; color:inherit; text-decoration: none; background:var(--viewer-surface-subtle); }
+.recent-growth__fact { cursor: pointer; transition: background .18s ease, transform .18s ease; }
+.recent-growth__fact:hover { transform: translateY(-1px); background:var(--viewer-surface); }
+.recent-growth__fact:focus-visible, .recent-growth__state button:focus-visible { outline: 3px solid var(--viewer-link); outline-offset: 3px; }
+.recent-growth__pulse { width: 9px; height: 9px; border: 2px solid var(--viewer-surface); border-radius: 50%; background:var(--viewer-primary); box-shadow:none; }
+.recent-growth__copy { min-width: 0; display: grid; gap: 3px; }
+.recent-growth__copy strong { overflow: hidden; color:var(--viewer-text); font-size: 14px; text-overflow: ellipsis; white-space: nowrap; }
+.recent-growth__copy small, .recent-growth__empty, .recent-growth__more, .recent-growth__state { color:var(--viewer-text-muted); font-size: 12px; line-height: 1.5; }
+.recent-growth__arrow { color:var(--viewer-primary); font-size: 17px; }
+.recent-growth__more { grid-column: 1 / -1; margin: 2px 0 0 31px; }
+.recent-growth__empty { margin: 0; }
+.recent-growth__state { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.recent-growth__state button { min-width: 72px; min-height: 44px; padding: 8px 14px; border: 1px solid var(--viewer-border); border-radius: 10px; color:var(--viewer-link); background:transparent; cursor: pointer; font: inherit; font-weight: 700; }
+.recent-growth__loading { display: grid; gap: 9px; }
+.recent-growth__loading span { height: 52px; border-radius: 13px; background:var(--viewer-border); }
+:global(body.theme-dark .recent-growth) { border-color:var(--viewer-border); background:var(--viewer-surface-subtle); }
+:global(body.theme-dark .recent-growth h2), :global(body.theme-dark .recent-growth__copy strong) { color:var(--viewer-text); }
+:global(body.theme-dark .recent-growth__fact) { background:var(--viewer-surface-subtle); }
+:global(body.theme-dark .recent-growth__copy small), :global(body.theme-dark .recent-growth__empty), :global(body.theme-dark .recent-growth__more), :global(body.theme-dark .recent-growth__state), :global(body.theme-dark .recent-growth time) { color:var(--viewer-text-muted); }
+@media (max-width: 680px) { .recent-growth__list { grid-template-columns: 1fr; } .recent-growth__head { align-items: end; } }
+@media (prefers-reduced-motion: reduce) { .recent-growth__fact { transition: none; } .recent-growth__fact:hover { transform: none; } }
+</style>
