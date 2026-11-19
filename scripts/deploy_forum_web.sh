@@ -5,6 +5,7 @@ usage() {
   cat <<'EOF'
 Usage:
   ./scripts/deploy_forum_web.sh "<commit_message>"
+  ./scripts/deploy_forum_web.sh --ci <tested_main_commit_sha>
 
 Example:
   ./scripts/deploy_forum_web.sh "0.9.6 修复称号页滚动并更新称号数据"
@@ -16,12 +17,20 @@ if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
   exit 0
 fi
 
-if [[ $# -lt 1 ]]; then
+if [[ ( "${1:-}" == "--ci" && $# -ne 2 ) || ( "${1:-}" != "--ci" && $# -ne 1 ) ]]; then
   usage
   exit 1
 fi
 
 COMMIT_MESSAGE="$1"
+CI_COMMIT=""
+if [[ "$1" == "--ci" ]]; then
+  CI_COMMIT="$2"
+  if [[ ! "$CI_COMMIT" =~ ^[0-9a-f]{40}$ ]]; then
+    echo "CI 部署必须提供完整的测试提交 SHA。" >&2
+    exit 1
+  fi
+fi
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 WEB_DIR="$ROOT_DIR/taiko_viewer"
 REMOTE="${REMOTE:-origin}"
@@ -304,7 +313,13 @@ cleanup_stale_build
 
 cd "$ROOT_DIR"
 
-echo "[1/5] 验证并推送已提交代码..."
+echo "[1/5] 验证发布提交..."
+if [[ -n "$CI_COMMIT" ]]; then
+  # CI consumes an already-tested main commit; it never creates or pushes one.
+  source "$ROOT_DIR/scripts/release/prepare-viewer-ci.sh"
+  prepare_viewer_ci "$CI_COMMIT"
+  COMMIT_MESSAGE="$(git log -1 --pretty=%s)"
+fi
 if ! git diff --quiet || ! git diff --cached --quiet; then
   echo "  - 存在未提交的跟踪文件。部署脚本不会自动暂存，请先按范围提交。"
   git status --short
@@ -317,7 +332,7 @@ if [[ "$HEAD_SUBJECT" != "$COMMIT_MESSAGE" ]]; then
   exit 1
 fi
 APP_VERSION="$(node -p "require('$WEB_DIR/package.json').version")"
-if [[ "$COMMIT_MESSAGE" != "$APP_VERSION "* ]]; then
+if [[ -z "$CI_COMMIT" && "$COMMIT_MESSAGE" != "$APP_VERSION "* ]]; then
   echo "  - 提交信息必须以当前 viewer 版本开头: $APP_VERSION"
   exit 1
 fi
@@ -326,13 +341,15 @@ if [[ -n "$UNTRACKED_FILES" ]]; then
   echo "  - 以下未跟踪文件不会被暂存或打入发布构建："
   sed 's/^/    /' <<<"$UNTRACKED_FILES"
 fi
-git fetch "$REMOTE" "$BRANCH"
-REMOTE_HEAD="$(git rev-parse "$REMOTE/$BRANCH")"
-if ! git merge-base --is-ancestor "$REMOTE_HEAD" HEAD; then
-  echo "  - 远端 $BRANCH 已出现当前 HEAD 未包含的新提交，请先 rebase 并重新验证。"
-  exit 1
+if [[ -z "$CI_COMMIT" ]]; then
+  git fetch "$REMOTE" "$BRANCH"
+  REMOTE_HEAD="$(git rev-parse "$REMOTE/$BRANCH")"
+  if ! git merge-base --is-ancestor "$REMOTE_HEAD" HEAD; then
+    echo "  - 远端 $BRANCH 已出现当前 HEAD 未包含的新提交，请先 rebase 并重新验证。"
+    exit 1
+  fi
+  git push "$REMOTE" "HEAD:$BRANCH"
 fi
-git push "$REMOTE" "HEAD:$BRANCH"
 
 echo "[2/5] 安装依赖（按需）..."
 NEED_NPM_INSTALL=0
@@ -343,7 +360,10 @@ if git show --name-only --pretty='' HEAD | grep -Eq '^taiko_viewer/(package\.jso
   NEED_NPM_INSTALL=1
 fi
 
-if [[ "$NEED_NPM_INSTALL" -eq 1 ]]; then
+if [[ -n "$CI_COMMIT" ]]; then
+  # Multi-commit fast-forwards must not reuse dependencies from an older lockfile.
+  (cd "$WEB_DIR" && npm ci)
+elif [[ "$NEED_NPM_INSTALL" -eq 1 ]]; then
   (cd "$WEB_DIR" && npm install)
 else
   echo "  - 依赖无变化，跳过 npm install。"
@@ -357,6 +377,9 @@ if ! run_nuxt_build; then
 fi
 
 echo "[4/5] 重载服务..."
+if [[ -n "$CI_COMMIT" ]]; then
+  verify_viewer_ci_revision "$CI_COMMIT"
+fi
 run_privileged install -m 0644 "$WEB_DIR/deploy/taiko-sync-receiver.service" /etc/systemd/system/taiko-sync-receiver.service
 run_privileged install -m 0644 "$WEB_DIR/deploy/taiko-viewer.service" /etc/systemd/system/taiko-viewer.service
 run_privileged systemctl daemon-reload
