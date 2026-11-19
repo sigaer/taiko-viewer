@@ -6,6 +6,8 @@ export const useToolChartImage = () => {
   const imageUrl = ref("");
   const loading = ref(false);
   const errorMessage = ref("");
+  // HTTP status of the last failure (0: none / unknown): lets a page tell "no bound ID" and "no data yet" apart.
+  const errorStatus = ref(0);
   const accountUser = useState<{ id: number } | null>("account-user", () => null);
   const bindingGeneration = useState("account-binding-generation", () => 0);
   let generation = 0;
@@ -24,6 +26,7 @@ export const useToolChartImage = () => {
     controller = new AbortController();
     loading.value = true;
     errorMessage.value = "";
+    errorStatus.value = 0;
     revokeUrl();
     try {
       const params = new URLSearchParams();
@@ -44,8 +47,13 @@ export const useToolChartImage = () => {
       imageUrl.value = URL.createObjectURL(blob);
     } catch (error: unknown) {
       if (request !== generation) return;
+      const failed = error as { statusCode?: unknown; status?: unknown; response?: { status?: unknown } } | null;
+      const status = Number(failed?.statusCode ?? failed?.status ?? failed?.response?.status) || 0;
       const message = await resolveViewerError(error, locale.value === "ja" ? "画像を生成できませんでした。再試行してください" : "图表生成失败，请重试", t);
-      if (request === generation) errorMessage.value = message;
+      if (request === generation) {
+        errorMessage.value = message;
+        errorStatus.value = status;
+      }
     } finally {
       if (request === generation) {
         controller = null;
@@ -60,6 +68,7 @@ export const useToolChartImage = () => {
     controller = null;
     loading.value = false;
     errorMessage.value = "";
+    errorStatus.value = 0;
     revokeUrl();
   };
   watch(() => [accountUser.value?.id, bindingGeneration.value], invalidate, { flush: "sync" });
@@ -69,6 +78,7 @@ export const useToolChartImage = () => {
     imageUrl,
     loading,
     errorMessage,
+    errorStatus,
     loadChart,
     revokeUrl,
     invalidate

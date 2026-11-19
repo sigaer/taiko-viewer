@@ -20,10 +20,15 @@ const rememberIdentifier = ref(false);
 const authenticatedUserId = ref<number | null>(null);
 const completionError = ref("");
 const authRetrying = ref(false);
+// Presentation only: the password stays a password field until the visitor shows it.
+const showPassword = ref(false);
 const authScope = useAuthFormScope(() => { authenticatedUserId.value = null; completionError.value = ""; authRetrying.value = false; submitting.value = false; form.password = ""; });
-const completionCopy = computed(() => locale.value === "ja"
-  ? {continue: "続ける", login: "ログインを続ける", registered: "アカウントを作成しました。ログインを続けてください。", reset: "パスワードを再設定しました。ログイン画面を開いてください。", session: "ログイン状態を確認できませんでした。もう一度お試しください。", sessionChanged: "ログイン状態が変わりました。パスワードを再入力してください。", navigation: "処理は完了しましたが、ページを開けませんでした。もう一度お試しください。"}
-  : {continue: "继续", login: "继续登录", registered: "账号已创建，请继续登录。", reset: "密码已重置，请继续打开登录页。", session: "未能确认登录状态，请重试。", sessionChanged: "登录会话已变化，请重新输入密码。", navigation: "操作已完成，但未能打开页面，请重试。"});
+// Slice E1: the inline zh / ja tables moved to locales (rework.account.*), same texts.
+const completionCopy = computed(() => (void locale.value, {
+  continue: t("rework.account.completion.continue"), login: t("rework.account.completion.login"), registered: t("rework.account.completion.registered"),
+  reset: t("rework.account.completion.reset"), session: t("rework.account.completion.session"), sessionChanged: t("rework.account.completion.sessionChanged"),
+  navigation: t("rework.account.completion.navigation")
+}));
 
 const redirectAfterLogin = computed(() => {
   const target = String(route.query.redirect || "").trim();
@@ -38,6 +43,7 @@ definePageMeta({
   pageTitleKey: "account.login",
   pageDescKey: "page.account.login.desc",
   navKey: "/account/login",
+  hidePageHeader: true,
   breadcrumbs: [
     { labelKey: "account.title", to: "/account/profile" },
     { labelKey: "account.login", to: "/account/login" },
@@ -50,37 +56,17 @@ useViewerSeo(() => ({
   path: "/account/login"
 }));
 
-const copy = computed(() =>
-  locale.value === "ja"
-    ? {
-        heading: "ログイン",
-        intro: "ログインするとプロフィール確認、連携 ID の切り替え、ローカル成績データの管理ができます。",
-        identifier: "ユーザー名またはメールアドレス",
-        identifierPlaceholder: "ユーザー名またはメールアドレスを入力",
-        password: "パスワード",
-        passwordPlaceholder: "パスワードを入力",
-        remember: "アカウントを保存",
-        submit: "ログイン",
-        register: "新規登録",
-        forgot: "パスワードを忘れた場合",
-        success: "ログインしました",
-        failed: "ログインに失敗しました"
-      }
-    : {
-        heading: "登录账号",
-        intro: "登录后可查看个人档案、切换绑定的鼓众 ID，并直接维护本地成绩数据。",
-        identifier: "用户名或邮箱",
-        identifierPlaceholder: "输入用户名或邮箱",
-        password: "密码",
-        passwordPlaceholder: "输入密码",
-        remember: "记住账号",
-        submit: "登录",
-        register: "注册账号",
-        forgot: "找回密码",
-        success: "登录成功",
-        failed: "登录失败"
-      }
-);
+const copy = computed(() => (void locale.value, {
+  heading: t("rework.account.login.heading"),
+  identifier: t("rework.account.login.identifier"),
+  password: t("rework.account.login.password"),
+  remember: t("rework.account.login.remember"),
+  submit: t("rework.account.login.submit"),
+  register: t("rework.account.login.register"),
+  forgot: t("rework.account.login.forgot"),
+  success: t("rework.account.login.success"),
+  failed: t("rework.account.login.failed")
+}));
 
 onMounted(() => {
   const remembered = loadRememberedIdentifier();
@@ -139,92 +125,57 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="auth-page">
-    <el-card class="panel-card auth-card">
-      <div class="auth-head">
-        <h2>{{ copy.heading }}</h2>
-        <p>{{ copy.intro }}</p>
+  <ReworkAccountAuthFrame class="auth-page" :title="copy.heading">
+    <p v-if="completionError" id="login-error" class="rw-alert" role="alert">{{ completionError }}</p>
+    <div v-if="accountAuthError && !authenticatedUserId" class="rw-alert auth-state-error" role="alert">
+      <p>{{ completionCopy.session }}</p>
+      <button type="button" class="rw-btn rw-btn--sm" :class="{ 'is-busy': authRetrying }" :disabled="authRetrying" :aria-busy="authRetrying" @click="retryAuth">{{ t('common.retry') }}</button>
+    </div>
+    <form v-else class="rw-stack auth-form" :aria-describedby="completionError ? 'login-error' : undefined" @submit.prevent="submit">
+      <div class="rw-field">
+        <label class="rw-field__label" for="login-identifier">{{ copy.identifier }}</label>
+        <input id="login-identifier" v-model="form.identifier" class="rw-input rw-input--block" name="username" autocomplete="username" autocapitalize="off" spellcheck="false" enterkeyhint="next" :disabled="Boolean(authenticatedUserId)" />
       </div>
-      <p v-if="completionError" role="alert">{{ completionError }}</p>
-      <div v-if="accountAuthError && !authenticatedUserId" class="auth-state-error" role="alert">
-        <p>{{ completionCopy.session }}</p>
-        <el-button :loading="authRetrying" @click="retryAuth">{{ t('common.retry') }}</el-button>
-      </div>
-      <el-form v-else label-position="top" @submit.prevent="submit">
-        <el-form-item :label="copy.identifier">
-          <el-input name="username" autocomplete="username" v-model="form.identifier" :disabled="Boolean(authenticatedUserId)" :placeholder="copy.identifierPlaceholder" />
-        </el-form-item>
-        <el-form-item :label="copy.password">
-          <el-input
-            v-model="form.password" :disabled="Boolean(authenticatedUserId)"
-            name="password"
-            autocomplete="current-password"
-            type="password"
-            show-password
-            :placeholder="copy.passwordPlaceholder"
-          />
-        </el-form-item>
-        <div class="remember-row">
-          <el-checkbox v-model="rememberIdentifier" @change="value => { if (!value) saveRememberedIdentifier('', false); }">{{ copy.remember }}</el-checkbox>
+      <div class="rw-field">
+        <label class="rw-field__label" for="login-password">{{ copy.password }}</label>
+        <div class="rw-pw">
+          <input id="login-password" v-model="form.password" class="rw-input rw-input--block" name="password" autocomplete="current-password" :type="showPassword ? 'text' : 'password'" autocapitalize="off" spellcheck="false" enterkeyhint="go" :disabled="Boolean(authenticatedUserId)" />
+          <button type="button" :aria-pressed="showPassword" :aria-label="t('rework.account.showPassword')" @click="showPassword = !showPassword"><ReworkIcon name="eye" /></button>
         </div>
-        <el-button
-          type="primary"
-          class="submit-btn"
-          :loading="submitting"
-          native-type="submit"
-          >{{ authenticatedUserId ? completionCopy.continue : copy.submit }}</el-button
-        >
-      </el-form>
-      <AccountOidcOptions purpose="login" :redirect="redirectAfterLogin" />
-      <div class="auth-links">
-        <NuxtLink :to="{path:localePath('/account/register'),query:{redirect:redirectAfterLogin}}">{{ copy.register }}</NuxtLink>
-        <NuxtLink :to="localePath('/account/forgot-password')">{{ copy.forgot }}</NuxtLink>
       </div>
-    </el-card>
-  </div>
+      <div class="remember-row">
+        <label class="rw-check">
+          <input v-model="rememberIdentifier" type="checkbox" @change="(event) => { if (!(event.target as HTMLInputElement).checked) saveRememberedIdentifier('', false); }" />
+          <span>{{ copy.remember }}</span>
+        </label>
+        <NuxtLink class="rw-link" :to="localePath('/account/forgot-password')">{{ copy.forgot }}</NuxtLink>
+      </div>
+      <button type="submit" class="rw-btn rw-btn--primary rw-btn--block submit-btn" :class="{ 'is-busy': submitting }" :disabled="submitting" :aria-busy="submitting">{{ authenticatedUserId ? completionCopy.continue : copy.submit }}</button>
+    </form>
+    <ReworkAccountOidcOptions purpose="login" :redirect="redirectAfterLogin" />
+    <template #footer>
+      <NuxtLink class="rw-link" :to="{path:localePath('/account/register'),query:{redirect:redirectAfterLogin}}">{{ copy.register }}</NuxtLink>
+    </template>
+  </ReworkAccountAuthFrame>
 </template>
 
 <style scoped>
-.auth-page {
-  display: flex;
-  justify-content: center;
-}
-
-.auth-card {
-  width: 100%;
-}
-
-.auth-head h2 {
-  margin: 0;
-  font-size: 28px;
-}
-
-.auth-head p {
-  margin: 8px 0 18px;
-  color:var(--viewer-text-muted);
-  line-height: 1.7;
-}
-
-.submit-btn {
-  width: 100%;
-  margin-top: 6px;
-}
-
+/* Layout only; colours and type come from the shared form pieces (pages do not read design-system tokens). */
 .remember-row {
   display: flex;
-  justify-content: flex-start;
-  margin: -4px 0 10px;
-}
-
-.auth-links {
-  margin-top: 18px;
-  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
+  gap: 4px 16px;
 }
-
-.auth-links a {
-  color:var(--viewer-link);
-  text-decoration: none;
+.auth-state-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 16px;
+}
+.auth-state-error p {
+  margin: 0;
 }
 </style>

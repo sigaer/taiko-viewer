@@ -1,16 +1,18 @@
 <script setup lang="ts">
-import AccountToolGate from "~/components/tools/AccountToolGate.vue";
 import { computed } from "vue";
 import { buildPageDescription } from "~/utils/seo";
-import { viewerErrorAlertType } from "~/utils/viewerError";
 
-const { t, locale } = useI18n();
+const { t } = useI18n();
+// Signed-in gate (slice F: ReworkGate replaces AccountToolGate, which read the same account state).
+const { accountUser, fetchCurrentUser } = useAccountState();
+await fetchCurrentUser();
 
 definePageMeta({
-  contentLayout: "wide",
+  contentLayout: "standard", // slice G: one content width for the 工具 group
   pageTitleKey: "tools.wordCloud",
   pageDescKey: "page.tools.wordCloud.desc",
   navKey: "/tools/word-cloud",
+  hidePageHeader: true,
   breadcrumbs: [
     { labelKey: "nav.myTaiko", to: "/my" },
     { labelKey: "tools.wordCloud", to: "/tools/word-cloud" }
@@ -23,20 +25,13 @@ useViewerSeo(() => ({
   path: "/tools/word-cloud"
 }));
 
-const { imageUrl, loading, errorMessage, loadChart } = useToolChartImage();
-const copy = computed(() =>
-  locale.value === "ja"
-    ? {
-        hint: "現在連携中のアカウントのプレイ記録からワードクラウドを生成します。先に同期を完了してください。",
-        submit: "ワードクラウドを生成",
-        imageAlt: "太鼓ワードクラウド"
-      }
-    : {
-        hint: "根据当前绑定账号的游玩记录生成词云，需先完成多端同步。",
-        submit: "生成词云",
-        imageAlt: "太鼓词云"
-      }
-);
+const { imageUrl, loading, errorMessage, errorStatus, loadChart } = useToolChartImage();
+// Copy in locales/{zh,ja}.json rework.toolPages.wordCloud (moved word for word in slice F).
+const copy = computed(() => ({
+  hint: t("rework.toolPages.wordCloud.hint"),
+  submit: t("rework.toolPages.wordCloud.submit"),
+  imageAlt: t("rework.toolPages.wordCloud.imageAlt")
+}));
 
 const submit = async () => {
   await loadChart("/api/account/charts/word-cloud");
@@ -44,50 +39,22 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="page-stack">
-    <AccountToolGate>
-      <el-card class="panel-card">
-        <p class="hint">{{ copy.hint }}</p>
-        <el-button type="primary" :loading="loading" @click="submit">{{ copy.submit }}</el-button>
-        <el-alert
-          v-if="errorMessage"
-          :title="errorMessage"
-          :type="viewerErrorAlertType(errorMessage)"
-          show-icon
-          :closable="false"
-          class="result-alert viewer-friendly-alert"
-        />
-        <div v-if="imageUrl" class="chart-wrap">
-          <img :src="imageUrl" :alt="copy.imageAlt" class="chart-image" />
-        </div>
-      </el-card>
-    </AccountToolGate>
+  <div class="rw-stack">
+    <ReworkPageHeader :title="t('tools.wordCloud')" />
+    <ReworkGate :need="accountUser ? null : 'login'">
+      <div class="rw-form">
+        <p class="rw-field__hint">{{ copy.hint }}</p>
+        <button type="button" class="rw-btn rw-btn--primary" :class="{ 'is-busy': loading }" :disabled="loading" :aria-busy="loading" @click="submit">{{ copy.submit }}</button>
+      </div>
+      <ReworkScoresImageResult
+        :url="imageUrl"
+        :loading="loading"
+        :error="errorMessage"
+        :status="errorStatus"
+        :alt="copy.imageAlt"
+        download="taiko-word-cloud.png"
+        @retry="submit"
+      />
+    </ReworkGate>
   </div>
 </template>
-
-<style scoped>
-.page-stack {
-  display: grid;
-  gap: 20px;
-}
-
-.hint {
-  margin: 0 0 14px;
-  color:var(--viewer-text-muted);
-}
-
-.result-alert {
-  margin-top: 16px;
-}
-
-.chart-wrap {
-  margin-top: 16px;
-  text-align: center;
-}
-
-.chart-image {
-  max-width: 100%;
-  border-radius: 12px;
-  box-shadow:0 10px 24px var(--viewer-shadow);
-}
-</style>

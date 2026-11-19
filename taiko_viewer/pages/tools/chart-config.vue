@@ -6,10 +6,11 @@ const { t } = useI18n();
 const apiFetch = useViewerApiFetch();
 
 definePageMeta({
-  contentLayout: "wide",
+  contentLayout: "standard", // slice G: one content width for the 工具 group
   pageTitleKey: "tools.chartConfig",
   pageDescKey: "page.tools.chartConfig.desc",
   navKey: "/tools/chart-config",
+  hidePageHeader: true,
   breadcrumbs: [
     { labelKey: "nav.more", to: "/more" },
     { labelKey: "tools.chartConfig", to: "/tools/chart-config" }
@@ -37,7 +38,8 @@ const submit = async () => {
     });
     lines.value = result.lines || [];
   } catch (error: unknown) {
-    errorMessage.value = await resolveViewerError(error, t("errors.queryFailed"));
+    // slice F: pass the setup-time `t` (without it resolveViewerError calls useI18n() outside setup, throws, and no error is shown)
+    errorMessage.value = await resolveViewerError(error, t("errors.queryFailed"), t);
   } finally {
     loading.value = false;
   }
@@ -45,56 +47,29 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="page-stack">
-    <el-card class="panel-card">
-      <p class="hint">
-        示例：<code>180</code>、<code>180 鬼10</code>、<code>16 oxxo</code>、<code>16 oxxo 180 鬼10</code>（省略分音符时默认 16 分）
-      </p>
-      <el-form label-position="top" @submit.prevent="submit">
-        <el-form-item :label="t('page.tools.chartConfig.queryLabel', '查询内容')">
-          <el-input v-model="query" :placeholder="t('page.tools.chartConfig.placeholder', '例如：16 oxxo 180 鬼10')" clearable />
-        </el-form-item>
-        <el-button type="primary" :loading="loading" native-type="submit">{{ t("common.search") }}</el-button>
-      </el-form>
-      <el-alert
-        v-if="errorMessage"
-        :title="errorMessage"
-        :type="viewerErrorAlertType(errorMessage)"
-        show-icon
-        :closable="false"
-        class="result-alert viewer-friendly-alert"
-      />
-      <pre v-else-if="lines.length" class="result-box">{{ lines.join("\n") }}</pre>
-    </el-card>
+  <div class="rw-stack">
+    <ReworkPageHeader :title="t('tools.chartConfig')" />
+    <ReworkPanel :label="t('tools.chartConfig')">
+      <form class="rw-form" @submit.prevent="submit">
+        <label class="rw-field rw-field--grow">
+          <span class="rw-field__label">{{ t("page.tools.chartConfig.queryLabel", "查询内容") }}</span>
+          <input
+            v-model="query"
+            class="rw-input rw-input--block"
+            type="search"
+            :placeholder="t('page.tools.chartConfig.placeholder', '例如：16 oxxo 180 鬼10')"
+            autocomplete="off"
+            autocapitalize="off"
+            spellcheck="false"
+            enterkeyhint="search"
+            aria-describedby="chart-config-hint"
+          />
+        </label>
+        <button type="submit" class="rw-btn rw-btn--primary" :class="{ 'is-busy': loading }" :disabled="loading" :aria-busy="loading">{{ t("common.search") }}</button>
+      </form>
+      <ReworkToolsExamples id="chart-config-hint" :examples="['180', '180 鬼10', '16 oxxo', '16 oxxo 180 鬼10']" :note="t('rework.toolPages.chartConfig.note')" @pick="(value) => (query = value)" />
+    </ReworkPanel>
+    <p v-if="errorMessage" class="rw-alert" :class="{ 'rw-alert--warn': viewerErrorAlertType(errorMessage) === 'warning' }" role="alert">{{ errorMessage }}</p>
+    <ReworkToolsLines v-else-if="lines.length" :lines="lines" :label="t('rework.toolPages.result')" />
   </div>
 </template>
-
-<style scoped>
-.page-stack {
-  display: grid;
-  gap: 20px;
-}
-
-.hint {
-  margin: 0 0 14px;
-  color:var(--viewer-text-muted);
-  line-height: 1.6;
-}
-
-.result-alert {
-  margin-top: 16px;
-}
-
-.result-box {
-  margin: 16px 0 0;
-  padding: 14px 16px;
-  border-radius: 12px;
-  background:var(--viewer-surface-subtle);
-  border: 1px solid var(--viewer-surface-subtle);
-  white-space: pre-wrap;
-  word-break: break-word;
-  font-size: 13px;
-  line-height: 1.6;
-  color:var(--viewer-text);
-}
-</style>

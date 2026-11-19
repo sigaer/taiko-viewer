@@ -1,0 +1,55 @@
+// formatShowcaseRequirement / formatShowcaseOptionLabel of pages/account/profile.vue at 6371b6c (before slice E1),
+// kept verbatim so tests/reworkStage4.test.mjs can compare the moved labels with them.
+const formatShowcaseRequirement = (option: MyDonShowcaseTitleOption) => {
+  const requirementLabel =
+    locale.value === "ja"
+      ? option.requirementType === "all_perfect"
+        ? "ドンダフル"
+        : option.requirementType === "full_combo"
+          ? "フルコンボ"
+          : "クリア"
+      : option.requirementType === "all_perfect"
+        ? "全良"
+        : option.requirementType === "full_combo"
+          ? "全连"
+          : "通关";
+  const difficultyLabel =
+    locale.value === "ja"
+      ? option.difficultyScope === "inner_oni"
+        ? "裏"
+        : option.difficultyScope === "oni_or_inner_oni"
+          ? "おに/裏"
+          : option.difficultyScope === "oni"
+            ? "おに"
+            : option.difficultyScope === "hard"
+              ? "むずかしい"
+              : option.difficultyScope === "normal"
+                ? "ふつう"
+                : option.difficultyScope === "easy"
+                  ? "かんたん"
+                  : "任意"
+      : option.difficultyScope === "inner_oni"
+        ? "里谱"
+        : option.difficultyScope === "oni_or_inner_oni"
+          ? "魔王/里谱"
+          : option.difficultyScope === "oni"
+            ? "魔王"
+            : option.difficultyScope === "hard"
+              ? "困难"
+              : option.difficultyScope === "normal"
+                ? "一般"
+                : option.difficultyScope === "easy"
+                  ? "简单"
+                  : "任意";
+  return `${requirementLabel} · ${difficultyLabel}`;
+};
+
+const formatShowcaseOptionLabel = (option: MyDonShowcaseTitleOption) => {
+  const constLabel = option.constValue > 0 ? ` · ${option.constValue.toFixed(1)}` : "";
+  const sourceLabel = option.source === "custom" ? (locale.value === "ja" ? "カスタム · " : "自定义 · ") : "";
+  const songLabel =
+    option.source === "custom" && option.songNames.length > 0
+      ? ` · ${locale.value === "ja" ? "曲" : "曲名"}：${option.songNames.join(" / ")}`
+      : "";
+  return `${sourceLabel}${option.titleName}${songLabel} · ${formatShowcaseRequirement(option)}${constLabel}`;
+};

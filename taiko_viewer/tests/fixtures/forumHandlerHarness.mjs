@@ -79,10 +79,18 @@ export async function handlers(path, api, exported, options = {}) {
   const useAccountRequestGuard = new Function('useState', 'watch', 'onBeforeUnmount', `${guardCode}; return useAccountRequestGuard;`)(useState, watch, onBeforeUnmount);
   const route = reactivity.reactive({ query: options.query || {}, fullPath: '/forum/new' });
   const navigate = async target => { navigations.push(target); return options.navigate?.(target); };
+  const messagesByLocale = Object.fromEntries(await Promise.all(['zh', 'ja'].map(async lang => [lang, JSON.parse(await readFile(new URL(`../../locales/${lang}.json`, import.meta.url), 'utf8'))])));
+  const translate = (lang, key, values) => {
+    const text = key.split('.').reduce((o, k) => o?.[k], messagesByLocale[lang]);
+    return typeof text === 'string' ? text.replace(/\{(\w+)\}/g, (_, k) => String(values[k] ?? `{${k}}`)) : key;
+  };
+  // Pure helpers the pages import (imports are stripped above): the real modules.
+  const { catalogRequestFor } = await import('../../utils/rework/catalog.ts');
   const ports = {
     ...Object.fromEntries(Object.entries(reactivity).filter(([key]) => !['fire', 'notify'].includes(key))),
     useState, useAccountRequestGuard, useAsyncData,
-    useI18n: () => ({ t: key => key, locale: ref(options.locale || 'zh') }),
+    // Slice D moved the pages' inline zh / ja copy to locales: t() reads the real locale file (key when missing).
+    useI18n: () => ({ t: (key, values = {}) => translate(options.locale || 'zh', key, values), locale: ref(options.locale || 'zh') }),
     useLocalePath: () => value => value, useAccountState: () => ({ accountUser: states.get('account-user') }),
     useNuxtData: key => ({ data: caches.get(key) }), useViewerApiFetch: () => api,
     useViewerDateTime: () => ({ formatDateTime: v => v, formatDate: v => v }),
@@ -90,7 +98,7 @@ export async function handlers(path, api, exported, options = {}) {
     useRoute: () => route, useRouter: () => ({ push: navigate }), navigateTo: navigate,
     isNavigationFailure: result => Boolean(result?.__navigationFailure),
     ElMessage: Object.fromEntries(['success', 'warning', 'error'].map(kind => [kind, text => messages.push({ kind, text })])),
-    FORUM_IMAGE_MAX_BYTES: 20 * 1024 * 1024,
+    FORUM_IMAGE_MAX_BYTES: 20 * 1024 * 1024, catalogRequestFor,
     resolveForumSectionTranslation: (_t, _slug, name) => name,
     FormData: class { append() {} }
   };

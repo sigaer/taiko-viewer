@@ -1,0 +1,43 @@
+{
+  "$comment": "Sample data for the design-system atom samples. Song ids and names: tests/fixtures/annual-summary.sample.json (songNo / songName / songNameJa). Game titles: assets/data/title_song_relations.json (title_name, requirement_type x difficulty_scope -> plate). Custom titles are invented. Site title: server/services/account-titles/repository.ts ANNUAL_BETA_TITLE. No real user data.",
+  "songs": {
+    "cover": 851,
+    "missing": 1255,
+    "alt": 1308
+  },
+  "songCells": [
+    { "id": 851, "ja": "気焔万丈神楽", "zh": "气焰万丈神乐", "difficulty": 4, "star": 10, "constant": 10.42 },
+    { "id": 410, "ja": "天妖ノ舞", "zh": "天妖ノ舞", "difficulty": 5, "star": 10, "constant": null },
+    { "id": 514, "ja": "聖徳たいこの「日いずるまで飛鳥」", "zh": "圣德太鼓的「日出为止飞鸟」", "difficulty": 3, "star": 7, "constant": "6.85" },
+    { "id": 1255, "ja": "電脳幻夜の星言詠", "zh": "电脑幻夜之星言咏唱", "difficulty": 4, "star": 9, "constant": 9.1 }
+  ],
+  "plates": [
+    { "plate": 0, "name": "ばいそくドンだー" },
+    { "plate": 1, "name": "ドドドドドンだフルコンボ！", "$comment": "no title in the relations file is all_perfect x unspecified; a real all-perfect title is borrowed to show plate 1" },
+    { "plate": 2, "name": "フルコンボの達人" },
+    { "plate": 41, "name": "歌劇「リコレクトブルー」" },
+    { "plate": 42, "name": "きたさいたまの達人" },
+    { "plate": 43, "name": "トロいか2000" },
+    { "plate": 59, "name": "宝の丘" },
+    { "plate": 60, "name": "最高速の歌姫" },
+    { "plate": 61, "name": "ドドドドドンだフルコンボ！" }
+  ],
+  "customPlates": [
+    { "plateStyle": "silver", "name": "咚咔平衡者" },
+    { "plateStyle": "gold", "name": "鼓棒不离手" },
+    { "plateStyle": "rainbow", "name": "博歌乐爱好者" }
+  ],
+  "noPlate": { "plate": null, "name": "手を叩きながら歩いていこう" },
+  "unmappedPlate": { "plate": 7, "name": "フルコンボの達人" },
+  "longTitles": [
+    { "plate": 42, "name": "案山子姫 -Princess Scarecrow-" },
+    { "plate": 60, "name": "ミ(＃ﾟДﾟ)ミRAGING!!彡(ﾟДﾟ＃)彡" }
+  ],
+  "siteTitle": "虹光先行者",
+  "avatars": {
+    "square": "/pwa-192x192.png",
+    "nonSquare": "/miku.png",
+    "broken": "/__ds-missing-avatar.png",
+    "serverDefault": "https://viewer.sakura-bot.cn/miku.png"
+  }
+}

@@ -52,7 +52,7 @@ for (const locale of ["zh", "ja"]) {
     assert.equal(growth.focusTitle, undefined);
     assert.equal(growth.todayPlan, undefined);
     assert.equal(growth.dailyProgress, undefined);
-    assert.equal(growth.planTitle, locale === "zh" ? "可以试试这三首" : "この3曲はいかが？");
+    assert.equal(growth.planTitle, locale === "zh" ? "今天想练的话，可以看看这几首" : "今日は練習するなら、このあたりはいかが？");
     assert.equal(growth.progressTitle, locale === "zh" ? "今天" : "今日");
   });
 }

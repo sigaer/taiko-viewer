@@ -17,18 +17,22 @@ const createGuidePageDefault = (): GuidePagePayload => ({
   }
 });
 
+// The fetcher is created in setup (slice F): created inside the handler it called useI18n() outside setup whenever
+// refresh() or the watch ran after setup, threw, and the page could not be read again. Same request and key.
 export const useGuideContent = (
   difficulty: MaybeRefOrGetter<number>,
   level: MaybeRefOrGetter<number>
-) =>
-  useAsyncData(
+) => {
+  const apiFetch = useViewerApiFetch();
+  return useAsyncData(
     () => `content-guide-${toValue(difficulty)}-${toValue(level)}`,
-    () => useViewerApiFetch()<GuidePagePayload>(`/api/content/guide/${toValue(difficulty)}/${toValue(level)}`),
+    () => apiFetch<GuidePagePayload>(`/api/content/guide/${toValue(difficulty)}/${toValue(level)}`),
     {
       default: createGuidePageDefault,
       watch: [() => toValue(difficulty), () => toValue(level)]
     }
   );
+};
 
 const createGuideTagDefault = (difficulty: number, level: number, tagId: number): GuideTagItemsPayload => ({
   difficulty,
