@@ -33,7 +33,7 @@ const localePath = useLocalePath();
         </NuxtLink>
         <span v-if="item.currentBestScore != null || rankValue(item.currentBestRank) !== null" class="tpl-best">
           <span v-if="item.currentBestScore != null" class="num">{{ item.currentBestScore.toLocaleString() }}</span>
-          <DsRank v-if="rankValue(item.currentBestRank) !== null" :value="rankValue(item.currentBestRank)" named />
+          <DsRank v-if="rankValue(item.currentBestRank) !== null" :value="rankValue(item.currentBestRank)" />
         </span>
         <button
           v-if="item.goalOptions?.length"
@@ -123,6 +123,35 @@ const localePath = useLocalePath();
   }
   .tpl-choose {
     margin-left: auto;
+  }
+}
+@container home-main (min-width: 680px) {
+  .tpl-list {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--sp-4);
+    border-top: 0;
+  }
+  .tpl-row {
+    display: grid;
+    grid-template-rows: auto 1fr auto;
+    align-items: start;
+    gap: var(--sp-3);
+    padding: var(--sp-3);
+    border: 1px solid var(--line);
+    border-radius: var(--r-panel);
+    background: var(--surface);
+  }
+  .tpl-best {
+    flex-wrap: wrap;
+    font-size: var(--fs-14);
+    font-variant-numeric: tabular-nums;
+  }
+  .tpl-choose {
+    grid-row: 3;
+    align-self: end;
+    width: 100%;
+    min-height: var(--hit);
+    margin: 0;
   }
 }
 </style>

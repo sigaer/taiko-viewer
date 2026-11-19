@@ -26,8 +26,7 @@ const authenticatedHomeState = computed(() => {
   return "authenticated_unbound";
 });
 const latestSongs = computed(() => homeContent.value.latestSongs || []);
-// Slice G: with the growth surface shown, the annual banner sits in the greeting row (components/rework/today/Hello.vue:
-// beside the greeting from 1100 px, above it below that) instead of a row of its own that left 40 % of it empty.
+// The personal home keeps its annual banner inside the responsive greeting row.
 const bannerInGreeting = computed(() => homePresentation.value === "authenticated" && authenticatedHomeState.value === "authenticated_ready");
 provide("rework-home-banner", bannerInGreeting);
 const eventSlides = computed(() => [
@@ -93,4 +92,8 @@ useViewerSeo(() => ({
 <style scoped>
 .home-page { display: grid; gap: 24px; width: 100%; min-width: 0; }
 .home-annual { width: 100%; max-width: 612px; }
+/* Expand this personal home only; the shell and all other pages retain their widths. */
+:global(.viewer-content:has(.authenticated-home[data-state="authenticated_ready"])) {
+  max-width: 1360px;
+}
 </style>

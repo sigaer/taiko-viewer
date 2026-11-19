@@ -244,6 +244,8 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
           @browse="trackPlanClick"
         />
       </template>
+      <template v-if="$slots.latest" #latest><slot name="latest" /></template>
+      <template v-if="$slots.events" #events><slot name="events" /></template>
       <dialog v-if="!pending && !failed" ref="selector" class="rw-dialog goal-dialog" aria-labelledby="goal-dialog-title" @keydown="trapGoalFocus" @cancel.prevent="closeGoal" @close="restoreGoalFocus">
         <ReworkTodayGoalPicker
           v-model:type="selectedType"
@@ -261,3 +263,10 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
     </ReworkTodayBoard>
   </section>
 </template>
+
+<style scoped>
+.growth-surface {
+  min-width: 0;
+  container: home-layout / inline-size;
+}
+</style>

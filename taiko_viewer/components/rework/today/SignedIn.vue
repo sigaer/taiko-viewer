@@ -88,9 +88,14 @@ const trackClick = (event: string, source: string) => {
       :recent-failed="!!recentError"
       :refresh-recent="refreshRecent"
       :acknowledge-recent="acknowledgeRecent"
-    />
+    >
+      <template #latest>
+        <ReworkTodayLatestSongs :songs="latestSongs" :pending="contentPending" :failed="contentFailed" />
+      </template>
+      <template #events><ReworkTodayEvents :events="events" /></template>
+    </HomePlayerGrowthSurface>
 
-    <div class="tsi-more">
+    <div v-if="!isReady" class="tsi-more">
       <ReworkTodayLatestSongs :songs="latestSongs" :pending="contentPending" :failed="contentFailed" />
       <ReworkTodayEvents :events="events" />
     </div>

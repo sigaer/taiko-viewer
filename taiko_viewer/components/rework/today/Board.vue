@@ -1,24 +1,26 @@
 <script setup lang="ts">
-// Layout of the signed-in home (frozen Today.vue, adapted to the real data): who / greeting, then the deck (Rating
-// and the six dimensions | the current goal), then what changed (since the last sync | today), then what to play next.
-// The 21-day lane of the prototype is not drawn: no API returns per-day activity (stage-2-progress.md 切片 C).
-// Slots: hello, notice, profile, goal, recent, daily, plan, default (dialogs). The markup of
-// components/home/RecentGrowth.vue and DailyProgress.vue is styled here (they keep their logic and test hooks).
+// The home container controls the two columns using its available content width.
+// On narrow screens the wrappers dissolve, restoring the original section order.
+// RecentGrowth and DailyProgress retain their data, interactions and test hooks.
 </script>
 
 <template>
   <div class="tb">
-    <slot name="hello" />
-    <slot name="notice" />
-    <div v-if="$slots.profile || $slots.goal" class="tb-deck" :class="{ 'has-goal': !!$slots.goal }">
-      <div v-if="$slots.profile" class="tb-profile"><slot name="profile" /></div>
-      <div v-if="$slots.goal" class="tb-goal"><slot name="goal" /></div>
-    </div>
-    <div v-if="$slots.recent || $slots.daily" class="tb-activity">
+    <div class="tb-main">
+      <div class="tb-hello"><slot name="hello" /></div>
+      <div class="tb-notice"><slot name="notice" /></div>
+      <div v-if="$slots.profile || $slots.goal" class="tb-deck">
+        <div v-if="$slots.profile" class="tb-profile"><slot name="profile" /></div>
+        <div v-if="$slots.goal" class="tb-goal"><slot name="goal" /></div>
+      </div>
       <div v-if="$slots.recent" class="tb-recent"><slot name="recent" /></div>
-      <div v-if="$slots.daily" class="tb-daily"><slot name="daily" /></div>
+      <div v-if="$slots.plan" class="tb-plan"><slot name="plan" /></div>
+      <div v-if="$slots.latest" class="tb-latest"><slot name="latest" /></div>
     </div>
-    <slot name="plan" />
+    <aside class="tb-side">
+      <div v-if="$slots.daily" class="tb-daily"><slot name="daily" /></div>
+      <div v-if="$slots.events" class="tb-events"><slot name="events" /></div>
+    </aside>
     <slot />
   </div>
 </template>
@@ -31,14 +33,34 @@
   color: var(--ink);
   font-family: var(--font-ui);
 }
+.tb-main,
+.tb-side {
+  display: contents;
+}
+.tb-main > div,
+.tb-side > div {
+  min-width: 0;
+}
+.tb-hello { order: 0; }
+.tb-notice { order: 1; }
+.tb-deck { order: 2; }
+.tb-recent { order: 3; }
+.tb-daily { order: 4; }
+.tb-plan { order: 5; }
+.tb-latest { order: 6; }
+.tb-events { order: 7; }
+.tb-notice:has(> :not(:empty)) {
+  display: grid;
+  gap: var(--sp-3);
+}
+.tb-notice:not(:has(> :not(:empty))) {
+  display: none;
+}
 .tb-deck {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: var(--sp-5);
   align-items: stretch;
-}
-.tb-deck.has-goal {
-  grid-template-columns: minmax(0, 1.5fr) minmax(300px, 1fr);
 }
 .tb-profile,
 .tb-goal {
@@ -49,19 +71,31 @@
 .tb-goal {
   align-self: start;
 }
-.tb-activity {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: var(--sp-8);
-  align-items: start;
-}
 .tb-recent,
 .tb-daily {
   min-width: 0;
 }
-@media (max-width: 1099px) {
-  .tb-deck.has-goal,
-  .tb-activity {
+@container home-layout (min-width: 1000px) {
+  .tb {
+    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
+    gap: 24px;
+    align-items: start;
+  }
+  .tb-main,
+  .tb-side {
+    display: grid;
+    gap: 24px;
+    min-width: 0;
+    align-content: start;
+  }
+  .tb-main {
+    container: home-main / inline-size;
+  }
+  .tb-main > div,
+  .tb-side > div {
+    order: initial;
+  }
+  .tb-side :deep(.te-list) {
     grid-template-columns: minmax(0, 1fr);
   }
 }

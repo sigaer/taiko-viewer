@@ -12,10 +12,12 @@ const props = withDefaults(
     size?: number;
     domain?: [number, number] | null;
     digits?: number;
+    /** Balance label extents around the plot center, for equal-width chart columns. */
+    centered?: boolean;
     /** Accessible chart name; defaults to ds.chart.radar.name. */
     name?: string;
   }>(),
-  { focus: null, size: 260, domain: null, digits: 2, name: "" }
+  { focus: null, size: 260, domain: null, digits: 2, centered: false, name: "" }
 );
 
 const { t } = useI18n();
@@ -48,6 +50,11 @@ const viewBox = computed(() => {
     y1 = Math.max(y1, l.box[3]);
   }
   const m = 4;
+  if (props.centered) {
+    const halfWidth = Math.ceil(Math.max(CX - x0, x1 - CX) + m);
+    const halfHeight = Math.ceil(Math.max(CY - y0, y1 - CY) + m);
+    return { x: CX - halfWidth, y: CY - halfHeight, w: halfWidth * 2, h: halfHeight * 2 };
+  }
   return { x: Math.floor(x0 - m), y: Math.floor(y0 - m), w: Math.ceil(x1 - x0 + 2 * m), h: Math.ceil(y1 - y0 + 2 * m) };
 });
 const pxHeight = computed(() => Math.round((props.size * viewBox.value.h) / viewBox.value.w));

@@ -34,7 +34,9 @@ const showRadar = computed(() => radarHasData(axes.value));
       </DsDrumDial>
     </div>
     <div class="tpf-radar">
-      <DsRadar v-if="showRadar" :axes="axes" :focus="focus" :size="248" :name="t('passport.skillOverview')" />
+      <DsRadar v-if="showRadar" :axes="axes" :focus="focus" :size="248" centered :name="t('passport.skillOverview')" />
+    </div>
+    <div class="tpf-support">
       <p class="tpf-say">{{ observation }}</p>
       <NuxtLink class="rw-link tpf-link" :to="localePath('/my/growth')">{{ t("passport.title") }}</NuxtLink>
     </div>
@@ -44,9 +46,9 @@ const showRadar = computed(() => radarHasData(axes.value));
 <style scoped>
 .tpf {
   display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   align-items: center;
-  gap: var(--sp-4) var(--sp-6);
+  gap: var(--sp-2) var(--sp-6);
   height: 100%;
   box-sizing: border-box;
   padding: var(--sp-4) var(--sp-6);
@@ -54,9 +56,11 @@ const showRadar = computed(() => radarHasData(axes.value));
   border-radius: var(--r-panel);
   background: var(--surface);
 }
-.tpf-rating {
+.tpf-rating,
+.tpf-radar {
   display: grid;
-  justify-items: center;
+  place-items: center;
+  min-width: 0;
 }
 .tpf-k {
   color: var(--ink-3);
@@ -68,7 +72,8 @@ const showRadar = computed(() => radarHasData(axes.value));
   line-height: 1;
   letter-spacing: -0.01em;
 }
-.tpf-radar {
+.tpf-support {
+  grid-column: 2;
   display: grid;
   justify-items: center;
   gap: var(--sp-2);
@@ -96,6 +101,9 @@ const showRadar = computed(() => radarHasData(axes.value));
   .tpf {
     grid-template-columns: minmax(0, 1fr);
     padding: var(--sp-4) var(--sp-3);
+  }
+  .tpf-support {
+    grid-column: 1;
   }
 }
 </style>

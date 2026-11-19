@@ -1,0 +1,14 @@
+{
+  "cgroup": "/development.slice/development-qa.slice/taiko-qa-76b846d78ac3.service",
+  "durationMs": 55322,
+  "sampledMemoryPeakBytes": 582307840,
+  "sampleIntervalMs": 250,
+  "memoryEvents": "low 0\nhigh 0\nmax 0\noom 0\noom_kill 0\n",
+  "processes": [
+    {
+      "Name": "MainThread",
+      "VmHWM": "222104 kB",
+      "VmRSS": "219900 kB"
+    }
+  ]
+}
