@@ -1,11 +1,11 @@
 {
-  "generated_at": "2026-11-17T01:56:55.469745+00:00",
+  "generated_at": "2026-11-19T01:54:01.111212+00:00",
   "stats": {
     "rows_total": 866,
-    "api_relations_total": 647,
-    "relations_total": 745,
-    "songs_total": 457,
-    "titles_total": 549
+    "api_relations_total": 663,
+    "relations_total": 761,
+    "songs_total": 460,
+    "titles_total": 556
   },
   "relations": [
     {
@@ -5929,6 +5929,134 @@
       "source_row_index": 1076
     },
     {
+      "song_name": "Miishi Kakure",
+      "title_name": "御石かくれ",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Miishi Kakure》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 1135
+    },
+    {
+      "song_name": "Miishi Kakure",
+      "title_name": "御石かくれ",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Miishi Kakure》的“魔王”难度下达成全连吧",
+      "source_row_index": 1136
+    },
+    {
+      "song_name": "Miishi Kakure",
+      "title_name": "御石かくれ",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Miishi Kakure》的“魔王”难度下达成通关吧",
+      "source_row_index": 1137
+    },
+    {
+      "song_name": "Miishi Kakure",
+      "title_name": "今から貴方の所に行くね",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Miishi Kakure》的“魔王”难度下达成全连吧",
+      "source_row_index": 1138
+    },
+    {
+      "song_name": "Don-doko Don-doko Don-doko Don-doko Don-tastic!!!",
+      "title_name": "どんどこ×4どんタスティック!!!",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 1139
+    },
+    {
+      "song_name": "Don-doko Don-doko Don-doko Don-doko Don-tastic!!!",
+      "title_name": "どんどこ×4どんタスティック!!!",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王”难度下达成全连吧",
+      "source_row_index": 1140
+    },
+    {
+      "song_name": "Don-doko Don-doko Don-doko Don-doko Don-tastic!!!",
+      "title_name": "どんどこ×4どんタスティック!!!",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王”难度下达成通关吧",
+      "source_row_index": 1141
+    },
+    {
+      "song_name": "Don-doko Don-doko Don-doko Don-doko Don-tastic!!!",
+      "title_name": "ドンだーとして最高の数値を持つ肉体",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王”难度下达成全连吧",
+      "source_row_index": 1142
+    },
+    {
+      "song_name": "Don-doko Don-doko Don-doko Don-doko Don-tastic!!!",
+      "title_name": "どんどこ×4どんタスティック!!!",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王（隐藏）”难度下达成全良连段吧",
+      "source_row_index": 1143
+    },
+    {
+      "song_name": "Don-doko Don-doko Don-doko Don-doko Don-tastic!!!",
+      "title_name": "どんどこ×4どんタスティック!!!",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 1144
+    },
+    {
+      "song_name": "Don-doko Don-doko Don-doko Don-doko Don-tastic!!!",
+      "title_name": "どんどこ×4どんタスティック!!!",
+      "requirement_type": "clear",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王（隐藏）”难度下达成通关吧",
+      "source_row_index": 1145
+    },
+    {
+      "song_name": "Don-doko Don-doko Don-doko Don-doko Don-tastic!!!",
+      "title_name": "世界を救う!!!どんタスティック!!!",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 1146
+    },
+    {
+      "song_name": "Kimi wa doko?",
+      "title_name": "君はドコ？",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Kimi wa doko?》的“魔王”难度下达成全良连段吧",
+      "source_row_index": 1147
+    },
+    {
+      "song_name": "Kimi wa doko?",
+      "title_name": "君はドコ？",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Kimi wa doko?》的“魔王”难度下达成全连吧",
+      "source_row_index": 1148
+    },
+    {
+      "song_name": "Kimi wa doko?",
+      "title_name": "君はドコ？",
+      "requirement_type": "clear",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Kimi wa doko?》的“魔王”难度下达成通关吧",
+      "source_row_index": 1149
+    },
+    {
+      "song_name": "Kimi wa doko?",
+      "title_name": "一番楽しい太鼓の達人",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "oni",
+      "condition_text": "在《Kimi wa doko?》的“魔王”难度下达成全连吧",
+      "source_row_index": 1150
+    },
+    {
       "song_name": "Purple Rose Fusion",
       "title_name": "紫薔薇の融合",
       "requirement_type": "full_combo",
@@ -6867,6 +6995,64 @@
         "source_row_index": 449
       }
     ],
+    "Don-doko Don-doko Don-doko Don-doko Don-tastic!!!": [
+      {
+        "title_name": "どんどこ×4どんタスティック!!!",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1139
+      },
+      {
+        "title_name": "どんどこ×4どんタスティック!!!",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王”难度下达成全连吧",
+        "source_row_index": 1140
+      },
+      {
+        "title_name": "どんどこ×4どんタスティック!!!",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王”难度下达成通关吧",
+        "source_row_index": 1141
+      },
+      {
+        "title_name": "ドンだーとして最高の数値を持つ肉体",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王”难度下达成全连吧",
+        "source_row_index": 1142
+      },
+      {
+        "title_name": "どんどこ×4どんタスティック!!!",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 1143
+      },
+      {
+        "title_name": "どんどこ×4どんタスティック!!!",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 1144
+      },
+      {
+        "title_name": "どんどこ×4どんタスティック!!!",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 1145
+      },
+      {
+        "title_name": "世界を救う!!!どんタスティック!!!",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 1146
+      }
+    ],
     "Donchan Shitai!": [
       {
         "title_name": "どんちゃんできたドン！",
@@ -7658,6 +7844,36 @@
         "source_row_index": 646
       }
     ],
+    "Kimi wa doko?": [
+      {
+        "title_name": "君はドコ？",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Kimi wa doko?》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1147
+      },
+      {
+        "title_name": "君はドコ？",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Kimi wa doko?》的“魔王”难度下达成全连吧",
+        "source_row_index": 1148
+      },
+      {
+        "title_name": "君はドコ？",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Kimi wa doko?》的“魔王”难度下达成通关吧",
+        "source_row_index": 1149
+      },
+      {
+        "title_name": "一番楽しい太鼓の達人",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Kimi wa doko?》的“魔王”难度下达成全连吧",
+        "source_row_index": 1150
+      }
+    ],
     "Ko Ki Ku Kuru Kuru Kure Ko!": [
       {
         "title_name": "つれづれなう！",
@@ -7929,6 +8145,36 @@
         "difficulty_scope": "oni",
         "condition_text": "在《METAMETA☆Universe!》的“魔王”难度下达成全连吧",
         "source_row_index": 572
+      }
+    ],
+    "Miishi Kakure": [
+      {
+        "title_name": "御石かくれ",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Miishi Kakure》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1135
+      },
+      {
+        "title_name": "御石かくれ",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Miishi Kakure》的“魔王”难度下达成全连吧",
+        "source_row_index": 1136
+      },
+      {
+        "title_name": "御石かくれ",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Miishi Kakure》的“魔王”难度下达成通关吧",
+        "source_row_index": 1137
+      },
+      {
+        "title_name": "今から貴方の所に行くね",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Miishi Kakure》的“魔王”难度下达成全连吧",
+        "source_row_index": 1138
       }
     ],
     "MINNA NO KAKIGOORI": [
@@ -14114,6 +14360,50 @@
         "source_row_index": 529
       }
     ],
+    "どんどこ×4どんタスティック!!!": [
+      {
+        "song_name": "Don-doko Don-doko Don-doko Don-doko Don-tastic!!!",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1139
+      },
+      {
+        "song_name": "Don-doko Don-doko Don-doko Don-doko Don-tastic!!!",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王”难度下达成全连吧",
+        "source_row_index": 1140
+      },
+      {
+        "song_name": "Don-doko Don-doko Don-doko Don-doko Don-tastic!!!",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王”难度下达成通关吧",
+        "source_row_index": 1141
+      },
+      {
+        "song_name": "Don-doko Don-doko Don-doko Don-doko Don-tastic!!!",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 1143
+      },
+      {
+        "song_name": "Don-doko Don-doko Don-doko Don-doko Don-tastic!!!",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 1144
+      },
+      {
+        "song_name": "Don-doko Don-doko Don-doko Don-doko Don-tastic!!!",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 1145
+      }
+    ],
     "なんじゃこりゃああ！": [
       {
         "song_name": "Rotter Tarmination(裏)",
@@ -14947,6 +15237,15 @@
         "source_row_index": 56
       }
     ],
+    "ドンだーとして最高の数値を持つ肉体": [
+      {
+        "song_name": "Don-doko Don-doko Don-doko Don-doko Don-tastic!!!",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王”难度下达成全连吧",
+        "source_row_index": 1142
+      }
+    ],
     "ドンだーの素質を持つ者": [
       {
         "song_name": "迈向希望的旋律",
@@ -15460,6 +15759,15 @@
         "source_row_index": 505
       }
     ],
+    "一番楽しい太鼓の達人": [
+      {
+        "song_name": "Kimi wa doko?",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Kimi wa doko?》的“魔王”难度下达成全连吧",
+        "source_row_index": 1150
+      }
+    ],
     "一陣の風": [
       {
         "song_name": "Aloft in the wind",
@@ -15541,6 +15849,15 @@
         "source_row_index": 448
       }
     ],
+    "世界を救う!!!どんタスティック!!!": [
+      {
+        "song_name": "Don-doko Don-doko Don-doko Don-doko Don-tastic!!!",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Don-doko Don-doko Don-doko Don-doko Don-tastic!!!》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 1146
+      }
+    ],
     "世界旅行ドンだー": [
       {
         "song_name": "小咚 世界旅行",
@@ -15584,6 +15901,15 @@
         "difficulty_scope": "oni",
         "condition_text": "在《Amber Light》的“魔王”难度下达成全连吧",
         "source_row_index": 535
+      }
+    ],
+    "今から貴方の所に行くね": [
+      {
+        "song_name": "Miishi Kakure",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Miishi Kakure》的“魔王”难度下达成全连吧",
+        "source_row_index": 1138
       }
     ],
     "今夜はホーミー": [
@@ -15963,6 +16289,29 @@
         "difficulty_scope": "oni",
         "condition_text": "在《Irodoru♡Future》的“魔王”难度下达成全连吧",
         "source_row_index": 588
+      }
+    ],
+    "君はドコ？": [
+      {
+        "song_name": "Kimi wa doko?",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Kimi wa doko?》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1147
+      },
+      {
+        "song_name": "Kimi wa doko?",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Kimi wa doko?》的“魔王”难度下达成全连吧",
+        "source_row_index": 1148
+      },
+      {
+        "song_name": "Kimi wa doko?",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Kimi wa doko?》的“魔王”难度下达成通关吧",
+        "source_row_index": 1149
       }
     ],
     "哀 got U": [
@@ -16440,6 +16789,29 @@
         "difficulty_scope": "oni",
         "condition_text": "在《waitin' for u》的“魔王”难度下达成全连吧",
         "source_row_index": 484
+      }
+    ],
+    "御石かくれ": [
+      {
+        "song_name": "Miishi Kakure",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Miishi Kakure》的“魔王”难度下达成全良连段吧",
+        "source_row_index": 1135
+      },
+      {
+        "song_name": "Miishi Kakure",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Miishi Kakure》的“魔王”难度下达成全连吧",
+        "source_row_index": 1136
+      },
+      {
+        "song_name": "Miishi Kakure",
+        "requirement_type": "clear",
+        "difficulty_scope": "oni",
+        "condition_text": "在《Miishi Kakure》的“魔王”难度下达成通关吧",
+        "source_row_index": 1137
       }
     ],
     "心の底から「だだだ脱出！」": [
