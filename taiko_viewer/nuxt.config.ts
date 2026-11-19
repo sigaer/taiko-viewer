@@ -86,7 +86,7 @@ export default defineNuxtConfig({
       if (dsSamplesEnabled()) pages.push(...dsSamplePages(fileURLToPath(new URL(".", import.meta.url))));
     }
   },
-  css: ["~/assets/css/main.css"],
+  css: ["~/assets/css/main.css", "~/assets/css/ds/firefox-android.css"],
   modules: ["@nuxtjs/i18n", "@element-plus/nuxt", "@vite-pwa/nuxt"],
   pwa: {
     registerType: "autoUpdate",

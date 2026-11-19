@@ -149,8 +149,8 @@ test("thread images open an accessible lightweight viewer without losing scroll"
   assert.match(viewer, /role="dialog"/);
   assert.match(viewer, /aria-modal="true"/);
   assert.match(viewer, /event\.key === "Escape"/);
-  assert.match(viewer, /preservedScrollY\.value = window\.scrollY/);
-  assert.match(viewer, /window\.scrollTo\(\{ top: preservedScrollY\.value, behavior: "auto" \}\)/);
+  assert.match(viewer, /preservedScrollY\.value = viewerScrollY\(\)/);
+  assert.match(viewer, /scrollViewerTo\(\{ top: preservedScrollY\.value, behavior: "auto" \}\)/);
   assert.match(viewer, /touch-action: pinch-zoom/);
   assert.match(viewer, /items\.length > 1/);
 });

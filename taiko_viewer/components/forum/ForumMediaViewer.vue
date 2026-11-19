@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { viewerScrollElement, viewerScrollY, scrollViewerTo } from "~/utils/viewer-scroll";
 const props = defineProps<{
   visible: boolean;
   index: number;
@@ -20,6 +21,8 @@ const closeButton = ref<HTMLButtonElement | null>(null);
 const preservedScrollY = ref(0);
 let bodyOverflow = "";
 let bodyLocked = false;
+let innerScroller: HTMLElement | null = null;
+let innerOverflow = "";
 
 const currentImage = computed(() => props.items[props.index] || null);
 
@@ -33,10 +36,12 @@ const changeImage = (offset: number) => {
 const restorePage = async () => {
   if (!import.meta.client || !bodyLocked) return;
   document.body.style.overflow = bodyOverflow;
+  if (innerScroller) innerScroller.style.overflowY = innerOverflow;
+  innerScroller = null;
   bodyLocked = false;
   await nextTick();
   requestAnimationFrame(() => {
-    window.scrollTo({ top: preservedScrollY.value, behavior: "auto" });
+    scrollViewerTo({ top: preservedScrollY.value, behavior: "auto" });
     props.trigger?.focus({ preventScroll: true });
   });
 };
@@ -47,7 +52,9 @@ watch(() => props.visible, async (visible) => {
     await restorePage();
     return;
   }
-  preservedScrollY.value = window.scrollY;
+  preservedScrollY.value = viewerScrollY();
+  innerScroller = viewerScrollElement();
+  if (innerScroller) { innerOverflow = innerScroller.style.overflowY; innerScroller.style.overflowY = "hidden"; }
   bodyOverflow = document.body.style.overflow;
   document.body.style.overflow = "hidden";
   bodyLocked = true;

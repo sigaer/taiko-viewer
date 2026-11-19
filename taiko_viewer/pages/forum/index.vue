@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { viewerScrollY, scrollViewerTo, viewerScrollTarget } from "~/utils/viewer-scroll";
 import type { ForumHomePayload, ForumThreadCard } from "~/types/forum";
 import type { CommunityChartActivityPayload } from "~/types/ugc";
 import { buildPageDescription } from "~/utils/seo";
@@ -48,15 +49,17 @@ const filters = computed(() => [
 ]);
 
 const scrollStorageKey = "community-scroll-position";
+let scrollTarget: EventTarget | null = null;
 let saveScrollPosition: (() => void) | null = null;
 onMounted(() => {
   const saved = Number(sessionStorage.getItem(scrollStorageKey) || 0);
-  if (saved > 0) requestAnimationFrame(() => window.scrollTo({ top: saved, behavior: "instant" as ScrollBehavior }));
-  saveScrollPosition = () => sessionStorage.setItem(scrollStorageKey, String(window.scrollY));
-  window.addEventListener("scroll", saveScrollPosition, { passive: true });
+  if (saved > 0) requestAnimationFrame(() => scrollViewerTo({ top: saved, behavior: "instant" as ScrollBehavior }));
+  saveScrollPosition = () => sessionStorage.setItem(scrollStorageKey, String(viewerScrollY()));
+  scrollTarget = viewerScrollTarget();
+  scrollTarget.addEventListener("scroll", saveScrollPosition, { passive: true });
 });
 onBeforeUnmount(() => {
-  if (saveScrollPosition) window.removeEventListener("scroll", saveScrollPosition);
+  if (saveScrollPosition) scrollTarget?.removeEventListener("scroll", saveScrollPosition);
   saveScrollPosition = null;
 });
 </script>
