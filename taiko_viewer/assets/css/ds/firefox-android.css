@@ -64,8 +64,8 @@
     max-height: calc(var(--firefox-keyboard-height) * 0.5);
   }
   /* Teleported option lists can be wider than a narrow inner-scroll anchor. */
-  html.firefox-android .el-select__popper,
-  html.firefox-android .el-select__popper .el-select-dropdown {
+  html.firefox-android[data-viewer-shell] .el-select__popper,
+  html.firefox-android[data-viewer-shell] .el-select__popper .el-select-dropdown {
     max-width: calc(100vw - 2 * var(--sp-4));
   }
   /* Element Plus locks body, but the main scroller also needs that lock. */
