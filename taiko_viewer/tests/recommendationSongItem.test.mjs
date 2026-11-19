@@ -7,15 +7,25 @@ import {createSSRApp,createRenderer,Suspense,h,ref,computed,watch,onBeforeUnmoun
 import {renderToString} from 'vue/server-renderer';
 import {component,mount} from './fixtures/batch2ComponentHarness.mjs';
 const vue=new URL('../node_modules/vue/dist/vue.runtime.esm-bundler.js',import.meta.url).href;
-async function rowComponent(path = 'components/RecommendationGoalAction.vue'){
+async function rowComponent(path = 'components/RecommendationSongItem.vue'){
  const raw=await readFile(new URL('../'+path,import.meta.url),'utf8');
  const descriptor=parse(raw).descriptor;const script=compileScript(descriptor,{id:'shared-song',inlineTemplate:false});
  let code=script.content.replace('export default','const __Component =')+'\n'+compileTemplate({id:'shared-song',source:descriptor.template.content,compilerOptions:{bindingMetadata:script.bindings,expressionPlugins:['typescript']}}).code.replace('export function render','function render')+'\n__Component.render=render;export default __Component;';
  code=code.replace(/from ['"]vue['"]/g,'from '+JSON.stringify(vue)).replace(/['"]~\/utils\/difficulty['"]/g,JSON.stringify(new URL('../utils/difficulty.ts',import.meta.url).href));
  try{return (await import('data:text/javascript,'+encodeURIComponent(ts.transpileModule(code,{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText))).default;}catch{throw new Error('Shared song SFC import failed');}
 }
-// Slice G: the shared-row test of components/RecommendationSongItem.vue was removed with the component (unused since
-// slice B; /tools/recommend and the home page render components/rework/scores and rework/today rows).
+for(const language of ['zh','ja'])test('actual shared row keeps actions outside navigation and optional fields honest ('+language+')',async()=>{
+ const old=globalThis.useI18n;const messages=JSON.parse(await readFile(new URL('../locales/'+language+'.json',import.meta.url),'utf8'));
+ globalThis.useI18n=()=>({t:key=>key.split('.').reduce((v,k)=>v?.[k],messages)||key});
+ try{
+  const component=await rowComponent();
+  const render=async(props,slots)=>{const app=createSSRApp({render:()=>h(component,{songId:1455,title:'長いタイトルと曲名の末尾まで自然に読む',difficultyType:5,to:'/songs/1455?difficulty=5',...props},slots)});app.component('NuxtLink',{props:['to'],render(){return h('a',{href:this.to},this.$slots.default?.());}});app.component('SongCoverImage',{props:['songId','alt'],render(){return h('img',{alt:this.alt,'data-cover':this.songId});}});return renderToString(app);};
+  const html=await render({starLevel:10},{actions:()=>h('button',{'data-song-action':''},'Choose'),details:()=>h('span','980,000'),tags:()=>h('span','未プレイ')});
+  assert.match(html,/10★/);assert.match(html,/980,000/);assert.match(html,/未プレイ/);assert.match(html,/difficulty=5/);
+  const link=html.slice(html.indexOf('<a '),html.indexOf('</a>')+4);assert.ok(!link.includes('<button'));assert.ok(html.indexOf('<button')>html.indexOf('</a>'));
+  for(const starLevel of [undefined,null]){const absent=await render({starLevel},{});assert.ok(!absent.includes('★'));assert.ok(!absent.includes('song-row__actions'));assert.ok(!absent.includes('song-row__details'));assert.ok(!absent.includes('980,000'));}
+ }finally{if(old===undefined)delete globalThis.useI18n;else globalThis.useI18n=old;}
+});
 test('ordinary existing goal handler preserves busy, preview failure retry, conflict and source credential through shared action',async()=>{
  const keys=['useState','useI18n','useLocalePath','useViewerApiFetch','ref','computed','watch','onBeforeUnmount','nextTick','document'];const old=new Map(keys.map(k=>[k,globalThis[k]]));let app;const pending=[],states=new Map([['account-user',ref({id:1})],['account-binding-generation',ref(0)]]);
  Object.assign(globalThis,{ref,computed,watch,onBeforeUnmount,nextTick,document:{activeElement:{focus(){}}},useState:k=>states.get(k),useI18n:()=>({t:k=>k,locale:ref('zh')}),useLocalePath:()=>x=>x,useViewerApiFetch:()=>((path,options)=>new Promise((resolve,reject)=>pending.push({path,options,resolve,reject})))});

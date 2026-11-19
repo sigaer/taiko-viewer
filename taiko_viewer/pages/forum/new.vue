@@ -6,7 +6,6 @@ import { buildPageDescription } from "~/utils/seo";
 import type { ForumSection } from "~/types/forum";
 import type { SongCatalogItem, SongCatalogPagePayload, SongDetailPayload } from "~/types/content";
 import { FORUM_IMAGE_MAX_BYTES, resolveForumSectionTranslation } from "~/utils/forum";
-import { catalogRequestFor } from "~/utils/rework/catalog";
 
 type UploadedImage = {
   imageUrl: string;
@@ -77,14 +76,91 @@ const songLoading = ref(false);
 const selectedSong = ref<SongCatalogItem | null>(null);
 const contextualSong = ref(false);
 
-// Visible text moved from the inline zh / ja table to locales (rework.forum.compose.*); the keys are the old names.
-const COPY_KEYS = [
-  "heading", "back", "section", "threadType", "title", "titlePlaceholder", "summary", "summaryPlaceholder", "tags",
-  "tagsPlaceholder", "paragraphs", "paragraphDraftPlaceholder", "addParagraph", "images", "imageCaption", "uploadImage",
-  "imageCaptionPlaceholder", "submit", "remove", "contentRequired", "uploadSuccess", "uploadTooLarge", "uploadFailed",
-  "publishSuccess", "publishFailed", "viewPublished", "newPost", "navigationFailed", "moreOptions"
-] as const;
-const copy = computed(() => Object.fromEntries(COPY_KEYS.map((key) => [key, t(`rework.forum.compose.${key}`)])) as Record<(typeof COPY_KEYS)[number], string>);
+const copy = computed(() =>
+  locale.value === "ja"
+    ? {
+        heading: "新規投稿",
+        back: "フォーラムへ戻る",
+        section: "セクション",
+        threadType: "投稿タイプ",
+        discussion: "雑談",
+        guide: "攻略",
+        achievement: "戦績",
+        official: "告知",
+        title: "タイトル（任意）",
+        titlePlaceholder: "例：虹2025 三曲段の攻略メモ",
+        summary: "概要",
+        summaryPlaceholder: "未入力の場合は本文1段目から自動抽出します",
+        tags: "タグ",
+        tagsPlaceholder: "空白またはカンマ区切り。例：段位 全良 配速",
+        songId: "関連曲",
+        songIdPlaceholder: "曲名を検索して選択",
+        difficulty: "関連難易度",
+        level: "星数",
+        levelPlaceholder: "例：10",
+        paragraphs: "本文",
+        paragraphDraftPlaceholder: "何かシェアしよう",
+        paragraphCount: "{count} 段",
+        addParagraph: "本文に追加",
+        images: "画像",
+        uploadingImages: "{count}枚をアップロード中…",
+        imageCaption: "説明",
+        uploadImage: "画像をアップロード",
+        imageCaptionPlaceholder: "画像説明（任意）",
+        submit: "投稿する",
+        remove: "削除",
+        contentRequired: "本文または画像を 1 つ以上追加してください",
+        uploadSuccess: "画像をアップロードしました",
+        uploadTooLarge: "1枚の画像は20MB以内で選択してください",
+        uploadFailed: "画像アップロードに失敗しました",
+        publishSuccess: "投稿を公開しました",
+        publishFailed: "投稿に失敗しました",
+        viewPublished: "投稿を見る",
+        newPost: "新しい投稿",
+        navigationFailed: "投稿は公開済みですが、ページを開けませんでした。"
+      }
+    : {
+        heading: "发新帖",
+        back: "返回社区",
+        section: "版块",
+        threadType: "帖子类型",
+        discussion: "讨论",
+        guide: "攻略",
+        achievement: "战报",
+        official: "公告",
+        title: "标题（选填）",
+        titlePlaceholder: "例如：虹2025 三曲段过段思路整理",
+        summary: "摘要",
+        summaryPlaceholder: "不填则自动从首段正文提取",
+        tags: "标签",
+        tagsPlaceholder: "用空格或逗号分隔，如：段位 全良 配速",
+        songId: "关联歌曲",
+        songIdPlaceholder: "搜索歌曲后选择",
+        difficulty: "关联难度",
+        level: "星级",
+        levelPlaceholder: "例如 10",
+        paragraphs: "正文",
+        paragraphDraftPlaceholder: "分享点什么？",
+        paragraphCount: "{count} 段",
+        addParagraph: "加入正文",
+        images: "图片",
+        uploadingImages: "正在上传 {count} 张…",
+        imageCaption: "说明",
+        uploadImage: "上传图片",
+        imageCaptionPlaceholder: "图片说明（可选）",
+        submit: "发布",
+        remove: "移除",
+        contentRequired: "至少需要一段正文或一张图片",
+        uploadSuccess: "图片上传完成",
+        uploadTooLarge: "单张图片不能超过 20MB",
+        uploadFailed: "图片上传失败",
+        publishSuccess: "帖子已发布",
+        publishFailed: "发帖失败",
+        viewPublished: "查看帖子",
+        newPost: "再发一帖",
+        navigationFailed: "帖子已发布，但未能打开帖子页面。"
+      }
+);
 
 const { data: sectionsData } = await useAsyncData<{ items: ForumSection[] }>(
   "forum-new-sections",
@@ -95,10 +171,10 @@ const { data: sectionsData } = await useAsyncData<{ items: ForumSection[] }>(
 );
 
 const threadTypeOptions = computed(() => [
-  { label: t("forum.types.discussion"), value: "discussion" },
-  { label: t("forum.types.guide"), value: "guide" },
-  { label: t("forum.types.achievement"), value: "achievement" },
-  { label: t("forum.types.official"), value: "official" }
+  { label: copy.value.discussion, value: "discussion" },
+  { label: copy.value.guide, value: "guide" },
+  { label: copy.value.achievement, value: "achievement" },
+  { label: copy.value.official, value: "official" }
 ]);
 const difficultyOptions = computed(() =>
   [1, 2, 3, 4, 5].filter((value) => !selectedSong.value || selectedSong.value[`level_${value}` as keyof SongCatalogItem] !== undefined && selectedSong.value[`level_${value}` as keyof SongCatalogItem] !== null && String(selectedSong.value[`level_${value}` as keyof SongCatalogItem]) !== "").map((value) => ({
@@ -163,9 +239,7 @@ const searchSongs = async () => {
   const request = requestGuard.capture();
   songLoading.value = true;
   try {
-    // Shared catalog contract (utils/rework/catalog.ts): view=list, page 1, 8 results, the keyword, catalog order and
-    // shelfStatus 0 (released songs) — the same songs the picker returned before.
-    const payload = await apiFetch<SongCatalogPagePayload>("/api/content/songs", { query: catalogRequestFor({ q: keyword, shelf: "available", sort: "catalog", page: 1 }, 8), retry: 0 });
+    const payload = await apiFetch<SongCatalogPagePayload>("/api/content/songs", { query: { view: "list", shelfStatus: 0, page: 1, pageSize: 8, keyword }, retry: 0 });
     if (viewActive && requestGuard.current(request) && search === searchGeneration && songQuery.value.trim() === keyword) songResults.value = payload.songs;
   } catch (error: any) {
     if (viewActive && requestGuard.current(request) && search === searchGeneration) {
@@ -341,211 +415,314 @@ const submit = async () => {
 <template>
   <div class="forum-new-page">
     <section class="composer-panel">
-      <ReworkCommunityComposerBar
-        :title="copy.heading"
-        :back-to="localePath('/forum')"
-        :back-label="copy.back"
-        :submit-label="copy.submit"
-        :disabled="editorDisabled || uploading"
-        :busy="submitting"
-        @submit="submit"
-      />
-      <section v-if="publishedThreadId !== null" class="composer-published rw-note" role="status">
+      <header class="composer-panel__head">
+        <NuxtLink :to="localePath('/forum')" class="composer-back-link">{{ copy.back }}</NuxtLink>
+        <h1>{{ copy.heading }}</h1>
+        <el-button type="primary" :disabled="editorDisabled || uploading" :loading="submitting" @click="submit">{{ copy.submit }}</el-button>
+      </header>
+      <section v-if="publishedThreadId !== null" class="composer-published" role="status">
         <p>{{ navigationFailed ? copy.navigationFailed : copy.publishSuccess }}</p>
-        <button type="button" class="rw-btn rw-btn--primary" :disabled="submitting" :aria-busy="submitting || undefined" @click="viewPublishedThread">{{ copy.viewPublished }}</button>
-        <button type="button" class="rw-btn" :disabled="submitting" @click="startAnotherThread">{{ copy.newPost }}</button>
+        <el-button :loading="submitting" @click="viewPublishedThread">{{ copy.viewPublished }}</el-button>
+        <el-button :disabled="submitting" @click="startAnotherThread">{{ copy.newPost }}</el-button>
       </section>
-      <form class="composer-form" novalidate @submit.prevent>
-        <fieldset class="composer-fieldset" :disabled="editorDisabled">
-          <div class="rw-form composer-row">
-            <label class="rw-field">
-              <span class="rw-field__label">{{ copy.section }}</span>
-              <select v-model="form.sectionSlug" class="rw-select">
-                <option v-for="section in sectionsData.items" :key="section.id" :value="section.slug">{{ getSectionLabel(section) }}</option>
-              </select>
-            </label>
-            <div class="rw-field">
-              <span id="composer-type-label" class="rw-field__label">{{ copy.threadType }}</span>
-              <div class="rw-seg type-chips" role="group" aria-labelledby="composer-type-label">
-                <button v-for="option in threadTypeOptions" :key="option.value" type="button" :disabled="editorDisabled" :aria-pressed="form.threadType === option.value" @click="form.threadType = option.value">{{ option.label }}</button>
-              </div>
+      <el-form label-position="top" :disabled="editorDisabled">
+        <el-form-item class="composer-title" :label="copy.title">
+          <el-input v-model="form.title" maxlength="120" show-word-limit :placeholder="copy.titlePlaceholder" />
+        </el-form-item>
+        <section class="block-editor block-editor--body">
+          <div class="block-editor__head">
+            <h3>{{ copy.paragraphs }}</h3>
+            <span v-if="form.threadType === 'guide'">{{ copy.paragraphCount.replace("{count}", String(paragraphBlocks.length)) }}</span>
+          </div>
+          <el-input v-model="form.paragraphDraft" type="textarea" :rows="8" maxlength="4000" show-word-limit :placeholder="copy.paragraphDraftPlaceholder" :aria-label="copy.paragraphs" />
+          <div v-if="form.threadType === 'guide'" class="block-editor__actions">
+            <el-button type="primary" plain @click="addParagraph">{{ copy.addParagraph }}</el-button>
+          </div>
+          <div v-if="paragraphBlocks.length" class="block-list">
+            <div v-for="(text, index) in paragraphBlocks" :key="`paragraph-${index}`" class="block-list__item">
+              <el-input v-model="paragraphBlocks[index]" type="textarea" :rows="3" maxlength="4000" :aria-label="`${copy.paragraphs} ${index + 1}`" />
+              <el-button text @click="removeParagraph(index)">{{ copy.remove }}</el-button>
             </div>
           </div>
-
-          <label class="rw-field composer-title">
-            <span class="rw-field__label">{{ copy.title }}</span>
-            <input v-model="form.title" class="rw-input composer-title__input" maxlength="120" :placeholder="copy.titlePlaceholder" />
-            <span class="rw-count composer-counter num">{{ form.title.length }} / 120</span>
-          </label>
-
-          <section class="rw-field block-editor block-editor--body">
-            <div class="block-editor__head">
-              <label for="composer-body" class="rw-field__label">{{ copy.paragraphs }}</label>
-              <span v-if="form.threadType === 'guide'" class="rw-count">{{ t("rework.forum.compose.paragraphCount", { count: paragraphBlocks.length }) }}</span>
+          <div class="composer-media-grid" :aria-label="copy.images" :aria-busy="uploading">
+            <div v-for="(image, index) in imageBlocks" :key="image.imageUrl" class="composer-image">
+              <div class="composer-image__preview">
+                <img :src="image.imageUrl" :alt="image.caption || `${copy.images} ${index + 1}`" />
+              </div>
+              <div class="composer-image__actions">
+                <button type="button" class="composer-image__remove" :disabled="editorDisabled" :aria-label="`${copy.remove} ${copy.images} ${index + 1}`" @click="removeImage(index)">
+                  <span aria-hidden="true">×</span>
+                </button>
+                <details class="composer-image__caption">
+                  <summary>{{ copy.imageCaption }}</summary>
+                  <el-input v-model="image.caption" type="textarea" :rows="3" maxlength="120" :placeholder="copy.imageCaptionPlaceholder" :aria-label="`${copy.imageCaptionPlaceholder} ${index + 1}`" />
+                </details>
+              </div>
             </div>
-            <textarea id="composer-body" v-model="form.paragraphDraft" class="rw-input rw-textarea composer-body" rows="8" maxlength="4000" :placeholder="copy.paragraphDraftPlaceholder" />
-            <span class="rw-count composer-counter num">{{ form.paragraphDraft.length }} / 4000</span>
-            <div v-if="form.threadType === 'guide'" class="block-editor__actions">
-              <button type="button" class="rw-btn" @click="addParagraph"><ReworkIcon name="plus" />{{ copy.addParagraph }}</button>
-            </div>
-            <ol v-if="paragraphBlocks.length" class="block-list">
-              <li v-for="(text, index) in paragraphBlocks" :key="`paragraph-${index}`" class="block-list__item">
-                <textarea v-model="paragraphBlocks[index]" class="rw-input rw-textarea" rows="3" maxlength="4000" :aria-label="t('rework.forum.compose.paragraphN', { n: index + 1 })" />
-                <button type="button" class="rw-btn rw-btn--sm rw-btn--ghost" @click="removeParagraph(index)"><ReworkIcon name="trash" />{{ copy.remove }}</button>
-              </li>
-            </ol>
-          </section>
-
-          <ReworkCommunityComposerImages :images="imageBlocks" :disabled="editorDisabled" :uploading="uploading" :upload-count="uploadCount" @remove="removeImage">
             <el-upload :key="accountUser?.id || 'guest'" class="composer-image-upload" :disabled="editorDisabled" :show-file-list="false" multiple :http-request="uploadImage" :before-upload="validateImageFile" accept="image/*">
-              <button type="button" class="composer-image-upload__trigger" :disabled="editorDisabled" :aria-label="copy.uploadImage" :title="copy.uploadImage" :aria-busy="uploading || undefined">
-                <ReworkIcon :name="uploading ? 'upload' : 'plus'" />
-              </button>
+              <el-button class="composer-image-upload__trigger" :loading="uploading" :aria-label="copy.uploadImage" :title="copy.uploadImage">
+                <span v-if="!uploading" aria-hidden="true">+</span>
+              </el-button>
             </el-upload>
-          </ReworkCommunityComposerImages>
-
-          <ReworkCommunitySongPicker
-            v-model:query="songQuery"
-            v-model:difficulty="form.difficultyType"
-            :results="songResults"
-            :loading="songLoading"
-            :selected="selectedSong"
-            :difficulty-options="difficultyOptions"
-            :level="selectedSongLevel"
-            :disabled="editorDisabled"
-            @search="searchSongs"
-            @choose="chooseSong"
-          />
-
-          <details class="more-options" :open="showMoreOptions" @toggle="showMoreOptions = ($event.target as HTMLDetailsElement).open">
-            <summary class="rw-btn rw-btn--ghost more-options__summary"><ReworkIcon name="chevron" />{{ copy.moreOptions }}</summary>
-            <div class="more-options__body">
-              <label class="rw-field">
-                <span class="rw-field__label">{{ copy.summary }}</span>
-                <textarea v-model="form.summary" class="rw-input rw-textarea" rows="2" maxlength="280" :placeholder="copy.summaryPlaceholder" />
-                <span class="rw-count composer-counter num">{{ form.summary.length }} / 280</span>
-              </label>
-              <label class="rw-field">
-                <span class="rw-field__label">{{ copy.tags }}</span>
-                <input v-model="form.tagsInput" class="rw-input" :placeholder="copy.tagsPlaceholder" />
-              </label>
+          </div>
+          <p v-if="uploading" class="composer-upload-status" role="status">{{ copy.uploadingImages.replace("{count}", String(uploadCount)) }}</p>
+        </section>
+        <details class="more-options" :open="showMoreOptions" @toggle="showMoreOptions = ($event.target as HTMLDetailsElement).open">
+          <summary>{{ locale === 'ja' ? 'その他の設定' : '更多选项' }}</summary>
+          <div class="more-options__body">
+            <div class="composer-grid composer-grid--compact">
+              <el-form-item :label="copy.section">
+                <el-select v-model="form.sectionSlug">
+                  <el-option v-for="section in sectionsData.items" :key="section.id" :label="getSectionLabel(section)" :value="section.slug" />
+                </el-select>
+              </el-form-item>
+              <el-form-item :label="copy.threadType">
+                <div class="type-chips">
+                  <button v-for="option in threadTypeOptions" :key="option.value" type="button" :disabled="editorDisabled" :class="{ active: form.threadType === option.value }" :aria-pressed="form.threadType === option.value" @click="form.threadType = option.value">{{ option.label }}</button>
+                </div>
+              </el-form-item>
             </div>
-          </details>
-        </fieldset>
-      </form>
+            <section v-if="contextualSong && selectedSong" class="composer-context-card" aria-live="polite">
+              <img :src="`/api/content/covers/${selectedSong.id}`" :alt="selectedSong.song_name" />
+              <div>
+                <strong>{{ locale === 'ja' && selectedSong.song_name_jp ? selectedSong.song_name_jp : selectedSong.song_name }}</strong>
+                <span>{{ t(`community.discussingChart`) }} · {{ t(`difficulty.${form.difficultyType}`) }} · {{ form.level }}{{ t("guide.starSuffix") }}</span>
+              </div>
+            </section>
+            <el-form-item :label="copy.summary">
+              <el-input v-model="form.summary" maxlength="280" show-word-limit :placeholder="copy.summaryPlaceholder" />
+            </el-form-item>
+            <el-form-item :label="copy.tags">
+              <el-input v-model="form.tagsInput" :placeholder="copy.tagsPlaceholder" />
+            </el-form-item>
+            <div class="song-picker">
+              <label for="composer-song-search">{{ copy.songId }}</label>
+              <div class="song-picker__search">
+                <el-input id="composer-song-search" v-model="songQuery" :placeholder="copy.songIdPlaceholder" @keyup.enter="searchSongs" />
+                <el-button :loading="songLoading" @click="searchSongs">{{ t('common.search') }}</el-button>
+              </div>
+              <div v-if="songResults.length" class="song-picker__results">
+                <button v-for="song in songResults" :key="song.id" type="button" :disabled="editorDisabled" @click="chooseSong(song)">
+                  <span>{{ locale === 'ja' && song.song_name_jp ? song.song_name_jp : song.song_name }}</span>
+                  <small>#{{ song.id }} · {{ song.type }}</small>
+                </button>
+              </div>
+              <p v-if="selectedSong" class="song-picker__selected">{{ locale === 'ja' && selectedSong.song_name_jp ? selectedSong.song_name_jp : selectedSong.song_name }}</p>
+            </div>
+            <div v-if="selectedSong" class="composer-grid composer-grid--song">
+              <el-form-item :label="copy.difficulty">
+                <el-select v-model="form.difficultyType" clearable>
+                  <el-option v-for="option in difficultyOptions" :key="option.value" :label="option.label" :value="option.value" />
+                </el-select>
+              </el-form-item>
+              <el-form-item :label="copy.level">
+                <el-input :model-value="selectedSongLevel" readonly :placeholder="copy.levelPlaceholder" />
+              </el-form-item>
+            </div>
+          </div>
+        </details>
+      </el-form>
     </section>
   </div>
 </template>
 
 <style scoped>
-/* Layout only (no DS tokens in pages): the composer bar, images and song picker are reworked components; fields use
-   the shared rw-* classes. */
+.composer-published { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; margin-bottom: 16px; }
+.composer-published p { margin: 0; }
+
 .forum-new-page {
   display: flex;
   justify-content: center;
 }
+
 .composer-panel {
   width: 100%;
-  min-width: 0;
-  padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  padding: 4px 0 24px;
 }
-.composer-published {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px 12px;
-  margin-bottom: 20px;
+
+.composer-context-card { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; padding: 10px 12px; border: 1px solid var(--viewer-border); border-radius: 14px; background:var(--viewer-surface); }
+.composer-context-card img { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; }
+.composer-context-card div { display: grid; gap: 4px; min-width: 0; }
+.composer-context-card strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.composer-context-card span { color:var(--viewer-text-muted); font-size: 13px; }
+
+.composer-back-link {
+  color:var(--viewer-error);
+  text-decoration: none;
 }
-.composer-published p {
-  flex: 1 1 100%;
-  margin: 0;
-}
-.composer-form {
-  min-width: 0;
-}
-.composer-fieldset {
+
+.composer-grid {
   display: grid;
-  gap: 24px;
-  min-width: 0;
-  margin: 0;
-  padding: 0;
-  border: 0;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
 }
-.composer-row {
-  align-items: flex-start;
+
+.type-chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.type-chips button { min-height: 44px; padding: 0 11px; border: 1px solid var(--viewer-border); border-radius: 9px; color:var(--viewer-text-muted); background:transparent; font: inherit; font-size: 12px; cursor: pointer; }
+.type-chips button.active { border-color:var(--viewer-accent-strong); color:var(--viewer-on-primary); background:var(--viewer-primary); }
+
+.composer-grid--song {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
-.composer-title__input {
-  width: 100%;
-  min-height: 52px;
-  font-size: 1.25rem;
-  font-weight: 700;
+
+.composer-grid--compact { margin-bottom: 2px; }
+.more-options { margin-top: 12px; border-top: 1px solid var(--viewer-border); border-bottom: 1px solid var(--viewer-border); }
+.more-options summary { padding: 14px 2px; color:var(--viewer-accent-strong); font-weight: 700; cursor: pointer; }
+.more-options__body { display: grid; gap: 4px; padding: 4px 0 12px; }
+.song-picker { display: grid; gap: 8px; margin: 2px 0 10px; }
+.song-picker > label { color:var(--viewer-text); font-size: 14px; font-weight: 600; }
+.song-picker__search { display: flex; gap: 8px; }
+.song-picker__search .el-input { flex: 1; }
+.song-picker__results { display: grid; gap: 4px; max-height: 240px; overflow-y: auto; padding: 4px; border: 1px solid var(--viewer-border); border-radius: 12px; background:var(--viewer-surface); }
+.song-picker__results button { display: grid; gap: 2px; padding: 9px 10px; border: 0; border-radius: 8px; color:var(--viewer-text); background:transparent; text-align: left; cursor: pointer; }
+.song-picker__results button:hover, .song-picker__results button:focus-visible { background:color-mix(in srgb, var(--viewer-accent-strong) 10%, var(--viewer-surface)); outline: none; }
+.song-picker__results small { color:var(--viewer-text-muted); }
+.song-picker__selected { margin: 0; padding: 8px 10px; border-radius: 8px; color:var(--viewer-accent-strong); background:color-mix(in srgb, var(--viewer-accent-strong) 10%, var(--viewer-surface)); font-size: 13px; }
+
+.block-editor {
+  display: grid;
+  gap: 12px;
+  padding: 18px;
+  margin-top: 10px;
+  border-radius: 22px;
+  background:var(--viewer-surface-subtle);
 }
-.composer-counter {
-  align-self: flex-end;
-}
+
+.block-editor--body { padding: 0; margin-top: 5px; border-radius: 0; background:transparent; }
+.block-editor--body .block-editor__head h3 { font-size: 15px; }
+
 .block-editor__head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
-  gap: 12px;
 }
-.composer-body {
-  width: 100%;
-  min-height: 220px;
+
+.block-editor__head h3 {
+  margin: 0;
+  font-size: 18px;
 }
+
+.block-editor__head span {
+  color:var(--viewer-text-muted);
+  font-size: 12px;
+}
+
 .block-editor__actions {
   display: flex;
   justify-content: flex-end;
 }
+
 .block-list {
   display: grid;
   gap: 12px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
 }
+
 .block-list__item {
+  padding: 14px;
+  border-radius: 18px;
+  background:var(--viewer-surface-subtle);
+}
+
+.block-list__item p {
+  margin: 0 0 10px;
+  white-space: pre-wrap;
+  line-height: 1.8;
+}
+
+.composer-media-grid {
   display: grid;
-  gap: 4px;
-  justify-items: end;
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  align-items: start;
+  gap: 10px;
 }
-.block-list__item textarea {
+.composer-image { min-width: 0; }
+.composer-image__preview { position: relative; aspect-ratio: 1; }
+.composer-image__preview img { width: 100%; height: 100%; object-fit: contain; border-radius: 8px; }
+.composer-image__actions { position: relative; }
+.composer-image__remove {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  color: var(--viewer-text-muted);
+  background: transparent;
+  font-size: 24px;
+  z-index: 1;
+  cursor: pointer;
+}
+.composer-image__remove:disabled { color: var(--viewer-text-disabled); cursor: not-allowed; }
+.composer-image__caption summary { padding-right: 44px; display: flex; align-items: center; min-height: 44px; color: var(--viewer-text-muted); font-size: 13px; cursor: pointer; }
+.composer-image-upload :deep(.el-upload) { display: block; }
+.composer-image-upload__trigger {
   width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px dashed var(--viewer-control-border);
+  border-radius: 10px;
+  background: transparent;
+  color: var(--viewer-text-muted);
+  font-size: 30px;
 }
-.composer-image-upload :deep(.el-upload) {
-  display: block;
-  width: 100%;
-  height: 100%;
+.composer-upload-status { margin: 0; color: var(--viewer-text-muted); font-size: 13px; }
+
+body.theme-dark .block-editor__head span {
+  color:var(--viewer-text-muted);
 }
-.more-options__summary {
-  justify-content: flex-start;
-  list-style: none;
+
+body.theme-dark .block-editor {
+  background:var(--viewer-surface-subtle);
 }
-.more-options__summary::-webkit-details-marker {
-  display: none;
+
+body.theme-dark .block-editor--body { background:transparent; }
+
+body.theme-dark .block-list__item {
+  background:var(--viewer-overlay);
 }
-.more-options__summary svg {
-  width: 18px;
-  height: 18px;
-  transform: rotate(-90deg);
-}
-.more-options[open] .more-options__summary svg {
-  transform: none;
-}
-.more-options__body {
-  display: grid;
-  gap: 16px;
-  padding-top: 12px;
-}
-.more-options__body .rw-input {
-  width: 100%;
-}
-@media (max-width: 767px) {
-  .composer-row .rw-field {
-    flex: 1 1 100%;
+
+@media (max-width: 860px) {
+  .composer-grid,
+  .composer-grid--song {
+    grid-template-columns: 1fr;
   }
-  .composer-body {
-    min-height: 240px;
+
+  .composer-grid--song { grid-template-columns: 1fr; }
+}
+.composer-panel__head { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; position: sticky; top: 0; z-index: 20; margin-bottom: 18px; gap: 16px; padding: 10px 0; background: var(--viewer-surface); }
+.composer-panel__head h1 { margin: 0; font-size: 20px; }
+.composer-panel__head > .el-button { justify-self: end; min-height: 44px; }
+.composer-back-link { display: flex; align-items: center; min-height: 44px; font-size: 14px; }
+.more-options summary { min-height: 44px; box-sizing: border-box; }
+@media (max-width: 960px) {
+  .composer-panel { padding: 0 0 calc(16px + env(safe-area-inset-bottom)); }
+  .composer-panel__head {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+    padding: max(16px, env(safe-area-inset-top)) 0 12px;
+    /* Match the canvas while keeping scrolled content behind sticky navigation. */
+    background: var(--viewer-bg);
   }
+  .composer-panel__head h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--viewer-text);
+  }
+  .composer-panel__head .composer-back-link {
+    justify-self: start;
+    color: var(--viewer-text-muted);
+  }
+  .composer-panel__head > .el-button {
+    height: 44px;
+    padding-inline: 18px;
+    border-radius: 12px;
+    box-shadow: none;
+  }
+  .composer-title { display: none; }
+  .block-editor--body :deep(.el-textarea__inner) { min-height: 240px; font-size: 16px; line-height: 1.7; }
 }
 </style>

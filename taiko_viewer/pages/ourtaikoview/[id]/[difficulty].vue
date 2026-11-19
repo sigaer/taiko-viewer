@@ -14,12 +14,32 @@ definePageMeta({
 });
 const route = useRoute();
 const localePath = useLocalePath();
-const { t } = useI18n();
+const { locale, t } = useI18n();
 const id = Number(route.params.id);
 const difficulty = Number(route.params.difficulty);
-const PRACTICE_COPY_KEYS = ["title", "back", "loading", "loadingBundle", "loadingChart", "bundleFailed", "playerFailed", "playerDownloadFailed", "playerBootFailed", "chartFailed", "failed", "missing", "retry", "volume", "fullscreen", "exitFullscreen", "finished", "exited", "ready"] as const;
-// Copy in locales/{zh,ja}.json rework.practice (moved word for word in slice F; same keys as before).
-const copy = computed(() => Object.fromEntries(PRACTICE_COPY_KEYS.map((key) => [key, t("rework.practice." + key)])) as Record<(typeof PRACTICE_COPY_KEYS)[number], string>);
+const copy = computed(() => locale.value === "ja" ? {
+  title: "プレイ練習", back: "楽曲に戻る", loading: "プレイヤーを読み込み中…",
+  loadingBundle: "譜面と音源をダウンロード中…", loadingChart: "譜面と音源を準備中…",
+  bundleFailed: "譜面と音源をダウンロードできませんでした。再読み込みしてください。",
+  playerFailed: "プレイヤーを読み込めませんでした。再読み込みしてください。",
+  playerDownloadFailed: "プレイヤーをダウンロードできませんでした。再読み込みしてください。",
+  playerBootFailed: "プレイヤーを起動できませんでした。再読み込みしてください。",
+  chartFailed: "譜面または音源を読み込めませんでした。再読み込みしてください。",
+  failed: "読み込めませんでした。再試行してください。", missing: "この難易度の譜面はありません。",
+  retry: "再読み込み", volume: "打音の音量", fullscreen: "全画面", exitFullscreen: "全画面を終了",
+  finished: "練習が終了しました。", exited: "練習を終了しました。", ready: "プレイヤー内で開始してください。"
+} : {
+  title: "游玩练习", back: "返回歌曲", loading: "正在加载播放器…",
+  loadingBundle: "正在下载谱面与音乐…", loadingChart: "正在准备谱面与音乐…",
+  bundleFailed: "谱面与音乐下载失败，请重新加载。",
+  playerFailed: "播放器加载失败，请重新加载。",
+  playerDownloadFailed: "播放器下载失败，请重新加载。",
+  playerBootFailed: "播放器启动失败，请重新加载。",
+  chartFailed: "谱面或音乐读取失败，请重新加载。",
+  failed: "加载失败，请重试。", missing: "此难度暂无可用谱面。",
+  retry: "重新加载", volume: "鼓音音量", fullscreen: "全屏", exitFullscreen: "退出全屏",
+  finished: "练习已结束。", exited: "已退出练习。", ready: "请在播放器中点击开始。"
+});
 useHead(() => ({ title: `${copy.value.title} · ${id}`, meta: [{ name: "robots", content: "noindex" }] }));
 const iframe = ref<HTMLIFrameElement | null>(null);
 const playerUrl = ref("");
@@ -187,40 +207,36 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-  <div class="practice-page">
-    <NuxtLink class="rw-link practice-back" :to="localePath(`/songs/${id}`)"><ReworkIcon name="back" class="practice-back__icon" />{{ copy.back }}</NuxtLink>
+  <main class="practice-page">
+    <NuxtLink :to="localePath(`/songs/${id}`)">{{ copy.back }}</NuxtLink>
     <h1>{{ copy.title }} · {{ t(`difficulty.${difficulty}`) }}</h1>
     <div class="practice-controls">
-      <label class="practice-volume"><span class="rw-field__label">{{ copy.volume }}</span>
+      <label>{{ copy.volume }}
         <input v-model.number="volume" type="range" min="0" max="100" step="1" @input="sendVolume" />
-        <output class="num">{{ volume }}</output>
+        <output>{{ volume }}</output>
       </label>
-      <button v-if="playerUrl" ref="fullscreenButton" type="button" class="rw-btn" @click="fullscreen">{{ copy.fullscreen }}</button>
-      <button type="button" class="rw-btn" @click="load">{{ copy.retry }}</button>
+      <button v-if="playerUrl" ref="fullscreenButton" type="button" @click="fullscreen">{{ copy.fullscreen }}</button>
+      <button type="button" @click="load">{{ copy.retry }}</button>
     </div>
-    <p v-if="failure" class="rw-alert practice-state" role="alert">{{ failure }}</p>
-    <p v-else class="practice-state" role="status">{{ status === 'loading' ? loadingLabel : status === 'finished' ? copy.finished : status === 'exit' ? copy.exited : copy.ready }}</p>
+    <p v-if="failure" role="alert">{{ failure }}</p>
+    <p v-else role="status">{{ status === 'loading' ? loadingLabel : status === 'finished' ? copy.finished : status === 'exit' ? copy.exited : copy.ready }}</p>
     <div class="player-stage" :class="{ 'is-expanded': expanded }">
       <div v-if="expanded" class="expanded-controls">
-        <button ref="exitButton" type="button" class="rw-btn" @click="exitExpanded()">{{ copy.exitFullscreen }}</button>
+        <button ref="exitButton" type="button" @click="exitExpanded()">{{ copy.exitFullscreen }}</button>
       </div>
     <iframe v-if="playerUrl" :key="playerUrl" ref="iframe" :src="playerUrl" :title="copy.title"
       allow="autoplay; fullscreen" allowfullscreen @load="frameLoaded" />
     </div>
-  </div>
+  </main>
 </template>
 
 <style scoped>
-/* Controls: shared rework classes (rw-link, rw-btn, rw-field__label, rw-alert); the player rendering below is unchanged. */
 .practice-page { width: min(1440px, 100%); margin: 0 auto; padding: 24px 16px; }
-.practice-back { display: inline-flex; align-items: center; gap: 4px; min-height: 44px; }
-.practice-back__icon { width: 18px; height: 18px; }
-h1 { font-size: clamp(1.25rem, 3vw, 2rem); margin: 12px 0 20px; line-height: 1.25; }
-.practice-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 16px; }
-.practice-volume { display: flex; align-items: center; gap: 10px; min-height: 44px; }
-.practice-volume input { width: 160px; }
+h1 { font-size: clamp(1.25rem, 3vw, 2rem); margin: 20px 0; }
+.practice-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; }
+label { display: flex; align-items: center; gap: 10px; }
 output { min-width: 3ch; font-variant-numeric: tabular-nums; }
-.practice-state { margin: 16px 0; }
+button { padding: 8px 16px; border: 1px solid currentColor; border-radius: 10px; background: transparent; color: inherit; cursor: pointer; }
 iframe { display: block; width: 100%; aspect-ratio: 16 / 9; border: 0; border-radius: 12px; background: #171717; }
 iframe:fullscreen { width: 100vw; height: 100vh; border-radius: 0; }
 </style>

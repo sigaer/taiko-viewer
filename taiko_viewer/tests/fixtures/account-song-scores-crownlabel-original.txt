@@ -1,7 +1,0 @@
-// components/account/AccountSongScores.vue at 519bfac (removed in slice G): crownLabel, verbatim.
-const crownLabel = (item: AccountSongScore) => {
-  if (item.dondafulComboCnt > 0) return copy.value.dondaful;
-  if (item.fullComboCnt > 0) return copy.value.fullCombo;
-  if (item.clearCnt > 0) return copy.value.clear;
-  return copy.value.played;
-};

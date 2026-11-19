@@ -2,8 +2,6 @@
 definePageMeta({
   pageTitleKey: "community.relatedDiscussions",
   navKey: "/forum",
-  hidePageHeader: true,
-  contentLayout: "wide",
   breadcrumbs: [
     { labelKey: "forum.title", to: "/forum" },
     { labelKey: "community.relatedDiscussions" }
@@ -12,5 +10,5 @@ definePageMeta({
 </script>
 
 <template>
-  <ReworkCommunityListPage />
+  <ForumThreadListPage />
 </template>

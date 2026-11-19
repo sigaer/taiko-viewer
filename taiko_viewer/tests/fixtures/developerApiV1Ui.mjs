@@ -11,10 +11,10 @@ export async function consentBrowser(c,{clientId,bindingId,key,ask}){
  const source=await readFile(new URL('../../pages/account/developer/grants.vue',import.meta.url),'utf8');
  const {descriptor}=parse(source);const compiled=compileScript(descriptor,{id:'grant-qa',inlineTemplate:true});
  const code=compiled.content.replace('export default','const Page =')+`
- import {createApp,ref,h,Suspense} from 'vue';import zhMessages from './locales/zh.json';
+ import {createApp,ref,h,Suspense} from 'vue';
  globalThis.definePageMeta=()=>{};
  globalThis.useRuntimeConfig=()=>({public:{developerApiV1:true}});globalThis.useAccountState=()=>({accountUser:ref({developerApiV1Access:true}),fetchCurrentUser:async()=>{}});
- globalThis.useI18n=()=>({locale:ref('zh'),t:key=>key.split('.').reduce((o,k)=>o?.[k],zhMessages)??key});
+ globalThis.useI18n=()=>({locale:ref('zh')});
  globalThis.useViewerApiFetch=()=>async(url,options={})=>{const response=await fetch(url,{...options,headers:{'Content-Type':'application/json'},body:options.body?JSON.stringify(options.body):undefined,credentials:'same-origin'});const data=await response.json();if(!response.ok)throw new Error('API_REQUEST_FAILED');return data;};
  createApp({render:()=>h(Suspense,null,{default:()=>h(Page)})}).mount('#app');`;
  const bundled=await build({stdin:{contents:code,resolveDir:new URL('../../',import.meta.url).pathname,loader:'ts'},bundle:true,format:'iife',write:false,minify:true,define:{'process.env.NODE_ENV':'"production"'}});

@@ -6,7 +6,6 @@ import packageJson from "./package.json" with { type: "json" };
 import { CANONICAL_BASE_URL, SITE_TITLE } from "./utils/seo";
 import { fileURLToPath } from "node:url";
 import { viewerPageRoutes } from "./scripts/viewer-page-routes";
-import { dsSamplePages, dsSamplesEnabled } from "./ds-samples/routes";
 
 const appVersion = process.env.npm_package_version || packageJson.version;
 // Browser chrome and install metadata read the public CSS palette as well.
@@ -48,9 +47,6 @@ export default defineNuxtConfig({
     vueI18n: "./i18n.config.ts"
   },
   app: {
-    // A NuxtPage prop overrides per-page metadata, including keepalive: false.
-    // The app default preserves caching while letting immersive pages opt out.
-    keepalive: { exclude: ["PracticePlayerPage"] },
     head: {
       title: SITE_TITLE,
       meta: [
@@ -78,12 +74,6 @@ export default defineNuxtConfig({
         { rel: "icon", type: "image/png", sizes: "32x32", href: "/favicon-32x32.png" },
         { rel: "apple-touch-icon", sizes: "180x180", href: "/apple-touch-icon.png" }
       ]
-    }
-  },
-  hooks: {
-    // Design-system sample pages (docs/design-system/viewer-ds.md): only in `nuxt dev` or with TAIKO_DS_SAMPLES=1.
-    "pages:extend"(pages) {
-      if (dsSamplesEnabled()) pages.push(...dsSamplePages(fileURLToPath(new URL(".", import.meta.url))));
     }
   },
   css: ["~/assets/css/main.css"],
