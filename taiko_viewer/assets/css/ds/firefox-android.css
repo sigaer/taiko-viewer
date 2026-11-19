@@ -1,0 +1,75 @@
+/* Android Firefox phone Shell only. Other UAs, tablet/desktop layouts and
+   immersive layouts keep their existing viewport and document scroll ownership. */
+@media (max-width: 767px) {
+  html.firefox-android[data-viewer-shell],
+  html.firefox-android[data-viewer-shell] body {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+  }
+  html.firefox-android .rework-shell {
+    position: fixed;
+    inset: 0;
+    height: 100%;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  html.firefox-android .rework-shell > .rework-bar,
+  html.firefox-android .rework-shell > .mobile-tabs {
+    position: static;
+    flex: 0 0 auto;
+  }
+  html.firefox-android .rework-shell > .rework-main {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    scroll-padding-block: var(--sp-4);
+  }
+  html.firefox-android .rework-shell.has-bottom-nav > .rework-main {
+    padding-bottom: 32px;
+  }
+  html.firefox-android .rework-shell > .rework-main--immersive {
+    padding-bottom: 0;
+  }
+  html.firefox-android .rework-shell > .rework-bottom {
+    position: static;
+    flex: 0 0 auto;
+    /* Existing safe-area padding belongs to the bar, not to the scroll port. */
+  }
+  html.firefox-android #viewer-shell-dock {
+    display: block;
+    flex: 0 0 auto;
+    min-height: 0;
+    z-index: var(--z-bar);
+  }
+  html.firefox-android .rework-main .sd-diffbar {
+    top: 0;
+  }
+  html.firefox-android .forum-thread-page {
+    padding-bottom: 0;
+  }
+  html.firefox-android #viewer-shell-dock > .crb {
+    position: static;
+    margin: 0;
+  }
+  html.firefox-android[data-kb] .rework-shell {
+    inset: auto 0 auto 0;
+    top: var(--firefox-keyboard-top, 0px);
+    height: var(--firefox-keyboard-height, 100%);
+  }
+  html.firefox-android[data-kb] #viewer-shell-dock > .crb.is-expanded {
+    max-height: calc(var(--firefox-keyboard-height) * 0.5);
+  }
+  /* Teleported option lists can be wider than a narrow inner-scroll anchor. */
+  html.firefox-android .el-select__popper,
+  html.firefox-android .el-select__popper .el-select-dropdown {
+    max-width: calc(100vw - 2 * var(--sp-4));
+  }
+  /* Element Plus locks body, but the main scroller also needs that lock. */
+  html.firefox-android body.el-popup-parent--hidden .rework-main {
+    overflow-y: hidden;
+  }
+}

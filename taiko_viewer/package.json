@@ -1,7 +1,7 @@
 {
   "name": "taiko",
   "private": true,
-  "version": "1.15.0",
+  "version": "1.15.1",
   "type": "module",
   "scripts": {
     "dev": "nuxt dev --host 0.0.0.0 --port 3000",
@@ -28,6 +28,7 @@
     "test:oidc:db": "node scripts/test_oidc_isolated.mjs --allow-test-db-mutation",
     "oidc:migrate": "node --experimental-strip-types scripts/migrate_oidc_schema.ts",
     "test:version": "node --test tests/versionProjection.test.mjs",
+    "test:firefox-android": "node --experimental-strip-types --test tests/firefoxAndroidShell.test.mjs",
     "test:ds": "node --experimental-strip-types --test \"tests/ds*.test.*\"",
     "check:ds-contrast": "node scripts/ds/contrast-check.mjs",
     "check:scoped-css": "node scripts/ds/check-scoped-css.mjs",
