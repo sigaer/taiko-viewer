@@ -56,3 +56,25 @@ export function composePassportMilestoneNarrative(node: SkillPassportMilestone, 
     timePrecision: node.observationOnly ? 'observation' : node.day ? 'day' : 'unknown'
   };
 }
+
+// Slice C (growth page chart): passport metric runs → the points of DsLineChart.
+export type MetricPoint = { id: string; day: string; value: number };
+export type MetricRun = { id: string; points: MetricPoint[] };
+
+/**
+ * Passport metric runs (utils/passportNarrative passportMetricRuns) → the points of DsLineChart.
+ * Runs that cannot be compared are separated by a null point, which breaks the line; `index` maps every real point
+ * to its position in `points` (for the keyboard read-out and the chart mark). Values are exactly the measured ones.
+ */
+export function metricLine(runs: readonly MetricRun[], dayLabel: (day: string) => string) {
+  const points: { label: string; value: number | null }[] = [];
+  const index: { id: string; at: number; day: string; value: number }[] = [];
+  runs.forEach((run, r) => {
+    if (r > 0 && run.points.length) points.push({ label: "", value: null });
+    for (const p of run.points) {
+      index.push({ id: p.id, at: points.length, day: p.day, value: p.value });
+      points.push({ label: dayLabel(p.day), value: p.value });
+    }
+  });
+  return { points, index };
+}

@@ -14,10 +14,10 @@ const assertTargets = process.argv.includes("--assert");
 const routeOverride = valueOf("routes", "");
 const routes = routeOverride ? routeOverride.split(",").filter(Boolean) : [
   "/",
-  "/songs/available",
-  "/songs/removed",
+  "/songs",
+  "/songs?shelf=removed",
   "/songs/1",
-  "/songs/v2-constants",
+  "/songs/constants",
   "/titles",
   "/guide/4/10",
   "/grade",

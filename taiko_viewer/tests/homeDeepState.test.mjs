@@ -160,33 +160,8 @@ test('actual home goal component preserves evaluation states and requires refres
   props.identity='2:2:true';assert.equal(m.recentCompletedGoal.value,null);assert.equal(m.busy.value,false);assert.equal(m.needsRefresh.value,false);
  }finally{globalThis.document=oldDocument;}
 }));
-test('actual My overview defers cached sync/focus reads and reloads exactly once on binding selection',async()=>fixture(async({cached,load,requests,controlled,states})=>{
- const beforeWindow=globalThis.window,beforeDocument=globalThis.document,listeners=new Map();
- const port={addEventListener:(key,fn)=>listeners.set(key,fn),removeEventListener:key=>listeners.delete(key)};
- globalThis.window=port;globalThis.document={...port,visibilityState:'visible'};
- try{
-  const path='/api/account/my-taiko/overview';controlled.add(path);
-  const View=await load('components/my-taiko/Overview.vue',true);const page=cached(()=>View.setup({}, {expose(){}}));
-  assert.equal(requests.length,1);requests.shift().resolve({profile:{bindingId:'1'}});await settle();assert.equal(page.model.overview.value.profile.bindingId,'1');
-  await page.deactivate();states.get('account-home-generation').value++;listeners.get('focus')();await settle();assert.equal(requests.length,0);assert.equal(page.model.overview.value,null);
-  await page.activate();assert.equal(requests.length,1);requests.shift().resolve({profile:{bindingId:'1'}});await settle();
-  page.model.selection.value='2';const switching=page.model.switchBinding();assert.equal(requests.length,1);requests.shift().resolve({});await switching;await settle();assert.equal(requests.length,1,'selection and generation share one overview read');
-  requests.shift().resolve({profile:{bindingId:'2'}});await settle();assert.equal(page.model.overview.value.profile.bindingId,'2');
-  page.close();assert.equal(listeners.size,0);
- }finally{if(beforeWindow===undefined)delete globalThis.window;else globalThis.window=beforeWindow;if(beforeDocument===undefined)delete globalThis.document;else globalThis.document=beforeDocument;}
-}));
-test('My overview distinguishes real binding conflicts from catalog and other 409 failures',async()=>fixture(async({attach,load})=>{
- const doc=globalThis.document,win=globalThis.window;let mounted;const port={addEventListener(){},removeEventListener(){}};globalThis.document={...port,visibilityState:'visible'};globalThis.window=port;
- try{
-  const View=await load('components/my-taiko/Overview.vue',true);mounted=attach(()=>View.setup({}, {expose(){}}));const {model}=mounted;await settle();
-  for(const reason of ['catalog-source-mismatch','source-mismatch','fact-owner-mismatch','unknown']){
-   model.failure.value=model.readFailure({statusCode:409,data:{statusMessage:reason}});assert.equal(model.errorText.value,model.copy.value.unavailable);
-  }
-  model.failure.value=model.readFailure({statusCode:409,data:{statusMessage:'catalog-changed'}});assert.equal(model.errorText.value,model.copy.value.catalogChanged);
-  for(const reason of ['profile-changed','binding-changed']){model.failure.value=model.readFailure({statusCode:409,data:{statusMessage:reason}});assert.equal(model.errorText.value,model.copy.value.changed);}
-  model.failure.value=model.readFailure({},true);assert.equal(model.errorText.value,model.copy.value.timeout);
- }finally{mounted?.close();globalThis.document=doc;globalThis.window=win;}
-}));
+// Slice G: the two tests of components/my-taiko/Overview.vue (cached sync/focus reads, 409 wording) were removed with
+// the component, which nothing has rendered since slice B (/my is components/rework/my/Hub.vue).
 
 test('training loop: inactive generations coalesce, retain DTOs and activate with one read each',async()=>fixture(async({home,cached,states,requests,controlled,overview,recent})=>{
  await home.resolve();
