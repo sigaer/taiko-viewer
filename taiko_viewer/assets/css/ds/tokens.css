@@ -1,0 +1,547 @@
+/*
+ * Viewer Design System V1.3 tokens (C+: real game assets + Viewer Teal).
+ *
+ * Stage 1: viewer-rework opts the default shell into tokens only.
+ * Stage 0 scoping rule (D0-2): every declaration lives under html.ds-preview or html.viewer-rework. Nothing here is on :root,
+ * so pages without that class never see these values, however long this stylesheet stays in the document.
+ * Only custom properties; no element styles. Existing --viewer-* tokens are untouched and are not aliased.
+ *
+ * Source of the values: docs/04-design-system.md §2 and the prototype cascade (src/styles/tokens.css + the
+ * .stage remap and bottom-space tokens of base.css) resolved for data-brand=teal / data-assets=authentic.
+ * Verified by scripts/ds/check-tokens.mjs; contrast by scripts/ds/contrast-check.mjs.
+ *
+ * Slice G colour tuning (docs/design-system/viewer-ds.md, section 实施调色 2026-11-18; scripts/ds/spec/tuning-2026-11-18.json):
+ * a near-neutral light page (--bg, --bg-sunk, --surface, --surface-2, --line), the teal-tinted frame kept through
+ * --chrome-*, a less luminous dark primary fill (--action-bg*), and --disabled-* for disabled controls. These values
+ * differ from the frozen prototype on purpose.
+ */
+
+html.ds-preview,
+html.viewer-rework {
+  /* ---------- Primitive (only this file may reference these) ---------- */
+  --ai-950: #0b1120;
+  --ai-900: #101728;
+  --ai-850: #151e35;
+  --ai-800: #1a2440;
+  --ai-750: #212d4e;
+  --ai-700: #2b3860;
+  --ai-600: #3f4d78;
+  --ai-500: #5a6790;
+  --ai-400: #7f8aaa;
+  --ai-300: #a7afc6;
+  --ai-200: #cdd2e0;
+  --ai-150: #dfe3ec;
+  --ai-100: #eaedf3;
+  --ai-50: #f3f5f8;
+  --ai-0: #ffffff;
+  --shu-700: #b62a17;
+  --shu-650: #c42b13;
+  --shu-600: #d23a22;
+  --shu-500: #e8482e;
+  --shu-400: #ff6a4d;
+  --shu-100: #fde4de;
+  --asagi-700: #0b6f82;
+  --asagi-600: #128a9f;
+  --asagi-500: #1fa5ba;
+  --asagi-400: #4cc6d8;
+  --asagi-100: #d9f1f5;
+  --yamabuki-700: #906200;
+  --yamabuki-600: #b47c00;
+  --yamabuki-500: #f2b51d;
+  --yamabuki-400: #ffcb45;
+  --yamabuki-100: #fdf0c8;
+  /* ---------- Typography (D0-4 B: Barlow / Barlow Condensed self-hosted on the sample pages; CJK falls through to system fonts) ---------- */
+  --font-cjk-sc: 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif;
+  --font-cjk-jp: 'Noto Sans JP Variable', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif;
+  --font-ui: 'Barlow', var(--font-cjk-sc);
+  --font-num: 'Barlow Condensed', 'Barlow', var(--font-cjk-sc);
+  --fs-11: 0.6875rem;
+  --fs-12: 0.75rem;
+  --fs-13: 0.8125rem;
+  --fs-14: 0.875rem;
+  --fs-16: 1rem;
+  --fs-18: 1.125rem;
+  --fs-22: 1.375rem;
+  --fs-28: 1.75rem;
+  --fs-36: 2.25rem;
+  --fs-48: 3rem;
+  --fs-64: 4rem;
+  --lh-tight: 1.15;
+  --lh-snug: 1.35;
+  --lh-body: 1.6;
+  /* ---------- Space (4px base) ---------- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+  /* ---------- Radius ---------- */
+  --r-ctl: 8px;
+  --r-panel: 14px;
+  --r-sheet: 22px;
+  --r-note: 999px;
+  --r-xs: 6px;
+  /* ---------- Layout and bottom space (04 §2.6; values used by utils/ds/breakpoints.ts) ---------- */
+  --rail-w: 84px;
+  --bar-h: 60px;
+  --bar-h-m: 52px;
+  --subtab-h-m: 44px;
+  --tab-h: 62px;
+  --content-max: 1480px;
+  --gutter: 28px;
+  --shell-bottom: env(safe-area-inset-bottom, 0px);
+  --dock-h: 0px;
+  --kb-h: 0px;
+  /* ---------- Motion ---------- */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-hit: cubic-bezier(0.3, 1.6, 0.5, 1);
+  --dur-1: 120ms;
+  --dur-2: 220ms;
+  --dur-3: 420ms;
+  /* ---------- Layers ---------- */
+  --z-rail: 20;
+  --z-bar: 30;
+  --z-sheet: 60;
+  --z-palette: 80;
+  --z-toast: 90;
+  /* ---------- Controls ---------- */
+  --hit: 44px;
+  --ctl-h-xs: 28px;
+  --ctl-h-sm: 30px;
+  --ctl-h: 38px;
+  --ctl-h-lg: 46px;
+  --ctl-radius: var(--r-ctl);
+  --ctl-pad-x: 12px;
+  --btn-pad-x: 14px;
+  --btn-pad-x-sm: 10px;
+  --btn-pad-x-lg: 20px;
+  --tag-h: 20px;
+  --tag-radius: var(--r-xs);
+  --plate-h: 22px;
+  /* ---------- Overlays ---------- */
+  --overlay-radius: var(--r-panel);
+  --overlay-pad: 20px;
+  --overlay-pad-sm: 6px;
+  --overlay-shadow: var(--shadow-pop);
+  /* ---------- Semantic ---------- */
+  --focus-ring: var(--brand-focus);
+  --toast-ink: #f1fbf9;
+  --lane-line: #2f5257;
+  --lane-ink: #e9edf7;
+  --note-ring: var(--ai-0);
+  --note-outline: var(--ai-950);
+  --note-fc: #ffd75a;
+  --status-ok: var(--ok);
+  --status-fail: var(--danger);
+  --focus-gap: var(--surface);
+  --focus: 0 0 0 2px var(--focus-gap), 0 0 0 4px var(--brand-focus);
+  --lane-don: var(--shu-400);
+  --lane-ka: #56c1ee;
+  --lane-roll: var(--yamabuki-500);
+  --lane-fc: var(--note-fc);
+  --lane-ink-2: #c3c9db;
+  --lane-ink-3: #a5aec8;
+  --lane-focus: #86d9dc;
+  --focus-lane: inset 0 0 0 2px var(--lane-focus);
+  --lane-ghost: var(--ai-500);
+  --lane-ghost-ring: var(--ai-300);
+  --lane-measure: var(--ai-400);
+  /* ---------- Stage surface source values (two themes alike) ---------- */
+  --stage-bg: #1d3d42;
+  --stage-sunk: #17353a;
+  --stage-surface: #27494e;
+  --stage-ink: #e4f4f1;
+  --stage-ink-2: #c0dad8;
+  --stage-ink-3: #a3c2c1;
+  --stage-line: #3a5d62;
+  --stage-line-strong: #4d7277;
+  --stage-ctl-border: #82a8aa;
+  --stage-focus: #86d9dc;
+  --stage-don-ink: #ff8266;
+  --stage-don-wash: #3b1f24;
+  --stage-ka: #5cc4ef;
+  --stage-ka-ink: #8ad4f4;
+  --stage-ka-wash: #16344a;
+  --stage-roll: var(--yamabuki-400);
+  --stage-roll-ink: #ffd568;
+  --stage-roll-wash: #38301a;
+  /* ---------- Role ---------- */
+  --action-bg: var(--brand-primary);
+  --action-bg-hover: var(--brand-hover);
+  --action-ink: var(--brand-on-primary);
+  --link: var(--brand-primary);
+  --selected-bg: var(--brand-soft);
+  --selected-ink: var(--brand-primary);
+  --selected-line: var(--brand-primary);
+  --seg-on-bg: var(--brand-soft);
+  --seg-on-ink: var(--brand-primary);
+  --seg-on-ring: var(--brand-primary);
+  --tab-line: var(--brand-primary);
+  --nav-active-bg: var(--brand-primary);
+  --nav-active-ink: var(--brand-on-primary);
+  --nav-active-text: var(--brand-primary);
+  --info-wash: var(--brand-soft);
+  --info-ink: var(--brand-primary);
+  --brand-mark: var(--brand-primary);
+  --overlay-line: var(--line-strong);
+  --popover-line: var(--line-strong);
+  --density-bar: var(--line-strong);
+  --judge-h: 6px;
+  --accent: var(--brand-primary);
+  --row-sel-bg: color-mix(in srgb, var(--brand-primary) 12%, var(--surface));
+  --row-sel-line: var(--brand-primary);
+  --warn-wash: var(--roll-wash);
+  --lock-ink: var(--ink-2);
+  --series-band-bg: color-mix(in srgb, var(--brand-primary) 10%, var(--surface));
+  --series-band-line: color-mix(in srgb, var(--brand-primary) 45%, transparent);
+  --series-band-cur: color-mix(in srgb, var(--brand-primary) 22%, var(--surface));
+  --chart-mark: var(--ink-2);
+  --progress-line: var(--brand-primary);
+  --annual-wash: var(--brand-soft);
+  --annual-ink: var(--brand-primary);
+  --unread-wash: var(--brand-soft);
+  --toast-surface: var(--overlay-bg);
+  --toast-text: var(--ink);
+  --role-mod-bg: var(--brand-soft);
+  --role-mod-ink: var(--brand-primary);
+  --role-admin-bg: var(--brand-soft);
+  --role-admin-ink: var(--brand-primary);
+  --btn-ink-bg: var(--brand-primary);
+  --btn-ink-line: var(--brand-primary);
+  --btn-ink-ink: var(--brand-on-primary);
+  --btn-ink-hover: var(--brand-hover);
+  --btn-ink-hover-line: transparent;
+  --tag-don-bg: var(--bg-sunk);
+  --tag-don-ink: var(--ink-2);
+  --tag-info-bg: var(--bg-sunk);
+  --tag-info-ink: var(--ink-2);
+  --emph-num: var(--ink);
+  --series: var(--brand-primary);
+  --series-alt: var(--brand-primary);
+  --series-fill: 12%;
+  --vote-on: var(--brand-primary);
+  --vote-on-wash: var(--brand-soft);
+  --vote-on-ink: var(--brand-primary);
+  --input-focus-line: var(--brand-primary);
+  --info-line: var(--brand-primary);
+  --series-focus: var(--ink);
+  --series-focus-ink: var(--ink);
+  --selection: color-mix(in srgb, var(--brand-primary) 30%, transparent);
+  /* ---------- Domain ---------- */
+  --judge-good: var(--don-data);
+  --judge-ok: var(--ink-3);
+  --crown-dfc: conic-gradient(from 210deg, #ff5a5a, #ffb13d, #f6e24b, #58d68d, #4cc6d8, #7a7cf0, #d05be0, #ff5a5a);
+  --rank-iki1: #8c93a3;
+  --rank-iki2: #b0703a;
+  --rank-iki3: #8e9fb8;
+  --rank-miyabi1: #d79a00;
+  --rank-miyabi2: #e2618f;
+  --rank-miyabi3: #8650d2;
+  --rank-kiwami-ring: #c9a227;
+  --plate-ink: #2b1d14;
+  --plate-ink-outline: #ffffff;
+  --site-title-bar: linear-gradient(#ff5a5a, #ffb13d, #f6e24b, #58d68d, #4cc6d8, #7a7cf0, #d05be0);
+  --genre-pops: #2d9fb8;
+  --genre-anime: #f08a24;
+  --genre-kids: #f0508c;
+  --genre-vocaloid: #9aa7b8;
+  --genre-game: #a865d8;
+  --genre-variety: #5db33a;
+  --genre-classic: #c9a227;
+  --genre-namco: #e8482e;
+  --section-official: var(--ink-3);
+  --section-events: var(--ink-3);
+  --section-beginner-help: var(--ink-3);
+  --section-score-guides: var(--ink-3);
+  --section-dojo: var(--ink-3);
+  --section-achievements: var(--ink-3);
+  --section-arcade: var(--ink-3);
+  --section-general: var(--ink-3);
+  --section-creative: var(--ink-3);
+}
+
+/* ============ Light ============ */
+html.ds-preview:not([data-theme="dark"]),
+html.viewer-rework:not([data-theme="dark"]) {
+  /* Brand: Viewer Teal */
+  --brand-primary: #006c76;
+  --brand-hover: #005860;
+  --brand-soft: #d7ece9;
+  --brand-on-primary: #ffffff;
+  --brand-focus: #006c76;
+  /* Semantic */
+  --bg: #f0f4f4;
+  --bg-sunk: #e4eaea;
+  --surface: #ffffff;
+  --surface-2: #f7f9f9;
+  --line: #d3dcdc;
+  /* the frame (rail, top bar, tabs, phone bottom bar) keeps the teal tint */
+  --chrome-bg: #eaf6f5;
+  --chrome-surface: #f9fdfc;
+  --chrome-sunk: #def0ee;
+  --chrome-line: #ccdfdc;
+  --line-strong: #b4cecb;
+  --ink: #203f43;
+  --ink-2: #3d5a5e;
+  --ink-3: #4d696c;
+  --ink-inv: #ffffff;
+  --ctl-border: #6e8c8e;
+  --don: var(--shu-500);
+  --don-solid: var(--shu-600);
+  --ink-on-solid: var(--ai-0);
+  --don-ink: var(--shu-650);
+  --don-wash: var(--shu-100);
+  --ka: #2b9bcf;
+  --ka-ink: #0f6a96;
+  --ka-wash: #ddeff8;
+  --roll: var(--yamabuki-500);
+  --roll-ink: var(--yamabuki-700);
+  --roll-wash: var(--yamabuki-100);
+  --ok: #26724e;
+  --ok-wash: #e4f3ea;
+  --warn: var(--yamabuki-700);
+  --danger: var(--shu-650);
+  --danger-wash: var(--shu-100);
+  --status-attn: var(--yamabuki-600);
+  --toast-bg: #24494d;
+  --lane: #17353a;
+  --shadow-pop: 0 18px 50px -12px rgb(22 43 48 / 0.28), 0 2px 6px rgb(22 43 48 / 0.08);
+  --shadow-lift: 0 6px 18px -8px rgb(22 43 48 / 0.22);
+  --scrim: rgb(15 27 33 / 0.46);
+  /* Role */
+  --overlay-bg: var(--surface);
+  --don-data: #e58572;
+  --action-bg-active: var(--action-bg-hover);
+  --disabled-bg: var(--bg-sunk);
+  --disabled-ink: var(--ink-3);
+  --disabled-line: var(--line);
+  /* Domain */
+  --judge-ng: #7648c8;
+  --diff-easy: #d14019;
+  --diff-normal: #448208;
+  --diff-hard: #2876b8;
+  --diff-oni: #d02f7a;
+  --diff-ura: #7648c8;
+  --diff-easy-ink: #af2b00;
+  --diff-normal-ink: #346c00;
+  --diff-hard-ink: #18619c;
+  --diff-oni-ink: #af1a63;
+  --diff-ura-ink: #6d42b8;
+  --crown-none: var(--ai-300);
+  --crown-clear: #9aa5b8;
+  --crown-fc: #e0a400;
+  --crown-fc-ink: #925b00;
+  --rank-kiwami: #17203a;
+  --rank-iki1-ink: #656c7b;
+  --rank-iki2-ink: #955922;
+  --rank-iki3-ink: #5e6e85;
+  --rank-miyabi1-ink: #925d00;
+  --rank-miyabi2-ink: #b83b6c;
+  --rank-miyabi3-ink: #804acb;
+}
+
+/* ============ Dark ============ */
+html.ds-preview[data-theme="dark"],
+html.viewer-rework[data-theme="dark"] {
+  /* Brand: Viewer Teal */
+  --brand-primary: #86d9dc;
+  --brand-hover: #a0e3e5;
+  --brand-soft: #2a565a;
+  --brand-on-primary: #0b2a2d;
+  --brand-focus: #86d9dc;
+  /* Semantic */
+  --bg: #0c2023;
+  --bg-sunk: #081619;
+  --surface: #1a383d;
+  --surface-2: #234a50;
+  --line: #2f5257;
+  --line-strong: #447378;
+  --chrome-bg: #0c2023;
+  --chrome-surface: #1a383d;
+  --chrome-sunk: #081619;
+  --chrome-line: #2f5257;
+  --ink: #e4f4f1;
+  --ink-2: #accbca;
+  --ink-3: #a3c0c0;
+  --ink-inv: #10282b;
+  --ctl-border: #779fa1;
+  --don: var(--shu-400);
+  --don-solid: var(--shu-400);
+  --ink-on-solid: var(--ai-950);
+  --don-ink: #ff8266;
+  --don-wash: #3b1f24;
+  --ka: #5cc4ef;
+  --ka-ink: #8ad4f4;
+  --ka-wash: #16344a;
+  --roll: var(--yamabuki-400);
+  --roll-ink: #ffd568;
+  --roll-wash: #38301a;
+  --ok: #4ccb8a;
+  --ok-wash: #153527;
+  --warn: #ffd568;
+  --danger: #ff8266;
+  --danger-wash: #3b1f24;
+  --status-attn: var(--roll);
+  --toast-bg: #31565b;
+  --lane: #081619;
+  --shadow-pop: 0 24px 60px -12px rgb(0 0 0 / 0.6), 0 0 0 1px #3d6165;
+  --shadow-lift: 0 8px 22px -8px rgb(0 0 0 / 0.5);
+  --scrim: rgb(5 14 16 / 0.62);
+  /* Role */
+  --overlay-bg: #265056;
+  --don-data: #e8806c;
+  /* the primary fill one step below the link / selected / focus teal (#86d9dc) */
+  --action-bg: #45aeb5;
+  --action-bg-hover: #5cbcc2;
+  --action-bg-active: #3a9da4;
+  /* disabled controls: low contrast fill and text, so they do not read as an enabled dark button */
+  --disabled-bg: #1f3d42;
+  --disabled-ink: #6b8a8c;
+  --disabled-line: #2f5257;
+  /* Domain */
+  --judge-ng: #a583f5;
+  --diff-easy: #ff7a55;
+  --diff-normal: #8fcb5a;
+  --diff-hard: #5aa9ea;
+  --diff-oni: #ff66a8;
+  --diff-ura: #a583f5;
+  --diff-easy-ink: #ff8a69;
+  --diff-normal-ink: var(--diff-normal);
+  --diff-hard-ink: #75b7ed;
+  --diff-oni-ink: #ff7fb7;
+  --diff-ura-ink: #d0befb;
+  --crown-none: #3f4d78;
+  --crown-clear: #b9c3d6;
+  --crown-fc: #ffc93a;
+  --crown-fc-ink: var(--crown-fc);
+  --rank-kiwami: #e9edf7;
+  --rank-iki1-ink: #a8adba;
+  --rank-iki2-ink: #d19c72;
+  --rank-iki3-ink: #a4b1c6;
+  --rank-miyabi1-ink: #e6a500;
+  --rank-miyabi2-ink: #ef89ad;
+  --rank-miyabi3-ink: #b98ffc;
+}
+
+/* ============ Japanese UI: Latin and digits stay Barlow, CJK falls back to the Japanese stack ============ */
+html.ds-preview:lang(ja),
+html.viewer-rework:lang(ja),
+html.ds-preview :lang(ja),
+html.viewer-rework :lang(ja) {
+  --font-ui: 'Barlow', var(--font-cjk-jp);
+  --font-num: 'Barlow Condensed', 'Barlow', var(--font-cjk-jp);
+}
+
+/* ============ Narrow screens (breakpoint 767, utils/ds/breakpoints.ts) ============ */
+@media (max-width: 767px) {
+  html.ds-preview,
+  html.viewer-rework {
+    --gutter: 16px;
+  }
+}
+
+/* ============ Stage surface (.stage; dark teal in both themes) ============ */
+html.ds-preview .stage,
+html.viewer-rework .stage {
+  /* Role tokens are declared again here: custom properties resolve where they are declared (04 §2.1) */
+  --action-bg: var(--brand-primary);
+  --action-bg-hover: var(--brand-hover);
+  --action-bg-active: var(--action-bg-hover);
+  --action-ink: var(--brand-on-primary);
+  --link: var(--brand-primary);
+  --selected-bg: var(--brand-soft);
+  --selected-ink: var(--brand-primary);
+  --selected-line: var(--brand-primary);
+  --seg-on-bg: var(--brand-soft);
+  --seg-on-ink: var(--brand-primary);
+  --seg-on-ring: var(--brand-primary);
+  --tab-line: var(--brand-primary);
+  --nav-active-bg: var(--brand-primary);
+  --nav-active-ink: var(--brand-on-primary);
+  --nav-active-text: var(--brand-primary);
+  --info-wash: var(--brand-soft);
+  --info-ink: var(--brand-primary);
+  --brand-mark: var(--brand-primary);
+  --overlay-bg: var(--surface);
+  --overlay-line: var(--line-strong);
+  --popover-line: var(--line-strong);
+  --don-data: var(--don);
+  --density-bar: var(--line-strong);
+  --judge-h: 6px;
+  --accent: var(--brand-primary);
+  --row-sel-bg: color-mix(in srgb, var(--brand-primary) 12%, var(--surface));
+  --row-sel-line: var(--brand-primary);
+  --warn-wash: var(--roll-wash);
+  --lock-ink: var(--ink-2);
+  --series-band-bg: color-mix(in srgb, var(--brand-primary) 10%, var(--surface));
+  --series-band-line: color-mix(in srgb, var(--brand-primary) 45%, transparent);
+  --series-band-cur: color-mix(in srgb, var(--brand-primary) 22%, var(--surface));
+  --chart-mark: var(--ink-2);
+  --progress-line: var(--brand-primary);
+  --annual-wash: var(--brand-soft);
+  --annual-ink: var(--brand-primary);
+  --unread-wash: var(--brand-soft);
+  --toast-surface: var(--overlay-bg);
+  --toast-text: var(--ink);
+  --role-mod-bg: var(--brand-soft);
+  --role-mod-ink: var(--brand-primary);
+  --role-admin-bg: var(--brand-soft);
+  --role-admin-ink: var(--brand-primary);
+  --btn-ink-bg: var(--brand-primary);
+  --btn-ink-line: var(--brand-primary);
+  --btn-ink-ink: var(--brand-on-primary);
+  --btn-ink-hover: var(--brand-hover);
+  --btn-ink-hover-line: transparent;
+  --tag-don-bg: var(--bg-sunk);
+  --tag-don-ink: var(--ink-2);
+  --tag-info-bg: var(--bg-sunk);
+  --tag-info-ink: var(--ink-2);
+  --emph-num: var(--ink);
+  --series: var(--brand-primary);
+  --series-alt: var(--brand-primary);
+  --series-fill: 12%;
+  --vote-on: var(--brand-primary);
+  --vote-on-wash: var(--brand-soft);
+  --vote-on-ink: var(--brand-primary);
+  --input-focus-line: var(--brand-primary);
+  --info-line: var(--brand-primary);
+  --series-focus: var(--ink);
+  --series-focus-ink: var(--ink);
+  --selection: color-mix(in srgb, var(--brand-primary) 30%, transparent);
+  /* Brand on the stage: dark-theme values (04 §2.2) */
+  --brand-primary: #86d9dc;
+  --brand-hover: #a0e3e5;
+  --brand-soft: #244b4e;
+  --brand-on-primary: #0b2a2d;
+  --brand-focus: #86d9dc;
+  --focus-ring: var(--brand-focus);
+  --focus: 0 0 0 2px var(--stage-bg), 0 0 0 4px var(--brand-focus);
+  /* Semantic tokens remapped to the stage surface */
+  --bg: var(--stage-bg);
+  --bg-sunk: var(--stage-sunk);
+  --surface: var(--stage-surface);
+  --surface-2: var(--stage-sunk);
+  --line: var(--stage-line);
+  --line-strong: var(--stage-line-strong);
+  --ctl-border: var(--stage-ctl-border);
+  --ink: var(--stage-ink);
+  --ink-2: var(--stage-ink-2);
+  --ink-3: var(--stage-ink-3);
+  --don-ink: var(--stage-don-ink);
+  --don-wash: var(--stage-don-wash);
+  --ka: var(--stage-ka);
+  --ka-ink: var(--stage-ka-ink);
+  --ka-wash: var(--stage-ka-wash);
+  --roll: var(--stage-roll);
+  --roll-ink: var(--stage-roll-ink);
+  --roll-wash: var(--stage-roll-wash);
+  --focus-gap: var(--stage-bg);
+  --disabled-bg: var(--bg-sunk);
+  --disabled-ink: var(--ink-3);
+  --disabled-line: var(--line);
+}

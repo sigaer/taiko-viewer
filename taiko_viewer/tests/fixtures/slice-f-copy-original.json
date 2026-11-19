@@ -1,0 +1,244 @@
+{
+  "rt": {
+    "zh": {
+      "song": "歌曲",
+      "search": "搜索曲名或 ID",
+      "difficulty": "难度",
+      "version": "计算版本",
+      "notes": "音符数",
+      "good": "良",
+      "ok": "可",
+      "bad": "不可",
+      "auto": "自动补齐",
+      "manual": "手动输入",
+      "full": "全良",
+      "accuracy": "精度",
+      "rating": "综合 RT",
+      "result": "计算结果",
+      "choose": "请选择歌曲",
+      "empty": "暂无该难度的定数",
+      "invalid": "判定数须为非负整数，且合计等于谱面音符数。",
+      "below": "精度低于 75%，不计入 Rating。",
+      "failed": "歌曲数据加载失败。",
+      "retry": "重试",
+      "searchFailed": "搜索失败，请重新输入。",
+      "noSongs": "没有找到歌曲",
+      "loading": "加载中…",
+      "source": "V2 定数来源",
+      "detail": "歌曲详情",
+      "v1": [
+        "大歌力",
+        "体力",
+        "高速处理",
+        "精度力",
+        "节奏处理",
+        "复合处理"
+      ],
+      "v2": [
+        "体力",
+        "手速",
+        "爆发",
+        "精度",
+        "节奏",
+        "复合"
+      ],
+      "v2Failed": "V2 定数加载失败。"
+    },
+    "ja": {
+      "song": "楽曲",
+      "search": "曲名・IDで検索",
+      "difficulty": "難易度",
+      "version": "計算方式",
+      "notes": "ノーツ数",
+      "good": "良",
+      "ok": "可",
+      "bad": "不可",
+      "auto": "自動補完",
+      "manual": "手動入力",
+      "full": "全良",
+      "accuracy": "精度",
+      "rating": "総合 RT",
+      "result": "計算結果",
+      "choose": "楽曲を選択してください",
+      "empty": "この難易度の定数はありません",
+      "invalid": "判定数は0以上の整数で、合計をノーツ数に合わせてください。",
+      "below": "精度が75%未満のため、Ratingの対象外です。",
+      "failed": "楽曲データを読み込めませんでした。",
+      "retry": "再試行",
+      "searchFailed": "検索に失敗しました。入力し直してください。",
+      "noSongs": "該当する楽曲はありません",
+      "loading": "読み込み中…",
+      "source": "V2 定数の出典",
+      "detail": "楽曲詳細",
+      "v1": [
+        "大歌力",
+        "体力",
+        "高速処理",
+        "精度力",
+        "リズム処理",
+        "複合処理"
+      ],
+      "v2": [
+        "体力",
+        "手速",
+        "瞬発力",
+        "精度",
+        "リズム",
+        "複合"
+      ],
+      "v2Failed": "V2 定数を読み込めませんでした。"
+    }
+  },
+  "wordCloud": {
+    "zh": {
+      "hint": "根据当前绑定账号的游玩记录生成词云，需先完成多端同步。",
+      "submit": "生成词云",
+      "imageAlt": "太鼓词云"
+    },
+    "ja": {
+      "hint": "現在連携中のアカウントのプレイ記録からワードクラウドを生成します。先に同期を完了してください。",
+      "submit": "ワードクラウドを生成",
+      "imageAlt": "太鼓ワードクラウド"
+    }
+  },
+  "about": {
+    "zh": {
+      "teamTitle": "开发团队",
+      "teamDesc": "感谢所有参与 Taiko 项目的成员。",
+      "stackTitle": "技术栈",
+      "stackDesc": "前端与后端主要技术。",
+      "linksTitle": "友情链接"
+    },
+    "ja": {
+      "teamTitle": "開発チーム",
+      "teamDesc": "Taiko プロジェクトに参加したすべてのメンバーに感謝します。",
+      "stackTitle": "技術スタック",
+      "stackDesc": "フロントエンドとバックエンドの主要技術です。",
+      "linksTitle": "関連リンク"
+    },
+    "team": {
+      "zh": [
+        {
+          "name": "马路",
+          "role": "产品与策划",
+          "avatar": "/avatar/maru.jpg"
+        },
+        {
+          "name": "sigaer",
+          "role": "前端开发/UI设计",
+          "avatar": "/avatar/sigaer.jpg"
+        },
+        {
+          "name": "Sparklizm/星川sutari",
+          "role": "翻译",
+          "avatar": "/avatar/sutari.png"
+        },
+        {
+          "name": "Hyperionml/百里莫凌",
+          "role": "后端",
+          "avatar": "/avatar/baili.jpg"
+        }
+      ],
+      "ja": [
+        {
+          "name": "马路",
+          "role": "プロダクト・企画",
+          "avatar": "/avatar/maru.jpg"
+        },
+        {
+          "name": "sigaer",
+          "role": "フロントエンド / UI デザイン",
+          "avatar": "/avatar/sigaer.jpg"
+        },
+        {
+          "name": "Sparklizm/星川sutari",
+          "role": "翻訳",
+          "avatar": "/avatar/sutari.png"
+        },
+        {
+          "name": "Hyperionml/百里莫凌",
+          "role": "バックエンド",
+          "avatar": "/avatar/baili.jpg"
+        }
+      ]
+    }
+  },
+  "aliasLog": {
+    "zh": {
+      "subtitle": "共 {total} 条记录",
+      "loadFailed": "加载失败，请稍后重试",
+      "reload": "重新加载",
+      "empty": "暂无别名记录",
+      "time": "时间",
+      "song": "歌曲",
+      "alias": "别名",
+      "user": "操作人",
+      "source": "来源",
+      "action": "操作",
+      "view": "查看",
+      "privateChat": "私聊",
+      "searchPlaceholder": "搜索曲名、ID、别名或用户",
+      "search": "搜索"
+    },
+    "ja": {
+      "subtitle": "全 {total} 件",
+      "loadFailed": "読み込みに失敗しました。しばらくしてから再試行してください。",
+      "reload": "再読み込み",
+      "empty": "別名変更記録はまだありません",
+      "time": "時刻",
+      "song": "楽曲",
+      "alias": "別名",
+      "user": "操作ユーザー",
+      "source": "来源",
+      "action": "操作",
+      "view": "見る",
+      "privateChat": "個別チャット",
+      "searchPlaceholder": "曲名、ID、別名、ユーザーを検索",
+      "search": "検索"
+    }
+  },
+  "practice": {
+    "zh": {
+      "title": "游玩练习",
+      "back": "返回歌曲",
+      "loading": "正在加载播放器…",
+      "loadingBundle": "正在下载谱面与音乐…",
+      "loadingChart": "正在准备谱面与音乐…",
+      "bundleFailed": "谱面与音乐下载失败，请重新加载。",
+      "playerFailed": "播放器加载失败，请重新加载。",
+      "playerDownloadFailed": "播放器下载失败，请重新加载。",
+      "playerBootFailed": "播放器启动失败，请重新加载。",
+      "chartFailed": "谱面或音乐读取失败，请重新加载。",
+      "failed": "加载失败，请重试。",
+      "missing": "此难度暂无可用谱面。",
+      "retry": "重新加载",
+      "volume": "鼓音音量",
+      "fullscreen": "全屏",
+      "exitFullscreen": "退出全屏",
+      "finished": "练习已结束。",
+      "exited": "已退出练习。",
+      "ready": "请在播放器中点击开始。"
+    },
+    "ja": {
+      "title": "プレイ練習",
+      "back": "楽曲に戻る",
+      "loading": "プレイヤーを読み込み中…",
+      "loadingBundle": "譜面と音源をダウンロード中…",
+      "loadingChart": "譜面と音源を準備中…",
+      "bundleFailed": "譜面と音源をダウンロードできませんでした。再読み込みしてください。",
+      "playerFailed": "プレイヤーを読み込めませんでした。再読み込みしてください。",
+      "playerDownloadFailed": "プレイヤーをダウンロードできませんでした。再読み込みしてください。",
+      "playerBootFailed": "プレイヤーを起動できませんでした。再読み込みしてください。",
+      "chartFailed": "譜面または音源を読み込めませんでした。再読み込みしてください。",
+      "failed": "読み込めませんでした。再試行してください。",
+      "missing": "この難易度の譜面はありません。",
+      "retry": "再読み込み",
+      "volume": "打音の音量",
+      "fullscreen": "全画面",
+      "exitFullscreen": "全画面を終了",
+      "finished": "練習が終了しました。",
+      "exited": "練習を終了しました。",
+      "ready": "プレイヤー内で開始してください。"
+    }
+  }
+}

@@ -23,7 +23,6 @@ import Card from '${source}/components/forum/ForumThreadCard.vue';
 import Badge from '${source}/components/forum/ForumUserBadge.vue';
 import TitleBadges from '${source}/components/account/TitleBadges.vue';
 import Cover from '${source}/components/SongCoverImage.vue';
-import SafeImage from '${source}/components/forum/ForumSafeImage.vue';
 import ReadState from '${source}/components/forum/ReadState.vue';
 import List from '${source}/components/forum/ThreadListPage.vue';
 import Home from '${source}/pages/forum/index.vue';
@@ -67,7 +66,7 @@ const routes=['','/ja'].flatMap(prefix=>[
 ]);
 const router=createRouter({history:createWebHistory(),routes});
 const app=createApp({setup:()=>()=>h('main',{class:'qa-content'},[h(RouterView,null,{default:({Component})=>h(Suspense,null,{default:()=>Component})})])});
-for(const [name,component] of Object.entries({NuxtLink:RouterLink,ForumThreadCard:Card,ForumUserBadge:Badge,AccountTitleBadges:TitleBadges,SongCoverImage:Cover,ForumSafeImage:SafeImage,ForumReadState:ReadState}))app.component(name,component);
+for(const [name,component] of Object.entries({NuxtLink:RouterLink,ForumThreadCard:Card,ForumUserBadge:Badge,AccountTitleBadges:TitleBadges,SongCoverImage:Cover,ForumReadState:ReadState}))app.component(name,component);
 app.use(router);app.use(createI18n({legacy:false,locale,fallbackLocale:'zh',messages:{zh,ja},missingWarn:false,fallbackWarn:false}));app.use(ElementPlus);
 app.$nuxt={isHydrating:true,$router:router};
 const dark=localStorage.getItem('taiko_theme')==='dark';document.documentElement.dataset.theme=dark?'dark':'light';document.body.classList.toggle('theme-dark',dark);

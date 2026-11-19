@@ -13,6 +13,6 @@ test('other and removed catalog HTTP independently preserve shelf classification
    const empty=await ask('shelfStatus='+shelf+'&keyword=NO_MATCH');assert.equal(empty.total,0);assert.equal(empty.songs.length,0);
   }
   await writeFile(file,'invalid synthetic catalog');await utimes(file,new Date(),new Date(Date.now()+2000));await ask('shelfStatus=2',500);await writeFile(file,JSON.stringify(songs));await utimes(file,new Date(),new Date(Date.now()+4000));assert.equal((await ask('shelfStatus=1')).total,26);
-  const component=await readFile(new URL('../components/SongListContent.vue',import.meta.url),'utf8');assert.match(component,/el-empty v-if="!songs.length"/);
+  const component=await readFile(new URL('../components/rework/Library.vue',import.meta.url),'utf8');assert.match(component,/view === 'empty'/);assert.match(component,/view === 'noMatch'/);
  }finally{if(server){server.closeAllConnections();await new Promise(r=>server.close(r));}uninstall?.();Object.assign(globalThis,old);await rm(root,{recursive:true,force:true});}
 });

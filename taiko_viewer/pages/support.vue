@@ -17,6 +17,7 @@ const { accountUser, fetchCurrentUser } = useAccountState();
 await fetchCurrentUser();
 
 definePageMeta({
+  hidePageHeader: true,
   middleware: "account-auth",
   pageTitleKey: "nav.support",
   pageDescKey: "page.support.desc",
@@ -52,122 +53,16 @@ watch(
   { immediate: true }
 );
 
-const copy = computed(() =>
-  locale.value === "ja"
-    ? {
-        introTitle: "サポートチケット",
-        introDesc: "問題報告や機能要望を送信すると、運営へ通知されます。返信は登録メールとこのページの両方で確認でき、ここから追加メッセージも送れます。",
-        formTitle: "新しいチケットを送信",
-        formDesc: "タイトルと内容を整理して送ると、確認と返信が速くなります。",
-        historyTitle: "自分のチケット",
-        historyDesc: "対応状況、スレッド履歴、未読返信を確認できます。",
-        category: "分類",
-        title: "タイトル",
-        titlePlaceholder: "例：同期後にプロフィールが更新されない",
-        contact: "連絡先",
-        contactPlaceholder: "未入力時はアカウントのメールを使用",
-        content: "内容",
-        contentPlaceholder: "再現手順、発生時間、期待していた結果などをできるだけ具体的に記入してください。",
-        submit: "チケット送信",
-        needTitle: "チケットタイトルを入力してください",
-        needContent: "チケット内容を入力してください",
-        submitSuccess: "チケット #{id} を送信しました",
-        submitQueued: "チケット #{id} は記録されましたが、メール送信に失敗しました",
-        submitFailed: "チケット送信に失敗しました",
-        empty: "まだチケットはありません",
-        loading: "読み込み中...",
-        statusOpen: "受付中",
-        statusClosed: "対応完了",
-        mailPending: "メール待機中",
-        mailSent: "メール送信済み",
-        mailFailed: "メール送信失敗",
-        submittedAt: "送信日時",
-        ticketId: "チケット番号",
-        noContact: "未入力",
-        unread: "未読返信",
-        expand: "詳細を見る",
-        collapse: "閉じる",
-        threadTitle: "やり取り",
-        staffLabel: "運営",
-        userLabel: "自分",
-        followUp: "追加メッセージ",
-        followUpPlaceholder: "追加情報や質問を入力してください",
-        followUpSubmit: "メッセージ送信",
-        followUpSuccess: "メッセージを送信しました",
-        followUpQueued: "メッセージは保存されましたが、運営通知メールの送信に失敗しました",
-        followUpFailed: "メッセージ送信に失敗しました",
-        closedHint: "このチケットは完了済みです。新しい問題は新規チケットを作成してください。",
-        needFollowUp: "メッセージ内容を入力してください"
-      }
-    : {
-        introTitle: "工单支持",
-        introDesc: "提交问题反馈或功能建议后，站务会收到通知。回复会同步发到你的注册邮箱，你也可以在这里查看线程并继续沟通。",
-        formTitle: "提交新工单",
-        formDesc: "把标题、现象和复现步骤写清楚，后续定位会更快。",
-        historyTitle: "我的工单",
-        historyDesc: "这里会保留最近提交记录、对话线程和未读回复。",
-        category: "工单分类",
-        title: "工单标题",
-        titlePlaceholder: "例如：同步完成后个人资料没有刷新",
-        contact: "联系方式",
-        contactPlaceholder: "留空则默认使用账号邮箱",
-        content: "工单内容",
-        contentPlaceholder: "请尽量写明复现步骤、出现时间、当前现象和预期结果。",
-        submit: "提交工单",
-        needTitle: "请输入工单标题",
-        needContent: "请输入工单内容",
-        submitSuccess: "工单 #{id} 已提交",
-        submitQueued: "工单 #{id} 已记录，但邮件投递失败",
-        submitFailed: "提交工单失败",
-        empty: "你还没有提交过工单",
-        loading: "加载中...",
-        statusOpen: "处理中",
-        statusClosed: "已关闭",
-        mailPending: "待投递",
-        mailSent: "已投递",
-        mailFailed: "投递失败",
-        submittedAt: "提交时间",
-        ticketId: "工单编号",
-        noContact: "未填写",
-        unread: "未读回复",
-        expand: "查看详情",
-        collapse: "收起",
-        threadTitle: "对话记录",
-        staffLabel: "站务",
-        userLabel: "我",
-        followUp: "追加留言",
-        followUpPlaceholder: "补充信息或继续提问",
-        followUpSubmit: "发送留言",
-        followUpSuccess: "留言已发送",
-        followUpQueued: "留言已保存，但站务通知邮件发送失败",
-        followUpFailed: "发送留言失败",
-        closedHint: "此工单已关闭，如有新问题请提交新工单。",
-        needFollowUp: "请输入留言内容"
-      }
-);
+// Slice E2: the inline zh / ja table moved to locales (rework.account.support.*), same texts; placeholders pass through literally.
+const SUPPORT_COPY_KEYS = ["introTitle", "introDesc", "formTitle", "historyTitle", "category", "title", "titlePlaceholder", "contact", "contactPlaceholder", "content", "contentPlaceholder", "submit", "needTitle", "needContent", "submitSuccess", "submitQueued", "submitFailed", "empty", "statusOpen", "statusClosed", "mailPending", "mailSent", "mailFailed", "submittedAt", "ticketId", "noContact", "unread", "expand", "collapse", "threadTitle", "staffLabel", "userLabel", "followUp", "followUpPlaceholder", "followUpSubmit", "followUpSuccess", "followUpQueued", "followUpFailed", "closedHint", "needFollowUp"] as const;
+const copy = computed(() => (void locale.value, Object.fromEntries(
+  SUPPORT_COPY_KEYS.map((key) => [key, t(`rework.account.support.${key}`, { id: "{id}" })])
+) as Record<(typeof SUPPORT_COPY_KEYS)[number], string>));
 
-const categoryOptions = computed<Array<{ value: SupportTicketCategory; label: string }>>(() => {
-  if (locale.value === "ja") {
-    return [
-      { value: "account", label: "アカウント" },
-      { value: "sync", label: "同期" },
-      { value: "forum", label: "フォーラム" },
-      { value: "data", label: "データ内容" },
-      { value: "bug", label: "不具合" },
-      { value: "feature", label: "機能要望" },
-      { value: "other", label: "その他" }
-    ];
-  }
-  return [
-    { value: "account", label: "账号问题" },
-    { value: "sync", label: "同步问题" },
-    { value: "forum", label: "论坛社区" },
-    { value: "data", label: "数据内容" },
-    { value: "bug", label: "站点异常" },
-    { value: "feature", label: "功能建议" },
-    { value: "other", label: "其他" }
-  ];
-});
+const SUPPORT_CATEGORIES = ["account", "sync", "forum", "data", "bug", "feature", "other"] as const;
+const categoryOptions = computed<Array<{ value: SupportTicketCategory; label: string }>>(() =>
+  (void locale.value, SUPPORT_CATEGORIES.map((value) => ({ value, label: t(`rework.account.support.categories.${value}`) })))
+);
 
 const findCategoryLabel = (category: SupportTicketCategory) =>
   categoryOptions.value.find((item) => item.value === category)?.label || category;
@@ -203,6 +98,11 @@ const formatTicketTime = (value: string) => {
 };
 
 const submitting = ref(false);
+// Slice E2 (presentation): the field the last validation stopped at (the toast stays) and the inputs to focus.
+const formError = ref<{ field: "title" | "content"; message: string } | null>(null);
+const titleInput = ref<HTMLInputElement | null>(null);
+const contentInput = ref<HTMLTextAreaElement | null>(null);
+const followUpErrorId = ref<number | null>(null);
 const expandedTicketId = ref<number | null>(null);
 const loadingDetailId = ref<number | null>(null);
 const followUpSubmittingId = ref<number | null>(null);
@@ -219,6 +119,7 @@ const actionScope = useAccountPageScope(() => {
   ticketDetails.value = {}; detailErrors.value = {};
   for (const key of Object.keys(followUpDrafts)) delete followUpDrafts[Number(key)];
   form.title = ""; form.content = ""; form.contact = accountUser.value?.email || "";
+  formError.value = null; followUpErrorId.value = null;
 });
 
 const getMessageLabel = (message: SupportTicketMessage) =>
@@ -237,7 +138,7 @@ const loadTicketDetail = async (ticketId: number) => {
     await refreshTickets();
   } catch (error: any) {
     if (!actionScope.current(ticket)) return;
-    detailErrors.value[ticketId] = locale.value === "ja" ? "読み込めませんでした" : "读取失败";
+    detailErrors.value[ticketId] = t("rework.account.support.detailFailed");
     ElMessage.error(error?.data?.statusMessage || error?.message || copy.value.followUpFailed);
   } finally {
     if (actionScope.current(ticket) && loadingDetailId.value === ticketId) loadingDetailId.value = null;
@@ -262,8 +163,10 @@ const submitFollowUp = async (ticketId: number) => {
   const content = String(followUpDrafts[ticketId] || "").trim();
   if (!content) {
     ElMessage.warning(copy.value.needFollowUp);
+    followUpErrorId.value = ticketId;
     return;
   }
+  followUpErrorId.value = null;
 
   const ticket = actionScope.capture();
   if (!actionScope.current(ticket)) return;
@@ -298,12 +201,17 @@ const submit = async () => {
   if (submitting.value) return;
   if (!form.title.trim()) {
     ElMessage.warning(copy.value.needTitle);
+    formError.value = { field: "title", message: copy.value.needTitle };
+    titleInput.value?.focus();
     return;
   }
   if (!form.content.trim()) {
     ElMessage.warning(copy.value.needContent);
+    formError.value = { field: "content", message: copy.value.needContent };
+    contentInput.value?.focus();
     return;
   }
+  formError.value = null;
 
   const ticket = actionScope.capture();
   if (!actionScope.current(ticket)) return;
@@ -339,412 +247,131 @@ const submit = async () => {
 </script>
 
 <template>
-  <div class="page-stack">
-    <el-card class="hero-card">
-      <div class="panel-header">
-        <div>
-          <h2 class="panel-title">
-            <span class="section-icon warm" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M4 7.5A1.5 1.5 0 0 1 5.5 6h13A1.5 1.5 0 0 1 20 7.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 4 16.5z M5 8l7 5 7-5"
-                  stroke="currentColor"
-                  stroke-width="1.5"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </span>
-            {{ copy.introTitle }}
-          </h2>
-          <p>{{ copy.introDesc }}</p>
-        </div>
-      </div>
-    </el-card>
+  <div class="support-page rw-stack">
+    <ReworkPageHeader :title="copy.introTitle">
+      <p class="rw-lead">{{ copy.introDesc }}</p>
+    </ReworkPageHeader>
 
     <div class="support-grid">
-      <el-card class="panel-card">
-        <div class="panel-header">
-          <div>
-            <h3 class="panel-title">
-              <span class="section-icon" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M12 5v14 M5 12h14"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                  />
-                </svg>
-              </span>
-              {{ copy.formTitle }}
-            </h3>
-            <p>{{ copy.formDesc }}</p>
+      <ReworkPanel :title="copy.formTitle" class="support-form-panel">
+        <form class="support-form" novalidate @submit.prevent>
+          <div class="rw-field">
+            <label class="rw-field__label" for="support-category">{{ copy.category }}</label>
+            <select id="support-category" v-model="form.category" class="rw-select support-input">
+              <option v-for="item in categoryOptions" :key="item.value" :value="item.value">{{ item.label }}</option>
+            </select>
           </div>
-        </div>
-
-        <el-form label-position="top" class="support-form">
-          <el-form-item :label="copy.category">
-            <el-select v-model="form.category" class="full-width">
-              <el-option v-for="item in categoryOptions" :key="item.value" :label="item.label" :value="item.value" />
-            </el-select>
-          </el-form-item>
-
-          <el-form-item :label="copy.title">
-            <el-input v-model="form.title" :placeholder="copy.titlePlaceholder" maxlength="120" show-word-limit />
-          </el-form-item>
-
-          <el-form-item :label="copy.contact">
-            <el-input v-model="form.contact" :placeholder="copy.contactPlaceholder" maxlength="255" />
-          </el-form-item>
-
-          <el-form-item :label="copy.content">
-            <el-input
-              v-model="form.content"
-              type="textarea"
-              :rows="8"
-              resize="vertical"
-              :maxlength="8000"
-              show-word-limit
-              :placeholder="copy.contentPlaceholder"
+          <div class="rw-field">
+            <label class="rw-field__label" for="support-title">{{ copy.title }}</label>
+            <input
+              id="support-title"
+              ref="titleInput"
+              v-model="form.title"
+              class="rw-input rw-input--block"
+              maxlength="120"
+              :placeholder="copy.titlePlaceholder"
+              :aria-invalid="formError?.field === 'title' ? 'true' : undefined"
+              :aria-describedby="formError?.field === 'title' ? 'support-title-error support-title-count' : 'support-title-count'"
+              @input="formError?.field === 'title' && form.title.trim() && (formError = null)"
             />
-          </el-form-item>
-
-          <div class="form-actions">
-            <el-button type="primary" :loading="submitting" @click="submit">
+            <p class="support-field-foot">
+              <span v-if="formError?.field === 'title'" id="support-title-error" class="rw-field__error" role="alert">{{ formError.message }}</span>
+              <span id="support-title-count" class="rw-count num">{{ form.title.length }} / 120</span>
+            </p>
+          </div>
+          <div class="rw-field">
+            <label class="rw-field__label" for="support-contact">{{ copy.contact }}</label>
+            <input id="support-contact" v-model="form.contact" class="rw-input rw-input--block" maxlength="255" :placeholder="copy.contactPlaceholder" />
+          </div>
+          <div class="rw-field">
+            <label class="rw-field__label" for="support-content">{{ copy.content }}</label>
+            <textarea
+              id="support-content"
+              ref="contentInput"
+              v-model="form.content"
+              class="rw-input rw-textarea rw-input--block"
+              rows="8"
+              maxlength="8000"
+              :placeholder="copy.contentPlaceholder"
+              :aria-invalid="formError?.field === 'content' ? 'true' : undefined"
+              :aria-describedby="formError?.field === 'content' ? 'support-content-error support-content-count' : 'support-content-count'"
+              @input="formError?.field === 'content' && form.content.trim() && (formError = null)"
+            />
+            <p class="support-field-foot">
+              <span v-if="formError?.field === 'content'" id="support-content-error" class="rw-field__error" role="alert">{{ formError.message }}</span>
+              <span id="support-content-count" class="rw-count num">{{ form.content.length }} / 8000</span>
+            </p>
+          </div>
+          <div class="support-actions">
+            <button
+              type="button"
+              class="rw-btn rw-btn--primary"
+              :class="{ 'is-busy': submitting }"
+              :disabled="submitting"
+              :aria-busy="submitting || undefined"
+              data-support-submit
+              @click="submit"
+            >
               {{ copy.submit }}
-            </el-button>
+            </button>
           </div>
-        </el-form>
-      </el-card>
+        </form>
+      </ReworkPanel>
 
-      <el-card class="panel-card">
-        <div class="panel-header">
-          <div>
-            <h3 class="panel-title">
-              <span class="section-icon alt" aria-hidden="true">
-                <svg viewBox="0 0 24 24" fill="none">
-                  <path
-                    d="M6 7h12M6 12h12M6 17h8"
-                    stroke="currentColor"
-                    stroke-width="1.5"
-                    stroke-linecap="round"
-                  />
-                </svg>
-              </span>
-              {{ copy.historyTitle }}
-            </h3>
-            <p>{{ copy.historyDesc }}</p>
-          </div>
-        </div>
-
-        <div v-if="historyError" role="alert" class="entry-read-error"><p>{{ historyError }}</p><el-button @click="refreshTickets">{{ t('common.retry') }}</el-button></div>
-        <div v-else-if="!tickets.length" class="empty-state">
-          {{ loadingTickets ? copy.loading : copy.empty }}
-        </div>
-
-        <div v-else class="ticket-list">
-          <article v-for="ticket in tickets" :key="ticket.id" class="ticket-card">
-            <div class="ticket-card__top">
-              <div class="ticket-card__title-wrap">
-                <div class="ticket-card__meta">
-                  <span class="ticket-id">{{ copy.ticketId }} #{{ ticket.id }}</span>
-                  <span>{{ findCategoryLabel(ticket.category) }}</span>
-                  <el-tag v-if="ticket.hasUnread" size="small" type="danger">{{ copy.unread }}</el-tag>
-                </div>
-                <h4>{{ ticket.title }}</h4>
-              </div>
-              <div class="ticket-tags">
-                <el-tag size="small" :type="getStatusType(ticket.status)">{{ getStatusLabel(ticket.status) }}</el-tag>
-                <el-tag size="small" :type="getMailStatusType(ticket.mailStatus)">{{ getMailStatusLabel(ticket.mailStatus) }}</el-tag>
-              </div>
-            </div>
-
-            <p class="ticket-content">{{ ticket.content }}</p>
-
-            <div class="ticket-card__footer">
-              <span>{{ copy.submittedAt }}：{{ formatTicketTime(ticket.createdAt) }}</span>
-              <span>{{ copy.contact }}：{{ ticket.contact || copy.noContact }}</span>
-              <el-button
-                link
-                type="primary"
-                :loading="loadingDetailId === ticket.id"
-                @click="toggleTicket(ticket.id)"
-              >
-                {{ expandedTicketId === ticket.id ? copy.collapse : copy.expand }}
-              </el-button>
-            </div>
-
-            <div v-if="expandedTicketId === ticket.id" class="ticket-thread">
-              <h5>{{ copy.threadTitle }}</h5>
-              <div v-if="loadingDetailId === ticket.id && !ticketDetails[ticket.id]" class="thread-loading">
-                {{ copy.loading }}
-              </div>
-              <div v-else-if="detailErrors[ticket.id]" role="alert"><p>{{ detailErrors[ticket.id] }}</p><el-button @click="loadTicketDetail(ticket.id)">{{ t('common.retry') }}</el-button></div>
-              <div v-else class="thread-list">
-                <div
-                  v-for="message in ticketDetails[ticket.id]?.messages || []"
-                  :key="`${message.id}-${message.createdAt}`"
-                  class="thread-item"
-                  :class="message.authorRole === 'staff' ? 'thread-item--staff' : 'thread-item--user'"
-                >
-                  <div class="thread-item__head">
-                    <strong>{{ getMessageLabel(message) }}</strong>
-                    <span>{{ formatTicketTime(message.createdAt) }}</span>
-                  </div>
-                  <p>{{ message.content }}</p>
-                </div>
-              </div>
-
-              <div v-if="ticket.status === 'open'" class="follow-up-box">
-                <el-input
-                  v-model="followUpDrafts[ticket.id]"
-                  type="textarea"
-                  :rows="4"
-                  resize="vertical"
-                  :maxlength="8000"
-                  show-word-limit
-                  :placeholder="copy.followUpPlaceholder"
-                />
-                <div class="form-actions">
-                  <el-button
-                    type="primary"
-                    :loading="followUpSubmittingId === ticket.id"
-                    @click="submitFollowUp(ticket.id)"
-                  >
-                    {{ copy.followUpSubmit }}
-                  </el-button>
-                </div>
-              </div>
-              <p v-else class="closed-hint">{{ copy.closedHint }}</p>
-            </div>
-          </article>
-        </div>
-      </el-card>
+      <ReworkSupportTickets
+        :tickets="tickets"
+        :loading="loadingTickets"
+        :error="historyError"
+        :expanded-id="expandedTicketId"
+        :loading-detail-id="loadingDetailId"
+        :details="ticketDetails"
+        :detail-errors="detailErrors"
+        :drafts="followUpDrafts"
+        :follow-up-submitting-id="followUpSubmittingId"
+        :follow-up-error-id="followUpErrorId"
+        :format-time="formatTicketTime"
+        @retry="refreshTickets"
+        @toggle="toggleTicket"
+        @retry-detail="loadTicketDetail"
+        @follow-up="submitFollowUp"
+        @update-draft="(id: number, value: string) => { followUpDrafts[id] = value; if (followUpErrorId === id && value.trim()) followUpErrorId = null; }"
+      />
     </div>
   </div>
 </template>
 
 <style scoped>
-.page-stack {
-  display: grid;
-  gap: 20px;
-}
-
 .support-grid {
   display: grid;
-  gap: 20px;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr);
-}
-
-.panel-header h2,
-.panel-header h3 {
-  margin: 0 0 6px;
-}
-
-.panel-header p {
-  margin: 0;
-  color:var(--viewer-text-muted);
-}
-
-.panel-title {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.section-icon {
-  width: 20px;
-  height: 20px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color:var(--viewer-link);
-  background:var(--viewer-surface-subtle);
-  border-radius: 6px;
-}
-
-.section-icon svg {
-  width: 14px;
-  height: 14px;
-}
-
-.section-icon.alt {
-  background:var(--viewer-surface-subtle);
-  color:var(--viewer-link);
-}
-
-.section-icon.warm {
-  background:var(--viewer-surface-subtle);
-  color:var(--viewer-warning);
-}
-
-.hero-card {
-  background:var(--viewer-surface-subtle);
-}
-
-.support-form {
-  margin-top: 10px;
-}
-
-.full-width {
-  width: 100%;
-}
-
-.form-actions {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.ticket-list {
-  display: grid;
-  gap: 14px;
-  margin-top: 10px;
-}
-
-.ticket-card {
-  padding: 16px;
-  border-radius: 18px;
-  background:var(--viewer-surface-subtle);
-  box-shadow:0 10px 24px var(--viewer-shadow);
-  display: grid;
-  gap: 12px;
-}
-
-.ticket-card__top {
-  display: flex;
-  justify-content: space-between;
-  gap: 12px;
-  align-items: flex-start;
-}
-
-.ticket-card__title-wrap {
+  gap: 24px;
+  align-items: start;
   min-width: 0;
 }
-
-.ticket-card__title-wrap h4 {
-  margin: 6px 0 0;
-  font-size: 16px;
-  line-height: 1.45;
-}
-
-.ticket-card__meta {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-  font-size: 12px;
-  color:var(--viewer-text-muted);
-}
-
-.ticket-id {
-  font-weight: 600;
-  color:var(--viewer-warning);
-}
-
-.ticket-tags {
-  display: inline-flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
-.ticket-content {
-  margin: 0;
-  color:var(--viewer-text);
-  line-height: 1.7;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.ticket-card__footer {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px 16px;
-  font-size: 12px;
-  color:var(--viewer-text-muted);
-}
-
-.empty-state {
-  min-height: 240px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 18px;
-  border: 1px dashed var(--viewer-border);
-  color:var(--viewer-text-muted);
-  background:var(--viewer-surface-subtle);
-}
-
-.ticket-thread {
-  padding-top: 8px;
-  border-top: 1px solid var(--viewer-border);
+.support-form {
   display: grid;
-  gap: 12px;
+  gap: 16px;
+  min-width: 0;
 }
-
-.ticket-thread h5 {
-  margin: 0;
-  font-size: 14px;
-  color:var(--viewer-text-muted);
+.support-input {
+  width: 100%;
 }
-
-.thread-loading {
-  color:var(--viewer-text-muted);
-  font-size: 13px;
-}
-
-.thread-list {
-  display: grid;
-  gap: 10px;
-}
-
-.thread-item {
-  padding: 12px 14px;
-  border-radius: 14px;
-  background:var(--viewer-surface-subtle);
-}
-
-.thread-item--staff {
-  background:var(--viewer-surface-subtle);
-}
-
-.thread-item--user {
-  background:var(--viewer-surface-subtle);
-}
-
-.thread-item__head {
+.support-field-foot {
   display: flex;
   justify-content: space-between;
-  gap: 10px;
-  font-size: 12px;
-  color:var(--viewer-text-muted);
-  margin-bottom: 8px;
-}
-
-.thread-item p {
-  margin: 0;
-  line-height: 1.7;
-  white-space: pre-wrap;
-  word-break: break-word;
-}
-
-.follow-up-box {
-  display: grid;
   gap: 12px;
-}
-
-.closed-hint {
   margin: 0;
-  font-size: 13px;
-  color:var(--viewer-text-muted);
 }
-
-@media (max-width: 960px) {
+.support-field-foot .rw-count {
+  margin-left: auto;
+}
+@media (min-width: 1100px) {
   .support-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   }
-
-  .ticket-card__top {
-    flex-direction: column;
+}
+@media (max-width: 767px) {
+  .support-actions .rw-btn {
+    width: 100%;
   }
 }
 </style>
