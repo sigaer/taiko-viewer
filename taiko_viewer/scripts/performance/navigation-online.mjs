@@ -50,21 +50,21 @@ try {
       } else {
       await page.goto(`${base}${prefix}/my`, { waitUntil: 'networkidle', timeout: 60000 });
       }
-      await page.locator('.my-page').waitFor();
+      await page.locator('.hub').waitFor();
       assert.equal(await page.evaluate(() => typeof window.__navQA), 'undefined', 'QA probe is absent from production');
       for (const path of ['/my/weekly', '/my/growth', '/my']) {
         await page.locator(`[data-nav-key="${path}"]`).evaluate(el => el.click());
         await page.waitForURL(`${base}${prefix}${path}`, { timeout: 30000 });
-        await page.locator(path === '/my/weekly' ? '.weekly-page' : path === '/my/growth' ? '.passport-page' : '.my-page').waitFor();
+        await page.locator(path === '/my/weekly' ? '.weekly-page' : path === '/my/growth' ? '.passport-page' : '.hub').waitFor();
         if (path !== '/my') await page.locator(path.endsWith('weekly') ? '.weekly-hero' : '.passport-hero').waitFor({ timeout: 60000 });
       }
         await page.locator('[data-nav-key="/account/songs"]').evaluate(el => el.click());
-        await page.locator('.songs-page .result-count').waitFor({ timeout: 60000 });
+        await page.locator('.sl .sl-summary').waitFor({ timeout: 60000 });
         for (let i = 0; i < 10; i++) for (const path of ['/my/weekly', '/my/growth', '/my', '/account/songs']) {
           await page.locator(`[data-nav-key="${path}"]`).evaluate(el => el.click()); await page.waitForTimeout(150);
         }
         await page.waitForURL(`${base}${prefix}/account/songs`);
-        await page.locator('.songs-page .result-count').waitFor();
+        await page.locator('.sl .sl-summary').waitFor();
       row.finalRoute = new URL(page.url()).pathname;
       await page.screenshot({ path: `${out}/online-${locale}.png` });
       assert.deepEqual(row.errors, []);

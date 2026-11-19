@@ -13,9 +13,12 @@ if (Number.isInteger(difficulty) && difficulty > 0 && Number.isInteger(level) &&
 }
 
 definePageMeta({
+  // slice G: the same content width as the rest of the 曲库 group (library, constants, dan, guide levels, titles)
+  contentLayout: "wide",
   pageTitleKey: "guide.title",
   pageDescKey: "page.guide.index.desc",
   navKey: "/guide",
+  hidePageHeader: true,
   breadcrumbs: [{ labelKey: "guide.title", to: "/guide" }]
 });
 
@@ -32,157 +35,10 @@ useViewerSeo(() => ({
 </script>
 
 <template>
-  <div class="guide-entry-page">
-    <el-card class="panel-card guide-entry-hero">
-      <div class="guide-entry-hero__copy">
-        <span class="guide-entry-hero__eyebrow">Guide Hub</span>
-        <h2>{{ t("page.guide.index.heroTitle") }}</h2>
-        <p>{{ t("page.guide.index.heroDesc") }}</p>
-      </div>
-      <img src="/optimized/guide-makina-160.webp" alt="" class="guide-entry-hero__image" width="160" height="160" decoding="async" />
-    </el-card>
-
-    <section class="guide-entry-grid">
-      <el-card v-for="group in GUIDE_DIFFICULTY_OPTIONS" :key="group.value" class="panel-card guide-entry-card">
-        <div class="guide-entry-card__head">
-          <div class="guide-entry-card__title">
-            <img :src="group.iconImage" :alt="group.label" class="guide-entry-card__icon" />
-            <div>
-              <h3>{{ t(`difficulty.${group.value}`) }}</h3>
-              <p>{{ t("page.guide.index.levelCount", { count: group.max }) }}</p>
-            </div>
-          </div>
-        </div>
-        <div class="guide-entry-card__links">
-          <NuxtLink
-            v-for="level in group.max"
-            :key="`${group.value}-${level}`"
-            class="guide-entry-link"
-            :to="localePath(`/guide/${group.value}/${level}`)"
-          >
-            {{ level }}{{ t("guide.starSuffix", "星") }}
-          </NuxtLink>
-        </div>
-      </el-card>
-    </section>
+  <div class="rw-stack">
+    <ReworkPageHeader :title="t('rework.guide')">
+      <template #actions><img src="/optimized/guide-makina-160.webp" alt="" width="72" height="72" decoding="async" /></template>
+    </ReworkPageHeader>
+    <ReworkGuideEntry :groups="GUIDE_DIFFICULTY_OPTIONS" />
   </div>
 </template>
-
-<style scoped>
-.guide-entry-page {
-  display: grid;
-  gap: 20px;
-}
-
-.guide-entry-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 180px;
-  gap: 18px;
-  align-items: center;
-  overflow: hidden;
-}
-
-.guide-entry-hero__copy {
-  display: grid;
-  gap: 10px;
-}
-
-.guide-entry-hero__eyebrow {
-  color:var(--viewer-link);
-  font-size: 12px;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-
-.guide-entry-hero__copy h2 {
-  margin: 0;
-  font-size: 32px;
-}
-
-.guide-entry-hero__copy p {
-  margin: 0;
-  color:var(--viewer-text-muted);
-  line-height: 1.8;
-}
-
-.guide-entry-hero__image {
-  width: 100%;
-  max-width: 180px;
-  justify-self: end;
-}
-
-.guide-entry-grid {
-  display: grid;
-  gap: 18px;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-}
-
-.guide-entry-card {
-  display: grid;
-  gap: 14px;
-}
-
-.guide-entry-card__head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.guide-entry-card__title {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-}
-
-.guide-entry-card__title h3 {
-  margin: 0;
-  font-size: 18px;
-}
-
-.guide-entry-card__title p {
-  margin: 4px 0 0;
-  color:var(--viewer-text-muted);
-  font-size: 13px;
-}
-
-.guide-entry-card__icon {
-  width: 42px;
-  height: 42px;
-  object-fit: contain;
-}
-
-.guide-entry-card__links {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 10px;
-}
-
-.guide-entry-link {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 68px;
-  padding: 9px 14px;
-  border-radius: 999px;
-  text-decoration: none;
-  color:var(--viewer-text);
-  background:var(--viewer-surface-subtle);
-  border: 1px solid var(--viewer-border);
-  transition: transform 0.18s ease, box-shadow 0.18s ease;
-}
-
-.guide-entry-link:hover {
-  transform: translateY(-1px);
-  box-shadow:0 10px 18px var(--viewer-shadow);
-}
-
-@media (max-width: 720px) {
-  .guide-entry-hero {
-    grid-template-columns: 1fr;
-  }
-
-  .guide-entry-hero__image {
-    justify-self: start;
-  }
-}
-</style>

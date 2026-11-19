@@ -5,7 +5,7 @@ import { resolve } from "node:path";
 
 const manifestPath = resolve(process.cwd(), ".nuxt", "dist", "server", "client.manifest.json");
 const manifest = JSON.parse(await readFile(manifestPath, "utf8"));
-const targets = ["pages/index.vue", "pages/songs/available.vue", "pages/songs/removed.vue", "pages/songs/[id].vue"];
+const targets = ["pages/index.vue", "pages/songs/index.vue", "pages/songs/[id].vue"];
 const forbidden = ["/admin/", "version-summary", "/annual/", "echarts", "gsap", "qrcode"];
 
 const collect = (entryKey, visited = new Set()) => {

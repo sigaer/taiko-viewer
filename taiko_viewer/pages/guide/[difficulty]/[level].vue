@@ -36,19 +36,19 @@ definePageMeta({
   pageTitleKey: "guide.title",
   pageDescKey: "guide.summary",
   navKey: "/guide",
+  hidePageHeader: true,
   breadcrumbs: [
     { labelKey: "guide.title", to: "/guide" },
     { labelKey: "guide.detail" }
   ]
 });
 
-const { data: guideContent, pending, error } = await useGuideContent(difficulty, level);
+const { data: guideContent, pending, error, refresh } = await useGuideContent(difficulty, level);
 const viewerApiFetch = useViewerApiFetch();
 
 const difficultyLabel = computed(
   () => guideContent.value.difficultyLabel || fallbackDifficultyLabel.value
 );
-const summaryRows = computed(() => [guideContent.value.summary]);
 const summaryColumns = computed(() => [
   { prop: "overPlus", label: t("guide.summaryColumns.overPlus") },
   { prop: "over", label: t("guide.summaryColumns.over") },
@@ -72,27 +72,8 @@ const detailCache = reactive<Record<number, GuideTagItemsPayload>>({});
 const loadingTagIds = ref<number[]>([]);
 const expandedTagIds = ref<number[]>([]);
 const detailErrors = reactive<Record<number, boolean>>({});
-const colorMap = ["hardest", "harder", "hard", "normal", "easy", "easier", "easiest"];
-
-const headerCellClassName = (row: { rowIndex: number; columnIndex: number }) => {
-  if (row.rowIndex === 1 && row.columnIndex < colorMap.length) {
-    return colorMap[row.columnIndex];
-  }
-  return "";
-};
-
-const getRowToneClass = (rowId: number) => {
-  if (rowId < 1 || rowId > colorMap.length) {
-    return "";
-  }
-  return `guide-tag-row ${colorMap[rowId - 1]}`;
-};
-
 const isTagLoading = (tagId: number) => loadingTagIds.value.includes(tagId);
 const isTagExpanded = (tagId: number) => expandedTagIds.value.includes(tagId);
-const hasTagLoadError = (tagId: number) => Boolean(detailErrors[tagId]);
-
-const getTagItems = (tagId: number) => detailCache[tagId]?.items || [];
 
 const ensureTagItemsLoaded = async (row: TreeRow, force = false) => {
   if (!force && (detailCache[row.id] || isTagLoading(row.id))) {
@@ -139,394 +120,40 @@ useViewerSeo(() => ({
     { name: `${difficultyLabel.value} ${level.value}${t("guide.starSuffix", "星")}`, path: `/guide/${difficulty.value}/${level.value}` }
   ]
 }));
+const levelCount = computed(() => fallbackDifficulty.value?.max || 0);
 </script>
 
 <template>
-  <div class="guide-shell">
-    <el-card v-if="pending" class="panel-card">
-      <el-skeleton :rows="10" animated />
-    </el-card>
+  <div class="rw-stack">
+    <ReworkPageHeader :title="t('page.guide.detail.header', { difficulty: difficultyLabel, level })">
+      <!-- both illustrations in one row beside the title (they used to flank it); decorative, empty alt as before -->
+      <template #lead><span style="display: flex; gap: 4px"><img src="/optimized/guide-makina-160.webp" alt="" width="56" height="56" decoding="async" /><img src="/optimized/guide-miku-160.webp" alt="" width="56" height="56" decoding="async" /></span></template>
+    </ReworkPageHeader>
 
-    <el-card v-else-if="error" class="panel-card">
-      <el-result :icon="'error'" :title="t('guide.pageLoadFailed')" :sub-title="t('page.guide.detail.loadFailedSubtitle')">
-        <template #extra>
-          <NuxtLink :to="localePath('/guide')">
-            <el-button type="primary">{{ t("guide.backToGuide") }}</el-button>
-          </NuxtLink>
-        </template>
-      </el-result>
-    </el-card>
-
-    <el-card v-else class="panel-card">
-      <div class="guide-header">
-        <img src="/optimized/guide-makina-160.webp" alt="" class="guide-avatar left" width="108" height="108" decoding="async" />
-        <h3>
-          <span class="guide-icon" aria-hidden="true">
-            <svg viewBox="0 0 24 24" fill="none">
-              <path
-                d="M4.5 5.5h7.5a2 2 0 0 1 2 2v11H6.5a2 2 0 0 0-2 2v-15z M19.5 5.5h-7.5a2 2 0 0 0-2 2v11h7.5a2 2 0 0 1 2 2v-15z"
-                stroke="currentColor"
-                stroke-width="1.6"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </span>
-          {{ t("page.guide.detail.header", { difficulty: difficultyLabel, level }) }}
-        </h3>
-        <img src="/optimized/guide-miku-160.webp" alt="" class="guide-avatar right" width="108" height="108" decoding="async" />
-      </div>
-
-      <div class="guide-section-title">
-        <span class="section-icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none">
-            <path
-              d="M5 19V9 M12 19V5 M19 19v-7"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-            />
-          </svg>
-        </span>
-        <span>{{ t("guide.difficultyDistribution") }}</span>
-      </div>
-      <el-table
-        :data="summaryRows"
-        class="summary-table"
-        :header-cell-class-name="headerCellClassName"
-      >
-        <el-table-column :label="t('page.guide.detail.summaryLabel')" align="center">
-          <el-table-column
-            v-for="column in summaryColumns"
-            :key="column.prop"
-            :prop="column.prop"
-            :label="column.label"
-            align="center"
-          />
-        </el-table-column>
-      </el-table>
-
-      <hr class="guide-divider" />
-
-      <div class="guide-section-title">
-        <span class="section-icon alt" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none">
-            <path
-              d="M5 7h14M5 12h14M5 17h10"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-            />
-          </svg>
-        </span>
-        <span>{{ t("guide.detailTable") }}</span>
-      </div>
-      <div class="detail-table">
-        <div class="guide-detail-head">
-          <span class="guide-detail-head__toggle" aria-hidden="true"></span>
-          <span class="guide-detail-head__label">{{ t("page.guide.detail.columns.tag") }}</span>
-          <span class="guide-detail-head__count">{{ t("page.guide.detail.columns.count") }}</span>
-        </div>
-
-        <div
-          v-for="row in tagRows"
-          :key="row.rowKey"
-          class="guide-detail-item"
-        >
-          <button
-            type="button"
-            class="guide-detail-row"
-            :class="[getRowToneClass(row.id), { 'is-expanded': isTagExpanded(row.id) }]"
-            :aria-expanded="isTagExpanded(row.id)"
-            @click="toggleTagRow(row)"
-          >
-            <span class="guide-expand-icon" aria-hidden="true">
-              <svg viewBox="0 0 24 24" fill="none">
-                <path
-                  d="M9 6l6 6-6 6"
-                  stroke="currentColor"
-                  stroke-width="1.8"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                />
-              </svg>
-            </span>
-            <span class="guide-detail-cell guide-detail-cell--title">{{ row.title }}</span>
-            <span class="guide-detail-cell guide-detail-cell--count">{{ row.count }}</span>
-          </button>
-
-          <div v-if="isTagExpanded(row.id)" class="tag-detail-wrap">
-            <el-skeleton v-if="isTagLoading(row.id)" :rows="6" animated />
-            <div v-else-if="hasTagLoadError(row.id)" class="tag-detail-error">
-              <span>{{ t("guide.loadFailed") }}</span>
-              <el-button link type="primary" @click.stop="ensureTagItemsLoaded(row, true)">
-                {{ t("common.retry") }}
-              </el-button>
-            </div>
-            <el-empty v-else-if="!getTagItems(row.id).length" :description="t('guide.empty')" />
-            <el-table
-              v-else
-              :data="getTagItems(row.id)"
-              border
-              class="tag-detail-table"
-            >
-              <el-table-column prop="title" :label="t('page.guide.detail.columns.tag')" min-width="220" />
-              <el-table-column prop="bpm" label="BPM" align="center" width="120" />
-              <el-table-column prop="category" :label="t('page.guide.detail.columns.category')" align="center" width="140" />
-              <el-table-column prop="tag" :label="t('page.guide.detail.columns.attribute')" align="center" width="150" />
-              <el-table-column prop="feature" :label="t('page.guide.detail.columns.feature')" min-width="320" />
-              <el-table-column prop="noteCount" :label="t('page.guide.detail.columns.noteCount')" align="center" width="100" />
-            </el-table>
-          </div>
-        </div>
-      </div>
-    </el-card>
+    <ReworkState v-if="pending" kind="loading" :lines="8" />
+    <ReworkState
+      v-else-if="error"
+      kind="failed"
+      :title="t('guide.pageLoadFailed')"
+      :text="t('page.guide.detail.loadFailedSubtitle')"
+      @retry="refresh()"
+    >
+      <NuxtLink class="rw-btn" :to="localePath('/guide')">{{ t("guide.backToGuide") }}</NuxtLink>
+    </ReworkState>
+    <ReworkGuideLevel
+      v-else
+      :difficulty="difficulty"
+      :level="level"
+      :levels="levelCount"
+      :summary="guideContent.summary"
+      :summary-columns="summaryColumns"
+      :rows="tagRows"
+      :expanded="expandedTagIds"
+      :loading="loadingTagIds"
+      :errors="detailErrors"
+      :items="detailCache"
+      @toggle="toggleTagRow"
+      @retry="(row) => ensureTagItemsLoaded(row, true)"
+    />
   </div>
 </template>
-
-<style scoped>
-.guide-shell {
-  display: grid;
-  gap: 20px;
-}
-
-.guide-header {
-  position: relative;
-  text-align: center;
-  margin-bottom: 12px;
-  min-height: 140px;
-}
-
-.guide-header h3 {
-  margin: 0;
-  font-size: 18px;
-  padding-top: 20px;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.guide-icon {
-  width: 22px;
-  height: 22px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.guide-icon svg {
-  width: 100%;
-  height: 100%;
-}
-
-.guide-avatar {
-  position: absolute;
-  bottom: 0;
-  width: 108px;
-  height: 108px;
-  object-fit: contain;
-}
-
-.guide-avatar.left {
-  left: 0;
-}
-
-.guide-avatar.right {
-  right: 0;
-}
-
-.guide-section-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 15px;
-  font-weight: 700;
-  margin: 10px 0 12px;
-}
-
-.section-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  color:var(--viewer-link);
-}
-
-.section-icon svg {
-  width: 14px;
-  height: 14px;
-}
-
-.section-icon.alt {
-  color:var(--viewer-constant-comprehensive);
-}
-
-.summary-table,
-.tag-detail-table {
-  width: 100%;
-}
-
-.guide-divider {
-  border: 0;
-  border-top: 1px solid var(--viewer-border);
-  margin: 20px 0;
-}
-
-:deep(.tag-detail-table .cell) {
-  white-space: pre-line;
-}
-
-.detail-table {
-  border: 1px solid var(--el-border-color-light);
-  border-radius: 14px;
-  overflow: hidden;
-  background:var(--viewer-surface-subtle);
-}
-
-.guide-detail-head,
-.guide-detail-row {
-  display: grid;
-  grid-template-columns: 56px minmax(0, 1fr) 100px;
-  align-items: center;
-}
-
-.guide-detail-head {
-  min-height: 46px;
-  padding: 0 12px;
-  background:var(--viewer-surface-subtle);
-  color:var(--el-text-color-secondary);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.guide-detail-head__toggle,
-.guide-detail-head__count {
-  text-align: center;
-}
-
-.guide-detail-item + .guide-detail-item {
-  border-top: 1px solid var(--viewer-border);
-}
-
-.guide-detail-row {
-  width: 100%;
-  min-height: 56px;
-  padding: 0 12px;
-  border: 0;
-  text-align: left;
-  background:transparent;
-  color:inherit;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  font-weight: 600;
-}
-
-.guide-detail-row:hover {
-  filter: brightness(0.985);
-}
-
-.guide-detail-row:focus-visible {
-  outline: 2px solid var(--viewer-link);
-  outline-offset: -2px;
-}
-
-.guide-expand-icon {
-  width: 24px;
-  height: 24px;
-  margin: 0 auto;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  color:var(--viewer-text-muted);
-  transition: transform 0.2s ease;
-}
-
-.guide-expand-icon svg {
-  width: 18px;
-  height: 18px;
-}
-
-.guide-detail-row.is-expanded .guide-expand-icon {
-  transform: rotate(90deg);
-}
-
-.guide-detail-cell--title {
-  min-width: 0;
-}
-
-.guide-detail-cell--count {
-  text-align: center;
-}
-
-.guide-tag-row.hardest {
-  background:var(--viewer-guide-hardest);
-}
-
-.guide-tag-row.harder {
-  background:var(--viewer-guide-harder);
-}
-
-.guide-tag-row.hard {
-  background:var(--viewer-guide-hard);
-}
-
-.guide-tag-row.normal {
-  background:var(--viewer-guide-normal);
-}
-
-.guide-tag-row.easy {
-  background:var(--viewer-guide-easy);
-}
-
-.guide-tag-row.easier {
-  background:var(--viewer-guide-easier);
-}
-
-.guide-tag-row.easiest {
-  background:var(--viewer-guide-easiest);
-}
-
-.tag-detail-wrap {
-  padding: 8px 12px;
-  background:var(--viewer-surface-subtle);
-  border-radius: 12px;
-  border-top: 1px solid var(--viewer-border);
-}
-
-.tag-detail-error {
-  min-height: 88px;
-  padding: 12px;
-  display: grid;
-  place-items: center;
-  gap: 8px;
-  color:var(--el-text-color-secondary);
-}
-
-@media (max-width: 840px) {
-  .guide-avatar {
-    position: static;
-    width: 72px;
-    height: 72px;
-  }
-
-  .guide-header {
-    display: grid;
-    gap: 12px;
-    justify-items: center;
-  }
-
-  .guide-header h3 {
-    padding-top: 0;
-  }
-
-  .guide-detail-head,
-  .guide-detail-row {
-    grid-template-columns: 44px minmax(0, 1fr) 72px;
-    padding: 0 8px;
-  }
-
-  .tag-detail-wrap {
-    padding: 8px;
-  }
-}
-</style>
