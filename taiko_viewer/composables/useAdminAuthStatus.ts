@@ -7,8 +7,16 @@ export const useAdminAuthStatus = () => {
 
   const fetchAdminAuthPayload = async () =>
     $fetch<AdminAuthPayload>("/api/admin/auth/me", {
-      headers: requestHeaders
+      headers: requestHeaders,
+      timeout: 10_000,
+      retry: 0
     });
+
+  const acceptAdminAuthPayload = (payload: AdminAuthPayload) => {
+    adminUser.value = payload.authenticated && payload.user ? payload.user : null;
+    adminLoaded.value = true;
+    return adminUser.value;
+  };
 
   const resolveAdminUser = async (force = false) => {
     if (adminLoaded.value && !force) {
@@ -36,6 +44,7 @@ export const useAdminAuthStatus = () => {
     adminUser,
     adminLoaded,
     resolveAdminUser,
+    acceptAdminAuthPayload,
     isAuthenticated,
     clearResolvedAdminUser
   };

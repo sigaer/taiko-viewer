@@ -83,6 +83,7 @@ const openDetail = (row: Record<string, any>) => {
           <el-option label="login" value="login" />
         </el-select>
         <el-select v-model="filters.targetType" clearable filterable allow-create placeholder="目标类型">
+          <el-option label="称号条件" value="title-condition" />
           <el-option label="custom-title" value="custom-title" />
           <el-option label="song" value="song" />
           <el-option label="alias" value="alias" />

@@ -1,5 +1,6 @@
 import type { H3Event } from "h3";
-import { createError, deleteCookie, getCookie, getHeader, setCookie } from "h3";
+import { createError, deleteCookie, getCookie, getHeader, setCookie, setHeader } from "h3";
+import { performance } from 'node:perf_hooks';
 import type { FetchOptions } from "ofetch";
 import { ensureNonEmpty, getSecureCookieFlag } from "~/server/internal/account/shared";
 import { recordAdminAction } from "./audit";
@@ -126,7 +127,9 @@ const verifyTaikoAdminToken = async (token: string): Promise<TaikoAdminUser> => 
   try {
     const data = await fetchTaikoAdminResult<unknown>("/taiko/manage/auth/me", {
       method: "GET",
-      token
+      token,
+      timeout: 8_000,
+      retry: 0
     });
     const user = normalizeVerifiedAdminUser(data);
     if (!user) {
@@ -173,18 +176,27 @@ export const loginTaikoAdmin = async (
   const password = String(payload.password || "");
   ensureNonEmpty(username, "请输入管理员用户名");
   ensureNonEmpty(password, "请输入管理员密码");
+  const timings: string[] = [];
+  const started = performance.now();
+  const measure = async <T>(name: string, run: () => Promise<T>): Promise<T> => {
+    const begin = performance.now();
+    try { return await run(); }
+    finally { timings.push(`${name};dur=${(performance.now() - begin).toFixed(1)}`); }
+  };
 
   try {
-    const token = await fetchTaikoAdminResult<string>("/taiko/login", {
+    const token = await measure('credentials', () => fetchTaikoAdminResult<string>("/taiko/login", {
       method: "POST",
+      timeout: 8_000,
+      retry: 0,
       body: {
         username,
         password
       }
-    });
-    const user = await verifyTaikoAdminToken(token);
+    }));
+    const user = await measure('identity', () => verifyTaikoAdminToken(token));
     setAdminSession(event, token, user);
-    await recordAdminAction({
+    await measure('audit', () => recordAdminAction({
       actorType: "admin",
       actorId: String(user.id || username),
       actorName: user.username,
@@ -196,13 +208,13 @@ export const loginTaikoAdmin = async (
         status: "success",
         expiresAt: user.expiresAt
       }
-    }).catch(() => undefined);
+    }).catch(() => undefined));
     return {
       authenticated: true,
       user
     };
   } catch (error: any) {
-    await recordAdminAction({
+    await measure('audit', () => recordAdminAction({
       actorType: "anonymous",
       actorId: username,
       actorName: username,
@@ -214,8 +226,11 @@ export const loginTaikoAdmin = async (
         status: "failed",
         reason: error?.statusMessage || error?.message || "登录失败"
       }
-    }).catch(() => undefined);
+    }).catch(() => undefined));
     throw error;
+  } finally {
+    timings.push(`total;dur=${(performance.now() - started).toFixed(1)}`);
+    setHeader(event, 'server-timing', timings.join(', '));
   }
 };
 

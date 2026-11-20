@@ -13,6 +13,8 @@ const breadcrumbMap: Record<string, string> = {
   "/admin/taiko/songs": "歌曲数据",
   "/admin/taiko/guides": "谱面攻略",
   "/admin/taiko/aliases": "别名管理",
+  "/admin/taiko/titles": "称号条件",
+  "/admin/taiko/custom-titles": "自定义称号",
   "/admin/taiko/covers": "封面管理",
   "/admin/taiko/audit": "审计日志"
 };

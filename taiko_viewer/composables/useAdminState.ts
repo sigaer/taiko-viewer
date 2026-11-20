@@ -3,6 +3,7 @@ export const useAdminState = () => {
     adminUser,
     adminLoaded,
     resolveAdminUser,
+    acceptAdminAuthPayload,
     clearResolvedAdminUser
   } = useAdminAuthStatus();
 
@@ -12,6 +13,7 @@ export const useAdminState = () => {
     adminUser,
     adminLoaded,
     fetchCurrentAdmin,
+    acceptAdminAuthPayload,
     clearAdminUser: clearResolvedAdminUser
   };
 };

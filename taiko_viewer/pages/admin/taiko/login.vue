@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, reactive, ref } from "vue";
 import { ElMessage } from "element-plus";
+import type { AdminAuthPayload } from '~/types/admin';
 
 defineI18nRoute(false);
 
@@ -15,7 +16,7 @@ useHead({
 });
 
 const apiFetch = useAdminApiFetch();
-const { fetchCurrentAdmin } = useAdminState();
+const { acceptAdminAuthPayload } = useAdminState();
 const submitting = ref(false);
 const form = reactive({
   username: "",
@@ -35,11 +36,12 @@ const submit = async () => {
   if (submitting.value) return;
   submitting.value = true;
   try {
-    await apiFetch("/api/admin/auth/login", {
+    const payload = await apiFetch<AdminAuthPayload>("/api/admin/auth/login", {
       method: "POST",
+      retry: 0,
       body: form
     });
-    await fetchCurrentAdmin(true);
+    if (!acceptAdminAuthPayload(payload)) throw new Error('管理员身份确认失败，请重试');
     ElMessage.success("管理员登录成功");
     await navigateTo("/admin/taiko/dashboard");
   } catch (error: any) {
@@ -53,7 +55,6 @@ const submit = async () => {
 <template>
   <div class="admin-login-page">
     <section class="admin-login-hero">
-      <span class="admin-login-hero__eyebrow">KOI-inspired Admin Console</span>
       <h1>{{ copy.heading }}</h1>
       <p>{{ copy.intro }}</p>
     </section>

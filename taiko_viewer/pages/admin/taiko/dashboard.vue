@@ -22,14 +22,14 @@ useHead({
 
 const apiFetch = useAdminApiFetch();
 const loadedAt = useState<number>("admin-taiko-dashboard-loaded-at", () => Date.now());
-const { data, pending, error, refresh } = await useAsyncData<AdminDashboardPayload>(
+const { data, pending, error, refresh } = await useLazyAsyncData<AdminDashboardPayload>(
   "admin-taiko-dashboard",
   async () => {
     const payload = await apiFetch<AdminDashboardPayload>("/api/admin/dashboard");
     loadedAt.value = Date.now();
     return payload;
   },
-  { default: () => null as unknown as AdminDashboardPayload }
+  { server: false, default: () => null as unknown as AdminDashboardPayload }
 );
 
 const dashboard = computed(() => data.value);
@@ -367,6 +367,7 @@ const targetTypeLabels: Record<string, string> = {
   "guide-difficulty": "谱面攻略",
   "custom-title": "自定义称号",
   "account-title": "称号",
+  "title-condition": "称号条件",
   "draw-guess-record": "你画我猜题目",
   backup: "备份",
   "annual-beta": "封闭测试",

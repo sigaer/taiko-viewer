@@ -42,10 +42,10 @@ export const mergeOfficialTitleDetails = (
   return { titles, total: titles.length };
 };
 
-export const getLocalTitleDetails = async (): Promise<TitleCatalogItem[]> => {
+export const getLocalTitleDetails = async (baseOverride?: string): Promise<TitleCatalogItem[]> => {
   const config = useRuntimeConfig();
   const baseURL = String(
-    config.taikoApiBase ||
+    baseOverride || config.taikoApiBase ||
       process.env.TAIKO_API_BASE ||
       config.taikoAdminApiBase ||
       process.env.TAIKO_ADMIN_API_BASE ||
