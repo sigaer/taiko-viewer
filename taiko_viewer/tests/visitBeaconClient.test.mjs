@@ -16,7 +16,7 @@ function client(send){
  const target={addEventListener:(name,fn)=>listeners.set(name,fn),removeEventListener:name=>listeners.delete(name)};
  const document={...target,visibilityState:'visible'};
  runInNewContext(outputFiles[0].text,{
-  Date:Clock,performance:{now:()=>0},crypto:{randomUUID:()=> '3f2b8c1e-9a4d-4c7e-8b1a-2d3e4f5a6b7c'},AbortSignal,
+  Date:Clock,performance:{now:()=>0},crypto:{randomUUID:()=> '3f2b8c1e-9a4d-4c7e-8b1a-2d3e4f5a6b7c'},AbortController,
   document,window:{...target,localStorage},navigator:{webdriver:false},fetch:send,
   setTimeout:(fn,delay)=>{timers.set(++nextTimer,{fn,delay});return nextTimer;},clearTimeout:id=>timers.delete(id),
   watch:(_source,fn)=>watchers.push(fn),useRouter:()=>({currentRoute:route}),useAccountAuthStatus:()=>({accountUser}),
@@ -28,7 +28,7 @@ function client(send){
   login:()=>{accountUser.value={id:42};for(const fn of watchers)fn(42,undefined);},
   navigate:()=>hooks.get('page:finish')?.(),
   nextDay:()=>{now+=86400000;listeners.get('visibilitychange')?.();},
-  retry:()=>{const entry=[...timers].find(([,t])=>t.delay===15000);assert.ok(entry,'bounded retry scheduled');timers.delete(entry[0]);entry[1].fn();},
+  retry:()=>{const entry=[...timers].find(([,t])=>t.delay===15000);assert.ok(entry,'bounded retry scheduled');timers.delete(entry[0]);now+=entry[1].delay;entry[1].fn();},
   cleanup:()=>cleanup?.()
  };
 }
@@ -38,6 +38,7 @@ test('actual plugin retries failed persistence and only marks a confirmed visit'
  try{
   c.syntheticInteract();await flush();assert.equal(requests,0,'synthetic events do not qualify');
   c.interact();await flush();assert.equal(requests,1);assert.equal(c.storage.has('tv_visit_day'),false);
+  for(let i=0;i<20;i++){c.interact();c.navigate();await flush();}assert.equal(requests,1,'continuous interaction cannot bypass retry cooldown');
   c.retry();await flush();assert.equal(requests,2);assert.equal(c.storage.get('tv_visit_day'),'2026-11-20');
   c.interact();c.navigate();await flush();assert.equal(requests,2,'same-day duplicate suppressed');
   c.nextDay();await flush();assert.equal(requests,3,'returning to an open tab on a new day counts');

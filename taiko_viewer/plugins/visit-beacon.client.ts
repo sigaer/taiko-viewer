@@ -53,17 +53,21 @@ const deviceId = () => {
 
 const post = async (id: string) => {
   const body = JSON.stringify({ d: id });
+  let timeout: ReturnType<typeof setTimeout> | undefined;
   try {
+    const controller = new AbortController();
+    timeout = setTimeout(() => controller.abort(), 5000);
     const response = await fetch(ENDPOINT, {
       method: "POST",
       body,
       keepalive: true,
       credentials: "same-origin",
-      signal: AbortSignal.timeout(5000),
+      signal: controller.signal,
       headers: { "Content-Type": "application/json" }
     });
     return response.status === 204;
   } catch { return false; }
+  finally { if (timeout) clearTimeout(timeout); }
 };
 
 export default defineNuxtPlugin((nuxtApp) => {
@@ -84,6 +88,7 @@ export default defineNuxtPlugin((nuxtApp) => {
     let disposed = false;
     let attemptedMarker = "";
     let attempts = 0;
+    let retryAfter = 0;
 
     const trySend = async () => {
       try {
@@ -92,8 +97,8 @@ export default defineNuxtPlugin((nuxtApp) => {
         const last = readValue(DAY_KEY) ?? memoryDay;
         const decision = decideVisitSend(last, today, loggedIn());
         if (!decision.send) return;
-        if (attemptedMarker !== decision.marker) { attemptedMarker = decision.marker; attempts = 0; }
-        if (attempts >= 3) return;
+        if (attemptedMarker !== decision.marker) { attemptedMarker = decision.marker; attempts = 0; retryAfter = 0; }
+        if (attempts >= 3 || Date.now() < retryAfter) return;
         const id = deviceId();
         if (!id) return;
         pending = true;
@@ -104,11 +109,13 @@ export default defineNuxtPlugin((nuxtApp) => {
         pending = false;
         if (disposed) return;
         if (recorded) {
+          retryAfter = 0;
           memoryDay = decision.marker;
           writeValue(DAY_KEY, decision.marker);
           // A login may have completed while the anonymous request was pending.
           void trySend();
         } else if (attempts < 3) {
+          retryAfter = Date.now() + 15_000;
           retryTimer = setTimeout(() => { retryTimer = null; void trySend(); }, 15_000);
         }
       } catch { /* never throw */ }

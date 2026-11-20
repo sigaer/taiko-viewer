@@ -10,7 +10,7 @@ import { createMemoryRateLimiter } from "~/server/utils/rate-limit";
 
 // Invalid requests are ignored with 204. Qualified requests are acknowledged
 // only after recording succeeds, so the client can retry transient failures.
-const admitIp = createMemoryRateLimiter({ windowMs: 60_000, limit: 60, maxBuckets: 5000, message: "请求过于频繁" });
+const admitIp = createMemoryRateLimiter({ windowMs: 60_000, limit: 60, maxBuckets: 5000, message: "Too many requests" });
 let pendingVisits = 0;
 const MAX_PENDING_VISITS = 16;
 let trafficSalt: string | null = null;
