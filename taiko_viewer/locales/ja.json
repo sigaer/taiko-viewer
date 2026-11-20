@@ -3320,7 +3320,19 @@
       "search": "称号・入手条件で検索",
       "summary": "{total} 件 · {page} / {pages} ページ",
       "noMatch": "該当する称号はありません",
-      "clear": "検索をクリア"
+      "clear": "絞り込みをリセット",
+      "category": "称号の分類",
+      "categories": {
+        "all": "すべて",
+        "event": "イベント",
+        "ai": "AI バトル",
+        "play": "楽曲プレイ",
+        "clear": "楽曲クリア",
+        "fullCombo": "楽曲フルコンボ",
+        "allPerfect": "楽曲全良",
+        "combination": "組み合わせ称号",
+        "other": "その他"
+      }
     },
     "toolPages": {
       "result": "検索結果",

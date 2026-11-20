@@ -3374,7 +3374,19 @@
       "search": "搜索称号或获取条件",
       "summary": "共 {total} 个称号 · 第 {page} / {pages} 页",
       "noMatch": "没有符合的称号",
-      "clear": "清除搜索"
+      "clear": "重置筛选",
+      "category": "称号分类",
+      "categories": {
+        "all": "全部",
+        "event": "活动",
+        "ai": "AI 对战",
+        "play": "歌曲游玩",
+        "clear": "歌曲过关",
+        "fullCombo": "歌曲全连",
+        "allPerfect": "歌曲全良",
+        "combination": "组合称号",
+        "other": "其他"
+      }
     },
     "toolPages": {
       "result": "查询结果",

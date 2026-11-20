@@ -2,10 +2,11 @@
 // ReworkTitlesList — /titles (slice F; frozen design: Titles.vue). Every title of the official catalogue as before:
 // the game plate (DsTitlePlate: the plate image when the catalogue's plate number is in the asset map, the text form
 // otherwise; the number itself stays in its own column), the condition and the linked songs. The list is long, so it
-// is filtered by a keyword on the client and mounted TITLES_PAGE_SIZE rows at a time (V1.3: ≤ 60 mounted rows).
+// is filtered by category and keyword on the client and mounted TITLES_PAGE_SIZE rows at a time.
 import type { PropType } from "vue";
 import type { TitleCatalogItem } from "~/types/content";
 import { pageCount } from "~/utils/rework/catalog";
+import { TITLE_CATEGORIES, titleCategory, titleMatchesKeyword, type TitleFilter } from "~/utils/rework/titles";
 
 const TITLES_PAGE_SIZE = 50;
 const props = defineProps({
@@ -17,16 +18,21 @@ const emit = defineEmits<{ retry: [] }>();
 const { t } = useI18n();
 const localePath = useLocalePath();
 const keyword = ref("");
+const category = ref<TitleFilter>("all");
+const categories: TitleFilter[] = ["all", ...TITLE_CATEGORIES];
 const page = ref(1);
-const norm = (text: string) => text.normalize("NFKC").toLowerCase();
-const filtered = computed(() => {
-  const q = norm(keyword.value.trim());
-  if (!q) return props.titles;
-  return props.titles.filter((title) => norm(title.name).includes(q) || norm(title.condition || "").includes(q) || String(title.rarity) === q);
+const classified = computed(() => props.titles.map((title) => ({ title, category: titleCategory(title) })));
+const searched = computed(() => classified.value.filter(({ title }) => titleMatchesKeyword(title, keyword.value)));
+const categoryCounts = computed(() => {
+  const counts = Object.fromEntries(categories.map((key) => [key, 0])) as Record<TitleFilter, number>;
+  counts.all = searched.value.length;
+  for (const row of searched.value) counts[row.category]++;
+  return counts;
 });
+const filtered = computed(() => searched.value.filter((row) => category.value === "all" || row.category === category.value).map(({ title }) => title));
 const count = computed(() => Math.max(1, pageCount(filtered.value.length, TITLES_PAGE_SIZE)));
 const rows = computed(() => filtered.value.slice((page.value - 1) * TITLES_PAGE_SIZE, page.value * TITLES_PAGE_SIZE));
-watch(keyword, () => (page.value = 1));
+watch([keyword, category], () => (page.value = 1));
 watch(count, (n) => {
   if (page.value > n) page.value = Math.max(1, n);
 });
@@ -55,8 +61,21 @@ function select(n: number) {
           {{ t("rework.titlesPage.summary", { total: filtered.length, page: page, pages: count }) }}
         </p>
       </div>
+      <div class="tl-filters" role="group" :aria-label="t('rework.titlesPage.category')">
+        <button
+          v-for="key in categories"
+          :key="key"
+          type="button"
+          class="tl-filter"
+          :aria-pressed="category === key"
+          @click="category = key"
+        >
+          <span>{{ t(`rework.titlesPage.categories.${key}`) }}</span>
+          <span class="tl-filter-count num">{{ categoryCounts[key] }}</span>
+        </button>
+      </div>
       <ReworkState v-if="!filtered.length" kind="empty" :title="t('rework.titlesPage.noMatch')" compact>
-        <button type="button" class="rw-btn" @click="keyword = ''">{{ t("rework.titlesPage.clear") }}</button>
+        <button type="button" class="rw-btn" @click="keyword = ''; category = 'all'">{{ t("rework.titlesPage.clear") }}</button>
       </ReworkState>
       <div v-else class="tl-scroll">
         <table class="tl-table">
@@ -115,6 +134,42 @@ function select(n: number) {
 .tl-sum:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: 2px;
+}
+.tl-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+}
+.tl-filter {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--sp-2);
+  min-height: 44px;
+  padding: var(--sp-2) var(--sp-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-ctl);
+  background: var(--surface);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: var(--fs-13);
+  cursor: pointer;
+}
+.tl-filter:hover {
+  border-color: var(--ink-3);
+  color: var(--ink);
+}
+.tl-filter[aria-pressed="true"] {
+  border-color: var(--action-bg);
+  background: var(--action-bg);
+  color: var(--action-ink);
+}
+.tl-filter:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.tl-filter-count {
+  font-size: var(--fs-12);
 }
 .tl-scroll {
   min-width: 0;
