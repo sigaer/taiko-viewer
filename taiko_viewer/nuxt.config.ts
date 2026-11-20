@@ -242,6 +242,8 @@ export default defineNuxtConfig({
     }
   },
   nitro: {
+    // Keep build warnings/errors; skip the final report that rereads/gzips every server file.
+    logLevel: 1,
     hooks: {
       compiled: async (nitro) => {
         await cp(fileURLToPath(new URL('./.tja-runtime', import.meta.url)), resolve(nitro.options.output.serverDir, 'tja-runtime'), { recursive: true });
