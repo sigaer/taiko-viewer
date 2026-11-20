@@ -109,6 +109,14 @@ class MatchingTests(unittest.TestCase):
         self.assertEqual(local, original)
         self.assertEqual(build_plan(payload(bindings), local + copy.deepcopy(local))["changes"], [])
 
+    def test_title_identity_matches_viewer_case_and_width_rules(self):
+        _, bindings = resolved()
+        lower_case = [dict(id=7, name="new title", rarity=42, songIds=[99])]
+        # Viewer does not merge a differently cased local title into this official row.
+        self.assertEqual(build_plan(payload(bindings), lower_case)["changes"][0]["action"], "add")
+        full_width = [dict(id=7, name="Ｎｅｗ　Ｔｉｔｌｅ", rarity=42, songIds=[99])]
+        self.assertEqual(build_plan(payload(bindings), full_width)["changes"][0]["local_id"], 7)
+
 
 class HTTPTests(unittest.TestCase):
     def setUp(self):

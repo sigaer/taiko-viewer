@@ -18,7 +18,7 @@ import urllib.error
 import urllib.parse
 import urllib.request
 
-from title_relation_ids import name_key, positive_id
+from title_relation_ids import title_name_key, positive_id
 
 ROOT = Path(__file__).resolve().parents[3]
 DEFAULT_CONFIG = ROOT / "data/title_sync.json"
@@ -38,7 +38,7 @@ def title_key(row):
     rarity = row.get("rarity")
     if not name or isinstance(rarity, bool) or not isinstance(rarity, int) or rarity < 0:
         raise ValueError("Invalid title name or plate")
-    return name_key(name), rarity
+    return title_name_key(name), rarity
 
 
 def build_plan(payload, local):

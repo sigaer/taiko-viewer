@@ -11,6 +11,11 @@ def name_key(value):
     return " ".join(unicodedata.normalize("NFKC", html.unescape(str(value or ""))).split()).casefold()
 
 
+def title_name_key(value):
+    # Match Viewer titleDetails.ts exactly; case belongs to the official title.
+    return " ".join(unicodedata.normalize("NFKC", str(value or "")).split())
+
+
 def positive_id(value):
     if isinstance(value, bool):
         return None
@@ -61,14 +66,14 @@ def enrich_relations(relations, songs, catalog, detect_requirement, detect_diffi
             "rarity": rarity, "condition": condition,
             "song_ids": [], "complete": True,
         }
-        by_name[name_key(title["name"])].append((title_id, requirement, difficulty))
+        by_name[title_name_key(title["name"])].append((title_id, requirement, difficulty))
 
     used_titles = set()
     identities = defaultdict(int)
     for binding in titles.values():
-        identities[(name_key(binding["title_name"]), binding["rarity"])] += 1
+        identities[(title_name_key(binding["title_name"]), binding["rarity"])] += 1
     for binding in titles.values():
-        if identities[(name_key(binding["title_name"]), binding["rarity"])] > 1:
+        if identities[(title_name_key(binding["title_name"]), binding["rarity"])] > 1:
             binding["complete"] = False
     enriched = []
     for original in relations:
@@ -82,7 +87,7 @@ def enrich_relations(relations, songs, catalog, detect_requirement, detect_diffi
         row["song_ids"] = sorted(candidates) if len(candidates) == 1 else []
         row["song_match"] = "matched" if len(candidates) == 1 else "ambiguous" if candidates else "unmatched"
         row["title_ids"] = []
-        for title_id, requirement, difficulty in by_name.get(name_key(row["title_name"]), []):
+        for title_id, requirement, difficulty in by_name.get(title_name_key(row["title_name"]), []):
             source_title_id = positive_id(row.get("source_title_id"))
             if source_title_id is not None and title_id != source_title_id:
                 continue
