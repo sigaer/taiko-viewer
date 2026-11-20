@@ -10,15 +10,20 @@ from __future__ import annotations
 import argparse
 import html
 import json
+import os
 import re
+import tempfile
 from collections import defaultdict
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from title_relation_ids import enrich_relations
+
 ROOT_DIR = Path(__file__).resolve().parents[3]
 TITLE_CATALOG_DEFAULT = ROOT_DIR / "data" / "title_catalog_cache.json"
+SONG_CATALOG_DEFAULT = ROOT_DIR / "songs" / "song_data.json"
 
 ANCHOR_RE = re.compile(r"<a\s+([^>]*?)>(.*?)</a>", re.IGNORECASE | re.DOTALL)
 TAG_RE = re.compile(r"<[^>]+>")
@@ -285,6 +290,7 @@ def build_api_relations(payload: dict[str, Any]) -> list[dict[str, Any]]:
                     "difficulty_scope": difficulty,
                     "condition_text": condition_text,
                     "source_row_index": source_row_index,
+                    "source_title_id": item.get("id", item.get("uid")),
                 }
             )
     return relations
@@ -357,6 +363,7 @@ def apply_manual_relation_overrides(rows: list[dict[str, Any]]) -> list[dict[str
 def build_relations(
     payload: dict[str, Any],
     api_payload: dict[str, Any] | None = None,
+    song_catalog: list[dict[str, Any]] | None = None,
 ) -> dict[str, Any]:
     rows = payload.get("rows", [])
     relations: list[dict[str, Any]] = []
@@ -437,11 +444,19 @@ def build_relations(
         seen_keys.add(key)
         deduped.append(item)
 
+    deduped, title_bindings = enrich_relations(
+        deduped, song_catalog or [],
+        (api_payload or {}).get("titles") or (api_payload or {}).get("list") or [],
+        detect_requirement_type, detect_difficulty,
+    )
     by_song: dict[str, list[dict[str, Any]]] = defaultdict(list)
     by_title: dict[str, list[dict[str, Any]]] = defaultdict(list)
+    by_song_id: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for item in deduped:
+        identity = {key: item[key] for key in ("song_ids", "title_ids", "song_match")}
         by_song[item["song_name"]].append(
             {
+                **identity,
                 "title_name": item["title_name"],
                 "requirement_type": item["requirement_type"],
                 "difficulty_scope": item["difficulty_scope"],
@@ -451,6 +466,7 @@ def build_relations(
         )
         by_title[item["title_name"]].append(
             {
+                **identity,
                 "song_name": item["song_name"],
                 "requirement_type": item["requirement_type"],
                 "difficulty_scope": item["difficulty_scope"],
@@ -458,8 +474,11 @@ def build_relations(
                 "source_row_index": item["source_row_index"],
             }
         )
+        for song_id in item["song_ids"]:
+            by_song_id[str(song_id)].append(dict(item))
 
     return {
+        "schema_version": 2,
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "stats": {
             "rows_total": len(rows),
@@ -467,6 +486,11 @@ def build_relations(
             "relations_total": len(deduped),
             "songs_total": len(by_song),
             "titles_total": len(by_title),
+            "matched_relations_total": sum(row["song_match"] == "matched" for row in deduped),
+            "ambiguous_relations_total": sum(row["song_match"] == "ambiguous" for row in deduped),
+            "unmatched_relations_total": sum(row["song_match"] == "unmatched" for row in deduped),
+            "song_ids_total": len(by_song_id),
+            "complete_title_bindings_total": sum(row["complete"] and bool(row["song_ids"]) for row in title_bindings),
         },
         "relations": sorted(
             deduped,
@@ -478,6 +502,8 @@ def build_relations(
         ),
         "by_song": dict(sorted(by_song.items(), key=lambda item: item[0].lower())),
         "by_title": dict(sorted(by_title.items(), key=lambda item: item[0].lower())),
+        "by_song_id": dict(sorted(by_song_id.items(), key=lambda item: int(item[0]))),
+        "title_bindings": title_bindings,
     }
 
 
@@ -494,6 +520,10 @@ def main() -> None:
         help="Path to output relation JSON.",
     )
     parser.add_argument(
+        "--songs", default=str(SONG_CATALOG_DEFAULT),
+        help="Song catalog used to resolve stable song IDs (required).",
+    )
+    parser.add_argument(
         "--title-catalog",
         default=str(TITLE_CATALOG_DEFAULT),
         help="Path to cached title catalog JSON from all/title.",
@@ -508,9 +538,26 @@ def main() -> None:
     api_payload: dict[str, Any] | None = None
     if title_catalog_path.exists():
         api_payload = json.loads(title_catalog_path.read_text(encoding="utf-8"))
-    result = build_relations(payload, api_payload=api_payload)
+    song_catalog = json.loads(Path(args.songs).read_text(encoding="utf-8"))
+    if not isinstance(song_catalog, list) or not song_catalog:
+        raise ValueError("Song catalog must be a nonempty list")
+    if not api_payload or not (api_payload.get("titles") or api_payload.get("list")):
+        raise ValueError("Official title catalog is required for ID resolution")
+    result = build_relations(payload, api_payload=api_payload, song_catalog=song_catalog)
     output_path.parent.mkdir(parents=True, exist_ok=True)
-    output_path.write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8", dir=output_path.parent, delete=False) as target:
+            temporary_path = Path(target.name)
+            json.dump(result, target, ensure_ascii=False, indent=2)
+            target.write("\n")
+            target.flush()
+            os.fsync(target.fileno())
+        temporary_path.chmod(0o644)
+        os.replace(temporary_path, output_path)
+    finally:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
 
     print(
         f"done: rows={result['stats']['rows_total']} api={result['stats'].get('api_relations_total', 0)} "
