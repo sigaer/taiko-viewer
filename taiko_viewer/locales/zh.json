@@ -3372,6 +3372,9 @@
     },
     "titlesPage": {
       "search": "搜索称号或获取条件",
+      "viewSongs": "查看全部 · 共 {count} 首",
+      "viewSongsFor": "查看「{name}」的全部 {count} 首关联歌曲",
+      "songCount": "共 {count} 首",
       "summary": "共 {total} 个称号 · 第 {page} / {pages} 页",
       "noMatch": "没有符合的称号",
       "clear": "重置筛选",

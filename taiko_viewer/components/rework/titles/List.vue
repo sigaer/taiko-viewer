@@ -9,6 +9,7 @@ import { pageCount } from "~/utils/rework/catalog";
 import { TITLE_CATEGORIES, titleCategory, titleMatchesKeyword, type TitleFilter } from "~/utils/rework/titles";
 
 const TITLES_PAGE_SIZE = 50;
+const SONG_PREVIEW_SIZE = 3;
 const props = defineProps({
   titles: { type: Array as PropType<TitleCatalogItem[]>, required: true },
   pending: { type: Boolean, default: false },
@@ -21,6 +22,12 @@ const keyword = ref("");
 const category = ref<TitleFilter>("all");
 const categories: TitleFilter[] = ["all", ...TITLE_CATEGORIES];
 const page = ref(1);
+const songsOpen = ref(false);
+const songsTitle = shallowRef<TitleCatalogItem | null>(null);
+function showSongs(title: TitleCatalogItem) {
+  songsTitle.value = title;
+  songsOpen.value = true;
+}
 const classified = computed(() => props.titles.map((title) => ({ title, category: titleCategory(title) })));
 const searched = computed(() => classified.value.filter(({ title }) => titleMatchesKeyword(title, keyword.value)));
 const categoryCounts = computed(() => {
@@ -91,9 +98,19 @@ function select(n: number) {
               <th scope="row" class="tl-name"><DsTitlePlate :name="title.name" :plate="title.rarity" form="plate" /></th>
               <td>{{ title.condition }}</td>
               <td class="tl-songs">
-                <template v-if="title.songIds.length">
-                  <NuxtLink v-for="songId in title.songIds" :key="songId" class="rw-link num" :to="localePath(`/songs/${songId}`)">#{{ songId }}</NuxtLink>
-                </template>
+                <div v-if="title.songIds.length" class="tl-related">
+                  <div class="tl-preview">
+                    <NuxtLink v-for="songId in title.songIds.slice(0, SONG_PREVIEW_SIZE)" :key="songId" class="rw-link num" :to="localePath(`/songs/${songId}`)">#{{ songId }}</NuxtLink>
+                  </div>
+                  <button
+                    v-if="title.songIds.length > SONG_PREVIEW_SIZE"
+                    type="button"
+                    class="tl-more"
+                    aria-haspopup="dialog"
+                    :aria-label="t('rework.titlesPage.viewSongsFor', { name: title.name, count: title.songIds.length })"
+                    @click="showSongs(title)"
+                  >{{ t('rework.titlesPage.viewSongs', { count: title.songIds.length }) }}</button>
+                </div>
                 <span v-else>—</span>
               </td>
             </tr>
@@ -102,6 +119,26 @@ function select(n: number) {
       </div>
       <ReworkPager v-if="count > 1" :page="page" :count="count" @select="select" />
     </template>
+    <el-dialog
+      v-if="songsTitle"
+      v-model="songsOpen"
+      :title="t('page.titles.columns.songs')"
+      width="min(640px, calc(100vw - 32px))"
+      align-center
+      append-to-body
+      destroy-on-close
+      @closed="songsTitle = null"
+    >
+      <div class="tl-song-dialog">
+        <DsTitlePlate :name="songsTitle.name" :plate="songsTitle.rarity" form="plate" />
+        <p class="tl-song-count">{{ t('rework.titlesPage.songCount', { count: songsTitle.songIds.length }) }}</p>
+        <ul class="tl-song-grid">
+          <li v-for="songId in songsTitle.songIds" :key="songId">
+            <NuxtLink class="rw-link num" :to="localePath(`/songs/${songId}`)">#{{ songId }}</NuxtLink>
+          </li>
+        </ul>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -202,13 +239,73 @@ function select(n: number) {
   font-weight: 600;
 }
 .tl-songs {
-  width: 160px;
+  width: 200px;
 }
-.tl-songs a {
+.tl-related {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.tl-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 var(--sp-2);
+}
+.tl-preview a {
   display: inline-flex;
   align-items: center;
-  min-height: 32px;
-  margin-right: var(--sp-3);
+  justify-content: center;
+  min-width: 44px;
+  min-height: 44px;
+}
+.tl-more {
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--link);
+  font: inherit;
+  font-size: var(--fs-13);
+  text-align: left;
+  cursor: pointer;
+}
+.tl-more:hover {
+  text-decoration: underline;
+}
+.tl-more:focus-visible,
+.tl-song-grid a:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.tl-song-dialog {
+  min-width: 0;
+  font-family: var(--font-ui);
+  color: var(--ink);
+}
+.tl-song-count {
+  margin: var(--sp-3) 0;
+  color: var(--ink-2);
+  font-size: var(--fs-14);
+}
+.tl-song-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: var(--sp-2);
+  max-height: min(50dvh, 420px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  list-style: none;
+  margin: 0;
+  padding: var(--sp-1);
+}
+.tl-song-grid a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-ctl);
+  background: var(--surface);
 }
 
 /* Below 768 px each title is a block: plate, condition, songs. */
@@ -242,6 +339,12 @@ function select(n: number) {
   .tl-table td {
     padding: 0;
     border: 0;
+  }
+  .tl-related {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 var(--sp-3);
   }
 }
 </style>

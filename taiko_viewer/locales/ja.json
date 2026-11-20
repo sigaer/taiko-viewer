@@ -3318,6 +3318,9 @@
     },
     "titlesPage": {
       "search": "称号・入手条件で検索",
+      "viewSongs": "全 {count} 曲を表示",
+      "viewSongsFor": "「{name}」の関連楽曲 {count} 曲をすべて表示",
+      "songCount": "全 {count} 曲",
       "summary": "{total} 件 · {page} / {pages} ページ",
       "noMatch": "該当する称号はありません",
       "clear": "絞り込みをリセット",
