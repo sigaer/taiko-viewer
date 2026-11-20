@@ -75,6 +75,7 @@ export const listAdminActionLogs = async (query: {
   source?: unknown;
   action?: unknown;
   targetType?: unknown;
+  excludeActions?: string[];
 }) => {
   await ensureAccountSchema();
   const db = getAccountDb();
@@ -106,6 +107,11 @@ export const listAdminActionLogs = async (query: {
   if (targetType) {
     whereParts.push("target_type = ?");
     params.push(targetType);
+  }
+  const excludeActions = (query.excludeActions || []).map((item) => String(item).trim()).filter(Boolean);
+  if (excludeActions.length) {
+    whereParts.push(`action NOT IN (${excludeActions.map(() => "?").join(", ")})`);
+    params.push(...excludeActions);
   }
 
   const whereSql = whereParts.length ? `WHERE ${whereParts.join(" AND ")}` : "";

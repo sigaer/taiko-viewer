@@ -2,6 +2,7 @@
 import { GOAL_TABLE_SQL } from "../services/goals/schema";
 import { GROWTH_MEASUREMENT_TABLE_SQL } from "../services/growth-history/schema";
 import { GROWTH_RECENT_CURSOR_TABLE_SQL } from "../services/growth-recent/schema";
+import { DAILY_VISITORS_TABLE_SQL, USER_DAILY_ACTIVITY_TABLE_SQL } from "../services/user-activity/schema";
 import type { RowDataPacket } from "mysql2/promise";
 import { getAccountDb } from "./account-db";
 import { CREATE_TABLES, MIGRATIONS, BIND_TABLE_CREATE_SQL } from "./account-schema-definition";
@@ -139,7 +140,7 @@ const ensureAnnualSummaryRetentionSchema = async () => {
 
 export const initializeAccountSchema = async () => {
   const db = getAccountDb();
-  for (const statement of [...CREATE_TABLES, ...BETA_TABLES, GOAL_TABLE_SQL, GROWTH_MEASUREMENT_TABLE_SQL, GROWTH_RECENT_CURSOR_TABLE_SQL]) await db.execute(statement);
+  for (const statement of [...CREATE_TABLES, ...BETA_TABLES, GOAL_TABLE_SQL, GROWTH_MEASUREMENT_TABLE_SQL, GROWTH_RECENT_CURSOR_TABLE_SQL, USER_DAILY_ACTIVITY_TABLE_SQL, DAILY_VISITORS_TABLE_SQL]) await db.execute(statement);
   for (const statement of [...MIGRATIONS, ...BETA_MIGRATIONS]) await runMigration(statement);
   await ensureAnnualSummaryRetentionSchema();
   await ensureBindTableSchema();

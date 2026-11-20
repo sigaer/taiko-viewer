@@ -48,6 +48,8 @@ test('OIDC real TLS provider + H3 handlers + isolated MySQL', { timeout: 180000 
     for (const name of ['web_user_accounts', 'web_user_sessions', 'web_email_verifications', 'web_password_resets', 'web_annual_summary_access']) {
       await pool.execute(CREATE_TABLES.find(sql => sql.startsWith(`CREATE TABLE IF NOT EXISTS ${name} (`)));
     }
+    const { ACCOUNT_TITLE_TABLE_SQL } = await import('../server/services/account-titles/schema.ts');
+    await pool.execute(ACCOUNT_TITLE_TABLE_SQL);
     await pool.execute("ALTER TABLE web_annual_summary_access ADD COLUMN enabled TINYINT(1) NOT NULL DEFAULT 1, ADD COLUMN feature VARCHAR(64) NOT NULL DEFAULT 'annual_first_run_beta'");
     const { OIDC_TABLES } = await import('../server/services/oidc/schema.ts');
     for (const sql of OIDC_TABLES) await pool.execute(sql);

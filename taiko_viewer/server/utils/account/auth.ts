@@ -3,6 +3,7 @@ import type { H3Event } from "h3";
 import { createError, deleteCookie } from "h3";
 import type { ResultSetHeader } from "mysql2/promise";
 import { DbRow, ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
+import { recordDailyActivity } from "~/server/services/user-activity/daily-activity";
 import {
   type AccountRow,
   type SessionRow,
@@ -247,6 +248,8 @@ export const getAccountUserFromEvent = async (event: H3Event) => {
     return null;
   }
   await db.execute("UPDATE web_user_sessions SET last_seen_at = NOW() WHERE session_token = ?", [token]);
+  // Fire-and-forget; recordDailyActivity never rejects and never affects auth.
+  void recordDailyActivity(db, row.user_id ?? row.id);
   return row as AccountRow;
 };
 
