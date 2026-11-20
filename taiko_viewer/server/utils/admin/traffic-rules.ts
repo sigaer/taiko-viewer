@@ -1,5 +1,6 @@
 import { createHmac } from 'node:crypto';
 import { parseNginxLogTime } from './dashboard-time';
+import { AUTOMATION_UA_PATTERN } from './automation-ua';
 
 export const TRAFFIC_SOURCE = 'viewer_access_v2';
 export const MINUTE = 60_000;
@@ -48,7 +49,7 @@ export function exclusionReason(r: AccessRequest, routes: RegExp[]): Reason | nu
   if (/(?:^|\/)(?:\.env|\.git|wp-admin|wp-login|wordpress|phpmyadmin|cgi-bin|actuator)(?:\/|\.|$)|\.php(?:\/|$)/i.test(r.path)) return 'probe';
   if (/^\/(?:_nuxt|_ipx|qqbot-cache|assets|images|fonts)(?:\/|$)/i.test(r.path) ||
       /\.(?:png|jpe?g|gif|svg|webp|avif|ico|css|m?js|cjs|map|woff2?|ttf|otf|eot|txt|xml|json|mp[34]|m4a|ogg|wav|webm|pdf|zip|wasm|webmanifest)$/i.test(r.path)) return 'resource';
-  if (/(bot|spider|crawl|headless|scan|zgrab|python|curl|wget|go-http-client|httpclient|libredtail|semrush|^node(?:\/|$)|undici|axios|okhttp|postman)/i.test(r.ua)) return 'bot';
+  if (AUTOMATION_UA_PATTERN.test(r.ua)) return 'bot';
   if (!r.ua.trim() || r.ua === '-') return 'missingUa';
   if (((r.status < 200 || r.status >= 300) && r.status !== 304) || r.status === 204 || r.status === 206) return 'status';
   if (!routes.some(pattern => pattern.test(r.path))) return 'unknownRoute';

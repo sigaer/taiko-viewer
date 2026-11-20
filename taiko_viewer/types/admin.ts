@@ -27,6 +27,22 @@ export type AdminMetricSummary = {
     onebotV11: number;
   };
   recentNewUsers: number;
+  /** Distinct uploading taikoIds in the last 24 hours. */
+  uploaders24h: number;
+  /**
+   * Daily active users on the current Beijing calendar day: union of active accounts and
+   * qualified beacon devices (deduplicated, suspect devices excluded). null before dauSince.
+   */
+  dauToday: number | null;
+  dauYesterday: number | null;
+  /** Today's split: distinct accounts vs. devices not attributed to an account. */
+  dauLoggedIn: number | null;
+  dauAnonymous: number | null;
+  /** Same union over the last 7 / 30 Beijing days. */
+  wau7d: number | null;
+  mau30d: number | null;
+  /** Beacon devices marked suspect today (too many devices from one network address). */
+  suspectDevicesToday: number | null;
 };
 
 export type AdminHourlyTrendItem = {
@@ -43,6 +59,10 @@ export type AdminDailyTrendItem = {
   newUsers: number;
   newBindings: number;
   uploads: number;
+  /** Distinct taikoIds with at least one upload that day. */
+  uploaders: number;
+  /** Daily active users (same definition as summary.dauToday); null before dauSince. */
+  activeUsers: number | null;
   pv: number;
   uv: number;
   homePv: number;
@@ -73,6 +93,8 @@ export type AdminDashboardPayload = {
   };
   topCommands: Array<{ name: string; count: number }>;
   taikoCommandStatsSince: string | null;
+  /** Beacon launch day (first day with web_daily_visitors rows), YYYY-MM-DD. */
+  dauSince: string | null;
   backups: Array<{
     name: string;
     path: string;

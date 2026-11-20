@@ -1,8 +1,13 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import type { EChartsOption } from "echarts";
 import type { AdminDashboardPayload } from "~/types/admin";
-import { formatAdminDateTime } from "~/utils/admin-time";
+import {
+  formatAdminClock,
+  formatAdminDateTime,
+  formatAdminMonthDay,
+  formatAdminRelativeTime
+} from "~/utils/admin-time";
 
 defineI18nRoute(false);
 
@@ -16,317 +21,1245 @@ useHead({
 });
 
 const apiFetch = useAdminApiFetch();
+const loadedAt = useState<number>("admin-taiko-dashboard-loaded-at", () => Date.now());
 const { data, pending, refresh } = await useAsyncData<AdminDashboardPayload>(
   "admin-taiko-dashboard",
-  () => apiFetch("/api/admin/dashboard"),
+  async () => {
+    const payload = await apiFetch<AdminDashboardPayload>("/api/admin/dashboard");
+    loadedAt.value = Date.now();
+    return payload;
+  },
   { default: () => null as unknown as AdminDashboardPayload }
 );
 
 const dashboard = computed(() => data.value);
-const trafficStatusLabels: Record<string, string> = { pending: '等待统计', stale: '统计更新延迟', backfilling: '历史数据回填中', ready: '已更新' };
-const trafficStatus = computed(() => trafficStatusLabels[dashboard.value?.trafficQuality.status || 'pending'] || '等待统计');
-const trafficReady = computed(() => dashboard.value?.trafficQuality.status === 'ready');
-const taikoCommandSinceText = computed(() => {
-  const value = dashboard.value?.taikoCommandStatsSince;
-  if (!value) return "新口径已启用，30 天窗口会逐步补满。";
-  return `新口径自 ${formatAdminDateTime(value)} 开始累计，30 天窗口会逐步补满。`;
+
+/* ---------- formatting ---------- */
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const formatCount = (value: unknown) => {
+  const number = Number(value);
+  return Number.isFinite(number) ? number.toLocaleString("zh-CN") : "—";
+};
+const relative = (value: unknown) => formatAdminRelativeTime(value, loadedAt.value);
+
+const palette = {
+  primary: "#006c76",
+  primaryArea: "rgba(0, 108, 118, 0.08)",
+  amber: "#c98a2e",
+  ink: "#1b2426",
+  secondary: "#5d6b6e",
+  grid: "#eef2f2",
+  axis: "#d5dddd"
+};
+
+/* ---------- header status ---------- */
+
+const trafficStatusPills: Record<string, string> = {
+  pending: "访问数据统计中",
+  backfilling: "访问数据补录中",
+  stale: "访问数据延迟"
+};
+const trafficReady = computed(() => dashboard.value?.trafficQuality.status === "ready");
+const trafficStatusPill = computed(() => {
+  const status = dashboard.value?.trafficQuality.status;
+  if (!status || status === "ready") return "";
+  return trafficStatusPills[status] || "访问数据统计中";
+});
+const trafficIncomplete = computed(() => {
+  const quality = dashboard.value?.trafficQuality;
+  return Boolean(quality && (!quality.complete24h || quality.gapAt));
+});
+const trafficGapTitle = computed(() => {
+  const gapAt = dashboard.value?.trafficQuality.gapAt;
+  return gapAt ? `缺失时间：${formatAdminDateTime(gapAt)}` : "近 24 小时记录未完整覆盖";
 });
 
-const accessOption = computed<EChartsOption>(() => ({
-  tooltip: { trigger: "axis" },
-  legend: {
-    top: 0,
-    textStyle: { color: "#6b5d4d" }
-  },
-  grid: { left: 16, right: 16, bottom: 16, top: 52, containLabel: true },
-  xAxis: {
-    type: "category",
-    data: dashboard.value?.trends.accessHourly.map((item) => item.label) || [],
-    axisLabel: { color: "#7b6d5c", rotate: 35 }
-  },
-  yAxis: {
-    type: "value",
-    axisLabel: { color: "#7b6d5c" },
-    splitLine: { lineStyle: { color: "rgba(148, 125, 87, 0.12)" } }
-  },
-  series: [
-    {
-      name: "页面请求 PV",
-      type: "line",
-      smooth: true,
-      symbol: "circle",
-      data: dashboard.value?.trends.accessHourly.map((item) => item.pv || 0) || [],
-      lineStyle: { color: "#d78f3f", width: 3 },
-      itemStyle: { color: "#d78f3f" },
-      areaStyle: { color: "rgba(215, 143, 63, 0.18)" }
-    },
-    {
-      name: "独立 IP",
-      type: "line",
-      smooth: true,
-      symbol: "circle",
-      data: dashboard.value?.trends.accessHourly.map((item) => item.uv || 0) || [],
-      lineStyle: { color: "#1d7688", width: 3 },
-      itemStyle: { color: "#1d7688" }
-    },
-    {
-      name: "首页请求",
-      type: "bar",
-      data: dashboard.value?.trends.accessHourly.map((item) => item.homePv || 0) || [],
-      itemStyle: { color: "rgba(85, 56, 141, 0.82)", borderRadius: [6, 6, 0, 0] }
-    }
-  ]
-}));
+/* ---------- key numbers ---------- */
 
-const growthOption = computed<EChartsOption>(() => ({
-  tooltip: { trigger: "axis" },
-  legend: {
-    top: 0,
-    textStyle: { color: "#6b5d4d" }
-  },
-  grid: { left: 16, right: 16, bottom: 16, top: 52, containLabel: true },
-  xAxis: {
-    type: "category",
-    data: dashboard.value?.trends.daily.map((item) => item.day.slice(5)) || [],
-    axisLabel: { color: "#7b6d5c" }
-  },
-  yAxis: {
-    type: "value",
-    axisLabel: { color: "#7b6d5c" },
-    splitLine: { lineStyle: { color: "rgba(148, 125, 87, 0.12)" } }
-  },
-  series: [
-    {
-      name: "新增 viewer 用户",
-      type: "bar",
-      data: dashboard.value?.trends.daily.map((item) => item.newUsers) || [],
-      itemStyle: { color: "#4456ab", borderRadius: [6, 6, 0, 0] }
-    },
-    {
-      name: "新增绑定",
-      type: "bar",
-      data: dashboard.value?.trends.daily.map((item) => item.newBindings) || [],
-      itemStyle: { color: "#b64d6f", borderRadius: [6, 6, 0, 0] }
-    },
-    {
-      name: "上传快照数",
-      type: "line",
-      smooth: true,
-      data: dashboard.value?.trends.daily.map((item) => item.uploads) || [],
-      lineStyle: { color: "#0c7b59", width: 3 },
-      itemStyle: { color: "#0c7b59" }
-    }
-  ]
-}));
+const daily = computed(() => dashboard.value?.trends.daily || []);
+const daily14 = computed(() => daily.value.slice(-14));
+const daily30 = computed(() => daily.value.slice(-30));
 
-const botOption = computed<EChartsOption>(() => ({
-  tooltip: { trigger: "axis" },
-  grid: { left: 16, right: 16, bottom: 16, top: 24, containLabel: true },
-  xAxis: {
-    type: "category",
-    data: dashboard.value?.topCommands.map((item) => item.name) || [],
-    axisLabel: { color: "#7b6d5c", interval: 0, rotate: 20 }
-  },
-  yAxis: {
-    type: "value",
-    axisLabel: { color: "#7b6d5c" },
-    splitLine: { lineStyle: { color: "rgba(148, 125, 87, 0.12)" } }
-  },
-  series: [
+const keyTiles = computed(() => {
+  const summary = dashboard.value?.summary;
+  if (!summary) return [];
+  const ready = trafficReady.value;
+  const platform = summary.botCommands24hByPlatform;
+  return [
     {
-      type: "bar",
-      data: dashboard.value?.topCommands.map((item) => item.count) || [],
-      itemStyle: {
-        color: "#d78032",
-        borderRadius: [10, 10, 0, 0]
+      key: "pv",
+      label: "浏览量",
+      value: ready ? summary.pagePv24h : "—",
+      help: "页面打开次数，已排除机器访问",
+      sub: "",
+      accent: "teal" as const,
+      color: palette.primary,
+      spark: ready ? daily14.value.map((item) => item.pv) : []
+    },
+    {
+      key: "uploads",
+      label: "成绩上传",
+      value: summary.uploads24h,
+      sub: summary.uploads24h > 0 ? `来自 ${formatCount(summary.uploaders24h)} 位玩家` : "",
+      help: "",
+      accent: "gold" as const,
+      color: palette.amber,
+      spark: daily14.value.map((item) => item.uploads)
+    },
+    {
+      key: "bot",
+      label: "Bot 指令",
+      value: summary.botCommands24h,
+      help: `QQ 官方 ${formatCount(platform.qqOfficial)} · 其他 ${formatCount(platform.onebotV11)}`,
+      sub: "",
+      accent: "gold" as const,
+      color: palette.amber,
+      spark: (dashboard.value?.trends.botHourly || []).map((item) => Number(item.count || 0))
+    }
+  ];
+});
+
+const withinLast30Days = (value: string | null | undefined) => {
+  if (!value) return false;
+  const time = new Date(value.length === 10 ? `${value}T00:00:00+08:00` : value).getTime();
+  return !Number.isNaN(time) && loadedAt.value - time <= 30 * DAY_MS;
+};
+
+const activeTile = computed(() => {
+  const summary = dashboard.value?.summary;
+  if (!summary) return null;
+  const tracked = summary.dauToday !== null && summary.dauToday !== undefined;
+  const since = dashboard.value?.dauSince || null;
+  const today = tracked ? Number(summary.dauToday) : 0;
+  const yesterday = summary.dauYesterday ?? null;
+  const delta = tracked && yesterday !== null ? today - yesterday : null;
+  return {
+    value: tracked ? today : "—",
+    delta: delta === null ? "" : `较昨日 ${delta > 0 ? "+" : delta < 0 ? "−" : "±"}${formatCount(Math.abs(delta))}`,
+    split: tracked
+      ? `已登录 ${formatCount(summary.dauLoggedIn ?? 0)} · 未登录 ${formatCount(summary.dauAnonymous ?? 0)}`
+      : "",
+    spark: tracked
+      ? daily14.value
+          .filter((item) => item.activeUsers !== null && item.activeUsers !== undefined)
+          .map((item) => Number(item.activeUsers))
+      : [],
+    sinceNote:
+      tracked && since && withinLast30Days(since)
+        ? `自 ${formatAdminMonthDay(`${since}T00:00:00+08:00`)} 起统计`
+        : ""
+  };
+});
+
+/* ---------- users ---------- */
+
+const users = computed(() => {
+  const summary = dashboard.value?.summary;
+  if (!summary) return null;
+  const unbound = Math.max(0, summary.totalUsers - summary.taikoBindings);
+  const segments = [
+    { key: "wahlap", label: "国服", value: summary.wahlapBindings, color: palette.primary },
+    { key: "hiroba", label: "国际服", value: summary.hirobaBindings, color: palette.amber },
+    { key: "unbound", label: "未绑定", value: unbound, color: "#cfd8d8" }
+  ];
+  const total = segments.reduce((sum, item) => sum + item.value, 0);
+  return {
+    summary,
+    segments: segments.map((item) => ({
+      ...item,
+      percent: total > 0 ? (item.value / total) * 100 : 0
+    }))
+  };
+});
+
+/* ---------- charts ---------- */
+
+const accessRange = ref<"48h" | "30d">("48h");
+const accessRanges = [
+  { value: "48h" as const, label: "48 小时" },
+  { value: "30d" as const, label: "30 天" }
+];
+
+const hourLabel = (label: string) => {
+  // label looks like "10-02 01:00"; show the date at midnight, otherwise the hour.
+  const [day = "", time = label] = label.split(" ");
+  return time === "00:00" && day ? day.replace("-", "/") : time;
+};
+const dayLabel = (day: string) => day.slice(5).replace("-", "/");
+
+const valueFormatter = (value: unknown) => formatCount(value);
+
+const baseAxisLabel = { color: palette.secondary, fontSize: 11, hideOverlap: true };
+
+const accessOption = computed<EChartsOption>(() => {
+  const hourly = accessRange.value === "48h";
+  const hourlyRows = dashboard.value?.trends.accessHourly || [];
+  const labels = hourly ? hourlyRows.map((item) => hourLabel(item.label)) : daily30.value.map((item) => dayLabel(item.day));
+  const lineSeries = (name: string, data: Array<number | string>, extra: Record<string, unknown> = {}) => ({
+    name,
+    type: "line" as const,
+    smooth: true,
+    showSymbol: false,
+    connectNulls: false,
+    data,
+    lineStyle: { width: 2 },
+    ...extra
+  });
+  const series = hourly
+    ? [
+        lineSeries("浏览量", hourlyRows.map((item) => Number(item.pv || 0)), { color: palette.amber }),
+        lineSeries("IP 访客", hourlyRows.map((item) => Number(item.uv || 0)), {
+          color: palette.primary,
+          areaStyle: { color: palette.primaryArea }
+        })
+      ]
+    : [
+        lineSeries(
+          "活跃用户",
+          daily30.value.map((item) => (item.activeUsers === null || item.activeUsers === undefined ? "-" : item.activeUsers)),
+          { color: palette.primary, areaStyle: { color: palette.primaryArea } }
+        ),
+        lineSeries("浏览量", daily30.value.map((item) => Number(item.pv || 0)), { color: palette.amber, yAxisIndex: 1 })
+      ];
+  const valueAxis = (show = true) => ({
+    type: "value" as const,
+    minInterval: 1,
+    axisLabel: { ...baseAxisLabel },
+    splitLine: show ? { lineStyle: { color: palette.grid } } : { show: false }
+  });
+  return {
+    tooltip: {
+      trigger: "axis",
+      valueFormatter: (value: unknown) => (value === "-" || value === undefined ? "未统计" : formatCount(value))
+    },
+    legend: {
+      top: 0,
+      left: 0,
+      icon: "roundRect",
+      itemWidth: 10,
+      itemHeight: 4,
+      textStyle: { color: palette.secondary, fontSize: 12 }
+    },
+    grid: { left: 4, right: 8, bottom: 4, top: 36, containLabel: true },
+    xAxis: {
+      type: "category",
+      boundaryGap: false,
+      data: labels,
+      axisLine: { lineStyle: { color: palette.axis } },
+      axisTick: { show: false },
+      axisLabel: { ...baseAxisLabel, interval: hourly ? 5 : "auto" }
+    },
+    yAxis: hourly ? valueAxis() : [valueAxis(), valueAxis(false)],
+    series
+  } as EChartsOption;
+});
+
+const growthOption = computed<EChartsOption>(() => {
+  const rows = daily30.value;
+  return {
+    color: [palette.primary, palette.amber],
+    tooltip: {
+      trigger: "axis",
+      formatter: (params: unknown) => {
+        const list = (Array.isArray(params) ? params : [params]) as Array<{
+          dataIndex: number;
+          marker: string;
+          seriesName: string;
+          value: unknown;
+        }>;
+        const index = list[0]?.dataIndex ?? 0;
+        const row = rows[index];
+        const lines = list.map(
+          (item) => `${item.marker}${item.seriesName}　<b>${formatCount(item.value)}</b>`
+        );
+        if (row) {
+          lines.push(`<span style="color:${palette.secondary}">上传玩家　${formatCount(row.uploaders)}</span>`);
+          lines.push(`<span style="color:${palette.secondary}">新增绑定　${formatCount(row.newBindings)}</span>`);
+        }
+        return [row ? row.day.replace(/-/g, "/") : "", ...lines].join("<br/>");
       }
-    }
-  ]
-}));
+    },
+    legend: {
+      top: 0,
+      left: 0,
+      itemWidth: 10,
+      itemHeight: 8,
+      textStyle: { color: palette.secondary, fontSize: 12 }
+    },
+    grid: { left: 4, right: 4, bottom: 4, top: 36, containLabel: true },
+    xAxis: {
+      type: "category",
+      data: rows.map((item) => dayLabel(item.day)),
+      axisLine: { lineStyle: { color: palette.axis } },
+      axisTick: { show: false },
+      axisLabel: { ...baseAxisLabel, interval: "auto" }
+    },
+    yAxis: [
+      {
+        type: "value",
+        minInterval: 1,
+        axisLabel: { ...baseAxisLabel },
+        splitLine: { lineStyle: { color: palette.grid } }
+      },
+      {
+        type: "value",
+        minInterval: 1,
+        axisLabel: { ...baseAxisLabel },
+        splitLine: { show: false }
+      }
+    ],
+    series: [
+      {
+        name: "新用户",
+        type: "bar",
+        barMaxWidth: 12,
+        data: rows.map((item) => item.newUsers),
+        itemStyle: { borderRadius: [3, 3, 0, 0] }
+      },
+      {
+        name: "上传",
+        type: "line",
+        yAxisIndex: 1,
+        smooth: true,
+        showSymbol: false,
+        data: rows.map((item) => item.uploads),
+        lineStyle: { width: 2 }
+      }
+    ]
+  };
+});
+
+/* ---------- commands ---------- */
+
+const topCommands = computed(() => {
+  const rows = (dashboard.value?.topCommands || []).slice(0, 8);
+  const max = Math.max(1, ...rows.map((item) => item.count));
+  return rows.map((item, index) => ({
+    ...item,
+    rank: index + 1,
+    percent: Math.max(2, (item.count / max) * 100)
+  }));
+});
+const commandSinceNote = computed(() => {
+  const since = dashboard.value?.taikoCommandStatsSince;
+  return since && withinLast30Days(since) ? `自 ${formatAdminMonthDay(since)} 起统计` : "";
+});
+
+/* ---------- recent operations ---------- */
+
+const actionVerbs: Record<string, string> = {
+  create: "新增了",
+  update: "修改了",
+  delete: "删除了",
+  read: "查看了",
+  login: "登录了",
+  grant: "发放了",
+  issue: "签发了"
+};
+const targetTypeLabels: Record<string, string> = {
+  "song-alias": "别名",
+  "song-alias-log": "别名记录",
+  "song-data": "歌曲",
+  "song-cover": "封面",
+  guide: "谱面攻略",
+  "guide-music": "攻略歌曲",
+  "guide-difficulty": "谱面攻略",
+  "custom-title": "自定义称号",
+  "account-title": "称号",
+  "draw-guess-record": "你画我猜题目",
+  backup: "备份",
+  "annual-beta": "封闭测试",
+  "annual-summary": "年度报告",
+  "annual-reaction": "年度报告互动",
+  audit: "审计日志",
+  dashboard: "工作台",
+  auth: "后台"
+};
+
+const truncate = (text: string, max = 24) => (text.length > max ? `${text.slice(0, max - 1)}…` : text);
+
+const describeTargetKey = (targetType: string, key: string) => {
+  const value = String(key || "").trim();
+  if (!value || targetType === "auth") return "";
+  if (targetType === "song-alias") {
+    const alias = value.includes(":") ? value.slice(value.indexOf(":") + 1) : value;
+    return `「${truncate(alias)}」`;
+  }
+  if (targetType === "guide-difficulty" && value.includes(":")) return "";
+  if (/^\d+$/.test(value)) return ` #${value}`;
+  return `「${truncate(value)}」`;
+};
+
+const recentOperations = computed(() =>
+  (dashboard.value?.recentAudits || [])
+    .filter((item) => item.action !== "read")
+    .slice(0, 6)
+    .map((item) => {
+      const actor =
+        item.actorName && item.actorName !== "system-backup"
+          ? item.actorName
+          : item.source === "bot"
+            ? "Bot"
+            : item.source === "system-backup" || item.actorType === "system"
+              ? "系统"
+              : item.actorId || "未知";
+      let sentence: string;
+      if (item.targetType === "auth") {
+        sentence = item.action === "delete" ? "退出了后台" : item.action === "login" ? "登录了后台" : `${actionVerbs[item.action] || item.action}后台`;
+      } else if (item.targetType === "backup" && item.action === "create") {
+        sentence = "创建了备份";
+      } else {
+        const verb = actionVerbs[item.action] || `${item.action} `;
+        const target = targetTypeLabels[item.targetType] || item.targetType;
+        sentence = `${verb}${target}${describeTargetKey(item.targetType, item.targetKey)}`;
+      }
+      return {
+        id: item.id,
+        actor,
+        sentence,
+        fullKey: item.targetKey,
+        relativeTime: relative(item.createdAt),
+        absoluteTime: formatAdminDateTime(item.createdAt)
+      };
+    })
+);
+
+/* ---------- system status ---------- */
+
+const trafficStatusLabels: Record<string, string> = {
+  ready: "正常",
+  pending: "统计中",
+  backfilling: "补录中",
+  stale: "延迟"
+};
+const systemStatus = computed(() => {
+  const value = dashboard.value;
+  if (!value) return null;
+  const quality = value.trafficQuality;
+  const statusLabel = trafficStatusLabels[quality.status] || "统计中";
+  const latestBackup = value.backups[0];
+  return {
+    trafficText: quality.checkedAt ? `${statusLabel} · ${relative(quality.checkedAt)}` : statusLabel,
+    trafficTitle: quality.checkedAt ? formatAdminDateTime(quality.checkedAt) : "",
+    trafficOk: quality.status === "ready",
+    backupText: latestBackup ? relative(latestBackup.createdAt) : "暂无记录",
+    backupTitle: latestBackup ? formatAdminDateTime(latestBackup.createdAt) : "",
+    backupCount: value.backups.length,
+    machineRequests: trafficReady.value ? formatCount(quality.suspected24h + quality.excluded24h) : "—",
+    ipVisitors: trafficReady.value ? formatCount(value.summary.pageUv24h) : "—",
+    suspectDevices:
+      value.summary.suspectDevicesToday === null || value.summary.suspectDevicesToday === undefined
+        ? ""
+        : formatCount(value.summary.suspectDevicesToday),
+    windowText: `${formatAdminDateTime(quality.windowStart)} — ${formatAdminDateTime(quality.windowEnd)}`,
+    rawRequests: formatCount(quality.rawRequests24h),
+    reasons: quality.reasons.filter((reason) => reason.count > 0),
+    malformedLines: quality.malformedLines
+  };
+});
 </script>
 
 <template>
-  <div class="admin-page-stack">
-    <div class="admin-toolbar">
-      <el-button :loading="pending" @click="refresh()">刷新数据</el-button>
+  <div class="dash">
+    <div class="dash-head">
+      <span v-if="trafficStatusPill" class="dash-pill" role="status">{{ trafficStatusPill }}</span>
+      <span v-if="trafficIncomplete" class="dash-pill dash-pill--warn" :title="trafficGapTitle">访问数据不完整</span>
+      <span v-if="dashboard" class="dash-head__time">更新于 {{ formatAdminClock(loadedAt) }}</span>
+      <button type="button" class="dash-refresh" :disabled="pending" @click="refresh()">
+        <svg :class="{ spinning: pending }" viewBox="0 0 16 16" width="14" height="14" aria-hidden="true">
+          <path
+            d="M13.5 8a5.5 5.5 0 1 1-1.61-3.89M13.5 2.5v3h-3"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.6"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+        刷新
+      </button>
     </div>
-
-    <div class="admin-metric-grid" v-if="dashboard">
-      <AdminMetricCard label="Viewer 用户数" :value="dashboard.summary.viewerUsers" hint="web_user_accounts" accent="gold" />
-      <AdminMetricCard label="Taiko 绑定数" :value="dashboard.summary.taikoBindings" hint="bind ∪ hiroba" accent="teal" />
-      <AdminMetricCard label="Wahlap 用户" :value="dashboard.summary.wahlapBindings" hint="国服绑定" accent="indigo" />
-      <AdminMetricCard label="海外用户" :value="dashboard.summary.hirobaBindings" hint="hiroba 绑定" accent="gold" />
-      <AdminMetricCard label="总用户数" :value="dashboard.summary.totalUsers" hint="绑定实体 + 未绑定 viewer" accent="rose" />
-      <AdminMetricCard label="总上传次数" :value="dashboard.summary.totalUploads" hint="userdata 历史快照" accent="indigo" />
-      <AdminMetricCard label="24h 上传总量" :value="dashboard.summary.uploads24h" hint="最近 24h 快照文件" />
-      <AdminMetricCard label="24h 页面请求 PV / 独立 IP" :value="trafficReady ? `${dashboard.summary.pagePv24h} / ${dashboard.summary.pageUv24h}` : '—'" hint="成功页面请求；IP 在整个窗口内去重" />
-      <AdminMetricCard label="24h 首页请求" :value="trafficReady ? dashboard.summary.homePv24h : '—'" hint="首页的有效页面请求" />
-      <AdminMetricCard label="24h 疑似自动化请求" :value="trafficReady ? dashboard.trafficQuality.suspected24h : '—'" hint="已从页面请求统计中排除" />
-      <AdminMetricCard label="24h 其他排除请求" :value="trafficReady ? dashboard.trafficQuality.excluded24h : '—'" hint="接口、资源、错误响应与已知自动化等" />
-      <AdminMetricCard
-        label="24h 太鼓指令调用"
-        :value="dashboard.summary.botCommands24h"
-        :hint="`QQ 官方 ${dashboard.summary.botCommands24hByPlatform.qqOfficial} / OneBot ${dashboard.summary.botCommands24hByPlatform.onebotV11}`"
-      />
-    </div>
-
-    <section v-if="dashboard" class="admin-card traffic-quality" aria-label="访问统计口径">
-      <p role="status"><strong>{{ trafficStatus }}</strong> · 检查时间：{{ dashboard.trafficQuality.checkedAt ? formatAdminDateTime(dashboard.trafficQuality.checkedAt) : '—' }}</p>
-      <p>统计窗口：{{ formatAdminDateTime(dashboard.trafficQuality.windowStart) }} — {{ formatAdminDateTime(dashboard.trafficQuality.windowEnd) }}（北京时间）</p>
-      <p>按完整分钟统计服务器收到的页面请求，不含站内无刷新跳转。独立 IP 不等于实际人数；疑似自动化仅影响统计，不封禁访问。</p>
-      <p v-if="!dashboard.trafficQuality.complete24h">当前日志未完整覆盖此窗口，数据可能不全。</p>
-      <p v-if="dashboard.trafficQuality.gapAt">检测到日志缺口：{{ formatAdminDateTime(dashboard.trafficQuality.gapAt) }}</p>
-      <p v-if="dashboard.trafficQuality.malformedLines">未能解析的日志：{{ dashboard.trafficQuality.malformedLines }} 条（累计）</p>
-      <details>
-        <summary>排除原因 · 24h 原始请求 {{ dashboard.trafficQuality.rawRequests24h }}</summary>
-        <ul><li v-for="reason in dashboard.trafficQuality.reasons" :key="reason.key">{{ reason.label }}：{{ reason.count }}</li></ul>
-      </details>
-    </section>
 
     <el-skeleton v-if="pending && !dashboard" :rows="10" animated />
 
-    <div v-else-if="dashboard" class="admin-chart-grid">
-      <AdminChartCard
-        title="最近 48 小时访问走势"
-        subtitle="有效页面请求、每小时独立 IP 与首页请求；回填期间数据不完整。"
-        :option="accessOption"
-        :height="340"
-      />
-      <AdminChartCard
-        title="增长与上传趋势"
-        subtitle="按日聚合的新增用户、绑定新增和上传快照走势。"
-        :option="growthOption"
-        :height="340"
-      />
-      <AdminChartCard
-        title="30 天 Top 指令"
-        :subtitle="taikoCommandSinceText"
-        :option="botOption"
-        :height="320"
-      />
+    <template v-else-if="dashboard">
+      <div class="dash-keyrow">
+        <section v-if="activeTile" class="dash-section" aria-labelledby="dash-today-title">
+          <h2 id="dash-today-title" class="dash-section__title">今日</h2>
+          <AdminMetricCard label="活跃用户" :value="activeTile.value" accent="teal" class="dash-tile dash-tile--primary">
+            <template #help>
+              <el-tooltip content="今天访问过网站的设备与账号，已去重并排除机器访问" placement="top">
+                <button type="button" class="dash-help" aria-label="活跃用户：今天访问过网站的设备与账号，已去重并排除机器访问">?</button>
+              </el-tooltip>
+            </template>
+            <span v-if="activeTile.split || activeTile.delta" class="dash-tile__sub">
+              <span v-if="activeTile.split">{{ activeTile.split }}</span>
+              <span v-if="activeTile.delta" class="dash-tile__delta">{{ activeTile.delta }}</span>
+            </span>
+            <div class="dash-tile__spark">
+              <AdminSparkline v-if="activeTile.spark.length > 1" :values="activeTile.spark" />
+            </div>
+            <span v-if="activeTile.sinceNote" class="dash-tile__note">{{ activeTile.sinceNote }}</span>
+          </AdminMetricCard>
+        </section>
 
-      <el-card class="admin-panel-card">
-        <template #header>
-          <div class="admin-panel-card__header">
-            <span>最近备份</span>
-            <small>每日备份 + 本地写前快照</small>
-          </div>
-        </template>
-        <el-empty v-if="!dashboard.backups.length" description="暂无备份记录" />
-        <div v-else class="admin-list">
-          <div v-for="item in dashboard.backups" :key="item.path" class="admin-list__item">
-            <strong>{{ item.name }}</strong>
-            <span>{{ item.category }} · {{ formatAdminDateTime(item.createdAt) }}</span>
-            <span class="mono">{{ item.path }}</span>
-          </div>
+      <section class="dash-section" aria-labelledby="dash-24h-title">
+        <h2 id="dash-24h-title" class="dash-section__title">近 24 小时</h2>
+        <div class="dash-tiles">
+          <AdminMetricCard
+            v-for="tile in keyTiles"
+            :key="tile.key"
+            :label="tile.label"
+            :value="tile.value"
+            :accent="tile.accent"
+            class="dash-tile"
+          >
+            <template v-if="tile.help" #help>
+              <el-tooltip :content="tile.help" placement="top">
+                <button type="button" class="dash-help" :aria-label="`${tile.label}：${tile.help}`">?</button>
+              </el-tooltip>
+            </template>
+            <span v-if="tile.sub" class="dash-tile__sub">{{ tile.sub }}</span>
+            <div class="dash-tile__spark">
+              <AdminSparkline v-if="tile.spark.length > 1" :values="tile.spark" :color="tile.color" />
+            </div>
+          </AdminMetricCard>
         </div>
-      </el-card>
+      </section>
+      </div>
 
-      <el-card class="admin-panel-card">
-        <template #header>
-          <div class="admin-panel-card__header">
-            <span>最近审计动作</span>
-            <small>统一来源：admin-web / bot / system-backup</small>
+      <div class="dash-grid">
+        <section v-if="users" class="dash-card dash-users" aria-labelledby="dash-users-title">
+          <h3 id="dash-users-title" class="dash-card__title">用户</h3>
+          <div class="dash-users__total">
+            <span class="dash-users__total-label">总用户</span>
+            <strong class="dash-users__total-value">{{ formatCount(users.summary.totalUsers) }}</strong>
           </div>
-        </template>
-        <el-empty v-if="!dashboard.recentAudits.length" description="暂无审计记录" />
-        <div v-else class="admin-list">
-          <div v-for="item in dashboard.recentAudits" :key="item.id" class="admin-list__item">
-            <strong>{{ item.action.toUpperCase() }} · {{ item.targetType }}</strong>
-            <span>{{ item.actorName || item.actorId || item.source }} · {{ formatAdminDateTime(item.createdAt) }}</span>
-            <span class="mono">{{ item.targetKey }}</span>
+
+          <div class="dash-users__bar" role="img" :aria-label="users.segments.map((s) => `${s.label} ${formatCount(s.value)}`).join('，')">
+            <span
+              v-for="segment in users.segments"
+              :key="segment.key"
+              :style="{ width: `${segment.percent}%`, background: segment.color }"
+            />
           </div>
-        </div>
-      </el-card>
-    </div>
+          <ul class="dash-users__legend">
+            <li v-for="segment in users.segments" :key="segment.key">
+              <i :style="{ background: segment.color }" />
+              {{ segment.label }} <b>{{ formatCount(segment.value) }}</b>
+            </li>
+          </ul>
+
+          <dl class="dash-stats">
+            <div>
+              <dt>网站账号</dt>
+              <dd>{{ formatCount(users.summary.viewerUsers) }}</dd>
+            </div>
+            <div>
+              <dt>
+                已绑定游戏
+                <small>国服 {{ formatCount(users.summary.wahlapBindings) }} · 国际服 {{ formatCount(users.summary.hirobaBindings) }}</small>
+              </dt>
+              <dd>{{ formatCount(users.summary.taikoBindings) }}</dd>
+            </div>
+            <div>
+              <dt>近 7 天活跃</dt>
+              <dd>{{ users.summary.wau7d === null || users.summary.wau7d === undefined ? "—" : formatCount(users.summary.wau7d) }}</dd>
+            </div>
+            <div>
+              <dt>近 30 天活跃</dt>
+              <dd>{{ users.summary.mau30d === null || users.summary.mau30d === undefined ? "—" : formatCount(users.summary.mau30d) }}</dd>
+            </div>
+            <div>
+              <dt>近 7 天新增</dt>
+              <dd>{{ formatCount(users.summary.recentNewUsers) }}</dd>
+            </div>
+            <div>
+              <dt>累计上传</dt>
+              <dd>{{ formatCount(users.summary.totalUploads) }} <small>次</small></dd>
+            </div>
+          </dl>
+        </section>
+
+        <AdminChartCard title="访问趋势" :option="accessOption" :height="280">
+          <template #actions>
+            <div class="dash-segmented" role="group" aria-label="时间范围">
+              <button
+                v-for="range in accessRanges"
+                :key="range.value"
+                type="button"
+                :class="{ active: accessRange === range.value }"
+                :aria-pressed="accessRange === range.value"
+                @click="accessRange = range.value"
+              >
+                {{ range.label }}
+              </button>
+            </div>
+          </template>
+        </AdminChartCard>
+
+        <AdminChartCard title="新增与上传（近 30 天）" :option="growthOption" :height="280" />
+
+        <section class="dash-card" aria-labelledby="dash-commands-title">
+          <h3 id="dash-commands-title" class="dash-card__title">热门指令（近 30 天）</h3>
+          <p v-if="!topCommands.length" class="dash-empty">暂无记录</p>
+          <ol v-else class="dash-commands">
+            <li v-for="command in topCommands" :key="command.name">
+              <span class="dash-commands__rank">{{ command.rank }}</span>
+              <span class="dash-commands__name" :title="command.name">{{ command.name }}</span>
+              <span class="dash-commands__bar" aria-hidden="true"><i :style="{ width: `${command.percent}%` }" /></span>
+              <span class="dash-commands__count">{{ formatCount(command.count) }}</span>
+            </li>
+          </ol>
+          <p v-if="commandSinceNote" class="dash-footnote">{{ commandSinceNote }}</p>
+        </section>
+
+        <section class="dash-card" aria-labelledby="dash-ops-title">
+          <header class="dash-card__head">
+            <h3 id="dash-ops-title" class="dash-card__title">最近操作</h3>
+            <NuxtLink to="/admin/taiko/audit" class="dash-link">查看全部</NuxtLink>
+          </header>
+          <p v-if="!recentOperations.length" class="dash-empty">暂无记录</p>
+          <ul v-else class="dash-ops">
+            <li v-for="op in recentOperations" :key="op.id">
+              <span class="dash-ops__text" :title="op.fullKey || undefined">
+                <b>{{ op.actor }}</b> {{ op.sentence }}
+              </span>
+              <time class="dash-ops__time" :title="op.absoluteTime">{{ op.relativeTime }}</time>
+            </li>
+          </ul>
+        </section>
+
+        <section v-if="systemStatus" class="dash-card dash-system" aria-labelledby="dash-system-title">
+          <h3 id="dash-system-title" class="dash-card__title">系统状态</h3>
+          <dl class="dash-stats">
+            <div>
+              <dt>访问统计</dt>
+              <dd :title="systemStatus.trafficTitle || undefined">
+                <i class="dash-dot" :class="{ 'dash-dot--warn': !systemStatus.trafficOk }" aria-hidden="true" />
+                {{ systemStatus.trafficText }}
+              </dd>
+            </div>
+            <div>
+              <dt>最近备份</dt>
+              <dd :title="systemStatus.backupTitle || undefined">
+                {{ systemStatus.backupText }}
+                <small v-if="systemStatus.backupCount">近期 {{ systemStatus.backupCount }} 份</small>
+              </dd>
+            </div>
+            <div>
+              <dt>已排除的机器访问 <small>近 24 小时</small></dt>
+              <dd>{{ systemStatus.machineRequests }}</dd>
+            </div>
+            <div>
+              <dt>
+                按网络地址估算的访客 <small>近 24 小时</small>
+              </dt>
+              <dd>{{ systemStatus.ipVisitors }}</dd>
+            </div>
+            <div v-if="systemStatus.suspectDevices">
+              <dt>已拦截可疑设备 <small>今日</small></dt>
+              <dd>{{ systemStatus.suspectDevices }}</dd>
+            </div>
+          </dl>
+          <details class="dash-details">
+            <summary>统计说明</summary>
+            <div class="dash-details__body">
+              <p>统计时段：{{ systemStatus.windowText }}（北京时间）</p>
+              <p>活跃用户按设备与账号去重，浏览量只计页面打开，机器访问均不计入。</p>
+              <p>原始请求：{{ systemStatus.rawRequests }}</p>
+              <ul v-if="systemStatus.reasons.length">
+                <li v-for="reason in systemStatus.reasons" :key="reason.key">
+                  {{ reason.label }} <b>{{ formatCount(reason.count) }}</b>
+                </li>
+              </ul>
+              <p v-if="systemStatus.malformedLines > 0">无法识别的记录：{{ formatCount(systemStatus.malformedLines) }}</p>
+            </div>
+          </details>
+        </section>
+      </div>
+    </template>
   </div>
 </template>
 
 <style scoped>
-.traffic-quality {
-  padding: 16px 20px;
-  border-radius: 16px;
-  background: var(--el-bg-color);
-  color: var(--el-text-color-regular);
-  overflow-wrap: anywhere;
-}
-.traffic-quality p { margin: 0 0 10px; line-height: 1.6; }
-.traffic-quality summary { cursor: pointer; padding: 10px 0; }
-.traffic-quality ul { margin: 8px 0; padding-left: 24px; line-height: 1.8; }
-.admin-page-stack {
+.dash {
   display: grid;
   gap: 20px;
+  min-width: 0;
+  color: var(--admin-ink, #1b2426);
 }
 
-.admin-toolbar {
+/* header */
+.dash-head {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  margin-top: -8px;
 }
 
-.admin-metric-grid {
+.dash-head__time {
+  color: var(--admin-ink-secondary, #5d6b6e);
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dash-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--admin-primary-soft, #d7ece9);
+  color: var(--admin-primary, #006c76);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.dash-pill--warn {
+  background: var(--admin-amber-soft, #f6ead6);
+  color: var(--admin-warning, #8a5a12);
+  cursor: help;
+}
+
+.dash-refresh {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid var(--admin-border, #e3e8e8);
+  border-radius: 8px;
+  background: var(--admin-surface, #ffffff);
+  color: var(--admin-ink, #1b2426);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+
+.dash-refresh:hover:not(:disabled),
+.dash-refresh:focus-visible {
+  border-color: var(--admin-primary, #006c76);
+  color: var(--admin-primary, #006c76);
+}
+
+.dash-refresh:disabled {
+  cursor: progress;
+  color: var(--admin-ink-secondary, #5d6b6e);
+}
+
+.dash-refresh .spinning {
+  animation: dash-spin 0.9s linear infinite;
+}
+
+@keyframes dash-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* sections */
+.dash-section {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 16px;
+  gap: 10px;
+  min-width: 0;
 }
 
-.admin-chart-grid {
+.dash-section__title {
+  margin: 0;
+  color: var(--admin-ink-secondary, #5d6b6e);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.dash-keyrow {
+  display: grid;
+  grid-template-columns: minmax(240px, 1.35fr) minmax(0, 3fr);
+  gap: 12px;
+  align-items: stretch;
+}
+
+.dash-keyrow > .dash-section {
+  grid-template-rows: auto 1fr;
+}
+
+.dash-tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.dash-tile--primary {
+  height: 100%;
+  box-sizing: border-box;
+  border-color: #c6e1dd;
+  background: #f1f8f7;
+}
+
+.dash-tile--primary :deep(.admin-metric-card__value) {
+  color: var(--admin-primary, #006c76);
+  font-size: clamp(30px, 3.2vw, 40px);
+}
+
+.dash-tile__sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  color: var(--admin-ink-secondary, #5d6b6e);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dash-tile__delta {
+  color: var(--admin-ink-muted, #7a8789);
+}
+
+.dash-tile__note {
+  color: var(--admin-ink-muted, #7a8789);
+  font-size: 11px;
+}
+
+.dash-tile__spark {
+  height: 32px;
+  margin-top: 4px;
+}
+
+.dash-help {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 1px solid var(--admin-border, #e3e8e8);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--admin-ink-muted, #7a8789);
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: help;
+}
+
+.dash-help:hover,
+.dash-help:focus-visible {
+  border-color: var(--admin-primary, #006c76);
+  color: var(--admin-primary, #006c76);
+}
+
+.dash-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 20px;
+  gap: 16px;
+  align-items: stretch;
 }
 
-.admin-panel-card {
-  border-radius: 24px;
-  border: none;
+.dash-card {
+  min-width: 0;
+  padding: 18px 20px;
+  border-radius: var(--admin-radius, 12px);
+  border: 1px solid var(--admin-border, #e3e8e8);
+  background: var(--admin-surface, #ffffff);
 }
 
-.admin-panel-card__header {
+.dash-card__head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
+}
+
+.dash-card__title {
+  margin: 0 0 14px;
+  font-size: 15px;
   font-weight: 700;
 }
 
-.admin-panel-card__header small {
-  color: #8a7a66;
-  font-weight: 400;
+.dash-card__head .dash-card__title {
+  margin-bottom: 14px;
 }
 
-.admin-list {
+.dash-link {
+  color: var(--admin-primary, #006c76);
+  font-size: 13px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.dash-link:hover,
+.dash-link:focus-visible {
+  text-decoration: underline;
+}
+
+.dash-empty {
+  margin: 0;
+  padding: 24px 0;
+  color: var(--admin-ink-muted, #7a8789);
+  font-size: 13px;
+  text-align: center;
+}
+
+.dash-footnote {
+  margin: 12px 0 0;
+  color: var(--admin-ink-muted, #7a8789);
+  font-size: 12px;
+}
+
+/* users */
+.dash-users__total {
   display: grid;
-  gap: 12px;
+  gap: 2px;
 }
 
-.admin-list__item {
-  padding: 14px 16px;
-  border-radius: 16px;
-  background: rgba(247, 242, 232, 0.76);
-  display: grid;
-  gap: 6px;
-}
-
-.admin-list__item span {
-  color: #6c6050;
+.dash-users__total-label {
+  color: var(--admin-ink-secondary, #5d6b6e);
   font-size: 13px;
 }
 
-.mono {
-  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  word-break: break-all;
+.dash-users__total-value {
+  font-size: 36px;
+  font-weight: 700;
+  line-height: 1.1;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
-@media (max-width: 1180px) {
-  .admin-metric-grid,
-  .admin-chart-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+.dash-users__bar {
+  display: flex;
+  height: 8px;
+  margin-top: 16px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--admin-surface-subtle, #f7f9f9);
+}
+
+.dash-users__bar span {
+  display: block;
+  height: 100%;
+}
+
+.dash-users__bar span + span {
+  border-left: 2px solid var(--admin-surface, #ffffff);
+}
+
+.dash-users__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin: 8px 0 6px;
+  padding: 0;
+  list-style: none;
+  color: var(--admin-ink-secondary, #5d6b6e);
+  font-size: 12px;
+}
+
+.dash-users__legend li {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.dash-users__legend i {
+  width: 8px;
+  height: 8px;
+  border-radius: 2px;
+}
+
+.dash-users__legend b {
+  color: var(--admin-ink, #1b2426);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* stat list (users + system) */
+.dash-stats {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin: 8px 0 0;
+}
+
+.dash-stats > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--admin-border, #e3e8e8);
+}
+
+.dash-stats dt {
+  min-width: 0;
+  color: var(--admin-ink-secondary, #5d6b6e);
+  font-size: 13px;
+}
+
+.dash-stats dt small {
+  display: block;
+  margin-top: 2px;
+  color: var(--admin-ink-muted, #7a8789);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.dash-stats dd {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.dash-stats dd small {
+  color: var(--admin-ink-muted, #7a8789);
+  font-size: 12px;
+  font-weight: 400;
+}
+
+/* segmented toggle */
+.dash-segmented {
+  display: inline-flex;
+  padding: 2px;
+  border-radius: 8px;
+  background: var(--admin-surface-subtle, #f7f9f9);
+  border: 1px solid var(--admin-border, #e3e8e8);
+}
+
+.dash-segmented button {
+  padding: 4px 10px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--admin-ink-secondary, #5d6b6e);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.dash-segmented button.active {
+  background: var(--admin-surface, #ffffff);
+  color: var(--admin-primary, #006c76);
+  font-weight: 700;
+  box-shadow: 0 1px 2px rgba(27, 36, 38, 0.08);
+}
+
+.dash-segmented button:focus-visible {
+  outline: 2px solid var(--admin-primary, #006c76);
+  outline-offset: -2px;
+}
+
+/* commands */
+.dash-commands {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dash-commands li {
+  display: grid;
+  grid-template-columns: 20px minmax(64px, 30%) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 30px;
+  font-size: 13px;
+}
+
+.dash-commands__rank {
+  color: var(--admin-ink-muted, #7a8789);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.dash-commands li:nth-child(-n + 3) .dash-commands__rank {
+  color: var(--admin-primary, #006c76);
+  font-weight: 700;
+}
+
+.dash-commands__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dash-commands__bar {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--admin-surface-subtle, #f7f9f9);
+  overflow: hidden;
+}
+
+.dash-commands__bar i {
+  display: block;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--admin-primary, #006c76);
+  opacity: 0.75;
+}
+
+.dash-commands__count {
+  min-width: 44px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+/* recent operations */
+.dash-ops {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dash-ops li {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 9px 0;
+  border-top: 1px solid var(--admin-border, #e3e8e8);
+  font-size: 13px;
+}
+
+.dash-ops li:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.dash-ops__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--admin-ink-secondary, #5d6b6e);
+}
+
+.dash-ops__text b {
+  color: var(--admin-ink, #1b2426);
+  font-weight: 600;
+}
+
+.dash-ops__time {
+  flex: 0 0 auto;
+  color: var(--admin-ink-muted, #7a8789);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* system */
+.dash-system .dash-stats {
+  margin-top: 0;
+}
+
+.dash-system .dash-stats > div:first-child {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.dash-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: var(--admin-primary, #006c76);
+  align-self: center;
+}
+
+.dash-dot--warn {
+  background: var(--admin-amber, #c98a2e);
+}
+
+.dash-details {
+  margin-top: 4px;
+  border-top: 1px solid var(--admin-border, #e3e8e8);
+  font-size: 13px;
+}
+
+.dash-details summary {
+  padding: 10px 0 0;
+  color: var(--admin-ink-secondary, #5d6b6e);
+  cursor: pointer;
+}
+
+.dash-details summary:focus-visible {
+  outline: 2px solid var(--admin-primary, #006c76);
+  outline-offset: 2px;
+}
+
+.dash-details__body {
+  padding-top: 8px;
+  color: var(--admin-ink-secondary, #5d6b6e);
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+
+.dash-details__body p {
+  margin: 0;
+}
+
+.dash-details__body ul {
+  margin: 4px 0;
+  padding-left: 18px;
+}
+
+.dash-details__body b {
+  color: var(--admin-ink, #1b2426);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* responsive */
+@media (max-width: 1100px) {
+  .dash-keyrow {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 
-@media (max-width: 720px) {
-  .admin-metric-grid,
-  .admin-chart-grid {
-    grid-template-columns: 1fr;
+@media (max-width: 600px) {
+  .dash-tiles {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dash-tiles > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 900px) {
+  .dash-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 600px) {
+  .dash-tiles {
+    gap: 10px;
+  }
+
+  .dash-tile {
+    padding: 12px 14px;
+  }
+
+  .dash-tile :deep(.admin-metric-card__value) {
+    font-size: 22px;
+  }
+
+  .dash-card {
+    padding: 16px;
+  }
+
+  .dash-users__total-value {
+    font-size: 30px;
   }
 }
 </style>

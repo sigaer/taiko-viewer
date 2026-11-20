@@ -1,72 +1,94 @@
 <script setup lang="ts">
-defineProps<{
+import { computed } from "vue";
+
+const props = defineProps<{
   label: string;
   value: string | number;
   hint?: string;
   accent?: "gold" | "teal" | "rose" | "indigo";
 }>();
+
+const displayValue = computed(() =>
+  typeof props.value === "number" && Number.isFinite(props.value)
+    ? props.value.toLocaleString("zh-CN")
+    : props.value
+);
 </script>
 
 <template>
   <div class="admin-metric-card" :class="accent ? `accent-${accent}` : ''">
-    <span class="admin-metric-card__label">{{ label }}</span>
-    <strong class="admin-metric-card__value">{{ value }}</strong>
+    <span class="admin-metric-card__label">
+      <span>{{ label }}</span>
+      <slot name="help" />
+    </span>
+    <strong class="admin-metric-card__value">{{ displayValue }}</strong>
     <span v-if="hint" class="admin-metric-card__hint">{{ hint }}</span>
+    <slot />
   </div>
 </template>
 
 <style scoped>
 .admin-metric-card {
+  --metric-accent: var(--admin-primary, #006c76);
+  position: relative;
   display: grid;
-  gap: 8px;
-  min-height: 128px;
-  padding: 20px;
-  border-radius: 22px;
-  background:
-    radial-gradient(circle at top right, rgba(255, 255, 255, 0.24), transparent 38%),
-    linear-gradient(145deg, rgba(13, 18, 30, 0.96), rgba(29, 39, 58, 0.92));
-  color: #f8f7f1;
-  box-shadow: 0 18px 36px rgba(18, 23, 38, 0.18);
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+  padding: 16px 18px;
+  border-radius: var(--admin-radius, 12px);
+  border: 1px solid var(--admin-border, #e3e8e8);
+  background: var(--admin-surface, #ffffff);
+  color: var(--admin-ink, #1b2426);
 }
 
 .admin-metric-card__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
   font-size: 13px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: rgba(248, 247, 241, 0.76);
+  font-weight: 600;
+  color: var(--admin-ink-secondary, #5d6b6e);
+}
+
+.admin-metric-card__label::before {
+  content: "";
+  width: 6px;
+  height: 6px;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--metric-accent);
 }
 
 .admin-metric-card__value {
-  font-size: clamp(30px, 4vw, 42px);
-  line-height: 1;
+  font-size: clamp(24px, 2.6vw, 32px);
+  font-weight: 700;
+  line-height: 1.15;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  overflow-wrap: anywhere;
 }
 
 .admin-metric-card__hint {
-  color: rgba(248, 247, 241, 0.72);
-  font-size: 13px;
+  color: var(--admin-ink-muted, #7a8789);
+  font-size: 12px;
+  overflow-wrap: anywhere;
 }
 
 .accent-gold {
-  background:
-    radial-gradient(circle at top right, rgba(255, 255, 255, 0.22), transparent 38%),
-    linear-gradient(145deg, rgba(58, 39, 12, 0.96), rgba(120, 82, 21, 0.92));
+  --metric-accent: var(--admin-amber, #c98a2e);
 }
 
 .accent-teal {
-  background:
-    radial-gradient(circle at top right, rgba(255, 255, 255, 0.2), transparent 38%),
-    linear-gradient(145deg, rgba(7, 52, 62, 0.96), rgba(22, 114, 131, 0.92));
+  --metric-accent: var(--admin-primary, #006c76);
 }
 
 .accent-rose {
-  background:
-    radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 38%),
-    linear-gradient(145deg, rgba(77, 21, 36, 0.96), rgba(147, 52, 77, 0.92));
+  --metric-accent: #b8576b;
 }
 
 .accent-indigo {
-  background:
-    radial-gradient(circle at top right, rgba(255, 255, 255, 0.18), transparent 38%),
-    linear-gradient(145deg, rgba(21, 33, 75, 0.96), rgba(68, 86, 171, 0.92));
+  --metric-accent: #4f63a8;
 }
 </style>

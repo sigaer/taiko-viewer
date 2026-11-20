@@ -36,7 +36,7 @@ const navItems = [
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  gap: 6px;
+  gap: 2px;
   width: 100%;
   align-self: start;
 }
@@ -44,27 +44,31 @@ const navItems = [
 .admin-shell-nav__item {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  min-height: 42px;
-  padding: 9px 12px;
-  border-radius: 12px;
-  color: rgba(247, 246, 240, 0.78);
+  min-height: 38px;
+  padding: 7px 10px;
+  border-radius: 8px;
+  color: var(--admin-sidebar-ink, rgba(234, 243, 242, 0.78));
   text-decoration: none;
   font-size: 14px;
   line-height: 1.35;
-  transition: transform 0.18s ease, background-color 0.18s ease, color 0.18s ease;
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 .admin-shell-nav__item:hover {
-  transform: translateX(4px);
-  background: rgba(255, 255, 255, 0.08);
-  color: #fffaf0;
+  background: rgba(234, 243, 242, 0.07);
+  color: var(--admin-sidebar-ink-strong, #f2f8f7);
+}
+
+.admin-shell-nav__item:focus-visible {
+  outline: 2px solid var(--admin-primary-soft, #d7ece9);
+  outline-offset: -2px;
 }
 
 .admin-shell-nav__item.active {
-  background: linear-gradient(135deg, rgba(236, 200, 114, 0.94), rgba(215, 144, 63, 0.9));
-  color: #2f2211;
+  background: var(--admin-primary-soft, #d7ece9);
+  color: var(--admin-primary, #006c76);
   font-weight: 700;
 }
 
@@ -72,16 +76,37 @@ const navItems = [
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.1);
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  background: rgba(234, 243, 242, 0.08);
   font-size: 11px;
   font-weight: 700;
   flex: 0 0 auto;
 }
 
 .admin-shell-nav__item.active .admin-shell-nav__badge {
-  background: rgba(47, 34, 17, 0.12);
+  background: var(--admin-primary, #006c76);
+  color: #ffffff;
+}
+
+@media (max-width: 1024px) {
+  .admin-shell-nav {
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  .admin-shell-nav__item {
+    width: auto;
+    min-height: 32px;
+    padding: 5px 10px;
+    gap: 6px;
+    font-size: 13px;
+  }
+
+  .admin-shell-nav__badge {
+    display: none;
+  }
 }
 </style>

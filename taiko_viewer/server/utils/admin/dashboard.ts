@@ -9,6 +9,8 @@ import { getAdminManagedPaths } from "./shared";
 import { getViewerTrafficStore } from "./traffic-runtime";
 
 import { dashboardDayKey as formatDayKey, dashboardRollupTime } from "./dashboard-time";
+import { shiftDayKey } from "~/server/services/user-activity/daily-activity";
+import { dauSummaryFields, readDailyActivityStats } from "~/server/services/user-activity/activity-stats";
 
 type RollupRow = {
   id: number;
@@ -34,7 +36,8 @@ type UploadStatsCache = {
   expiresAt: number;
   totalUploads: number;
   uploads24h: number;
-  dailyUploads: Array<{ day: string; count: number }>;
+  uploaders24h: number;
+  dailyUploads: Array<{ day: string; count: number; uploaders: number }>;
 };
 
 const DASHBOARD_CACHE_TTL_MS = 60 * 1000;
@@ -70,9 +73,13 @@ const scanUserdataUploadStats = async () => {
 
   const { userdataDir } = getAdminManagedPaths();
   const dailyMap = new Map<string, number>();
+  const dailyUploaderMap = new Map<string, Set<string>>();
+  const uploaders24hSet = new Set<string>();
   let totalUploads = 0;
   let uploads24h = 0;
   const now = Date.now();
+  // Distinct uploader sets are only kept for the window the dashboard shows.
+  const uploaderCutoffDay = shiftDayKey(formatDayKey(new Date(now)), -40);
 
   try {
     const rootEntries = await readdir(userdataDir, { withFileTypes: true });
@@ -93,9 +100,15 @@ const scanUserdataUploadStats = async () => {
           const fileStat = await stat(fullPath);
           if (now - fileStat.mtimeMs <= 24 * 60 * 60 * 1000) {
             uploads24h += 1;
+            uploaders24hSet.add(entry.name);
           }
           const dayKey = formatDayKey(fileStat.mtime);
           dailyMap.set(dayKey, Number(dailyMap.get(dayKey) || 0) + 1);
+          if (dayKey >= uploaderCutoffDay) {
+            const uploaders = dailyUploaderMap.get(dayKey) || new Set<string>();
+            uploaders.add(entry.name);
+            dailyUploaderMap.set(dayKey, uploaders);
+          }
         } catch {
           // Ignore deleted or unreadable snapshots.
         }
@@ -108,12 +121,13 @@ const scanUserdataUploadStats = async () => {
   const dailyUploads = Array.from(dailyMap.entries())
     .sort((a, b) => a[0].localeCompare(b[0]))
     .slice(-30)
-    .map(([day, count]) => ({ day, count }));
+    .map(([day, count]) => ({ day, count, uploaders: dailyUploaderMap.get(day)?.size || 0 }));
 
   uploadStatsCache = {
     expiresAt: Date.now() + UPLOAD_SCAN_CACHE_TTL_MS,
     totalUploads,
     uploads24h,
+    uploaders24h: uploaders24hSet.size,
     dailyUploads
   };
   return uploadStatsCache;
@@ -212,7 +226,8 @@ const buildDashboardPayload = async () => {
     recentAuditRows,
     topCommands,
     uploadStats,
-    taikoCommandStatsSince
+    taikoCommandStatsSince,
+    activity
   ] = await Promise.all([
     db.execute<DbRow<{ total: number }>[]>("SELECT COUNT(*) AS total FROM web_user_accounts"),
     db.execute<DbRow<{ id: string }>[]>("SELECT DISTINCT id FROM bind WHERE is_current = 1"),
@@ -251,10 +266,11 @@ const buildDashboardPayload = async () => {
     getRollupSeries(TAIKO_COMMAND_PLATFORM_SOURCE_QQ, "hour", 48),
     getRollupSeries(TAIKO_COMMAND_PLATFORM_SOURCE_ONEBOT, "hour", 48),
     listAdminBackups(10),
-    listAdminActionLogs({ page: 1, pageSize: 8 }),
+    listAdminActionLogs({ page: 1, pageSize: 10, excludeActions: ["read"] }),
     getTopCommandRows(10),
     scanUserdataUploadStats(),
-    getTaikoCommandMeta()
+    getTaikoCommandMeta(),
+    readDailyActivityStats(getAccountDb())
   ]);
 
   const viewerUsers = Number(viewerCountRows[0][0]?.total || 0);
@@ -280,13 +296,15 @@ const buildDashboardPayload = async () => {
       ...newUserRows[0].map((row) => row.day_key),
       ...newBindingRows[0].map((row) => row.day_key),
       ...uploadStats.dailyUploads.map((row) => row.day),
-      ...traffic.daily.map((row) => row.day)
+      ...traffic.daily.map((row) => row.day),
+      ...(activity ? activity.days : [])
     ])
   ).sort((a, b) => a.localeCompare(b));
 
   const newUsersMap = new Map(newUserRows[0].map((row) => [row.day_key, Number(row.total || 0)]));
   const newBindingsMap = new Map(newBindingRows[0].map((row) => [row.day_key, Number(row.total || 0)]));
   const uploadMap = new Map(uploadStats.dailyUploads.map((row) => [row.day, row.count]));
+  const uploaderMap = new Map(uploadStats.dailyUploads.map((row) => [row.day, row.uploaders]));
   const accessDailyMap = new Map(traffic.daily.map((row) => [row.day, row]));
 
   const accessHourlySeries = traffic.hourly;
@@ -307,6 +325,9 @@ const buildDashboardPayload = async () => {
     newUsers: Number(newUsersMap.get(day) || 0),
     newBindings: Number(newBindingsMap.get(day) || 0),
     uploads: Number(uploadMap.get(day) || 0),
+    uploaders: Number(uploaderMap.get(day) || 0),
+    // null = not tracked yet on that day (before the stats start), not zero.
+    activeUsers: activity ? activity.activeOn(day) : null,
     pv: Number(accessDailyMap.get(day)?.pv || 0),
     uv: Number(accessDailyMap.get(day)?.uv || 0),
     homePv: Number(accessDailyMap.get(day)?.homePv || 0)
@@ -335,7 +356,9 @@ const buildDashboardPayload = async () => {
       homePv24h,
       botCommands24h,
       botCommands24hByPlatform,
-      recentNewUsers: dailySeries.slice(-7).reduce((sum, item) => sum + item.newUsers, 0)
+      recentNewUsers: dailySeries.slice(-7).reduce((sum, item) => sum + item.newUsers, 0),
+      uploaders24h: uploadStats.uploaders24h,
+      ...dauSummaryFields(activity)
     },
     trends: {
       accessHourly: accessHourlySeries,
@@ -344,6 +367,7 @@ const buildDashboardPayload = async () => {
     },
     topCommands,
     taikoCommandStatsSince,
+    dauSince: activity?.since || null,
     trafficQuality: traffic.quality,
     backups: backupRows,
     recentAudits: recentAuditRows.items

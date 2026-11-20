@@ -33,32 +33,26 @@ useHead({
   <div class="admin-layout">
     <aside class="admin-layout__sidebar">
       <div class="admin-layout__brand">
-        <span class="admin-layout__brand-mark">太</span>
+        <span class="admin-layout__brand-mark" aria-hidden="true">太</span>
         <div>
           <strong>Taiko Admin</strong>
-          <p>KOI-inspired console</p>
+          <p>管理后台</p>
         </div>
       </div>
       <AdminShellNav />
-      <div class="admin-layout__operator">
-        <span class="admin-layout__operator-label">当前管理员</span>
-        <strong>{{ adminUser?.username || "未登录" }}</strong>
-        <span v-if="adminUser?.expiresAt" class="admin-layout__operator-expire">
-          令牌到期：{{ formatAdminDateTime(adminUser.expiresAt) }}
-        </span>
-        <el-button plain class="admin-layout__logout" @click="logout">退出登录</el-button>
+      <div
+        class="admin-layout__operator"
+        :title="adminUser?.expiresAt ? `登录有效期至 ${formatAdminDateTime(adminUser.expiresAt)}` : undefined"
+      >
+        <span class="admin-layout__avatar" aria-hidden="true">{{ (adminUser?.username || "?").slice(0, 1).toUpperCase() }}</span>
+        <strong class="admin-layout__operator-name">{{ adminUser?.username || "未登录" }}</strong>
+        <button type="button" class="admin-layout__logout" @click="logout">退出</button>
       </div>
     </aside>
 
     <main class="admin-layout__main">
       <header class="admin-layout__topbar">
-        <div>
-          <span class="admin-layout__eyebrow">Taiko 后台管理</span>
-          <h1>{{ breadcrumbMap[route.path] || "管理后台" }}</h1>
-        </div>
-        <div class="admin-layout__chip">
-          <span>仅授权人员可访问</span>
-        </div>
+        <h1>{{ breadcrumbMap[route.path] || "管理后台" }}</h1>
       </header>
 
       <div class="admin-layout__content">
@@ -70,129 +64,207 @@ useHead({
 
 <style scoped>
 .admin-layout {
+  --admin-bg: #f4f6f6;
+  --admin-surface: #ffffff;
+  --admin-surface-subtle: #f7f9f9;
+  --admin-border: #e3e8e8;
+  --admin-ink: #1b2426;
+  --admin-ink-secondary: #5d6b6e;
+  --admin-ink-muted: #7a8789;
+  --admin-primary: #006c76;
+  --admin-primary-hover: #005a63;
+  --admin-primary-soft: #d7ece9;
+  --admin-amber: #c98a2e;
+  --admin-amber-soft: #f6ead6;
+  --admin-warning: #8a5a12;
+  --admin-radius: 12px;
+  --admin-sidebar-bg: #0f2426;
+  --admin-sidebar-ink: rgba(234, 243, 242, 0.78);
+  --admin-sidebar-ink-strong: #f2f8f7;
+  --el-color-primary: var(--admin-primary);
+  --el-color-primary-light-3: #4d98a0;
+  --el-color-primary-light-5: #80b6bb;
+  --el-color-primary-light-7: #b3d3d6;
+  --el-color-primary-light-8: #cce2e4;
+  --el-color-primary-light-9: #e6f0f1;
+  --el-color-primary-dark-2: var(--admin-primary-hover);
   min-height: 100vh;
   display: grid;
-  grid-template-columns: 300px minmax(0, 1fr);
-  background:
-    radial-gradient(circle at top left, rgba(244, 217, 154, 0.42), transparent 22%),
-    linear-gradient(180deg, #efe8dd 0%, #f8f4ee 58%, #f0e6d8 100%);
+  grid-template-columns: 248px minmax(0, 1fr);
+  background: var(--admin-bg);
+  color: var(--admin-ink);
 }
 
 .admin-layout__sidebar {
   position: sticky;
   top: 0;
-  min-height: 100vh;
-  padding: 28px 22px;
+  height: 100vh;
+  min-height: 0;
+  padding: 22px 14px 16px;
   display: grid;
-  grid-template-rows: auto 1fr auto;
-  gap: 24px;
-  background:
-    radial-gradient(circle at top right, rgba(255, 240, 200, 0.16), transparent 28%),
-    linear-gradient(180deg, #0e1728 0%, #182338 100%);
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 20px;
+  overflow-y: auto;
+  background: var(--admin-sidebar-bg);
 }
 
 .admin-layout__brand {
   display: flex;
   align-items: center;
-  gap: 14px;
-  color: #fff8ec;
+  gap: 12px;
+  padding: 0 8px;
+  color: var(--admin-sidebar-ink-strong);
 }
 
 .admin-layout__brand strong {
   display: block;
-  font-size: 18px;
+  font-size: 16px;
+  letter-spacing: 0.01em;
 }
 
 .admin-layout__brand p {
-  margin: 4px 0 0;
-  color: rgba(255, 248, 236, 0.7);
+  margin: 2px 0 0;
+  color: var(--admin-sidebar-ink);
   font-size: 12px;
 }
 
 .admin-layout__brand-mark {
-  width: 52px;
-  height: 52px;
-  border-radius: 18px;
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #f7cf7b, #d99342);
-  color: #2f2211;
-  font-size: 24px;
+  background: var(--admin-primary);
+  color: #ffffff;
+  font-size: 18px;
   font-weight: 800;
+  flex: 0 0 auto;
 }
 
 .admin-layout__operator {
-  padding: 18px;
-  border-radius: 18px;
-  background: rgba(255, 255, 255, 0.06);
-  color: #f9f5eb;
-  display: grid;
-  gap: 8px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  padding: 10px 8px 0;
+  border-top: 1px solid rgba(234, 243, 242, 0.12);
+  color: var(--admin-sidebar-ink-strong);
 }
 
-.admin-layout__operator-label,
-.admin-layout__operator-expire {
-  color: rgba(249, 245, 235, 0.7);
+.admin-layout__avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  background: rgba(215, 236, 233, 0.16);
+  color: var(--admin-primary-soft);
   font-size: 12px;
+  font-weight: 700;
+}
+
+.admin-layout__operator-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 14px;
+  font-weight: 600;
 }
 
 .admin-layout__logout {
-  margin-top: 8px;
-  border-color: rgba(255, 255, 255, 0.18);
-  color: #fef5e5;
+  flex: 0 0 auto;
+  padding: 5px 10px;
+  border: 1px solid rgba(234, 243, 242, 0.2);
+  border-radius: 8px;
   background: transparent;
+  color: var(--admin-sidebar-ink);
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.admin-layout__logout:hover,
+.admin-layout__logout:focus-visible {
+  background: rgba(234, 243, 242, 0.1);
+  color: var(--admin-sidebar-ink-strong);
 }
 
 .admin-layout__main {
   min-width: 0;
-  padding: 28px;
+  padding: 24px 28px 40px;
 }
 
 .admin-layout__topbar {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 22px;
-}
-
-.admin-layout__eyebrow {
-  display: inline-block;
-  margin-bottom: 8px;
-  color: #8f6d3f;
-  font-size: 12px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
+  margin-bottom: 16px;
 }
 
 .admin-layout__topbar h1 {
   margin: 0;
-  color: #1f2937;
-  font-size: clamp(28px, 4vw, 38px);
-}
-
-.admin-layout__chip {
-  padding: 10px 14px;
-  border-radius: 999px;
-  background: rgba(255, 250, 241, 0.88);
-  color: #6d5a42;
-  box-shadow: 0 10px 26px rgba(130, 113, 87, 0.1);
+  color: var(--admin-ink);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.3;
 }
 
 .admin-layout__content {
   display: grid;
   gap: 20px;
+  min-width: 0;
 }
 
 @media (max-width: 1024px) {
   .admin-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .admin-layout__sidebar {
     position: static;
-    min-height: auto;
+    height: auto;
+    padding: 14px 16px;
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-rows: auto auto;
+    gap: 12px;
+    overflow: visible;
+  }
+
+  .admin-layout__brand {
+    padding: 0;
+  }
+
+  .admin-layout__sidebar :deep(.admin-shell-nav) {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+
+  .admin-layout__operator {
+    grid-column: 2;
+    grid-row: 1;
+    padding: 0;
+    border-top: 0;
+  }
+
+  .admin-layout__main {
+    padding: 18px 16px 32px;
+  }
+}
+
+@media (max-width: 600px) {
+  .admin-layout__brand p {
+    display: none;
+  }
+
+  .admin-layout__operator-name {
+    max-width: 96px;
   }
 }
 </style>
