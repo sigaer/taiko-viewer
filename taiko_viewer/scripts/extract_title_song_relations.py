@@ -44,7 +44,13 @@ GENERIC_PHRASES = (
     "同时",
     "歌曲",
     "特定の曲",
+    "1プレイ中",
+    "オプション",
+    "通关所有曲目",
 )
+NON_SONG_CANDIDATES = {
+    "IA曲", "GUMI曲", "公式の初音ミク曲", "東方Projectアレンジ楽曲", "アイドルマスターの楽曲",
+}
 EXCLUDED_TITLE_NAMES = {
     "765の達人",
     "876の達人",
@@ -146,6 +152,8 @@ def detect_requirement_type(condition_text: str) -> str | None:
 
 
 def detect_difficulty(condition_text: str) -> str:
+    # A song name such as 《KOKODOKO? 或许是DOKKA岛呢!》 is not a difficulty connector.
+    condition_text = re.sub(r"《[^》]+》", "", condition_text)
     has_oni = bool(re.search(r"魔王|難易度おに|おにで|おに譜面", condition_text))
     has_inner_oni = bool(
         re.search(r"魔王[（(]隐藏[)）]|魔王[（(]裏[)）]|[（(]裏[)）]|裏譜面|里谱|隠し譜面", condition_text)
@@ -168,7 +176,7 @@ def detect_difficulty(condition_text: str) -> str:
 def cleanup_song_name(name: str) -> str:
     value = html.unescape(name).strip()
     value = re.sub(r"\s+", " ", value)
-    value = value.strip(" \t\r\n.,，。:：;；\"'[]《》")
+    value = value.strip(" \t\r\n，:：;；\"《》")
     return value
 
 
@@ -176,7 +184,7 @@ def cleanup_condition_song_name(name: str) -> str:
     value = html.unescape(name).strip()
     value = re.sub(r"\s+", " ", value)
     value = value.replace("》《", "|")
-    return value.strip(" \t\r\n.,，。:：;；\"'")
+    return value.strip(" \t\r\n")
 
 
 def split_song_blob(blob: str) -> list[str]:
@@ -188,10 +196,14 @@ def split_song_blob(blob: str) -> list[str]:
 
 
 def is_generic_candidate(name: str) -> bool:
-    return any(phrase in name for phrase in GENERIC_PHRASES)
+    return name in NON_SONG_CANDIDATES or any(phrase in name for phrase in GENERIC_PHRASES)
 
 
 def extract_plain_song_names(condition_text: str, requirement_type: str) -> list[str]:
+    # Quoted song names are authoritative boundaries; punctuation inside belongs to the name.
+    quoted = extract_api_song_names(condition_text)
+    if quoted:
+        return quoted
     names: list[str] = []
 
     if requirement_type == "full_combo":
@@ -453,7 +465,7 @@ def build_relations(
     by_title: dict[str, list[dict[str, Any]]] = defaultdict(list)
     by_song_id: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for item in deduped:
-        identity = {key: item[key] for key in ("song_ids", "title_ids", "song_match")}
+        identity = {key: item[key] for key in ("song_ids", "title_ids", "song_match", "song_match_method")}
         by_song[item["song_name"]].append(
             {
                 **identity,

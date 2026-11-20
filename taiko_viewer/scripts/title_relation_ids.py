@@ -8,7 +8,97 @@ from collections import defaultdict
 
 
 def name_key(value):
-    return " ".join(unicodedata.normalize("NFKC", html.unescape(str(value or ""))).split()).casefold()
+    return song_name_key(value).casefold()
+
+
+def song_name_key(value):
+    text = unicodedata.normalize("NFKC", html.unescape(str(value or "")))
+    return " ".join(text.translate(str.maketrans({"’": "'", "‘": "'"})).split())
+
+
+# Reviewed against the actual catalog and existing local title details on 2026-11-20.
+# These are explicit translations/upstream spellings, not punctuation-stripped fuzzy keys.
+REVIEWED_SONG_ALIASES = {
+    "古典乐组曲（寒假篇）": "クラシックメドレー（冬休み編）",
+    "DAJARE de OSHARE": "ダジャレdeオシャレ",
+    "YELL EX MAKINA!": "YELL EX MACHINA!",
+    "GO GET'EM": "GO GET'EM!",
+    "Nesin Amatias": "【限定】 Nesin Amatias",
+    "よくでる15300": "【限定】 よくでる15300",
+    "黄ダルマ2000": "【限定】 黄ダルマ2000",
+    "ココドコ？多分ドッカ島": "ココドコ？多分ドッカ島！",
+}
+
+# Both arcade IDs are intentionally associated in the reviewed title source.
+# An unlisted third ID or changed Japanese name invalidates this disambiguation.
+REVIEWED_ARCADE_GROUPS = {
+    "ヘイラ": frozenset({1146, 1264}),
+    "いっそこのままで": frozenset({939, 1263}),
+    "ボクハシンセ": frozenset({191, 1266}),
+    "濃紅": frozenset({450, 1257}),
+}
+
+
+class SongMatcher:
+    def __init__(self, songs):
+        self.exact = defaultdict(set)
+        self.folded = defaultdict(set)
+        self.songs = {}
+        for song in songs:
+            song_id = positive_id(song.get("id"))
+            if song_id is None:
+                raise ValueError("Invalid song catalog ID")
+            self.songs[song_id] = song
+            for field in ("song_name", "song_name_jp"):
+                key = song_name_key(song.get(field))
+                if key and key != "-":
+                    self.exact[key].add(song_id)
+                    self.folded[key.casefold()].add(song_id)
+        self.aliases = {name_key(alias): canonical for alias, canonical in REVIEWED_SONG_ALIASES.items()}
+
+    def lookup(self, name):
+        key = song_name_key(name)
+        if self.exact.get(key):
+            return self.exact[key], "exact"
+        return self.folded.get(key.casefold(), set()), "casefold"
+
+    def resolve(self, name, difficulty):
+        candidates, method = self.lookup(name)
+        alias_names = [name]
+        if not candidates and difficulty in {"inner_oni", "oni_or_inner_oni"}:
+            stripped = re.sub(r"\s*\((?:裏|裏譜面|里|里谱)\)$", "", song_name_key(name))
+            alias_names.append(stripped)
+            candidates, method = self.lookup(stripped)
+            if candidates:
+                method = "chart_suffix"
+        if not candidates:
+            for alias in alias_names:
+                if canonical := self.aliases.get(name_key(alias)):
+                    candidates, _ = self.lookup(canonical)
+                    method = "reviewed_alias"
+                    break
+        if len(candidates) > 1:
+            arcade = {
+                sid for sid in candidates
+                if positive_id(self.songs[sid].get("nijiiro_id")) == sid
+                and self.songs[sid].get("shelf_status") in {0, 1}
+            }
+            if arcade:
+                candidates = arcade
+                method = "arcade_catalog"
+        if len(candidates) == 1:
+            return sorted(candidates), "matched", method
+        if len(candidates) > 1:
+            for japanese_name, group in REVIEWED_ARCADE_GROUPS.items():
+                if candidates == group and all(
+                    song_name_key(self.songs[sid].get("song_name_jp")) == song_name_key(japanese_name)
+                    and positive_id(self.songs[sid].get("nijiiro_id")) == sid
+                    and self.songs[sid].get("shelf_status") in {0, 1}
+                    for sid in candidates
+                ):
+                    return sorted(candidates), "matched", "reviewed_arcade_group"
+            return [], "ambiguous", "ambiguous"
+        return [], "unmatched", "unmatched"
 
 
 def title_name_key(value):
@@ -33,15 +123,7 @@ PLATE_SCOPES = {
 
 
 def enrich_relations(relations, songs, catalog, detect_requirement, detect_difficulty):
-    lookup = defaultdict(set)
-    for song in songs:
-        song_id = positive_id(song.get("id"))
-        if song_id is None:
-            raise ValueError("Invalid song catalog ID")
-        for field in ("song_name", "song_name_jp"):
-            key = name_key(song.get(field))
-            if key and key != "-":
-                lookup[key].add(song_id)
+    matcher = SongMatcher(songs)
 
     titles = {}
     by_name = defaultdict(list)
@@ -78,14 +160,7 @@ def enrich_relations(relations, songs, catalog, detect_requirement, detect_diffi
     enriched = []
     for original in relations:
         row = dict(original)
-        key = name_key(row["song_name"])
-        candidates = lookup.get(key, set())
-        # A wiki link may include the chart-side suffix; it is not part of the song name.
-        if not candidates and row["difficulty_scope"] in {"inner_oni", "oni_or_inner_oni"}:
-            stripped = re.sub(r"\s*\((?:裏|裏譜面|里|里谱)\)$", "", key)
-            candidates = lookup.get(stripped, set())
-        row["song_ids"] = sorted(candidates) if len(candidates) == 1 else []
-        row["song_match"] = "matched" if len(candidates) == 1 else "ambiguous" if candidates else "unmatched"
+        row["song_ids"], row["song_match"], row["song_match_method"] = matcher.resolve(row["song_name"], row["difficulty_scope"])
         row["title_ids"] = []
         for title_id, requirement, difficulty in by_name.get(title_name_key(row["title_name"]), []):
             source_title_id = positive_id(row.get("source_title_id"))
