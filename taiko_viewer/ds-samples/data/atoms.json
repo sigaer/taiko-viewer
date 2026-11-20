@@ -28,7 +28,7 @@
     { "plateStyle": "rainbow", "name": "博歌乐爱好者" }
   ],
   "noPlate": { "plate": null, "name": "手を叩きながら歩いていこう" },
-  "unmappedPlate": { "plate": 7, "name": "フルコンボの達人" },
+  "unmappedPlate": { "plate": 999, "name": "フルコンボの達人" },
   "longTitles": [
     { "plate": 42, "name": "案山子姫 -Princess Scarecrow-" },
     { "plate": 60, "name": "ミ(＃ﾟДﾟ)ミRAGING!!彡(ﾟДﾟ＃)彡" }

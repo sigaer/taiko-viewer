@@ -2,116 +2,1066 @@
   "cropRule": {
     "mode": "top_slice",
     "removeBottomPx": 45,
-    "description": "Matches the upper-part crop used by My Don title showcase rendering."
+    "description": "Top slice; retain the nine previously reviewed web variants."
   },
   "items": [
     {
       "plateId": 0,
-      "usage": {
-        "requirementType": "clear",
-        "difficultyScope": "unspecified"
-      },
-      "usedByCurrentRelations": true,
       "sourceFile": "assets/name_plate/name_plate_0.png",
       "outputFile": "/assets/my-don/title-plate-slices/name_plate_0_slice.png",
       "width": 556,
-      "height": 45
+      "height": 45,
+      "textBand": {
+        "top": 4,
+        "bottom": 42,
+        "art": null
+      },
+      "sha256": "4719b5e7b7efbc23ca127a4705c70b087546ddf388f253cdac0ebda62d7bf106",
+      "retainedLegacySlice": true,
+      "usage": {
+        "requirementType": "clear",
+        "difficultyScope": "unspecified"
+      }
     },
     {
       "plateId": 1,
-      "usage": {
-        "requirementType": "all_perfect",
-        "difficultyScope": "unspecified"
-      },
-      "usedByCurrentRelations": false,
       "sourceFile": "assets/name_plate/name_plate_1.png",
       "outputFile": "/assets/my-don/title-plate-slices/name_plate_1_slice.png",
       "width": 556,
-      "height": 45
+      "height": 45,
+      "textBand": {
+        "top": 4,
+        "bottom": 42,
+        "art": null
+      },
+      "sha256": "53cc90432428ab0f39908d1960e568313bf28f2e2c0f258764bc53f716dcabbc",
+      "retainedLegacySlice": true,
+      "usage": {
+        "requirementType": "all_perfect",
+        "difficultyScope": "unspecified"
+      }
     },
     {
       "plateId": 2,
-      "usage": {
-        "requirementType": "full_combo",
-        "difficultyScope": "unspecified"
-      },
-      "usedByCurrentRelations": true,
       "sourceFile": "assets/name_plate/name_plate_2.png",
       "outputFile": "/assets/my-don/title-plate-slices/name_plate_2_slice.png",
       "width": 556,
-      "height": 45
+      "height": 45,
+      "textBand": {
+        "top": 4,
+        "bottom": 42,
+        "art": null
+      },
+      "sha256": "4a94ba78801adea41e1ba07c9a6c63eb2be19b6eb640887f778cbe5e1256a7f0",
+      "retainedLegacySlice": true,
+      "usage": {
+        "requirementType": "full_combo",
+        "difficultyScope": "unspecified"
+      }
+    },
+    {
+      "plateId": 3,
+      "sourceFile": "assets/name_plate/name_plate_3.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_3_slice.png",
+      "width": 556,
+      "height": 45,
+      "textBand": {
+        "top": 4,
+        "bottom": 42,
+        "art": null
+      },
+      "sha256": "304c659e1ba186bc7fa4eb1975fb38530654d912fd2c4380882f1c5791b2e9e2",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 4,
+      "sourceFile": "assets/name_plate/name_plate_4.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_4_slice.png",
+      "width": 556,
+      "height": 45,
+      "textBand": {
+        "top": 4,
+        "bottom": 42,
+        "art": null
+      },
+      "sha256": "76c7ec32a471aefd136a2d4a138207c31308759e1c820a5b2dee324d9224fc32",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 5,
+      "sourceFile": "assets/name_plate/name_plate_5.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_5_slice.png",
+      "width": 556,
+      "height": 45,
+      "textBand": {
+        "top": 4,
+        "bottom": 42,
+        "art": null
+      },
+      "sha256": "8784d7d7ef23b800d38f3a140e52314fd653f283c9ba1c14ec050003b9ddabaa",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 6,
+      "sourceFile": "assets/name_plate/name_plate_6.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_6_slice.png",
+      "width": 556,
+      "height": 45,
+      "textBand": {
+        "top": 4,
+        "bottom": 42,
+        "art": null
+      },
+      "sha256": "8ca567f105dc9c916d497b56d8c89f84e862ba96f935bc22777f9cdd628f34ab",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 7,
+      "sourceFile": "assets/name_plate/name_plate_7.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_7_slice.png",
+      "width": 556,
+      "height": 45,
+      "textBand": {
+        "top": 4,
+        "bottom": 42,
+        "art": null
+      },
+      "sha256": "af931317372fd37e809ddb80f9e28f8f780b4fac3d8f458cfc01c278605ac9c5",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 10,
+      "sourceFile": "assets/name_plate/name_plate_10.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_10_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "38ca13d55c664aa6e29c4719ca044067ac7c27779ec6803f19a9b018fecff2ad",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 11,
+      "sourceFile": "assets/name_plate/name_plate_11.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_11_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "16d61803906e4b4a4456510f525db85ca117029f1213894656a996c8da22f606",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 12,
+      "sourceFile": "assets/name_plate/name_plate_12.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_12_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "5480bf627589d6515c9137f7a6ee151e0f3a8b0b4551d179697e397764d2629f",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 13,
+      "sourceFile": "assets/name_plate/name_plate_13.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_13_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "982143f7bb36bd77ff8ac7a16519e519be22822a9e16a1a4ec3ebc58fd56f5e5",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 14,
+      "sourceFile": "assets/name_plate/name_plate_14.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_14_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "cb55b0938aebfa4c165157e0cf25ac9e03fcbc9991975a8c67d07b4d11ec563a",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 15,
+      "sourceFile": "assets/name_plate/name_plate_15.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_15_slice.png",
+      "width": 556,
+      "height": 99,
+      "textBand": {
+        "top": 58,
+        "bottom": 96,
+        "art": 430
+      },
+      "sha256": "a1c6bc314cafdc1e35fb48eb6602ef6cb78c1670163b3d8f5d57f37eb29eddd9",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 16,
+      "sourceFile": "assets/name_plate/name_plate_16.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_16_slice.png",
+      "width": 556,
+      "height": 90,
+      "textBand": {
+        "top": 49,
+        "bottom": 87,
+        "art": 430
+      },
+      "sha256": "fb67837d817480fe5f99095915fdaf69da1662f89c68c370aa1e25c2e6bc6228",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 17,
+      "sourceFile": "assets/name_plate/name_plate_17.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_17_slice.png",
+      "width": 556,
+      "height": 92,
+      "textBand": {
+        "top": 51,
+        "bottom": 89,
+        "art": 430
+      },
+      "sha256": "dfecd921fcf32092dfe975e9aa55c03f46869055a23fc839ef05a7f5065dd742",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 18,
+      "sourceFile": "assets/name_plate/name_plate_18.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_18_slice.png",
+      "width": 556,
+      "height": 91,
+      "textBand": {
+        "top": 50,
+        "bottom": 88,
+        "art": 430
+      },
+      "sha256": "a12e9aa2527c5b37eb25f2d0a9851c48088910d116539f4dce40d1b45018f42f",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 19,
+      "sourceFile": "assets/name_plate/name_plate_19.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_19_slice.png",
+      "width": 556,
+      "height": 84,
+      "textBand": {
+        "top": 43,
+        "bottom": 81,
+        "art": 430
+      },
+      "sha256": "b9e7244393c846d797f40057afa42fd68f2f234351775d254f674e308a138bec",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 20,
+      "sourceFile": "assets/name_plate/name_plate_20.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_20_slice.png",
+      "width": 556,
+      "height": 79,
+      "textBand": {
+        "top": 38,
+        "bottom": 76,
+        "art": 430
+      },
+      "sha256": "ababd47d13c3fa2502711feb3148c8b24db4b1781b34a70fd210040e2611f500",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 27,
+      "sourceFile": "assets/name_plate/name_plate_27.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_27_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "f3d9de8d63c7214fa399be6d8428a5dd4cde30b59af001e5e3dfc6cf43cc993b",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 28,
+      "sourceFile": "assets/name_plate/name_plate_28.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_28_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "0b6982dc4784a607ffc60205278acc4af70e70f4204560e1b501d15371ba82b0",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 29,
+      "sourceFile": "assets/name_plate/name_plate_29.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_29_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "c6dcbdf308a3b1d9b059780ae1cab1c52e19773449d25726a52c9acc61bf82fc",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 30,
+      "sourceFile": "assets/name_plate/name_plate_30.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_30_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "9ec4a8a3e9c99a2a5f0aa6cf5a58e813d0342a11f3de3dd15479fb1c5df85c6b",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 31,
+      "sourceFile": "assets/name_plate/name_plate_31.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_31_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "b429807f565080f2a305fe5a1e7ce3e28648b0016317cec29d85161bd1f72323",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 32,
+      "sourceFile": "assets/name_plate/name_plate_32.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_32_slice.png",
+      "width": 556,
+      "height": 65,
+      "textBand": {
+        "top": 24,
+        "bottom": 62,
+        "art": 430
+      },
+      "sha256": "ecf10bf84a6cd2a7d81cef4a0ceaf3fefe4ad73bc0c36a7d57a3e60b11c4096d",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 33,
+      "sourceFile": "assets/name_plate/name_plate_33.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_33_slice.png",
+      "width": 556,
+      "height": 65,
+      "textBand": {
+        "top": 24,
+        "bottom": 62,
+        "art": 430
+      },
+      "sha256": "53b8efc2984b4e8ad976f814ff2736909ea629fe0969bb1c008babf93222a76e",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 34,
+      "sourceFile": "assets/name_plate/name_plate_34.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_34_slice.png",
+      "width": 556,
+      "height": 65,
+      "textBand": {
+        "top": 24,
+        "bottom": 62,
+        "art": 430
+      },
+      "sha256": "a99fe11cf31a710fff8945fd4e16d24c38922c439e32a89969df6d17a7d9b25a",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 35,
+      "sourceFile": "assets/name_plate/name_plate_35.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_35_slice.png",
+      "width": 556,
+      "height": 65,
+      "textBand": {
+        "top": 24,
+        "bottom": 62,
+        "art": 430
+      },
+      "sha256": "130beec59a0a5470e72bdd0cc8cd749b43a152b293382a3b839fc6c580cfca0b",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 36,
+      "sourceFile": "assets/name_plate/name_plate_36.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_36_slice.png",
+      "width": 556,
+      "height": 73,
+      "textBand": {
+        "top": 32,
+        "bottom": 70,
+        "art": 430
+      },
+      "sha256": "6bac2628079276069725ac8b80f324cbf14c6bff65f183bf54ce589a557ec004",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 37,
+      "sourceFile": "assets/name_plate/name_plate_37.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_37_slice.png",
+      "width": 556,
+      "height": 90,
+      "textBand": {
+        "top": 49,
+        "bottom": 87,
+        "art": 430
+      },
+      "sha256": "f3edddb431dd3fa3b3a4c1ab417f8ca687151b8a2f6afa3978b0cf23e0ecefe3",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 38,
+      "sourceFile": "assets/name_plate/name_plate_38.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_38_slice.png",
+      "width": 556,
+      "height": 90,
+      "textBand": {
+        "top": 49,
+        "bottom": 87,
+        "art": 430
+      },
+      "sha256": "1441844d6faf89a799363839dbf4dd1aa2d82a52a82b494c5607bb5359778c4b",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 39,
+      "sourceFile": "assets/name_plate/name_plate_39.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_39_slice.png",
+      "width": 556,
+      "height": 90,
+      "textBand": {
+        "top": 49,
+        "bottom": 87,
+        "art": 430
+      },
+      "sha256": "fb08613a613cfba411273f416ed0256b43be433affdbbf4b114c0aa049979840",
+      "retainedLegacySlice": false
     },
     {
       "plateId": 41,
-      "usage": {
-        "requirementType": "clear",
-        "difficultyScope": "oni"
-      },
-      "usedByCurrentRelations": true,
       "sourceFile": "assets/name_plate/name_plate_41.png",
       "outputFile": "/assets/my-don/title-plate-slices/name_plate_41_slice.png",
       "width": 556,
-      "height": 71
+      "height": 71,
+      "textBand": {
+        "top": 30,
+        "bottom": 68,
+        "art": null
+      },
+      "sha256": "ef4ba08554798c6d60a5cee78926ab7100cd10b2a32614565491ba08957e94bd",
+      "retainedLegacySlice": true,
+      "usage": {
+        "requirementType": "clear",
+        "difficultyScope": "oni"
+      }
     },
     {
       "plateId": 42,
-      "usage": {
-        "requirementType": "full_combo",
-        "difficultyScope": "oni"
-      },
-      "usedByCurrentRelations": true,
       "sourceFile": "assets/name_plate/name_plate_42.png",
       "outputFile": "/assets/my-don/title-plate-slices/name_plate_42_slice.png",
       "width": 556,
-      "height": 71
+      "height": 71,
+      "textBand": {
+        "top": 30,
+        "bottom": 68,
+        "art": null
+      },
+      "sha256": "56ae9ddf5426d059794788121bfef343082e53cdb556bff8bdd082888b5e07c2",
+      "retainedLegacySlice": true,
+      "usage": {
+        "requirementType": "full_combo",
+        "difficultyScope": "oni"
+      }
     },
     {
       "plateId": 43,
-      "usage": {
-        "requirementType": "all_perfect",
-        "difficultyScope": "oni"
-      },
-      "usedByCurrentRelations": true,
       "sourceFile": "assets/name_plate/name_plate_43.png",
       "outputFile": "/assets/my-don/title-plate-slices/name_plate_43_slice.png",
       "width": 556,
-      "height": 71
+      "height": 71,
+      "textBand": {
+        "top": 30,
+        "bottom": 68,
+        "art": null
+      },
+      "sha256": "be0cd0990571fdb69411012a4d9990b2e44f65e37c155a3045edb738e160217e",
+      "retainedLegacySlice": true,
+      "usage": {
+        "requirementType": "all_perfect",
+        "difficultyScope": "oni"
+      }
+    },
+    {
+      "plateId": 44,
+      "sourceFile": "assets/name_plate/name_plate_44.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_44_slice.png",
+      "width": 556,
+      "height": 83,
+      "textBand": {
+        "top": 42,
+        "bottom": 80,
+        "art": 430
+      },
+      "sha256": "dc73340da44af518425b53f9a8d8de53901085d1618452604d4814886ca068bb",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 51,
+      "sourceFile": "assets/name_plate/name_plate_51.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_51_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "a93e903f37cd9976be0c1eac3315cea9bcba3ae60a743991ab209dc1e1d3f9ec",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 52,
+      "sourceFile": "assets/name_plate/name_plate_52.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_52_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "ac207605e8c84cee691c098dbed49a28d0971a602117b371ee3e109246ba4775",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 53,
+      "sourceFile": "assets/name_plate/name_plate_53.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_53_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "84c0a38d5ae534d0c0daf7c6047139850c915bd113f7a6581341f8f1e84d7fcb",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 54,
+      "sourceFile": "assets/name_plate/name_plate_54.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_54_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "a87d074fe8afa60c4bf9b6f960ec3afd0a9d5a2f27d43bb5f76b89c690b3e1fc",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 55,
+      "sourceFile": "assets/name_plate/name_plate_55.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_55_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "a4064abd3d521159e21330ed3e26df492118c219c9c553e08b70ba7a6a6e3b3f",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 56,
+      "sourceFile": "assets/name_plate/name_plate_56.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_56_slice.png",
+      "width": 556,
+      "height": 89,
+      "textBand": {
+        "top": 48,
+        "bottom": 86,
+        "art": 430
+      },
+      "sha256": "ae24fd95881d35b342232d40b64fd14d8e8c9f3435cc649d694a2fdc900144bf",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 57,
+      "sourceFile": "assets/name_plate/name_plate_57.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_57_slice.png",
+      "width": 556,
+      "height": 88,
+      "textBand": {
+        "top": 47,
+        "bottom": 85,
+        "art": 430
+      },
+      "sha256": "744af4fda43a245d85f12ba6ea40a2dccf620c87fe6ea3abdad51006a9fee56e",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 58,
+      "sourceFile": "assets/name_plate/name_plate_58.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_58_slice.png",
+      "width": 556,
+      "height": 88,
+      "textBand": {
+        "top": 47,
+        "bottom": 85,
+        "art": 430
+      },
+      "sha256": "3382191dac5be07fe4ec0ac6e761c5041c24f43f3c7ca95da07d92e25ab3de85",
+      "retainedLegacySlice": false
     },
     {
       "plateId": 59,
-      "usage": {
-        "requirementType": "clear",
-        "difficultyScope": "inner_oni"
-      },
-      "usedByCurrentRelations": true,
       "sourceFile": "assets/name_plate/name_plate_59.png",
       "outputFile": "/assets/my-don/title-plate-slices/name_plate_59_slice.png",
       "width": 556,
-      "height": 71
+      "height": 71,
+      "textBand": {
+        "top": 30,
+        "bottom": 68,
+        "art": 467
+      },
+      "sha256": "40b40267fe38e997f9114db22a3c1a999e7495ff58a4d84cc78a217b177574a7",
+      "retainedLegacySlice": true,
+      "usage": {
+        "requirementType": "clear",
+        "difficultyScope": "inner_oni"
+      }
     },
     {
       "plateId": 60,
-      "usage": {
-        "requirementType": "full_combo",
-        "difficultyScope": "inner_oni"
-      },
-      "usedByCurrentRelations": true,
       "sourceFile": "assets/name_plate/name_plate_60.png",
       "outputFile": "/assets/my-don/title-plate-slices/name_plate_60_slice.png",
       "width": 556,
-      "height": 71
+      "height": 71,
+      "textBand": {
+        "top": 30,
+        "bottom": 68,
+        "art": 467
+      },
+      "sha256": "8859d09cd63b03a6577c1e7fc8dda56e11263df62420045bd10905f2fc8b37c9",
+      "retainedLegacySlice": true,
+      "usage": {
+        "requirementType": "full_combo",
+        "difficultyScope": "inner_oni"
+      }
     },
     {
       "plateId": 61,
-      "usage": {
-        "requirementType": "all_perfect",
-        "difficultyScope": "inner_oni"
-      },
-      "usedByCurrentRelations": true,
       "sourceFile": "assets/name_plate/name_plate_61.png",
       "outputFile": "/assets/my-don/title-plate-slices/name_plate_61_slice.png",
       "width": 556,
-      "height": 71
+      "height": 71,
+      "textBand": {
+        "top": 30,
+        "bottom": 68,
+        "art": 467
+      },
+      "sha256": "dafd57c4888240a30fdd2c4fb03040bb098cbdca6e4803b2ea3d96e0e6396f6e",
+      "retainedLegacySlice": true,
+      "usage": {
+        "requirementType": "all_perfect",
+        "difficultyScope": "inner_oni"
+      }
+    },
+    {
+      "plateId": 63,
+      "sourceFile": "assets/name_plate/name_plate_63.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_63_slice.png",
+      "width": 556,
+      "height": 82,
+      "textBand": {
+        "top": 41,
+        "bottom": 79,
+        "art": 430
+      },
+      "sha256": "94979fd241a441f5d9df33c1348d9946fcbfa6836a49392bec75c2f1365a15bc",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 64,
+      "sourceFile": "assets/name_plate/name_plate_64.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_64_slice.png",
+      "width": 556,
+      "height": 82,
+      "textBand": {
+        "top": 41,
+        "bottom": 79,
+        "art": 430
+      },
+      "sha256": "94979fd241a441f5d9df33c1348d9946fcbfa6836a49392bec75c2f1365a15bc",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 65,
+      "sourceFile": "assets/name_plate/name_plate_65.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_65_slice.png",
+      "width": 556,
+      "height": 82,
+      "textBand": {
+        "top": 41,
+        "bottom": 79,
+        "art": 430
+      },
+      "sha256": "94979fd241a441f5d9df33c1348d9946fcbfa6836a49392bec75c2f1365a15bc",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 66,
+      "sourceFile": "assets/name_plate/name_plate_66.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_66_slice.png",
+      "width": 556,
+      "height": 82,
+      "textBand": {
+        "top": 41,
+        "bottom": 79,
+        "art": 430
+      },
+      "sha256": "e2bba55be7d35dd03a8e929e7ae340e08bbbee6fdbd92f49fbf58df45af8ab50",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 67,
+      "sourceFile": "assets/name_plate/name_plate_67.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_67_slice.png",
+      "width": 556,
+      "height": 82,
+      "textBand": {
+        "top": 41,
+        "bottom": 79,
+        "art": 430
+      },
+      "sha256": "d89e2a19d77f4accdc3aa8036c0c7c13deb9eb9fd8bc2712cbb30465d23aa333",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 68,
+      "sourceFile": "assets/name_plate/name_plate_68.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_68_slice.png",
+      "width": 556,
+      "height": 68,
+      "textBand": {
+        "top": 27,
+        "bottom": 65,
+        "art": 430
+      },
+      "sha256": "ce66b31095b0d536d1e86f83149a797b10bbcdc8e225f95d3ecf431745974bb7",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 69,
+      "sourceFile": "assets/name_plate/name_plate_69.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_69_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "7eb07d774ec7c2c4a08673b5f82d889614dd05fa2ecd047b92f277d29c9cbf23",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 70,
+      "sourceFile": "assets/name_plate/name_plate_70.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_70_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "39e9d1543fbfaf397407e1e393ea87d5e72dc4a6606d88b78526978a284c7e41",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 71,
+      "sourceFile": "assets/name_plate/name_plate_71.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_71_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "868961d113fcdeea38866cd336817957ec9abee574575243b142aa7463bfc8e6",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 72,
+      "sourceFile": "assets/name_plate/name_plate_72.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_72_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "2c78f4be72dfa6c21f304a92a764c0ccc336b5ce8cc8f895d0b8a9cc63a3bdbd",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 73,
+      "sourceFile": "assets/name_plate/name_plate_73.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_73_slice.png",
+      "width": 556,
+      "height": 105,
+      "textBand": {
+        "top": 64,
+        "bottom": 102,
+        "art": 430
+      },
+      "sha256": "c4dfa4ebfe2a844677c3573526c5284af102f751b6cc4338b5732feb7a7e4e7a",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 79,
+      "sourceFile": "assets/name_plate/name_plate_79.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_79_slice.png",
+      "width": 556,
+      "height": 70,
+      "textBand": {
+        "top": 29,
+        "bottom": 67,
+        "art": 430
+      },
+      "sha256": "d8b0a3f34085c9c826c30823faec39023b6c10fe2fe87199162916c06920dd53",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 80,
+      "sourceFile": "assets/name_plate/name_plate_80.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_80_slice.png",
+      "width": 556,
+      "height": 70,
+      "textBand": {
+        "top": 29,
+        "bottom": 67,
+        "art": 430
+      },
+      "sha256": "ca7dc9eb0c038d2885fcc8e623d2d1ff2cbe6591844d39fcc3f824ea94914b4f",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 81,
+      "sourceFile": "assets/name_plate/name_plate_81.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_81_slice.png",
+      "width": 556,
+      "height": 70,
+      "textBand": {
+        "top": 29,
+        "bottom": 67,
+        "art": 430
+      },
+      "sha256": "bf183c91a58cf8f074be4747cc4e5eccd715c4f3e37d29b6b4c6685cfb7e69e0",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 82,
+      "sourceFile": "assets/name_plate/name_plate_82.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_82_slice.png",
+      "width": 556,
+      "height": 91,
+      "textBand": {
+        "top": 50,
+        "bottom": 88,
+        "art": 430
+      },
+      "sha256": "7f4aab946eaa7f519b57c25f87d3e38c58b560cb865d64b6f989e4d0051ea36a",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 83,
+      "sourceFile": "assets/name_plate/name_plate_83.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_83_slice.png",
+      "width": 556,
+      "height": 85,
+      "textBand": {
+        "top": 44,
+        "bottom": 82,
+        "art": 430
+      },
+      "sha256": "b891b79fbed5258407d821532bb8f797743ed7994df545035f9bbf581ade13d9",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 84,
+      "sourceFile": "assets/name_plate/name_plate_84.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_84_slice.png",
+      "width": 556,
+      "height": 90,
+      "textBand": {
+        "top": 49,
+        "bottom": 87,
+        "art": 430
+      },
+      "sha256": "1113c438291aa3d9a12b0b0e265ce4011ce7d91663656cb3f115ca545b008fd2",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 85,
+      "sourceFile": "assets/name_plate/name_plate_85.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_85_slice.png",
+      "width": 556,
+      "height": 70,
+      "textBand": {
+        "top": 29,
+        "bottom": 67,
+        "art": 430
+      },
+      "sha256": "75d2ef5ace07632d18d5412a1cfb9f0fbb30d96110e5b1dd79af273a42896326",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 86,
+      "sourceFile": "assets/name_plate/name_plate_86.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_86_slice.png",
+      "width": 556,
+      "height": 70,
+      "textBand": {
+        "top": 29,
+        "bottom": 67,
+        "art": 430
+      },
+      "sha256": "3d9f6441e72fe2f13e5f1219f405b32b7b46e2e76a2e66e0e8e3eb853ac5bd4b",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 100,
+      "sourceFile": "assets/name_plate/name_plate_100.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_100_slice.png",
+      "width": 555,
+      "height": 82,
+      "textBand": {
+        "top": 41,
+        "bottom": 79,
+        "art": 430
+      },
+      "sha256": "fcdd2b46a6424f30822475f611ca07ce9b790318551bf25da589bd93d340f9f7",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 101,
+      "sourceFile": "assets/name_plate/name_plate_101.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_101_slice.png",
+      "width": 555,
+      "height": 82,
+      "textBand": {
+        "top": 41,
+        "bottom": 79,
+        "art": 430
+      },
+      "sha256": "fcdd2b46a6424f30822475f611ca07ce9b790318551bf25da589bd93d340f9f7",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 102,
+      "sourceFile": "assets/name_plate/name_plate_102.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_102_slice.png",
+      "width": 555,
+      "height": 82,
+      "textBand": {
+        "top": 41,
+        "bottom": 79,
+        "art": 430
+      },
+      "sha256": "fcdd2b46a6424f30822475f611ca07ce9b790318551bf25da589bd93d340f9f7",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 103,
+      "sourceFile": "assets/name_plate/name_plate_103.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_103_slice.png",
+      "width": 556,
+      "height": 82,
+      "textBand": {
+        "top": 41,
+        "bottom": 79,
+        "art": 430
+      },
+      "sha256": "70972bd0368fcca4143ca77d09700062bf60627fbc26c32539d203e9088e957d",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 104,
+      "sourceFile": "assets/name_plate/name_plate_104.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_104_slice.png",
+      "width": 556,
+      "height": 82,
+      "textBand": {
+        "top": 41,
+        "bottom": 79,
+        "art": 430
+      },
+      "sha256": "c69377668e327e413532ec339ab7643d25c3e63846251537ec4d20859c01f706",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 105,
+      "sourceFile": "assets/name_plate/name_plate_105.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_105_slice.png",
+      "width": 556,
+      "height": 82,
+      "textBand": {
+        "top": 41,
+        "bottom": 79,
+        "art": 430
+      },
+      "sha256": "59a053ae1d305f9cdf871028cda04820299a20b2e8391791f9ec72c3b2b6994e",
+      "retainedLegacySlice": false
+    },
+    {
+      "plateId": 106,
+      "sourceFile": "assets/name_plate/name_plate_106.png",
+      "outputFile": "/assets/my-don/title-plate-slices/name_plate_106_slice.png",
+      "width": 556,
+      "height": 68,
+      "textBand": {
+        "top": 27,
+        "bottom": 65,
+        "art": 430
+      },
+      "sha256": "fbbfebb4fb12eab038c94c1f0779153a77bfc53851ef7ac93f559384210c32d1",
+      "retainedLegacySlice": false
     }
   ]
 }

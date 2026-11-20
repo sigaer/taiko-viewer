@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // ReworkTitlesList — /titles (slice F; frozen design: Titles.vue). Every title of the official catalogue as before:
 // the game plate (DsTitlePlate: the plate image when the catalogue's plate number is in the asset map, the text form
-// otherwise; the number itself stays in its own column), the condition and the linked songs. The list is long, so it
+// otherwise), the condition and the linked songs. The list is long, so it
 // is filtered by category and keyword on the client and mounted TITLES_PAGE_SIZE rows at a time.
 import type { PropType } from "vue";
 import type { TitleCatalogItem } from "~/types/content";
@@ -81,7 +81,6 @@ function select(n: number) {
         <table class="tl-table">
           <thead>
             <tr>
-              <th scope="col" class="tl-rarity">{{ t("page.titles.columns.rarity") }}</th>
               <th scope="col">{{ t("page.titles.columns.name") }}</th>
               <th scope="col">{{ t("page.titles.columns.condition") }}</th>
               <th scope="col">{{ t("page.titles.columns.songs") }}</th>
@@ -89,7 +88,6 @@ function select(n: number) {
           </thead>
           <tbody>
             <tr v-for="title in rows" :key="title.id || `${title.name}-${title.rarity}-${title.condition}`">
-              <td class="tl-rarity num" :data-label="t('page.titles.columns.rarity')">{{ title.rarity }}</td>
               <th scope="row" class="tl-name"><DsTitlePlate :name="title.name" :plate="title.rarity" form="plate" /></th>
               <td>{{ title.condition }}</td>
               <td class="tl-songs">
@@ -199,10 +197,6 @@ function select(n: number) {
 .tl-table tbody tr:last-child > * {
   border-bottom: 0;
 }
-.tl-rarity {
-  width: 72px;
-  color: var(--ink-3);
-}
 .tl-name {
   width: 252px;
   font-weight: 600;
@@ -217,7 +211,7 @@ function select(n: number) {
   margin-right: var(--sp-3);
 }
 
-/* Below 768 px each title is a block: plate, condition, songs; the plate number moves to the end of the block */
+/* Below 768 px each title is a block: plate, condition, songs. */
 @media (max-width: 767px) {
   .tl-table thead {
     position: absolute;
@@ -248,13 +242,6 @@ function select(n: number) {
   .tl-table td {
     padding: 0;
     border: 0;
-  }
-  .tl-rarity {
-    order: 9;
-    font-size: var(--fs-12);
-  }
-  .tl-rarity::before {
-    content: attr(data-label) " ";
   }
 }
 </style>

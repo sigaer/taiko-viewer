@@ -182,10 +182,10 @@ test("title plates: manifest ids and custom plates map to files; anything else â
     assert.equal(asset.src, item.outputFile);
     assert.equal(asset.width, item.width);
     assert.equal(asset.height, item.height);
-    assert.deepEqual(titlePlateForUsage(item.usage.requirementType, item.usage.difficultyScope), asset);
+    if (item.usage) assert.deepEqual(titlePlateForUsage(item.usage.requirementType, item.usage.difficultyScope), asset);
     assert.deepEqual(titlePlateAsset(String(item.plateId)), asset);
   }
-  for (const bad of [3, 40, 62, -1, "custom", null, undefined, 1.5]) assert.equal(titlePlateAsset(bad), null, String(bad));
+  for (const bad of [40, 62, 999, -1, "custom", null, undefined, 1.5]) assert.equal(titlePlateAsset(bad), null, String(bad));
   assert.equal(titlePlateForUsage("full_combo", "easy"), null);
   assert.deepEqual(DS_CUSTOM_PLATES, ["custom_sliver", "custom_gold", "custom_rainbow"]);
   assert.equal(customTitlePlate("clear")?.src, "/assets/my-don/custom-title/name_plate_custom_sliver.png");

@@ -5,6 +5,7 @@
 import { normalizeDifficultyType, type DifficultyType } from "../difficulty.ts";
 import { SCORE_RANK_DEFINITIONS } from "../scoreRank.ts";
 import { crownAssetName, type DsCrownState } from "./crown.ts";
+import { TITLE_PLATE_SLICES } from "./titlePlateSlices.ts";
 
 /* ---------------- Difficulty ---------------- */
 
@@ -106,11 +107,12 @@ export interface DsPlateAsset {
   src: string;
   width: number;
   height: number;
+  textBand?: { top: number; bottom: number; art: number | null };
 }
 
 /**
- * The nine plate slices of public/assets/my-don/title-plate-slices/manifest.json (tests compare this table with the
- * manifest) and the three custom-title plates (file name `sliver` spelled as in production).
+ * Achievement-based lookup keeps its explicit nine usage mappings. The full
+ * numbered catalog comes from the generated slice metadata.
  */
 const SLICE_PLATES: ReadonlyArray<{ id: number; requirement: DsPlateRequirement; scope: DsPlateScope; height: number }> = [
   { id: 0, requirement: "clear", scope: "unspecified", height: 45 },
@@ -131,7 +133,7 @@ const CUSTOM_PLATES: Readonly<Record<DsCustomPlate, DsPlateRequirement>> = {
 };
 const CUSTOM_HEIGHT = 90;
 
-export const DS_PLATE_IDS: readonly number[] = Object.freeze(SLICE_PLATES.map((p) => p.id));
+export const DS_PLATE_IDS: readonly number[] = Object.freeze(TITLE_PLATE_SLICES.map((p) => p.id));
 export const DS_CUSTOM_PLATES: readonly DsCustomPlate[] = Object.freeze(Object.keys(CUSTOM_PLATES) as DsCustomPlate[]);
 
 /** Plate id (number or numeric string) or custom plate key → asset; anything without an exact match → null (D13). */
@@ -141,9 +143,10 @@ export function titlePlateAsset(plate: unknown): DsPlateAsset | null {
     return { key, src: `/assets/my-don/custom-title/name_plate_${key}.png`, width: PLATE_WIDTH, height: CUSTOM_HEIGHT };
   }
   const id = integerIn(plate, 0, Number.MAX_SAFE_INTEGER);
-  const slice = id === null ? undefined : SLICE_PLATES.find((p) => p.id === id);
+  const slice = id === null ? undefined : TITLE_PLATE_SLICES.find((p) => p.id === id);
   if (!slice) return null;
-  return { key: slice.id, src: `/assets/my-don/title-plate-slices/name_plate_${slice.id}_slice.png`, width: PLATE_WIDTH, height: slice.height };
+  return { key: slice.id, src: `/assets/my-don/title-plate-slices/name_plate_${slice.id}_slice.png`,
+    width: slice.width, height: slice.height, textBand: { top: slice.top, bottom: slice.bottom, art: slice.art } };
 }
 
 /** Plate for a title's achievement × difficulty scope; combinations without a plate in the manifest → null (no guessing). */

@@ -19,3 +19,10 @@ bash scripts/memory/run_qa.sh /usr/bin/python3 taiko_viewer/scripts/sync_title_s
 ```
 
 生产每日任务由 taiko-bot 的 `taiko_bot.offline.title_update` 编排，仍在 Asia/Shanghai 每日 09:42 的曲库更新流程末尾执行。独立运行该模块默认只预览，加 `--cached` 使用现有官方缓存，加 `--apply` 才发布。测试使用合成数据及本地 HTTP 服务，不连接实际数据库。
+
+称号底板使用 `public/assets/my-don/title-plate-slices/manifest.json` 的 73 种编号资源，覆盖当前目录的全部底板类型。新增切片沿用去掉原图底部 45 像素的规则，原有 9 张切片保留原始字节；原始素材位于 Git 外的 `/home/sigaer/taiko/assets/name_plate`。切片清单记录尺寸、文字区域和 SHA-256，生成的 `utils/ds/titlePlateSlices.ts` 供前端按实际底板 ID 查找。长称号缩至 10px 后按文字区域横向适配，保留底图和完整称号。重建或核对素材时运行：
+
+```bash
+bash scripts/memory/run_qa.sh /usr/bin/python3 taiko_viewer/scripts/generate_title_plate_slices.py
+bash scripts/memory/run_qa.sh /usr/bin/python3 taiko_viewer/scripts/generate_title_plate_slices.py --check
+```

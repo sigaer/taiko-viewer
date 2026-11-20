@@ -9,7 +9,7 @@ import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { SCORE_RANK_DEFINITIONS } from "../utils/scoreRank.ts";
-import { rankAssetName, smallSrc, diffIconSrc, crownIconSrc, titlePlateAsset, DS_SMALL_SIZES } from "../utils/ds/gameAssets.ts";
+import { rankAssetName, smallSrc, diffIconSrc, crownIconSrc, titlePlateAsset, DS_PLATE_IDS, DS_SMALL_SIZES } from "../utils/ds/gameAssets.ts";
 import { generate, SETS } from "../scripts/ds/generate_small_game_icons.mjs";
 
 const pub = new URL("../public/", import.meta.url);
@@ -44,7 +44,6 @@ export const ORIGINALS = {
   "assets/my-don/title-plate-slices/name_plate_59_slice.png": [23944, "3a817b98f5d04a6c79d80c6ff02c75df"],
   "assets/my-don/title-plate-slices/name_plate_60_slice.png": [22979, "5d8dc43ef581501f72ac2663e2cb1090"],
   "assets/my-don/title-plate-slices/name_plate_61_slice.png": [28542, "1c1606a31a4f85860dd503ca409fffdd"],
-  "assets/my-don/title-plate-slices/manifest.json": [3363, "bebbdd1bd262125af3f55e20e1a1da79"],
   "assets/my-don/custom-title/name_plate_custom_gold.png": [25157, "9806fdf72034db48666b51acb6675930"],
   "assets/my-don/custom-title/name_plate_custom_rainbow.png": [23642, "cb4832bb3cc46aa983ec77da8a0fac32"],
   "assets/my-don/custom-title/name_plate_custom_sliver.png": [24250, "c91ae49e986c73519e29d5f73fc0c1ac"],
@@ -68,7 +67,7 @@ test("legacy icons/difficulty copies are still present and identical to icons/di
 test("every path the utilities produce exists", () => {
   for (let d = 1; d <= 5; d++) assert.ok(existsSync(new URL(diffIconSrc(d).slice(1), pub)));
   for (const s of ["dondaful", "full", "clear"]) assert.ok(existsSync(new URL(crownIconSrc(s).slice(1), pub)));
-  for (const id of [0, 1, 2, 41, 42, 43, 59, 60, 61, "custom_sliver", "custom_gold", "custom_rainbow"]) assert.ok(existsSync(new URL(titlePlateAsset(id).src.slice(1), pub)), String(id));
+  for (const id of [...DS_PLATE_IDS, "custom_sliver", "custom_gold", "custom_rainbow"]) assert.ok(existsSync(new URL(titlePlateAsset(id).src.slice(1), pub)), String(id));
 });
 
 test("rank values 2–8 map to rank/{n}.png with production names; 0 and 1 have no image", () => {
@@ -97,13 +96,20 @@ test("rank values 2–8 map to rank/{n}.png with production names; 0 and 1 have 
   }
 });
 
-test("title-plate manifest: nine slices with production usage and size", () => {
+test("title-plate manifest: all numbered slices have verified bytes, dimensions and text bands", () => {
   const manifest = JSON.parse(bytesOf("assets/my-don/title-plate-slices/manifest.json").toString("utf8"));
-  assert.equal(manifest.items.length, 9);
+  assert.equal(manifest.items.length, 73);
+  assert.equal(manifest.cropRule.removeBottomPx, 45);
   for (const item of manifest.items) {
-    assert.equal(item.width, 556);
-    assert.equal(item.height, item.plateId <= 2 ? 45 : 71);
+    const bytes = bytesOf(item.outputFile.slice(1));
+    assert.equal(createHash("sha256").update(bytes).digest("hex"), item.sha256, `plate ${item.plateId} digest`);
+    assert.equal(bytes.readUInt32BE(16), item.width);
+    assert.equal(bytes.readUInt32BE(20), item.height);
+    assert.ok(item.textBand.top >= 0 && item.textBand.bottom <= item.height);
+    assert.ok(item.textBand.bottom > item.textBand.top);
+    assert.ok(item.textBand.art === null || item.textBand.art < item.width);
     assert.equal(titlePlateAsset(item.plateId).src, item.outputFile);
+    assert.deepEqual(titlePlateAsset(item.plateId).textBand, item.textBand);
   }
 });
 
