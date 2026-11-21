@@ -82,10 +82,21 @@ export function deriveProgressForCalendarDays(current: UserdataSong[], history: 
     };
     if (before) {
       let bestScoreDf = false;
+      let bestScoreRank = false;
+      const aRank = num(before.best_score_rank), bRank = num(after.best_score_rank);
+      const rankUp = aRank !== null && bRank !== null && Number.isInteger(aRank) && Number.isInteger(bRank)
+        && aRank >= 1 && bRank <= 8 && bRank > aRank;
       const scoreTime = includeScore && after.highscore_datetime !== before.highscore_datetime && epochFor(after.highscore_datetime) > epochFor(before.highscore_datetime);
       const playTime = includePlay && after.update_datetime !== before.update_datetime && epochFor(after.update_datetime) > epochFor(before.update_datetime);
       if (scoreTime) {
         add(scoreDay, 'score-pb', num(before.high_score) === null ? null : bestScores.get(songKey) ?? num(before.high_score), num(after.high_score), after.highscore_datetime);
+        // A new best score dates its accompanying score-rank improvement even
+        // when the previous trusted snapshot was on an earlier day.
+        const aScore = num(before.high_score), bScore = num(after.high_score);
+        if (rankUp && aScore !== null && bScore !== null && bScore > (bestScores.get(songKey) ?? aScore)) {
+          add(scoreDay, 'rank-upgrade', aRank, bRank, after.highscore_datetime);
+          bestScoreRank = true;
+        }
         const total = judgments(before);
         if (total !== null && total > 0 && total === judgments(after)) {
           add(scoreDay, 'ng-reduced', num(before.ng_cnt), num(after.ng_cnt), after.highscore_datetime, true);
@@ -106,8 +117,7 @@ export function deriveProgressForCalendarDays(current: UserdataSong[], history: 
       if (playTime && (calendarDayFor(before.update_datetime) === playDay || (calendarDayFor(observedBefore) === playDay && epochFor(observedBefore) < epochFor(after.update_datetime)))) {
         const a = crown(before), b = crown(after);
         if (a !== null && b !== null && b > a && !(b === 2 && bestScoreDf)) add(playDay, b === 2 ? 'df' : b === 1 ? 'fc' : 'clear-upgrade', a, b, after.update_datetime);
-        const aRank = num(before.best_score_rank), bRank = num(after.best_score_rank);
-        if (aRank !== null && bRank !== null && aRank >= 1 && bRank <= 8) add(playDay, 'rank-upgrade', aRank, bRank, after.update_datetime);
+        if (rankUp && !bestScoreRank) add(playDay, 'rank-upgrade', aRank, bRank, after.update_datetime);
       }
     }
   };

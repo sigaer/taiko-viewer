@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { deriveDailyProgress } from '../utils/dailyProgress.ts';
+import { deriveDailyProgress, deriveProgressForRange } from '../utils/dailyProgress.ts';
 const day = '2026-09-17';
 const before = { song_no: 1, level: 4, high_score: 900000, good_cnt: 90, ok_cnt: 3, ng_cnt: 7, combo_cnt: 60, clear_cnt: 0, full_combo_cnt: 0, dondaful_combo_cnt: 0, best_score_rank: 6, highscore_datetime: '2026-09-16 18:00:00', update_datetime: '2026-09-16 18:00:00' };
 const after = { ...before, highscore_datetime: '2026-09-17 12:00:00', update_datetime: '2026-09-17 12:00:00' };
@@ -39,4 +39,44 @@ test('new DF is dated by its complete best-score judgments across a snapshot gap
   for (const changed of [{ok_cnt:1,good_cnt:207},{ok_cnt:undefined},{highscore_datetime:before.highscore_datetime},{dondaful_combo_cnt:0}]) {
     assert.ok(!types(derive({...next,...changed})).includes('df'));
   }
+});
+
+test('a trusted PB dates its rank upgrade across a snapshot gap', () => {
+  for (const [oldScore, newScore, oldRank, newRank] of [[989720,1006940,7,8],[954710,964670,6,7]]) {
+    const previous = {...before,high_score:oldScore,best_score_rank:oldRank};
+    const next = {...after,high_score:newScore,best_score_rank:newRank};
+    const result = deriveDailyProgress([next], [
+      {full:true,timestamp:'2026-09-16 20:00:00',songs:[previous]},
+      {full:false,timestamp:'2026-09-17 20:00:00',songs:[next]}
+    ],day,()=> 'Song');
+    assert.deepEqual(result.events[0].facts.find(f=>f.type==='rank-upgrade'),{type:'rank-upgrade',before:oldRank,after:newRank,delta:1});
+    assert.equal(result.events[0].factOccurredAt?.['rank-upgrade'],'2026-09-17T04:00:00.000Z');
+  }
+});
+
+test('cross-day rank attribution requires a real PB, valid ranks and trusted continuity', () => {
+  const next = {...after,high_score:960000,best_score_rank:7};
+  const derive = (row:any, metadata = {}) => deriveDailyProgress([row],[
+    {full:true,timestamp:'2026-09-16 20:00:00',songs:[before]},
+    {full:false,timestamp:'2026-09-17 20:00:00',songs:[row],...metadata}
+  ],day,()=> 'Song');
+  for(const changes of [{high_score:before.high_score},{high_score:undefined},{highscore_datetime:before.highscore_datetime},
+    {best_score_rank:6},{best_score_rank:7.5},{best_score_rank:9}]) {
+    assert.ok(!types(derive({...next,...changes})).includes('rank-upgrade'));
+  }
+  for(const metadata of [{excludedReason:'import'},{chartExclusions:{'1:4':'discontinuity-baseline'}}]) {
+    assert.ok(!types(derive(next,metadata)).includes('rank-upgrade'));
+  }
+});
+
+test('rank uses its PB date rather than a later play date, and is not counted twice', () => {
+  const next = {...after,high_score:960000,best_score_rank:7,update_datetime:'2026-09-18 12:00:00'};
+  const history = [
+    {full:true,timestamp:'2026-09-16 20:00:00',songs:[before]},
+    {full:false,timestamp:'2026-09-18 20:00:00',songs:[next]},
+    {full:false,timestamp:'2026-09-18 21:00:00',songs:[next]}
+  ];
+  const days=deriveProgressForRange([next],history,day,'2026-09-18',()=> 'Song');
+  assert.equal(days[0].events.flatMap(e=>e.facts).filter(f=>f.type==='rank-upgrade').length,1);
+  assert.equal(days[1].events.flatMap(e=>e.facts).filter(f=>f.type==='rank-upgrade').length,0);
 });

@@ -22,6 +22,11 @@ const webVitalsSampleRate = Math.min(
   1,
   Math.max(0, Number(process.env.NUXT_PUBLIC_WEB_VITALS_SAMPLE_RATE || 0.2) || 0)
 );
+const buildStartedAt = Date.now();
+const reportBuildStage = (stage: string) => {
+  const memory = process.memoryUsage();
+  console.info(`[viewer-build] ${stage} elapsed=${((Date.now() - buildStartedAt) / 1000).toFixed(1)}s rss=${Math.round(memory.rss / 1048576)}MiB heap=${Math.round(memory.heapUsed / 1048576)}MiB`);
+};
 
 export default defineNuxtConfig({
   ssr: true,
@@ -245,8 +250,20 @@ export default defineNuxtConfig({
     // Keep build warnings/errors; skip the final report that rereads/gzips every server file.
     logLevel: 1,
     hooks: {
+      'rollup:before': (nitro, config) => {
+        const phase = nitro.options.preset;
+        reportBuildStage(`${phase}:rollup-start`);
+        config.plugins = [config.plugins, {
+          name: 'viewer-build-progress',
+          buildEnd: () => reportBuildStage(`${phase}:modules-ready`),
+          renderStart: () => reportBuildStage(`${phase}:render-start`),
+          writeBundle: () => reportBuildStage(`${phase}:files-written`)
+        }];
+      },
       compiled: async (nitro) => {
+        reportBuildStage(`${nitro.options.preset}:compiled`);
         await cp(fileURLToPath(new URL('./.tja-runtime', import.meta.url)), resolve(nitro.options.output.serverDir, 'tja-runtime'), { recursive: true });
+        reportBuildStage(`${nitro.options.preset}:runtime-copied`);
       }
     },
     routeRules: {

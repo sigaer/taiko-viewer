@@ -189,7 +189,13 @@ run_nuxt_build() {
   local build_web_dir
   local build_workspace
 
-  BUILD_ROOT="$(mktemp -d /tmp/taiko-viewer-release.XXXXXX)"
+  local build_temp_base="${TMPDIR:-/var/tmp/taiko-build}"
+  mkdir -p "$build_temp_base"
+  if [[ "$(stat -fc %T "$build_temp_base")" == "tmpfs" ]]; then
+    echo "  - 构建临时目录必须位于磁盘，不能使用 tmpfs: $build_temp_base"
+    return 1
+  fi
+  BUILD_ROOT="$(mktemp -d "$build_temp_base/taiko-viewer-release.XXXXXX")"
   build_workspace="$BUILD_ROOT/workspace"
   mkdir -p "$build_workspace/taiko-forum"
   git archive --format=tar HEAD | tar -xf - -C "$build_workspace/taiko-forum"
@@ -198,14 +204,14 @@ run_nuxt_build() {
   ln -s "$WEB_DIR/node_modules" "$build_web_dir/node_modules"
   local build_artifact="$build_web_dir/.output/server/index.mjs"
 
-  build_log="$(mktemp)"
+  build_log="$(mktemp "$build_temp_base/taiko-viewer-build.XXXXXX.log")"
   build_start_epoch="$(date +%s)"
   build_deadline=$((SECONDS + BUILD_TIMEOUT))
 
   pushd "$build_web_dir" > /dev/null
   export NODE_OPTIONS="--max-old-space-size=4096"
 
-  BUILD_WEB_DIR="$build_web_dir" setsid bash -lc 'cd "$BUILD_WEB_DIR" && npm run build' >"$build_log" 2>&1 &
+  BUILD_WEB_DIR="$build_web_dir" TMPDIR="$build_temp_base" TAIKO_REPO_ROOT="$(cd "$ROOT_DIR/.." && pwd)" setsid bash -lc 'cd "$BUILD_WEB_DIR" && npm run build' >"$build_log" 2>&1 &
   build_pid=$!
   CURRENT_BUILD_PID="$build_pid"
   printf '%s\n' "$build_pid" > "$BUILD_PID_FILE"
@@ -253,7 +259,7 @@ run_nuxt_build() {
   if [[ "$build_exit" -ne 0 ]]; then
     echo "  - 构建失败，最后日志如下："
     tail -n 120 "$build_log"
-    rm -f "$build_log"
+    echo "  - 完整构建日志已保留: $build_log"
     clear_build_pidfile "$build_pid"
     CURRENT_BUILD_PID=""
     return "$build_exit"

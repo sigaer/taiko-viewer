@@ -27,7 +27,7 @@ const showRadar = computed(() => radarHasData(axes.value));
 <template>
   <section class="tpf growth-focus" :aria-label="t('passport.skillOverview')">
     <div class="tpf-rating">
-      <DsDrumDial :value="rating" :size="156" name="Rating">
+      <DsDrumDial :value="rating" :size="248" name="Rating">
         <span class="tpf-k">Rating</span>
         <b class="num tpf-v">{{ rating === null ? "—" : rating.toFixed(2) }}</b>
         <span class="tpf-k num">/ 15.5</span>
@@ -62,12 +62,13 @@ const showRadar = computed(() => radarHasData(axes.value));
   place-items: center;
   min-width: 0;
 }
+.tpf-rating { grid-row: 1 / span 2; }
 .tpf-k {
   color: var(--ink-3);
-  font-size: var(--fs-11);
+  font-size: var(--fs-13);
 }
 .tpf-v {
-  font-size: var(--fs-36);
+  font-size: var(--fs-48);
   font-weight: 700;
   line-height: 1;
   letter-spacing: -0.01em;
@@ -105,5 +106,6 @@ const showRadar = computed(() => radarHasData(axes.value));
   .tpf-support {
     grid-column: 1;
   }
+  .tpf-rating { grid-row: auto; }
 }
 </style>

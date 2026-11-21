@@ -39,7 +39,7 @@ for(const cause of ['manual','counter-regression']) test(`affected chart require
     assert.ok(facts.some(f=>f.songId===2&&f.type==='score-pb'&&f.temporal.attributedDay==='2026-01-03'));
     const resumed=facts.find(f=>f.songId===1&&f.type==='score-pb'&&f.temporal.attributedDay==='2026-01-04');
     assert.equal(resumed.before,900300);assert.equal(resumed.after,900400);
-    assert.equal(resumed.evidence.provenance.factPolicyRevision,'observation-chart-continuity-v4');
+    assert.equal(resumed.evidence.provenance.factPolicyRevision,'observation-chart-continuity-v5');
   });
 });
 for(const change of [{writer_source:'hiroba'},{source_account:'other-synthetic'},{merge_topology:['other-synthetic']}]) test(`authoritative identity change remains global: ${JSON.stringify(change)}`,async()=>{
