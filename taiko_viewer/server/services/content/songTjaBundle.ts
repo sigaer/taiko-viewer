@@ -45,6 +45,7 @@ type TjaRootReportPayload = {
 let songTjaIndexCache: { cacheKey: string; data: SongTjaIndexPayload } | null = null;
 let songTjaIndexBuildPromise: Promise<SongTjaIndexPayload> | null = null;
 const SONG_TJA_INDEX_CACHE_KEY = "song-tja-index";
+const SONG_TJA_INDEX_VERSION = "verified-title-v2";
 
 const defaultTjaRepoCandidates = ["/home/sigaer/git/ESE_autosync", "/home/sigaer/git/ESE"];
 
@@ -94,7 +95,7 @@ const loadSongTjaIndex = async (forceRefresh = false): Promise<SongTjaIndexPaylo
   const reportPath = resolve(repoRoot, "logs", "ese_audio_sync_report.json");
   const songDataStat = await stat(songDataPath);
   const { tjaRoot, reportMtimeMs } = await resolveTjaRepoPath(reportPath);
-  const cacheKey = [songDataStat.mtimeMs, reportMtimeMs, tjaRoot].join(":");
+  const cacheKey = [SONG_TJA_INDEX_VERSION, songDataStat.mtimeMs, reportMtimeMs, tjaRoot].join(":");
 
   if (!forceRefresh && songTjaIndexCache?.cacheKey === cacheKey) {
     return songTjaIndexCache.data;

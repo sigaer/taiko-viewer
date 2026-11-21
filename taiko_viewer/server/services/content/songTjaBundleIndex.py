@@ -10,6 +10,19 @@ from taiko_bot.offline import merge_index
 from taiko_bot.offline.catalog_resources import safe_resource
 
 
+def has_verified_title(song, candidate, debug):
+    # Candidate scoring also accepts substrings. That is useful for discovery,
+    # but a substring alone must never authorize a downloadable chart package.
+    if debug.get("reason") == "manual_override":
+        return True
+    exact, normalized, base = merge_index.build_song_keys(song)
+    return bool(
+        exact & candidate.exact_aliases
+        or normalized & candidate.normalized_aliases
+        or base & candidate.base_normalized_titles
+    )
+
+
 def build_song_tja_index(song_data_path: Path, tja_root: Path):
     with song_data_path.open("r", encoding="utf-8") as handle:
         song_data = json.load(handle)
@@ -61,6 +74,10 @@ def build_song_tja_index(song_data_path: Path, tja_root: Path):
                     "reason": debug,
                 }
             )
+            continue
+
+        if not has_verified_title(song, candidate, debug):
+            unresolved.append({"id": song_id, "reason": "unverified_title", "selected_path": candidate.rel_path})
             continue
 
         song_records, record_error = merge_index.build_song_records(song, candidate.path)

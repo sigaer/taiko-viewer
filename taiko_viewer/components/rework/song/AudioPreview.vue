@@ -44,7 +44,7 @@ watch([() => props.songId, () => props.selectedTrack], () => drumAudioRefs.clear
 </script>
 
 <template>
-  <details class="audio">
+  <details class="audio" open>
     <summary>
       <span class="audio-title">{{ t("rework.songDetail.audio.title") }}</span>
       <span class="audio-modes">{{ t("rework.songDetail.audio.drum") }} · {{ t("rework.songDetail.audio.mix") }} · {{ t("rework.songDetail.audio.pure") }}</span>
