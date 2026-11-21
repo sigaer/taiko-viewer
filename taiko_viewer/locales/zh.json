@@ -97,6 +97,18 @@
     "comingSoon": "敬请期待"
   },
   "home": {
+    "footer": {
+      "label": "站点信息",
+      "friends": "友链",
+      "thanks": "鸣谢",
+      "explore": "探索",
+      "community": "社区与支持",
+      "feedback": "反馈与报错",
+      "description": "国行太鼓达人数据、谱面攻略与玩家社区。",
+      "copyright": "© {year} Sakura Taiko Viewer · Created by sigaer",
+      "project": "太鼓达人玩家社区项目",
+      "disclaimer": "本站由玩家自发维护，与万代南梦宫娱乐无关。《太鼓之达人》及相关素材版权归各权利方所有。"
+    },
     "recovery": {
       "auth": "暂时无法确认登录状态",
       "binding": "暂时无法读取绑定信息",

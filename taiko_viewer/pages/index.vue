@@ -86,6 +86,7 @@ useViewerSeo(() => ({
       :content-failed="!!error"
       :events="eventSlides"
     />
+    <ReworkTodayFooter />
   </div>
 </template>
 
