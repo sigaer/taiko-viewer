@@ -166,6 +166,8 @@ export type WeeklyGrowthTheme = {
 export type WeeklyGrowthHighlight = {
   id: string;
   primaryType: Exclude<GrowthFactType, "played" | "goal-completed"> | "played";
+  primaryFactKey?: string;
+  facts?: Pick<GrowthFact, "factKey" | "type" | "before" | "after" | "delta">[];
   factKeys: string[];
   songId: number;
   difficultyType: number;

@@ -158,6 +158,8 @@ function buildHighlights(scoreFacts: GrowthFact[], attributions: GoalAttribution
       highlight: {
         id: `weekly:${key}:${primary.type}`,
         primaryType: primary.type as WeeklyGrowthHighlight["primaryType"],
+        primaryFactKey: primary.factKey,
+        facts: facts.map(({ factKey, type, before, after, delta }) => ({ factKey, type, before, after, delta })),
         factKeys,
         songId: primary.songId!,
         difficultyType: primary.difficultyType!,

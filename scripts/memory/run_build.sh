@@ -21,6 +21,6 @@ trap cleanup EXIT
 trap 'exit 130' INT TERM
 systemd-run --quiet --unit="$unit" --slice=development-build.slice --wait --collect --pipe \
  --working-directory="$PWD" --setenv=TMPDIR=/var/tmp/taiko-build --setenv=PATH="$PATH" \
- -p MemoryHigh=4G -p MemoryMax=5G -p MemorySwapMax=512M -p TasksMax=512 \
+ -p MemoryHigh=4608M -p MemoryMax=5G -p MemorySwapMax=512M -p TasksMax=512 \
  -p CPUQuota=200% -p RuntimeMaxSec=30min -p TimeoutStopSec=15 \
  -p KillMode=control-group -p OOMPolicy=stop -p UMask=0077 -- "$@"

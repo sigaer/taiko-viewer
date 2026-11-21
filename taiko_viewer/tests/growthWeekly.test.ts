@@ -80,6 +80,18 @@ test("highlights collapse same-chart facts, rank relative magnitudes, deduplicat
   assert.deepEqual(recap(result.highlights.map(item => fact(item.primaryType, { songId: item.songId }))).highlights.map(item => item.songId).sort(), result.highlights.map(item => item.songId).sort());
 });
 
+test("score-themed highlights retain the rank transition alongside the chosen PB", () => {
+  const pb = fact('score-pb', { before: 989720, after: 1006940, delta: 17220 });
+  const rank = fact('rank-upgrade', { before: 7, after: 8, delta: 1 });
+  const result = recap([pb, rank, { ...rank }, fact('score-pb', { songId: 11 }), fact('score-pb', { songId: 12 })]);
+  assert.equal(result.theme.type, 'score-breakthrough');
+  const highlight = result.highlights.find(item => item.songId === pb.songId)!;
+  assert.equal(highlight.primaryType, 'score-pb');
+  assert.equal(highlight.primaryFactKey, pb.factKey);
+  assert.deepEqual(highlight.facts, [pb, rank].map(({ factKey, type, before, after, delta }) => ({ factKey, type, before, after, delta })));
+  assert.equal(result.totals.rankUpgrade, 1);
+});
+
 test("weekly differences remain available across every version and availability boundary", () => {
   const start = measurement("m1", "2026-09-14T01:00:00Z");
   const end = measurement("m2", "2026-09-19T01:00:00Z", { rating: 10.2, dimensions: { ...start.dimensions, accuracy_power: 9.3 }, focus: "rhythm" });

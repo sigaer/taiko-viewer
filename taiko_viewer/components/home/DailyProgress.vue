@@ -1,10 +1,9 @@
 <script setup lang="ts">
 // Today's progress on the signed-in home. Logic unchanged (what counts as a change, the relocated-to-goal notice,
 // attendance states); the markup is styled by components/rework/today/Board.vue. Crown facts show the crown with its
-// name, rank facts the rank icons with names (DsCrown / DsRank).
+// name, rank facts the accessible rank images and upgrade arrow (DsCrown / DsRank).
 import type { GrowthDailyProgress, GrowthEventFact } from '~/types/player-growth';
 import { difficultyLabelKey } from '~/utils/difficulty';
-import { formatScoreRank } from '~/utils/scoreRank';
 
 const props = defineProps<{ progress: GrowthDailyProgress; original: GrowthDailyProgress }>();
 const { t, locale } = useI18n();
@@ -21,8 +20,7 @@ const changesElsewhere = computed(() => !hasChanges.value && props.original.even
 const stateText = computed(() => props.progress.attendance === 'unknown' ? t('home.growth.progressUnavailable')
   : props.progress.attendance === 'not_played' ? t('home.growth.noPlay')
   : changesElsewhere.value ? t('home.growth.dailyElsewhere') : !hasChanges.value ? t('rework.home.daily.quiet') : '');
-const factValue = (fact: GrowthEventFact, value: number) => fact.type === 'rank-upgrade'
-  ? formatScoreRank(value, locale.value) : value.toLocaleString(locale.value === 'ja' ? 'ja-JP' : 'zh-CN');
+const factValue = (value: number) => value.toLocaleString(locale.value === 'ja' ? 'ja-JP' : 'zh-CN');
 const numericTypes = ['score-pb', 'ng-reduced', 'combo-improved'];
 const crownOf = (type: GrowthEventFact['type']) => type === 'df' ? 'dondaful' : type === 'fc' ? 'full' : type === 'clear-upgrade' ? 'clear' : null;
 </script>
@@ -46,11 +44,11 @@ const crownOf = (type: GrowthEventFact['type']) => type === 'df' ? 'dondaful' : 
           <li v-for="(fact, factIndex) in event.facts" :key="`${fact.type}:${fact.before}:${fact.after}:${factIndex}`">
             <template v-if="numericTypes.includes(fact.type) && fact.after !== null">
               <span class="growth-event__label">{{ t(`home.growth.factLabels.${fact.type}`) }}</span>
-              <span class="growth-event__values"><span v-if="fact.before !== null" class="growth-event__before">{{ factValue(fact, fact.before) }} <span aria-hidden="true">→</span> </span><strong>{{ factValue(fact, fact.after) }}</strong><small v-if="fact.type === 'score-pb' && fact.delta !== null && fact.delta > 0"> (+{{ factValue(fact, fact.delta) }})</small></span>
+              <span class="growth-event__values"><span v-if="fact.before !== null" class="growth-event__before">{{ factValue(fact.before) }} <span aria-hidden="true">→</span> </span><strong>{{ factValue(fact.after) }}</strong><small v-if="fact.type === 'score-pb' && fact.delta !== null && fact.delta > 0"> (+{{ factValue(fact.delta) }})</small></span>
             </template>
             <template v-else-if="fact.type === 'rank-upgrade' && fact.after !== null">
-              <span class="growth-event__label">{{ t('home.growth.factLabels.rank-upgrade') }}</span>
-              <span class="growth-event__values"><template v-if="fact.before !== null"><DsRank :value="fact.before" named /> <span aria-hidden="true">→</span> </template><DsRank :value="fact.after" named /></span>
+              <DsRank v-if="fact.before !== null" :value="fact.after" :previous="fact.before" variant="upgrade" />
+              <DsRank v-else :value="fact.after" />
             </template>
             <DsCrown v-else-if="crownOf(fact.type)" :state="crownOf(fact.type)!" size="sm" text="full" />
             <span v-else>{{ fact.type === 'played' ? t('rework.home.daily.recorded') : t(`home.growth.events.${fact.type}`) }}</span>
