@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { mkdtemp, mkdir, writeFile, rm } from 'node:fs/promises';
-import { readDailyAbilityArchive, mergeDailyAbilityMeasurements } from '../server/services/growth-history/daily-archive.ts';
+import { readDailyAbilityArchive, mergeDailyAbilityMeasurements, mergeWeeklyAbilityMeasurements } from '../server/services/growth-history/daily-archive.ts';
 
 test('archive restores historical dates without replacing existing frozen Viewer values', async () => {
   const root = await mkdtemp('/var/tmp/daily-ability-test-');
@@ -16,6 +16,11 @@ test('archive restores historical dates without replacing existing frozen Viewer
     const today = {...archive[1]!,id:'101',rating:10,capturedAt:'2026-10-10T10:00:00.000Z'};
     const merged=mergeDailyAbilityMeasurements([stored,today],archive,'2026-10-10');
     assert.equal(merged[0]!.rating,9.9);assert.equal(merged[1]!.rating,10.5);
+    const weekly = mergeWeeklyAbilityMeasurements([stored,today],archive,'2026-10-10');
+    assert.equal(weekly.length,3);
+    assert.equal(weekly[0]!.rating,9.9,'past Viewer measurements stay frozen');
+    assert.equal(weekly[1]!.id,'101','retain the first observation even on a single-day week');
+    assert.equal(weekly[2]!.rating,10.5,'latest same-day archive supplies the endpoint');
     assert.equal((await readDailyAbilityArchive(root,'456',7,9,'2026-09-01','2026-10-10')).length,0);
     await assert.rejects(readDailyAbilityArchive(root,'../123',7,9,'2026-09-01','2026-10-10'));
     await writeFile(`${root}/123/daily-ability-v1-top20.json`,'bad');

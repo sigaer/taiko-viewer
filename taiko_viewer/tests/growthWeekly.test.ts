@@ -80,7 +80,7 @@ test("highlights collapse same-chart facts, rank relative magnitudes, deduplicat
   assert.deepEqual(recap(result.highlights.map(item => fact(item.primaryType, { songId: item.songId }))).highlights.map(item => item.songId).sort(), result.highlights.map(item => item.songId).sort());
 });
 
-test("measurement comparison enforces availability and every version boundary", () => {
+test("weekly differences remain available across every version and availability boundary", () => {
   const start = measurement("m1", "2026-09-14T01:00:00Z");
   const end = measurement("m2", "2026-09-19T01:00:00Z", { rating: 10.2, dimensions: { ...start.dimensions, accuracy_power: 9.3 }, focus: "rhythm" });
   const compatible = buildWeeklyMeasurementChange([end, start]);
@@ -96,10 +96,38 @@ test("measurement comparison enforces availability and every version boundary", 
   assert.equal(buildWeeklyMeasurementChange([start, { ...end, modelRevision: "n".repeat(64) }]).reason, "model-mismatch");
   assert.equal(buildWeeklyMeasurementChange([start, { ...end, measurementVersion: 2 }]).reason, "measurement-version-mismatch");
   assert.equal(buildWeeklyMeasurementChange([start, { ...end, availabilityState: "limited", focus: "limited" }]).reason, "limited");
+  for (const metadata of [
+    { algorithmVersion: 'growth-v2' }, { modelRevision: 'n'.repeat(64) }, { modelRevision: null },
+    { measurementVersion: 2 }, { availabilityState: 'limited' as const }, { availabilityState: 'insufficient' as const }
+  ]) {
+    const change = buildWeeklyMeasurementChange([start, { ...end, ...metadata }]);
+    assert.equal(change.compatible, false);
+    assert.equal(change.ratingDelta, 0.2);
+    assert.equal(change.dimensionDeltas?.accuracy_power, 0.3);
+    assert.equal(change.start?.rating, 10);
+    assert.equal(change.end?.rating, 10.2);
+  }
   assert.equal(buildWeeklyMeasurementChange([start, { ...end, focus: "balanced" }]).focusTo, "balanced");
   const unchanged = buildWeeklyMeasurementChange([start, measurement("m3", "2026-09-20T01:00:00Z")]);
   assert.equal(unchanged.primaryDimension, null);
-  assert.equal(unchanged.ratingDelta, null);
+  assert.equal(unchanged.ratingDelta, 0);
+  assert.equal(unchanged.dimensionDeltas?.speed, 0);
+  assert.equal(buildWeeklyMeasurementChange([start, { ...end, rating: start.rating! - 0.00000008 }]).ratingDelta, 0);
+});
+
+test('missing weekly values stay unknown while other values and zero differences remain visible', () => {
+  const start = measurement('m1', '2026-09-14T01:00:00Z', { rating: null });
+  const end = measurement('m2', '2026-09-19T01:00:00Z', { dimensions: { ...start.dimensions, speed: null, stamina: 10.5 } });
+  const change = buildWeeklyMeasurementChange([start, end]);
+  assert.equal(change.ratingDelta, null);
+  assert.equal(change.end?.rating, 10);
+  assert.equal(change.dimensionDeltas?.speed, null);
+  assert.equal(change.dimensionDeltas?.stamina, 0.5);
+  assert.equal(change.dimensionDeltas?.big_song, 0);
+  const single = buildWeeklyMeasurementChange([end]);
+  assert.equal(single.start, null);
+  assert.equal(single.end?.rating, 10);
+  assert.equal(single.ratingDelta, null);
 });
 
 test("coverage states remain explicit while totals only describe confirmed facts", () => {

@@ -94,11 +94,10 @@ const nextCopy = computed(() => composeRecommendationCopy({ profileId: `${accoun
 const rangeText = computed(() => weekly.value ? t("rework.weeklyPage.range", { from: formatDay(weekly.value.week.from), to: formatDay(weekly.value.week.to) }) : "");
 const focusText = computed(() => {
   const m = measurement.value;
-  if (!m?.compatible) return "";
+  if (!m?.start || !m.end || m.start.id === m.end.id) return "";
   if (m.focusFrom !== m.focusTo) return t("weekly.measurement.focusChanged", { from: focusLabel(m.focusFrom), to: focusLabel(m.focusTo) });
   return m.focusTo ? t("weekly.measurement.focusSame", { focus: focusLabel(m.focusTo) }) : "";
 });
-const recordMethodChanged = computed(() => ['algorithm-mismatch', 'model-mismatch', 'measurement-version-mismatch'].includes(measurement.value?.reason || ''));
 
 </script>
 
@@ -129,10 +128,10 @@ const recordMethodChanged = computed(() => ['algorithm-mismatch', 'model-mismatc
           <ReworkPanel v-if="weekly.highlights.length" class="weekly-section" plain :title="t('weekly.highlights')">
             <ReworkWeeklyHighlights class="weekly-rhythm" :items="weekly.highlights" :change="highlightChange" />
           </ReworkPanel>
-          <ReworkWeeklyChange v-else :change="measurement" :complete-week="weekly.week.isCompleteWeek" :focus-text="focusText" :record-method-changed="recordMethodChanged" />
+          <ReworkWeeklyChange v-else :change="measurement" :complete-week="weekly.week.isCompleteWeek" :focus-text="focusText" />
         </div>
         <aside class="wk-side">
-          <ReworkWeeklyChange v-if="weekly.highlights.length" :change="measurement" :complete-week="weekly.week.isCompleteWeek" :focus-text="focusText" :record-method-changed="recordMethodChanged" />
+          <ReworkWeeklyChange v-if="weekly.highlights.length" :change="measurement" :complete-week="weekly.week.isCompleteWeek" :focus-text="focusText" />
           <ReworkPanel class="weekly-section weekly-next" plain :title="t('weekly.currentAdvice')">
             <p v-if="next" class="rw-count wk-next-say weekly-next__focus">{{ t(nextCopy.observation.key) }}</p>
             <ReworkState v-if="!next || !next.todayPlan.items.length" kind="empty" compact :title="t('weekly.noAdvice')" />

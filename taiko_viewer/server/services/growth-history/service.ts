@@ -5,7 +5,7 @@ import { performance } from "node:perf_hooks";
 import { createError } from "h3";
 import type { GrowthCoverageState, GrowthHistoryResponse } from "~/types/player-growth";
 import { getAccountDb } from "~/server/utils/account-db";
-import { getCurrentBindingRow } from "~/server/internal/account/shared";
+import { getCurrentBindingRow, getRuntimePaths } from "~/server/internal/account/shared";
 import { readGoalSnapshot } from "~/server/services/goals/snapshot";
 import { getSongCatalog } from "~/server/services/content";
 import { deriveProgressForRange } from "~/utils/dailyProgress";
@@ -15,6 +15,7 @@ import { canonicalGrowthProjection } from "~/utils/canonicalGrowth.ts";
 import { loadGrowthScoreEvidence } from "./evidence";
 import { loadGoalFacts } from "./goals";
 import { readGrowthMeasurements } from "./measurements";
+import { readDailyAbilityArchive, mergeWeeklyAbilityMeasurements } from "./daily-archive";
 import { GROWTH_HISTORY_TIMEZONE } from "./constants";
 import { GROWTH_HISTORY_MAX_DAYS, type GrowthHistoryRange } from "./range";
 
@@ -28,7 +29,7 @@ const scoreCoverage = (manual: boolean, fromDay: string, evidence: Awaited<Retur
   return baseline && evidence.invalidFiles === 0 ? "complete" : "partial";
 };
 
-export async function getGrowthHistory(userId: number, range: GrowthHistoryRange, options: { includeMeasurements?: boolean; loadScoreEvidence?: typeof loadGrowthScoreEvidence } = {}): Promise<GrowthHistoryResponse> {
+export async function getGrowthHistory(userId: number, range: GrowthHistoryRange, options: { includeMeasurements?: boolean; includeDailyAbilityArchive?: boolean; loadScoreEvidence?: typeof loadGrowthScoreEvidence } = {}): Promise<GrowthHistoryResponse> {
   const startedAt = performance.now();
   const binding = await getCurrentBindingRow(userId);
   if (!binding) throw createError({ statusCode: 400, statusMessage: "请先绑定鼓众 ID" });
@@ -38,7 +39,16 @@ export async function getGrowthHistory(userId: number, range: GrowthHistoryRange
     const db = getAccountDb();
     const measurementPromise = options.includeMeasurements === false
       ? Promise.resolve([])
-      : readGrowthMeasurements(db, userId, Number(binding.id), range.fromUtc, range.toExclusiveUtc);
+      : Promise.all([
+        readGrowthMeasurements(db, userId, Number(binding.id), range.fromUtc, range.toExclusiveUtc),
+        options.includeDailyAbilityArchive
+          ? readDailyAbilityArchive(getRuntimePaths().userdataDir, binding.taiko_id, userId, Number(binding.id), range.from, range.to).catch(() => {
+            console.error("[growth-history] daily ability archive unavailable", { userId, bindingId: Number(binding.id) });
+            return [];
+          })
+          : Promise.resolve([])
+      ]).then(([stored, archive]) => options.includeDailyAbilityArchive
+        ? mergeWeeklyAbilityMeasurements(stored, archive, growthCalendarDay(new Date())) : stored);
     const goalPromise = loadGoalFacts(db, userId, Number(binding.id), range.fromUtc, range.toExclusiveUtc);
     const manual = binding.source === "manual";
     const evidencePromise = manual ? Promise.resolve({ snapshots: [], totalFiles: 0, filesRead: 0, invalidFiles: 0, truncated: false, fromDay: null, toDay: null }) : (options.loadScoreEvidence || loadGrowthScoreEvidence)(binding.taiko_id);

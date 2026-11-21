@@ -37,3 +37,11 @@ export function mergeDailyAbilityMeasurements(measurements: GrowthMeasurement[],
   }
   return [...days.values()].sort((a,b) => a.capturedAt.localeCompare(b.capturedAt));
 }
+
+// Weekly compares the first and last observations, so retain the earlier
+// same-day records as well as the latest daily representative.
+export function mergeWeeklyAbilityMeasurements(measurements: GrowthMeasurement[], archive: GrowthMeasurement[], today: string) {
+  const daily = mergeDailyAbilityMeasurements(measurements, archive, today);
+  return [...new Map([...measurements, ...daily].map(row => [row.id, row])).values()]
+    .sort((a, b) => a.capturedAt.localeCompare(b.capturedAt) || a.id.localeCompare(b.id));
+}

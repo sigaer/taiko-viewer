@@ -14,7 +14,7 @@ export async function getWeeklyGrowthRecap(userId: number, window: WeeklyGrowthW
     return null;
   });
   const overviewDurationMs = performance.now() - overviewStartedAt;
-  const history = await getGrowthHistory(userId, window);
+  const history = await getGrowthHistory(userId, window, { includeDailyAbilityArchive: true });
   const composeStartedAt = performance.now();
   const currentNextAction = overview ? {
     focus: measurementFocus(overview.playerState),

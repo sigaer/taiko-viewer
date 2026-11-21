@@ -16,7 +16,7 @@ type GoalAttribution = { goal: GrowthFact; score: GrowthFact | null };
 const crownRank: Partial<Record<GrowthFactType, number>> = { clear: 1, fc: 2, df: 3 };
 const highlightPriority: Partial<Record<GrowthFactType, number>> = { df: 100, fc: 90, clear: 80, "rank-upgrade": 70, "score-pb": 60, "ng-reduced": 50, "combo-improved": 40, played: 1 };
 const finite = (value: unknown): value is number => typeof value === "number" && Number.isFinite(value);
-const round = (value: number) => Number(value.toFixed(6));
+const round = (value: number) => Number(value.toFixed(6)) || 0;
 const chartKey = (fact: GrowthFact) => `${fact.songId || 0}:${fact.difficultyType || 0}`;
 const deduplicateFacts = (facts: GrowthFact[]) => [...new Map(facts.map(fact => [fact.factKey, fact])).values()];
 const compatibleGoalTypes: Record<string, GrowthFactType[]> = {
@@ -56,11 +56,14 @@ export function buildWeeklyMeasurementChange(measurements: GrowthMeasurement[]):
   const start = ordered[0] || null;
   const end = ordered.at(-1) || null;
   const base = { start, end, compatible: false, ratingDelta: null, dimensionDeltas: null, primaryDimension: null, focusFrom: start?.focus || null, focusTo: end?.focus || null };
-  if (!start || !end || start.id === end.id) return { ...base, reason: "insufficient" };
-  if (start.availabilityState !== "ready" || end.availabilityState !== "ready") return { ...base, reason: "limited" };
-  if (start.measurementVersion !== end.measurementVersion) return { ...base, reason: "measurement-version-mismatch" };
-  if (start.algorithmVersion !== end.algorithmVersion) return { ...base, reason: "algorithm-mismatch" };
-  if (!start.modelRevision || !end.modelRevision || start.modelRevision !== end.modelRevision) return { ...base, reason: "model-mismatch" };
+  if (!start || !end || start.id === end.id) return { ...base, start: null, focusFrom: null, reason: "insufficient" };
+  // Version metadata describes the records; it must not suppress their values
+  // or arithmetic differences. A broad artifact hash is not a display gate.
+  const reason = start.availabilityState !== "ready" || end.availabilityState !== "ready" ? "limited"
+    : start.measurementVersion !== end.measurementVersion ? "measurement-version-mismatch"
+    : start.algorithmVersion !== end.algorithmVersion ? "algorithm-mismatch"
+    : !start.modelRevision || !end.modelRevision || start.modelRevision !== end.modelRevision ? "model-mismatch"
+    : "compatible";
   const dimensions = Object.fromEntries(GROWTH_DIMENSION_ORDER.map(key => [key,
     finite(start.dimensions[key]) && finite(end.dimensions[key]) ? round(end.dimensions[key]! - start.dimensions[key]!) : null
   ])) as GrowthMeasurementDimensions;
@@ -69,9 +72,9 @@ export function buildWeeklyMeasurementChange(measurements: GrowthMeasurement[]):
     .sort((left, right) => Math.abs(dimensions[right]!) - Math.abs(dimensions[left]!) || GROWTH_DIMENSION_ORDER.indexOf(left) - GROWTH_DIMENSION_ORDER.indexOf(right))[0];
   return {
     ...base,
-    compatible: true,
-    reason: "compatible",
-    ratingDelta: finite(start.rating) && finite(end.rating) && Math.abs(end.rating - start.rating) > 1e-6 ? round(end.rating - start.rating) : null,
+    compatible: reason === "compatible",
+    reason,
+    ratingDelta: finite(start.rating) && finite(end.rating) ? round(end.rating - start.rating) : null,
     dimensionDeltas: dimensions,
     primaryDimension: primaryKey ? {
       key: primaryKey,
