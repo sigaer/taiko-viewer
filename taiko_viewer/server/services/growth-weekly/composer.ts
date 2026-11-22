@@ -169,9 +169,10 @@ function buildHighlights(scoreFacts: GrowthFact[], attributions: GoalAttribution
         delta: primary.delta ?? null,
         goalCompleted: goals.length > 0
       },
-      score: themeBoost + (highlightPriority[primary.type] || 0) * 10 + magnitude
+      score: themeBoost + (highlightPriority[primary.type] || 0) * 10,
+      magnitude
     };
-  }).sort((left, right) => right.score - left.score || left.highlight.id.localeCompare(right.highlight.id)).slice(0, 4).map(item => item.highlight);
+  }).sort((left, right) => right.score - left.score || right.magnitude - left.magnitude || left.highlight.id.localeCompare(right.highlight.id)).map(item => item.highlight);
 }
 
 export function buildWeeklyGrowthRecap(history: GrowthHistoryResponse, week: { from: string; to: string; isCompleteWeek: boolean }, currentNextAction: WeeklyGrowthResponse["currentNextAction"]): WeeklyGrowthResponse {
@@ -181,12 +182,14 @@ export function buildWeeklyGrowthRecap(history: GrowthHistoryResponse, week: { f
   const distinctCharts = new Set(scoreFacts.filter(fact => fact.songId && fact.difficultyType).map(chartKey)).size;
   const measurementChange = buildWeeklyMeasurementChange(history.measurements);
   const theme = chooseTheme(scoreFacts, attributions, history.coverage, measurementChange, distinctCharts);
+  const changes = buildHighlights(scoreFacts, attributions, theme);
   return {
     profileId: history.profileId,
     week: { ...week, timezone: "Asia/Shanghai" },
     coverage: history.coverage,
     theme,
-    highlights: buildHighlights(scoreFacts, attributions, theme),
+    highlights: changes.slice(0, 4),
+    changes,
     measurementChange,
     totals: {
       distinctCharts,

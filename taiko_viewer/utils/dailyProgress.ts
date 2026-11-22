@@ -4,7 +4,7 @@ import { legacyScoreReader, legacyCrown, legacyJudgmentTotal, legacyScoreInstant
 import { growthCalendarDay } from "./playerGrowth.ts";
 import { memoizeGrowthString } from "./growthRequestMemo.ts";
 
-export type GrowthSnapshot = { full: boolean; timestamp: string; songs: UserdataSong[]; revision?: string; source?: string; removed?: string[]; excludedReason?: string | null; chartExclusions?: Record<string, string>; ignoredChartKeys?: string[]; identity?: string };
+export type GrowthSnapshot = { full: boolean; timestamp: string; songs: UserdataSong[]; revision?: string; source?: string; removed?: string[]; excludedReason?: string | null; chartExclusions?: Record<string, string>; ignoredChartKeys?: string[]; identity?: string; freshChartBaselines?: Record<string, { song: UserdataSong; observedAt: string }> };
 const num = legacyScoreReader("viewer-daily-v1");
 const key = (s: UserdataSong) => `${s.song_no}:${s.level}`;
 const epoch = (v: unknown) => {
@@ -81,7 +81,7 @@ export function deriveProgressForCalendarDays(current: UserdataSong[], history: 
       if (instant) chart.factOccurredAt![type] = instant;
     };
     if (before) {
-      let bestScoreDf = false;
+      let bestScoreCrown = false;
       let bestScoreRank = false;
       const aRank = num(before.best_score_rank), bRank = num(after.best_score_rank);
       const rankUp = aRank !== null && bRank !== null && Number.isInteger(aRank) && Number.isInteger(bRank)
@@ -101,24 +101,41 @@ export function deriveProgressForCalendarDays(current: UserdataSong[], history: 
         if (total !== null && total > 0 && total === judgments(after)) {
           add(scoreDay, 'ng-reduced', num(before.ng_cnt), num(after.ng_cnt), after.highscore_datetime, true);
           add(scoreDay, 'combo-improved', num(before.combo_cnt), num(after.combo_cnt), after.highscore_datetime);
-          // A complete best-score judgment tuple can date its new DF even
-          // when the previous snapshot was on another day. Cumulative crown
-          // counters alone still cannot identify a play day across that gap.
-          const previousCrown = crown(before), nextCrown = crown(after);
-          if (previousCrown !== null && previousCrown < 2 && nextCrown === 2
-            && num(after.good_cnt)! > 0 && num(after.ok_cnt) === 0 && num(after.ng_cnt) === 0
+        }
+        // The best-score judgments date FC/DF independently of sync cadence
+        // and do not depend on the previous record's judgment fields existing.
+        const previousCrown = crown(before), nextCrown = crown(after), nextTotal = judgments(after), combo = num(after.combo_cnt);
+        if (previousCrown !== null && nextCrown !== null && nextCrown > previousCrown && nextCrown >= 1
+            && nextTotal !== null && nextTotal > 0 && num(after.ng_cnt) === 0 && (combo === null || combo === nextTotal)
+            && (nextCrown !== 2 || num(after.ok_cnt) === 0)
             && num(before.high_score) !== null && num(after.high_score) !== null
             && num(after.high_score)! > num(before.high_score)!) {
-            add(scoreDay, 'df', previousCrown, 2, after.highscore_datetime);
-            bestScoreDf = true;
-          }
+            add(scoreDay, nextCrown === 2 ? 'df' : 'fc', previousCrown, nextCrown, after.highscore_datetime);
+            bestScoreCrown = true;
         }
       }
-      if (playTime && (calendarDayFor(before.update_datetime) === playDay || (calendarDayFor(observedBefore) === playDay && epochFor(observedBefore) < epochFor(after.update_datetime)))) {
+      const previousPlays = num(before.stage_cnt), nextPlays = num(after.stage_cnt);
+      const singleNewPlay = previousPlays !== null && nextPlays !== null && Number.isInteger(previousPlays)
+        && Number.isInteger(nextPlays) && nextPlays - previousPlays === 1;
+      if (playTime && (singleNewPlay || calendarDayFor(before.update_datetime) === playDay || (calendarDayFor(observedBefore) === playDay && epochFor(observedBefore) < epochFor(after.update_datetime)))) {
         const a = crown(before), b = crown(after);
-        if (a !== null && b !== null && b > a && !(b === 2 && bestScoreDf)) add(playDay, b === 2 ? 'df' : b === 1 ? 'fc' : 'clear-upgrade', a, b, after.update_datetime);
+        if (a !== null && b !== null && b > a && !bestScoreCrown) add(playDay, b === 2 ? 'df' : b === 1 ? 'fc' : 'clear-upgrade', a, b, after.update_datetime);
         if (rankUp && !bestScoreRank) add(playDay, 'rank-upgrade', aRank, bRank, after.update_datetime);
       }
+    } else if (snapshotInstant && num(after.stage_cnt) === 1 && includePlay
+      && instantFor(after.highscore_datetime) === instantFor(after.update_datetime)
+      && epochFor(after.update_datetime) <= epochFor(snapshot.timestamp)) {
+      // One authoritative play proves its first crown without an invented
+      // previous score or a second synchronization just to create a baseline.
+      const firstCrown = crown(after), total = judgments(after);
+      const combo = num(after.combo_cnt);
+      const completeCombo = total !== null && total > 0 && num(after.ng_cnt) === 0 && (combo === null || combo === total);
+      if (firstCrown !== null && firstCrown >= 0 && (firstCrown === 0 || completeCombo)
+        && (firstCrown !== 2 || num(after.ok_cnt) === 0)) {
+        add(playDay, firstCrown === 2 ? 'df' : firstCrown === 1 ? 'fc' : 'clear-upgrade', -1, firstCrown, after.update_datetime);
+      }
+      const rank = num(after.best_score_rank);
+      if (rank !== null && Number.isInteger(rank) && rank >= 2 && rank <= 8) add(playDay, 'rank-upgrade', 1, rank, after.update_datetime);
     }
   };
   const orderedHistory = history.every(snapshot => Number.isFinite(epochFor(snapshot.timestamp)))
@@ -139,7 +156,8 @@ export function deriveProgressForCalendarDays(current: UserdataSong[], history: 
     const nextObserved = snapshot.full ? new Map<string, string>() : new Map(observed);
     for (const song of snapshot.songs) {
       const songKey = key(song);
-      const before = state.get(songKey);
+      const recovered = snapshot.freshChartBaselines?.[songKey];
+      const before = recovered?.song || state.get(songKey);
       if (before && snapshot.ignoredChartKeys?.includes(songKey)) {
         next.set(songKey, before);
         if (observed.has(songKey)) nextObserved.set(songKey, observed.get(songKey)!);
@@ -161,7 +179,7 @@ export function deriveProgressForCalendarDays(current: UserdataSong[], history: 
       }
       else if (before && changed) unconfirmed.delete(songKey);
       // Delta rows are chart records, not field patches: absent evidence stays absent.
-      if (!unconfirmed.has(songKey)) visit(song, before, snapshot.full ? 'full-snapshot' : 'delta-snapshot', observed.get(songKey), snapshot, songKey, snapshotInstant);
+      if (!unconfirmed.has(songKey)) visit(song, before, snapshot.full ? 'full-snapshot' : 'delta-snapshot', recovered?.observedAt || observed.get(songKey), snapshot, songKey, snapshotInstant);
       everSeen.add(songKey);
       const score = num(song.high_score);
       if (score !== null) bestScores.set(songKey, Math.max(bestScores.get(songKey) ?? score, score));

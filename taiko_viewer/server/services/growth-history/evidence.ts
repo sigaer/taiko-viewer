@@ -107,7 +107,8 @@ async function readGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvid
     let state = new Map<string, UserdataSong>();
     let lastAuthoritativeSource = "";
     let lastAuthoritativeIdentity = "";
-    const pendingChartBaselines = new Set<string>();
+    const pendingChartBaselines = new Map<string, GrowthObservationExclusion>();
+    let chartObservations = new Map<string, { at: string; scope: string }>();
     let needsAuthoritativeBaseline = false;
     let invalidFiles = 0;
     for await (const { name, raw } of readHistoryFiles(reader, taikoId, names)) {
@@ -134,6 +135,7 @@ async function readGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvid
           meta.source_account || meta.sourceAccount || meta.account_id || payload.profile?.userid || (manual ? previousIdentity?.[1] : null) || taikoId,
           manual && !hasTopology ? previousIdentity?.[2] || [] : topologyIdentity(meta)
         ]);
+        const identityScope = JSON.stringify(JSON.parse(identity).slice(1));
         const localManual = manual && !!lastAuthoritativeIdentity && identity === lastAuthoritativeIdentity;
         let excludedReason: GrowthObservationExclusion | null = localManual ? null : writerExclusion;
         if (!observedAt) excludedReason = "unknown-source";
@@ -153,13 +155,15 @@ async function readGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvid
         // syncs can re-establish each affected chart's baseline independently;
         // requiring a new full export here would suppress real progress forever.
         if (excludedReason && !["source-switch", "discontinuity-baseline"].includes(excludedReason)) {
-          if (full) for (const songKey of state.keys()) pendingChartBaselines.add(songKey);
-          for (const song of payload.songs) pendingChartBaselines.add(chartKey(song));
+          if (full) for (const songKey of state.keys()) pendingChartBaselines.set(songKey, excludedReason);
+          for (const song of payload.songs) pendingChartBaselines.set(chartKey(song), excludedReason);
         }
         const chartExclusions: Record<string, GrowthObservationExclusion> = {};
         const ignoredChartKeys: string[] = [];
+        const freshChartBaselines: NonNullable<GrowthSnapshot['freshChartBaselines']> = {};
         const eventDaySet = new Set<string>();
         const next = full ? new Map<string, UserdataSong>() : new Map(state);
+        const nextObservations = full ? new Map<string, { at: string; scope: string }>() : new Map(chartObservations);
         for (const song of payload.songs) {
           const songKey = chartKey(song);
           const previous = state.get(songKey);
@@ -167,19 +171,31 @@ async function readGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvid
           if (localManual && !excludedReason && !changed) ignoredChartKeys.push(songKey);
           if (localManual && changed) {
             chartExclusions[songKey] = "manual";
-            pendingChartBaselines.add(songKey);
+            pendingChartBaselines.set(songKey, "manual");
           } else if (!excludedReason && !manual) {
             const regressed = previous && changed && regressionFields.some(field => {
               const left = numberValue(previous[field]), right = numberValue(song[field]);
               return left !== null && right !== null && right < left;
             });
             if (pendingChartBaselines.has(songKey)) {
-              // The previous edited/regressed row is not a trusted comparator.
-              chartExclusions[songKey] = "discontinuity-baseline";
+              // History imports/transfers are prior state, never play events.
+              // A later authoritative PB can prove a fresh transition itself.
+              const priorObservation = chartObservations.get(songKey);
+              const priorInstant = normalizedInstant(priorObservation?.at);
+              const pbInstant = normalizedInstant(song.highscore_datetime);
+              const playInstant = normalizedInstant(song.update_datetime);
+              const oldScore = previous && numberValue(previous.high_score), newScore = numberValue(song.high_score);
+              const baselineCause = pendingChartBaselines.get(songKey);
+              const freshImportedPb = ["import", "content-edit", "dispatcher-transfer", "unknown-source"].includes(baselineCause!) && !regressed
+                && priorObservation?.scope === identityScope
+                && oldScore !== null && oldScore !== undefined && newScore !== null && newScore > oldScore
+                && priorInstant && pbInstant > priorInstant && playInstant >= pbInstant && observedAt >= playInstant;
+              if (!freshImportedPb) chartExclusions[songKey] = "discontinuity-baseline";
+              else freshChartBaselines[songKey] = { song: previous!, observedAt: priorInstant };
               pendingChartBaselines.delete(songKey);
             } else if (regressed) {
               chartExclusions[songKey] = "counter-regression";
-              pendingChartBaselines.add(songKey);
+              pendingChartBaselines.set(songKey, "counter-regression");
             }
           }
           if (previous && changed) {
@@ -188,16 +204,23 @@ async function readGrowthScoreEvidence(taikoId: string): Promise<GrowthScoreEvid
             if (scoreDay) eventDaySet.add(scoreDay);
           }
           next.set(songKey, song);
+          nextObservations.set(songKey, { at: observedAt, scope: identityScope });
         }
         const eventDays = [...eventDaySet].sort();
         const observationExclusion = excludedReason || writerExclusion || Object.values(chartExclusions)[0] || null;
         const removed = (payload as UserdataPayload & { songs_removed?: unknown[] }).songs_removed;
         if (Array.isArray(removed)) {
-          for (const item of removed) next.delete(Array.isArray(item) ? `${item[0]}:${item[1]}` : String(item));
+          for (const item of removed) {
+            const removedKey = Array.isArray(item) ? `${item[0]}:${item[1]}` : String(item);
+            next.delete(removedKey);
+            nextObservations.delete(removedKey);
+          }
         }
         state = next;
+        chartObservations = nextObservations;
         const orderKey = fileOrder(name);
         snapshots.push({
+          freshChartBaselines,
           full,
           timestamp,
           songs: payload.songs,

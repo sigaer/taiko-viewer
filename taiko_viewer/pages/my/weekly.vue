@@ -126,7 +126,7 @@ const focusText = computed(() => {
       <div class="wk-cols">
         <div class="wk-main">
           <ReworkPanel v-if="weekly.highlights.length" class="weekly-section" plain :title="t('weekly.highlights')">
-            <ReworkWeeklyHighlights class="weekly-rhythm" :items="weekly.highlights" :change="highlightChange" />
+            <ReworkWeeklyHighlights class="weekly-rhythm" :items="weekly.changes || weekly.highlights" :change="highlightChange" />
           </ReworkPanel>
           <ReworkWeeklyChange v-else :change="measurement" :complete-week="weekly.week.isCompleteWeek" :focus-text="focusText" />
         </div>

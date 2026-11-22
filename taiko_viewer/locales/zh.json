@@ -476,6 +476,8 @@
     "currentWeek": "本周 · 截至今天",
     "completeWeek": "这一周",
     "highlights": "值得记住的变化",
+    "showAll": "展开全部 {count} 张谱面",
+    "showLess": "收起",
     "guestTitle": "登录后查看这一周",
     "login": "登录",
     "loading": "正在整理这一周",

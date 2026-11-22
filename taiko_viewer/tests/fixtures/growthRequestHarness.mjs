@@ -44,7 +44,7 @@ export async function importGrowthRequest(fixture, { baseline = false, migration
       upsertGrowthMeasurement: async () => { counters.measurementWrites++; return { created: false }; } },
     fs: { ...fs, readdir: async (...args) => { counters.enumeration++; if (onHistoryEnumerate) await onHistoryEnumerate(String(args[0])); return fs.readdir(...args); },
       stat: async (...args) => {
-        if (onHistoryStat) await onHistoryStat(String(args[0]));
+        if (onHistoryStat && String(args[0]).startsWith(resolve(fixture.userdataDir, fixture.id))) await onHistoryStat(String(args[0]));
         return fs.stat(...args);
       },
       readFile: async (...args) => {
@@ -74,6 +74,7 @@ export async function importGrowthRequest(fixture, { baseline = false, migration
     if (cache.has(path)) return cache.get(path);
     let source = await fs.readFile(path, 'utf8');
     const relative = path.slice(root.length);
+    if (relative === 'server/services/content/runtime.ts') source = `const useRuntimeConfig=()=>({repoRoot:${JSON.stringify(process.env.QA_RUN_TMPDIR)},public:{}});\n` + source;
     if (migrationBaseline) {
       source = execFileSync('git', ['show', `060dc05:taiko_viewer/${relative}`], { cwd: root, encoding: 'utf8', maxBuffer: 1024 * 1024 });
     }
@@ -86,7 +87,10 @@ export async function importGrowthRequest(fixture, { baseline = false, migration
     if (relative === 'server/services/growth-history/evidence.ts') {
       const readAnchor = source.includes('const raw = await reader.readHistory') ? 'const raw = await reader.readHistory(taikoId, name);' : 'const raw = await readFile(resolve(directory, name), "utf-8");';
       insert(readAnchor, `const readStarted = performance.now(); ${readAnchor} __counts.readMs += performance.now() - readStarted;`);
-      insert('const payload = JSON.parse(raw) as UserdataPayload;', '__counts.parseAttempts++; __counts.bytes += Buffer.byteLength(raw); const parseStarted = performance.now(); let payload: UserdataPayload; try { payload = JSON.parse(raw) as UserdataPayload; __counts.parses++; } finally { __counts.parseMs += performance.now() - parseStarted; }');
+      const payloadExpression = source.includes('const payload = await normalizeCatalogScores')
+        ? 'await normalizeCatalogScores(JSON.parse(raw) as UserdataPayload, getContentRuntimePaths().repoRoot)'
+        : 'JSON.parse(raw) as UserdataPayload';
+      insert(`const payload = ${payloadExpression};`, `__counts.parseAttempts++; __counts.bytes += Buffer.byteLength(raw); const parseStarted = performance.now(); let payload: UserdataPayload; try { payload = ${payloadExpression}; __counts.parses++; } finally { __counts.parseMs += performance.now() - parseStarted; }`);
       insert('const snapshots: GrowthSnapshot[] = [];', '__counts.normalization++; const snapshots: GrowthSnapshot[] = [];');
       if (source.includes('async function* readHistoryFiles')) {
         insert('    const batch = await Promise.all', '    const batchStarted=performance.now(); const batch = await Promise.all');

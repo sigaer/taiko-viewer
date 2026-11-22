@@ -218,6 +218,7 @@ export type WeeklyGrowthResponse = {
   coverage: GrowthHistoryResponse["coverage"];
   theme: WeeklyGrowthTheme;
   highlights: WeeklyGrowthHighlight[];
+  changes?: WeeklyGrowthHighlight[];
   measurementChange: WeeklyMeasurementChange;
   totals: {
     distinctCharts: number;

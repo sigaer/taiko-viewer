@@ -74,6 +74,7 @@ test("highlights collapse same-chart facts, rank relative magnitudes, deduplicat
     fact("score-pb", { songId: 11, delta: 9000 }), fact("df", { songId: 12 }), fact("fc", { songId: 13 }), fact("rank-upgrade", { songId: 14 }), fact("score-pb", { songId: 15, delta: 500 })
   ]);
   assert.equal(result.highlights.length, 4);
+  assert.equal(result.changes!.length, 6, 'all chart changes remain available beyond the four highlights');
   assert.equal(result.highlights.filter(item => item.songId === duplicate.songId).length, 1);
   assert.equal(result.highlights.find(item => item.songId === duplicate.songId)?.primaryType, "fc");
   assert.equal(new Set(result.highlights.flatMap(item => item.factKeys)).size, result.highlights.flatMap(item => item.factKeys).length);
@@ -90,6 +91,17 @@ test("score-themed highlights retain the rank transition alongside the chosen PB
   assert.equal(highlight.primaryFactKey, pb.factKey);
   assert.deepEqual(highlight.facts, [pb, rank].map(({ factKey, type, before, after, delta }) => ({ factKey, type, before, after, delta })));
   assert.equal(result.totals.rankUpgrade, 1);
+});
+
+test('large PB point gains do not bury accompanying first crowns outside the featured changes', () => {
+  const result = recap([
+    fact('fc', { before: 0, after: 1, delta: 1 }),
+    fact('score-pb', { delta: 1000 }),
+    ...[11,12,13,14,15].map(songId=>fact('score-pb', { songId, delta: 900000 }))
+  ]);
+  assert.equal(result.theme.type, 'score-breakthrough');
+  assert.equal(result.highlights[0].primaryType, 'fc');
+  assert.equal(result.changes!.length, 6);
 });
 
 test("weekly differences remain available across every version and availability boundary", () => {

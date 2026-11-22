@@ -24,6 +24,9 @@ export async function importGrowthModule(relative, { userdataDir, before = false
       return dataUrl(`export const getRuntimePaths=()=>({userdataDir:${JSON.stringify(userdataDir)},repoRoot:${JSON.stringify(process.env.QA_RUN_TMPDIR)}});`);
     }
     let source = await readFile(path, "utf8");
+    if (userdataDir && path === resolve(root, "server/services/content/runtime.ts")) {
+      source = `const useRuntimeConfig=()=>({repoRoot:${JSON.stringify(process.env.QA_RUN_TMPDIR)},public:{}});\n` + source;
+    }
     if (before && path === resolve(root, "utils/playerGrowth.ts")) {
       const marker = source.indexOf("// One fixed-zone formatter");
       if (marker < 0) throw new Error("Calendar oracle replacement anchor changed");

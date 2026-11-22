@@ -1,22 +1,28 @@
 <script setup lang="ts">
 // Keep the theme's headline and show the other measured changes on the same chart.
 import type { WeeklyGrowthHighlight } from "~/types/player-growth";
-import { difficultyLabelKey } from "~/utils/difficulty";
 import { factCrown, rankValue } from "~/utils/rework/today";
+import type { DsCrownState } from "~/utils/ds/crown";
+import { computed, ref, watch } from "vue";
 
-defineProps<{ items: WeeklyGrowthHighlight[]; change: (highlight: WeeklyGrowthHighlight) => string }>();
+const props = defineProps<{ items: WeeklyGrowthHighlight[]; change: (highlight: WeeklyGrowthHighlight) => string }>();
 const { t, locale } = useI18n();
 const localePath = useLocalePath();
+const expanded = ref(false);
+watch(() => props.items, () => { expanded.value = false; });
+const visible = computed(() => expanded.value ? props.items : props.items.slice(0, 4));
+const crownBefore = (value: number | null): DsCrownState => value === 2 ? 'dondaful' : value === 1 ? 'full' : value === 0 ? 'clear' : value === -1 ? 'played' : 'none';
 const to = (h: WeeklyGrowthHighlight) => localePath({ path: `/songs/${h.songId}`, query: { difficulty: String(h.difficultyType) } });
 const supportingFacts = (h: WeeklyGrowthHighlight) => (h.facts || []).filter(fact =>
-  fact.factKey !== h.primaryFactKey && ['rank-upgrade', 'score-pb', 'ng-reduced', 'combo-improved'].includes(fact.type)
+  fact.factKey !== h.primaryFactKey && ['clear', 'fc', 'df', 'rank-upgrade', 'score-pb', 'ng-reduced', 'combo-improved'].includes(fact.type)
 );
 const value = (n: number | null) => n === null ? '—' : n.toLocaleString(locale.value === 'ja' ? 'ja-JP' : 'zh-CN');
 </script>
 
 <template>
+  <div class="wl-section">
   <ol class="wl">
-    <li v-for="highlight in items" :key="highlight.id" class="wl-item weekly-highlight">
+    <li v-for="highlight in visible" :key="highlight.id" class="wl-item weekly-highlight">
       <NuxtLink :to="to(highlight)" class="wl-cover weekly-highlight__cover" tabindex="-1" aria-hidden="true">
         <DsCover :song-id="highlight.songId" size="md" />
       </NuxtLink>
@@ -25,18 +31,31 @@ const value = (n: number | null) => n === null ? '—' : n.toLocaleString(locale
           <DsRank v-if="highlight.primaryType === 'rank-upgrade' && rankValue(highlight.after) !== null"
             :value="rankValue(highlight.after)" :previous="rankValue(highlight.before)"
             :variant="rankValue(highlight.before) !== null ? 'upgrade' : 'default'" />
+          <span v-else-if="factCrown(highlight.primaryType)" class="wl-crown-change" role="img" :aria-label="t(`weekly.fact.${highlight.primaryType}`)" :title="t(`weekly.fact.${highlight.primaryType}`)">
+            <template v-if="highlight.before !== null">
+              <DsCrown :state="crownBefore(highlight.before)" size="md" aria-hidden="true" />
+              <span class="wl-arrow" aria-hidden="true">→</span>
+            </template>
+            <DsCrown :state="factCrown(highlight.primaryType)!" size="lg" aria-hidden="true" />
+          </span>
           <template v-else>{{ change(highlight) }}</template>
         </p>
         <NuxtLink :to="to(highlight)" class="rw-link wl-name">{{ highlight.title }}</NuxtLink>
         <span class="wl-meta">
-          <span>{{ t(difficultyLabelKey(highlight.difficultyType)) }}</span>
-          <DsCrown v-if="factCrown(highlight.primaryType)" :state="factCrown(highlight.primaryType)!" size="sm" text="full" />
+          <DsDiff :difficulty="highlight.difficultyType" :show-constant="false" />
         </span>
         <ul v-if="supportingFacts(highlight).length" class="wl-facts">
           <li v-for="fact in supportingFacts(highlight)" :key="fact.factKey">
             <DsRank v-if="fact.type === 'rank-upgrade' && rankValue(fact.after) !== null"
               :value="rankValue(fact.after)" :previous="rankValue(fact.before)"
               :variant="rankValue(fact.before) !== null ? 'upgrade' : 'default'" />
+            <span v-else-if="factCrown(fact.type)" class="wl-crown-change" role="img" :aria-label="t(`weekly.fact.${fact.type}`)" :title="t(`weekly.fact.${fact.type}`)">
+              <template v-if="fact.before !== null">
+                <DsCrown :state="crownBefore(fact.before)" size="sm" aria-hidden="true" />
+                <span class="wl-arrow" aria-hidden="true">→</span>
+              </template>
+              <DsCrown :state="factCrown(fact.type)!" size="md" aria-hidden="true" />
+            </span>
             <template v-else>{{ t(`weekly.fact.${fact.type}`) }} <span v-if="fact.before !== null">{{ value(fact.before) }} → </span><strong>{{ value(fact.after) }}</strong></template>
           </li>
         </ul>
@@ -44,9 +63,14 @@ const value = (n: number | null) => n === null ? '—' : n.toLocaleString(locale
       </div>
     </li>
   </ol>
+  <button v-if="items.length > 4" class="rw-btn rw-btn--ghost wl-more" type="button" :aria-expanded="expanded" @click="expanded = !expanded">
+    {{ expanded ? t('weekly.showLess') : t('weekly.showAll', { count: items.length }) }}
+  </button>
+  </div>
 </template>
 
 <style scoped>
+.wl-section { min-width: 0; }
 .wl {
   display: grid;
   margin: 0;
@@ -110,6 +134,9 @@ const value = (n: number | null) => n === null ? '—' : n.toLocaleString(locale
   font-size: var(--fs-13);
   font-weight: 600;
 }
+.wl-crown-change { display: inline-flex; align-items: center; gap: var(--sp-2); }
+.wl-arrow { color: var(--ink-3); font-weight: 400; }
+.wl-more { margin-top: var(--sp-3); justify-self: start; }
 @media (max-width: 767px) {
   .wl-item {
     gap: var(--sp-3);

@@ -23,6 +23,7 @@ test('daily and weekly show actual rank images and arrows alongside PB without d
       import Weekly from './components/rework/weekly/Highlights.vue';
       import Rank from './components/ds/Rank.vue';
       import Crown from './components/ds/Crown.vue';
+      import Diff from './components/ds/Diff.vue';
       import zh from './locales/zh.json'; import ja from './locales/ja.json';
       import {buildWeeklyGrowthRecap} from './server/services/growth-weekly/composer.ts';
       globalThis.computed=computed; globalThis.useI18n=useI18n;
@@ -44,6 +45,7 @@ test('daily and weekly show actual rank images and arrows alongside PB without d
         app.use(createI18n({legacy:false,locale,messages:{zh,ja}}));
         app.component('DsRank',Rank);
         app.component('DsCrown',Crown);
+        app.component('DsDiff',Diff);
         app.component('DsCover',{render:()=>h('span',{class:'cover'})});
         app.component('NuxtLink',{props:['to'],setup:(p,{slots})=>()=>h('a',{href:p.to},slots.default?.())});
         return await renderToString(app);

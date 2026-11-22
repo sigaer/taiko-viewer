@@ -475,6 +475,8 @@
     "currentWeek": "今週 · 今日まで",
     "completeWeek": "この一週間",
     "highlights": "覚えておきたい変化",
+    "showAll": "全 {count} 譜面を表示",
+    "showLess": "折りたたむ",
     "guestTitle": "ログインして今週を振り返る",
     "login": "ログイン",
     "loading": "今週の記録をまとめています",

@@ -18,6 +18,39 @@ test('multiple charts ranked by meaning and capped', () => { const rows=Array.fr
 test('midnight respects Shanghai', () => { assert.equal(run({...after,update_datetime:'2026-09-16T16:00:00Z',highscore_datetime:before.highscore_datetime}).attendance,'played'); assert.equal(run({...after,update_datetime:'2026-09-16T15:59:59Z',highscore_datetime:before.highscore_datetime}).attendance,'not_played'); });
 test('duplicate sync does not duplicate event', () => { const row={...after,high_score:910000}; const r=run(row,before,[{full:false,timestamp:'',songs:[row]}]); assert.equal(r.events.length,1); assert.equal(r.events[0].facts[0].delta,10000); });
 test('missing previous state or fields never becomes zero baseline', () => { assert.deepEqual(types(run({...after,high_score:910000},null)),['played']); assert.ok(!types(run({...after,high_score:910000},{...before,high_score:undefined})).includes('score-pb')); });
+
+test('a complete FC PB is dated across a multi-day synchronization gap', () => {
+  const previous={...before,high_score:962650,stage_cnt:9,clear_cnt:1};
+  const next={...after,high_score:972010,stage_cnt:10,good_cnt:95,ok_cnt:5,ng_cnt:0,combo_cnt:100,full_combo_cnt:1};
+  const result=deriveProgressForRange([], [{full:true,timestamp:'2026-09-16 20:00:00',songs:[previous]},{full:false,timestamp:'2026-09-17 20:00:00',songs:[next]}],day,day,()=> 'Song')[0];
+  assert.ok(result.events[0].facts.some(f=>f.type==='fc'&&f.before===0&&f.after===1));
+  assert.equal(result.events[0].factOccurredAt.fc,'2026-09-17T04:00:00.000Z');
+});
+
+test('one new play dates its first FC even when it does not replace the best score', () => {
+  const previous={...before,stage_cnt:9};
+  const next={...previous,stage_cnt:10,full_combo_cnt:1,update_datetime:after.update_datetime};
+  const replay=(row:any)=>deriveProgressForRange([], [{full:true,timestamp:'2026-09-16 20:00:00',songs:[previous]},{full:false,timestamp:'2026-09-17 20:00:00',songs:[row]}],day,day,()=> 'Song')[0];
+  assert.ok(types(replay(next)).includes('fc'));
+  assert.ok(!types(replay({...next,stage_cnt:11})).includes('fc'));
+  assert.ok(!types(replay({...next,full_combo_cnt:0})).includes('fc'));
+});
+
+test('a real first play can earn its first crown and rank without inventing a previous PB', () => {
+  const first={...after,stage_cnt:1,good_cnt:95,ok_cnt:5,ng_cnt:0,combo_cnt:100,full_combo_cnt:1};
+  const replay=(row:any,metadata={})=>deriveProgressForRange([], [{full:false,timestamp:'2026-09-17 20:00:00',songs:[row],...metadata}],day,day,()=> 'Song')[0];
+  assert.deepEqual(types(replay(first)),['fc','rank-upgrade']);
+  assert.ok(!types(replay(first)).includes('score-pb'));
+  assert.ok(!types(replay({...first,stage_cnt:2})).includes('fc'));
+  assert.ok(!types(replay(first,{excludedReason:'import'})).includes('fc'));
+  assert.ok(!types(deriveDailyProgress([first],[],day,()=> 'Song')).includes('fc'));
+});
+
+test('repeated FC counters do not become another new FC and PB tuple evidence needs no old judgments', () => {
+  const first={...after,stage_cnt:2,good_cnt:95,ok_cnt:5,ng_cnt:0,combo_cnt:100,full_combo_cnt:1};
+  assert.ok(!types(run({...first,full_combo_cnt:2},{...before,full_combo_cnt:1})).includes('fc'));
+  assert.ok(types(run(first,{...before,good_cnt:undefined,ok_cnt:undefined,ng_cnt:undefined})).includes('fc'));
+});
 test('incomplete delta-only history still compares known records', () => { const r=deriveDailyProgress([], [{full:false,timestamp:'',songs:[before]},{full:false,timestamp:'',songs:[{...after,high_score:910000}]}],day,s=>'Song'); assert.equal(r.events[0].facts[0].type,'score-pb'); });
 test('stale PB timestamp cannot prove a new PB today', () => assert.ok(!types(run({...after,high_score:910000,highscore_datetime:before.highscore_datetime})).includes('score-pb')));
 test('regressions do not become achievements', () => assert.deepEqual(types(run({...after,high_score:800000,best_score_rank:5}, {...before,full_combo_cnt:1})),['played']));

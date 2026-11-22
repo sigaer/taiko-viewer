@@ -42,7 +42,7 @@ const fields = WEEKLY_TOTAL_FIELDS;
     <p v-if="coverageNote" class="rw-note wh-coverage weekly-coverage" role="note">{{ coverageNote }}</p>
     <dl class="wh-totals weekly-summary" :aria-label="t('weekly.recordedTotals')">
       <div v-for="field in fields" :key="field" class="wh-total">
-        <dt>{{ t(WEEKLY_TOTAL_KEYS[field]) }}</dt>
+        <dt><DsCrown v-if="field === 'fc' || field === 'df'" :state="field === 'fc' ? 'full' : 'dondaful'" size="sm" aria-hidden="true" />{{ t(WEEKLY_TOTAL_KEYS[field]) }}</dt>
         <dd class="num">{{ props.weekly.totals[field].toLocaleString(numberLocale) }}</dd>
       </div>
     </dl>
@@ -112,6 +112,9 @@ const fields = WEEKLY_TOTAL_FIELDS;
   line-height: 1.1;
 }
 .wh-total dt {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
   color: var(--ink-2);
   font-size: var(--fs-13);
   overflow-wrap: anywhere;

@@ -39,7 +39,7 @@ for(const cause of ['manual','counter-regression']) test(`affected chart require
     assert.ok(facts.some(f=>f.songId===2&&f.type==='score-pb'&&f.temporal.attributedDay==='2026-01-03'));
     const resumed=facts.find(f=>f.songId===1&&f.type==='score-pb'&&f.temporal.attributedDay==='2026-01-04');
     assert.equal(resumed.before,900300);assert.equal(resumed.after,900400);
-    assert.equal(resumed.evidence.provenance.factPolicyRevision,'observation-chart-continuity-v5');
+    assert.equal(resumed.evidence.provenance.factPolicyRevision,'observation-chart-continuity-v6');
   });
 });
 for(const change of [{writer_source:'hiroba'},{source_account:'other-synthetic'},{merge_topology:['other-synthetic']}]) test(`authoritative identity change remains global: ${JSON.stringify(change)}`,async()=>{
@@ -49,7 +49,17 @@ for(const change of [{writer_source:'hiroba'},{source_account:'other-synthetic'}
     assert.equal(facts.some(f=>f.temporal.attributedDay==='2026-01-02'),false);
   });
 });
-for(const source of ['unknown','web-score-import','repair-job']) test(`untrusted batch ${source} recovers through authoritative chart baselines`,async()=>{
+for(const scope of [{source_account:'other-synthetic'},{merge_topology:['other-synthetic']}]) test(`import recovery cannot compare a different account scope: ${JSON.stringify(scope)}`,async()=>{
+  await replay([
+    {songs:[row(1,1)]},
+    {full:false,songs:[row(1,2)],meta:{writer_source:'web-score-import',...scope}},
+    {full:false,songs:[row(1,3)]},
+  ],(e,days,facts)=>{
+    assert.equal(e.snapshots[2].chartExclusions['1:4'],'discontinuity-baseline');
+    assert.equal(facts.some(f=>f.temporal.attributedDay==='2026-01-03'),false);
+  });
+});
+for(const source of ['unknown','web-score-import','repair-job']) test(`untrusted batch ${source} cannot become an event; a later dated PB recovers where supported`,async()=>{
   await replay([
     {songs:[row(1,1),row(2,1)]},
     {full:false,songs:[row(1,2)],meta:{writer_source:source}},
@@ -58,8 +68,10 @@ for(const source of ['unknown','web-score-import','repair-job']) test(`untrusted
     {full:false,songs:[row(2,5)]},
   ],(e,days,facts)=>{
     assert.equal(e.snapshots[2].excludedReason,null);
-    assert.equal(e.snapshots[2].chartExclusions['1:4'],'discontinuity-baseline');
-    assert.equal(facts.some(f=>f.songId===1&&f.temporal.attributedDay==='2026-01-03'),false);
+    const freshRecovery = source !== 'repair-job';
+    assert.equal(e.snapshots[2].chartExclusions['1:4'],freshRecovery ? undefined : 'discontinuity-baseline');
+    assert.equal(facts.some(f=>f.songId===1&&f.temporal.attributedDay==='2026-01-03'),freshRecovery);
+    assert.equal(facts.some(f=>f.songId===1&&f.temporal.attributedDay==='2026-01-02'),false);
     assert.ok(facts.some(f=>f.songId===2&&f.type==='score-pb'&&f.temporal.attributedDay==='2026-01-03'));
     const resumed=facts.find(f=>f.songId===1&&f.type==='score-pb'&&f.temporal.attributedDay==='2026-01-04');
     assert.equal(resumed.before,900300);assert.equal(resumed.after,900400);
@@ -90,7 +102,7 @@ test('new manual chart has no attendance until a trusted baseline and later chan
     assert.ok(facts.some(f=>f.songId===2&&f.type==='score-pb'&&f.temporal.attributedDay==='2026-01-04'));
   });
 });
-test('manual full after unknown batch cannot clear an affected chart baseline',async()=>{
+test('unchanged manual copy cannot prove progress; a later authoritative PB can',async()=>{
   await replay([
     {songs:[row(1,1),row(2,1)]},
     {full:false,songs:[row(1,2)],meta:{writer_source:'unknown'}},
@@ -100,8 +112,9 @@ test('manual full after unknown batch cannot clear an affected chart baseline',a
     {full:false,songs:[row(1,6)]},
   ],(e,days,facts)=>{
     assert.equal(e.snapshots[2].chartExclusions['1:4'],undefined);
-    assert.equal(e.snapshots[3].chartExclusions['1:4'],'discontinuity-baseline');
-    assert.equal(facts.some(f=>f.songId===1&&f.temporal.attributedDay==='2026-01-04'),false);
+    assert.equal(e.snapshots[3].chartExclusions['1:4'],undefined);
+    assert.equal(facts.some(f=>f.songId===1&&f.temporal.attributedDay==='2026-01-03'),false);
+    assert.equal(facts.some(f=>f.songId===1&&f.temporal.attributedDay==='2026-01-04'),true);
     assert.ok(facts.some(f=>f.songId===1&&f.type==='score-pb'&&f.temporal.attributedDay==='2026-01-05'));
   });
 });
@@ -113,12 +126,32 @@ test('imported history followed only by authoritative deltas restores real miles
     {full:false,songs:[row(1,3,{high_score:940000})]},
   ],async(e,days,facts)=>{
     assert.equal(e.snapshots[0].excludedReason,'import');
-    assert.equal(e.snapshots[1].chartExclusions['1:4'],'discontinuity-baseline');
-    assert.equal(facts.some(f=>f.temporal.attributedDay==='2026-01-02'),false);
+    assert.equal(e.snapshots[1].chartExclusions['1:4'],undefined);
+    assert.equal(e.snapshots[1].freshChartBaselines['1:4'].song.high_score,900100);
+    assert.equal(facts.some(f=>f.temporal.attributedDay==='2026-01-01'),false);
+    assert.equal(facts.some(f=>f.temporal.attributedDay==='2026-01-02'),true);
     const resumed=facts.find(f=>f.type==='score-pb'&&f.temporal.attributedDay==='2026-01-03');
     assert.equal(resumed.before,920000);assert.equal(resumed.after,940000);
     const {curateSkillPassportMilestones}=await importGrowthModule('server/services/growth-passport/milestones.ts');
+    assert.equal(facts.filter(f=>f.type==='score-pb').length,2);
     assert.equal(curateSkillPassportMilestones(facts,{from:'2026-01-01',to:'2026-01-06'}).milestones.length,1);
+  });
+});
+
+for (const variant of ['unchanged-pb-time','pb-before-import','counter-regression','future-play']) test(`import recovery rejects ${variant}`,async()=>{
+  const imported=row(1,1,{high_score:920000});
+  const changes=variant==='unchanged-pb-time'?{highscore_datetime:imported.highscore_datetime}
+    : variant==='pb-before-import'?{highscore_datetime:'2026-01-02 12:00:00'}
+    : variant==='counter-regression'?{stage_cnt:0}
+    : {update_datetime:'2026-01-04 12:00:00'};
+  await replay([
+    {songs:[row(1,1)]},
+    {songs:[imported],meta:{imported_via:'kinoko-history'}},
+    {full:false,songs:[row(1,3,{high_score:940000,...changes})]},
+  ],(e,_days,facts)=>{
+    assert.equal(e.snapshots[2].chartExclusions['1:4'],'discontinuity-baseline');
+    assert.equal(e.snapshots[2].freshChartBaselines['1:4'],undefined);
+    assert.equal(facts.some(f=>f.temporal.attributedDay==='2026-01-03'),false);
   });
 });
 

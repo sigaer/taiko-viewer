@@ -7,18 +7,25 @@ import { deriveDailyProgress, deriveProgressForRange } from "../utils/dailyProgr
 import { projectScoreFacts } from "../utils/growthHistory.ts";
 import { fixtures } from "./fixtures/dailyProgressReplay.mjs";
 import { calendarCases, calendarResult, growthCalendarDayBefore } from "./fixtures/growthCalendarBefore0800.mjs";
+import { importGrowthModule } from "../scripts/performance/growth-module-loader.mjs";
 const golden = JSON.parse(await readFile(new URL("./fixtures/growthCalendar0800.golden.json", import.meta.url), "utf8"));
 for (const [id, value, zone] of calendarCases()) test(`calendar legacy parity: ${id}`, () => {
   const result = calendarResult(growthCalendarDay, value, zone);
   assert.deepEqual(result, golden.calendar[id]);
   assert.deepEqual(result, calendarResult(growthCalendarDayBefore, value, zone));
 });
-for (const fixture of fixtures) test(`canonical replay before/after golden: ${fixture.id}`, () => {
+// Calendar parity must hold with the current fact policy too. The old replay
+// digest also froze unrelated policy metadata and intentional crown fixes.
+const calendarOracle = await importGrowthModule('utils/dailyProgress.ts', { before: true });
+for (const fixture of fixtures) test(`canonical replay calendar parity: ${fixture.id}`, () => {
   const snapshots = fixture.snapshots.map(p => ({ full: p._meta.full, timestamp: p._meta.ts, songs: p.songs, revision: p._meta.ts }));
   const current = snapshots.at(-1).songs;
   const days = deriveProgressForRange(current, snapshots, "2026-09-16", "2026-09-17", () => "fixture");
   const value = { days, daily: deriveDailyProgress(current, snapshots, "2026-09-17", () => "fixture"), facts: projectScoreFacts(1, 1, days) };
-  assert.equal(createHash("sha256").update(JSON.stringify(value)).digest("hex"), golden.replay[fixture.id], "canonical day/facts/provenance digest changed");
+  const beforeDays = calendarOracle.deriveProgressForRange(current, snapshots, "2026-09-16", "2026-09-17", () => "fixture");
+  const before = { days: beforeDays, daily: calendarOracle.deriveDailyProgress(current, snapshots, "2026-09-17", () => "fixture"), facts: projectScoreFacts(1, 1, beforeDays) };
+  const digest = value => createHash("sha256").update(JSON.stringify(value)).digest("hex");
+  assert.equal(digest(value), digest(before), "canonical calendar grouping/facts/provenance changed");
 });
 
 test("offset-aware calendar parity across leap years and DST zones", () => {
