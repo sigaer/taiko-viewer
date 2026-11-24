@@ -1,0 +1,56 @@
+{
+  "task": "Taiko Viewer Batch 2",
+  "date": "2026-11-24",
+  "status": "REVIEW_CANDIDATE_WITH_OPEN_RELEASE_GATES",
+  "originalCandidates": {
+    "viewer": "26930740",
+    "bot": "62c4d3e"
+  },
+  "viewerRuntimeCommit": "ce76be5f564d298d58462a113d8221428ef1b3b8",
+  "worktrees": {
+    "integration": {
+      "path": "/var/tmp/taiko-batch2-20261124/integration",
+      "branch": "audit/catalog-release-batch2-20261124",
+      "headAtHandoff": "ce76be5f564d298d58462a113d8221428ef1b3b8"
+    },
+    "bot": {
+      "path": "/var/tmp/taiko-batch2-20261124/bot",
+      "branch": "repair/core-artifact-rc-20261124",
+      "headAtHandoff": "cda0a857697119d30bd291cf275900ddf89aab85"
+    },
+    "core": {
+      "path": "/var/tmp/taiko-batch2-20261124/core",
+      "branch": "repair/center-core-0.1.3rc1-20261124",
+      "headAtHandoff": "52909eca0749080a4f8921c4374b2b0375eb3c47"
+    },
+    "catalog": {
+      "path": "/var/tmp/taiko-batch2-20261124/catalog",
+      "branch": "audit/catalog-authority-batch2-20261124",
+      "headAtHandoff": "2693074043c6dc60d17d83e595e3fa383340cab6"
+    },
+    "integrity": {
+      "path": "/var/tmp/taiko-batch2-20261124/integrity",
+      "branch": "audit/integrity-batch2-20261124",
+      "headAtHandoff": "2693074043c6dc60d17d83e595e3fa383340cab6"
+    },
+    "timeline": {
+      "path": "/var/tmp/taiko-batch2-20261124/timeline",
+      "branch": "audit/timeline-batch2-20261124",
+      "headAtHandoff": "2693074043c6dc60d17d83e595e3fa383340cab6"
+    }
+  },
+  "artifacts": "/var/tmp/taiko-batch2-20261124/release-candidate",
+  "privateEvidence": "/var/tmp/taiko-batch2-20261124/evidence/integrity-private",
+  "durableEvidence": "/home/sigaer/taiko/qa-vault/evidence/catalog-release-batch2-20261124/evidence.tar.gz",
+  "stopsRespected": [
+    "no main merge",
+    "no push",
+    "no release",
+    "no deployment",
+    "no score or production DB writes",
+    "no Publication replacement/recovery",
+    "no Measurement backfill",
+    "no new engine or agent"
+  ],
+  "execution": "All tool execution by lead; native children had no tools and executed nothing"
+}

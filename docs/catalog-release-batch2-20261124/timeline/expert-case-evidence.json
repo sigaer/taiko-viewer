@@ -67,13 +67,8 @@
   {
     "source": "ESE/09 Namco Original/Donkama 2000/Donkama 2000.tja",
     "sourceHash": "610da4ab9fc67efc9c3bbab3c99cd94b20683319ce81d3553f7178ed63256742",
-    "status": "INVALID",
-    "diagnostics": [
-      "oni/unbranched:NONFINITE_TIMELINE",
-      "hard/unbranched:NONFINITE_TIMELINE",
-      "normal/unbranched:NONFINITE_TIMELINE",
-      "easy/unbranched:NONFINITE_TIMELINE"
-    ],
+    "status": "COMPLETE",
+    "diagnostics": [],
     "courses": {
       "oni": {
         "bpm": 120,
@@ -85,9 +80,7 @@
             "rolls": 0,
             "balloons": 0,
             "chartRelativeDurationMs": 126062.41147921125,
-            "diagnostics": [
-              "NONFINITE_TIMELINE"
-            ]
+            "diagnostics": []
           }
         }
       },
@@ -101,9 +94,7 @@
             "rolls": 0,
             "balloons": 0,
             "chartRelativeDurationMs": 128062.41147921125,
-            "diagnostics": [
-              "NONFINITE_TIMELINE"
-            ]
+            "diagnostics": []
           }
         }
       },
@@ -117,9 +108,7 @@
             "rolls": 0,
             "balloons": 0,
             "chartRelativeDurationMs": 128062.41147921125,
-            "diagnostics": [
-              "NONFINITE_TIMELINE"
-            ]
+            "diagnostics": []
           }
         }
       },
@@ -133,9 +122,7 @@
             "rolls": 0,
             "balloons": 0,
             "chartRelativeDurationMs": 128062.41147921125,
-            "diagnostics": [
-              "NONFINITE_TIMELINE"
-            ]
+            "diagnostics": []
           }
         }
       }
@@ -229,13 +216,8 @@
   {
     "source": "ESE/09 Namco Original/Yokuderu 15300/Yokuderu 15300.tja",
     "sourceHash": "fda6711aedb7ad3098640bc934440d5fb46ad5beff86a2b3d48ff53e815b2203",
-    "status": "INVALID",
-    "diagnostics": [
-      "oni/unbranched:NONFINITE_TIMELINE",
-      "hard/unbranched:NONFINITE_TIMELINE",
-      "normal/unbranched:NONFINITE_TIMELINE",
-      "easy/unbranched:NONFINITE_TIMELINE"
-    ],
+    "status": "COMPLETE",
+    "diagnostics": [],
     "courses": {
       "oni": {
         "bpm": 225.27,
@@ -247,9 +229,7 @@
             "rolls": 0,
             "balloons": 0,
             "chartRelativeDurationMs": 17660.327728454235,
-            "diagnostics": [
-              "NONFINITE_TIMELINE"
-            ]
+            "diagnostics": []
           }
         }
       },
@@ -263,9 +243,7 @@
             "rolls": 0,
             "balloons": 1,
             "chartRelativeDurationMs": 17660.327728454235,
-            "diagnostics": [
-              "NONFINITE_TIMELINE"
-            ]
+            "diagnostics": []
           }
         }
       },
@@ -279,9 +257,7 @@
             "rolls": 0,
             "balloons": 1,
             "chartRelativeDurationMs": 17660.327728454235,
-            "diagnostics": [
-              "NONFINITE_TIMELINE"
-            ]
+            "diagnostics": []
           }
         }
       },
@@ -295,9 +271,7 @@
             "rolls": 0,
             "balloons": 1,
             "chartRelativeDurationMs": 17660.327728454235,
-            "diagnostics": [
-              "NONFINITE_TIMELINE"
-            ]
+            "diagnostics": []
           }
         }
       }
@@ -307,13 +281,8 @@
   {
     "source": "ESE/09 Namco Original/Yokuderu 2000/Yokuderu 2000.tja",
     "sourceHash": "78bfbf3289361cdef84815a717034d6f109c94d087f025ef4003771dddc4721f",
-    "status": "INVALID",
-    "diagnostics": [
-      "oni/unbranched:NONFINITE_TIMELINE",
-      "hard/unbranched:NONFINITE_TIMELINE",
-      "normal/unbranched:NONFINITE_TIMELINE",
-      "easy/unbranched:NONFINITE_TIMELINE"
-    ],
+    "status": "COMPLETE",
+    "diagnostics": [],
     "courses": {
       "oni": {
         "bpm": 186,
@@ -325,9 +294,7 @@
             "rolls": 2,
             "balloons": 0,
             "chartRelativeDurationMs": 114173.74031593428,
-            "diagnostics": [
-              "NONFINITE_TIMELINE"
-            ]
+            "diagnostics": []
           }
         }
       },
@@ -341,9 +308,7 @@
             "rolls": 2,
             "balloons": 0,
             "chartRelativeDurationMs": 115141.48225141814,
-            "diagnostics": [
-              "NONFINITE_TIMELINE"
-            ]
+            "diagnostics": []
           }
         }
       },
@@ -357,9 +322,7 @@
             "rolls": 2,
             "balloons": 0,
             "chartRelativeDurationMs": 115141.48225141814,
-            "diagnostics": [
-              "NONFINITE_TIMELINE"
-            ]
+            "diagnostics": []
           }
         }
       },
@@ -373,9 +336,7 @@
             "rolls": 2,
             "balloons": 0,
             "chartRelativeDurationMs": 115141.48225141814,
-            "diagnostics": [
-              "NONFINITE_TIMELINE"
-            ]
+            "diagnostics": []
           }
         }
       }

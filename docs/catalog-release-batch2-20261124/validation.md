@@ -15,7 +15,7 @@
 | Publication /11+3 Measurement | 916current完整hash、1异常；14日志/2绑定 | qa-33b57dd8344f / integrity-audit.log |
 | 历史对象、writer、身份与xlsx补审 | 751unique对象、1499引用、1坏引用、312源码写位置、9工作表、3失效映射资源 | qa-530f9045cc92 / deep-audit-complete.log |
 | Measurement合成重现 | writer0样本接受、reader0拒绝、1接受 | qa-c979facce5ef / measurement-contract.log |
-| 全量TJA最终 | 3003，1832 COMPLETE/1171 PARTIAL | qa-51fd2f7b8693 / tja-final.log |
+| 全量TJA最终 | 3003，1832 COMPLETE/1171 PARTIAL | qa-435ab1f4042d / tja-final-corrected.log |
 | Source alias /实际资源根复核 | 2990 source关联、558歧义搜索别名、2987有资源/6缺失或未知 | qa-95878fbf890f / alias-audit-final.log |
 | 原TJA私有冻结 | 3003逐一重新hash与扫描匹配 | qa-3ba8fd7d81b2 / corpus-freeze.log |
 
@@ -32,6 +32,7 @@ Python4个skip为原tests/offline/conftest对历史真实玩家/特定私有ESE�
 - 深度调查首次用生产解释器缺openpyxl，改用新venv工具；第二次在全量TJA文件重建前找不到task artifact，最终完整重跑成功。没有取消隔离或改用未保护业务入口。
 - ESE单源2990与任务3003不符，查证13补充原TJA，最终来源分区扫描3003；先前扫描全部留证。
 - 扫描报告初版BPM/DELAY命令时刻不足以表示同槽位原始次序，改为明确null精确时刻和前后DELAY边界；parser业务源码未改，最终全量重跑。绝对音频对齐和动态LEVELHOLD始终未标已支持。
+- 最终自检发现扫描器把明确未知命令时刻null当成非有限值，误归993个INVALID；仅修扫描器分类，加Golden状态断言，全量3003重新执行后恢复1832/1171。错误版本与首次归档保留，未修改parser或原谱。
 - Client9项桥接失败与resolver失败仍未修复，明确阻止全系统Release，不被其他PASS覆盖。
 
 ## 数据与原工作区保护
@@ -39,3 +40,5 @@ Python4个skip为原tests/offline/conftest对历史真实玩家/特定私有ESE�
 原Viewer工作区的title_song_relations修改、研究/脚本/CSV/TJA未跟踪文件，Bot的web.conf与既有未跟踪报告保持原状；未stash/reset/clean。原候选分支HEAD仍26930740/62c4d3e。未修改生产userdata/history/Publication、songs/assets/config/keys/DB/OSS；源原文只复制到私有QA证据，不移动或重建业务目录。
 
 所有新脚本是审计/候选构建入口；真实数据库读调查通过readonly事务，未调用应用schema初始化/Publication shared恢复路径。结束时没有本批临时HTTP/dev服务；systemd隔离任务退出后由wrapper回收子进程。
+
+最终交付联检：`qa-6b248274d7c9`重新流式读回3003文件/5,253,837个event，验证源原文归档3003个hash、13个制品hash、报告本地链接及6个安装writer源码一致性；正确分类1832 COMPLETE/1171 PARTIAL。见`delivery-verification.json`。私有持久证据包位置/hash见`durable-evidence.json`；其中包括原始失败输出，禁止公开分发。

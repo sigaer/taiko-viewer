@@ -1,0 +1,11 @@
+{
+  "qaRun": "qa-6b248274d7c9",
+  "archive": "/home/sigaer/taiko/qa-vault/evidence/catalog-release-batch2-20261124/evidence.tar.gz",
+  "sha256": "83688d663880e7f433688ac34d0533a739a1cfc951590cd92a060ba6185fcc44",
+  "bytes": 248792544,
+  "inputFiles": 153,
+  "inputBytes": 269533509,
+  "privacy": "0700 directory; includes raw player evidence; do not publish",
+  "viewerRuntimeCommit": "ce76be5f564d298d58462a113d8221428ef1b3b8",
+  "sourceBundles": "viewer/bot incremental bundles require preserved 26930740/62c4d3e; core bundle includes lineage"
+}

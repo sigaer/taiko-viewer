@@ -46,3 +46,5 @@ BPM/DELAY同槽位命令的原始次序保存在rawCommands（原行号和参数
 221份有branch、147份有player-side未验证语义。大量低难度`LONG_NOTE_OVERLAP`需要逐例核对重复marker/源方言/parser展开与扫描解释，不能直接宣称原TJA坏，也不能静默忽略。未新增parser业务修复、音频对齐算法、难度模型或Agent。
 
 本批保留先前全量扫描输出，后续只修正扫描报告的BPM/DELAY命令时间表述；原parser源码未改。新旧压缩artifact与各自hash分目录保留，最终以本目录summary指定的artifact为准。
+
+扫描器v2曾把命令精确时间null误算为nonfinite，导致993份错误INVALID；v3明确允许这种未知值，并以6例Golden的状态断言防回归。错误输出在`evidence/scan-v2-null-classification-error/`保留。最终以v3 summary与全量artifact为准，原谱与vendored parser未变。

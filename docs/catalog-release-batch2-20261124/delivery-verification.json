@@ -1,0 +1,15 @@
+{
+  "qaRun": "qa-6b248274d7c9",
+  "corpusFiles": 3003,
+  "eventsChecked": 5253837,
+  "statusCounts": {
+    "COMPLETE": 1832,
+    "PARTIAL": 1171
+  },
+  "corpusSourceHashesVerified": 3003,
+  "artifactHashesVerified": 13,
+  "reportLocalLinksValid": true,
+  "runtimeSourceHashCount": 2113,
+  "pythonWriterParityFiles": 6,
+  "wholeSystemRelease": "BLOCKED_CLIENT_AND_OPEN_GATES"
+}

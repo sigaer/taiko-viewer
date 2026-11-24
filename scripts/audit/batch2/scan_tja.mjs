@@ -17,7 +17,7 @@ await build({stdin:{contents:"export {parseTJA} from './vendor/tja/TJARenderer/s
 const {parseTJA,barIntervalMs}=await import('file://'+bundle);
 const hash=b=>createHash('sha256').update(b).digest('hex');
 const sourceFiles=['vendor/tja/TJARenderer/src/tja-parser.ts','vendor/tja/TJARenderer/src/primitives.ts','vendor/tja/TJAAnalyzer/src/utils/bar-timeline.ts'];
-const version={viewerCandidate:'26930740',scannerVersion:'batch2-2',files:Object.fromEntries(sourceFiles.map(x=>[x,hash(fs.readFileSync(viewer+'/'+x))]))};
+const version={viewerCandidate:'26930740',scannerVersion:'batch2-3',files:Object.fromEntries(sourceFiles.map(x=>[x,hash(fs.readFileSync(viewer+'/'+x))]))};
 const known=new Set(['START','END','BPMCHANGE','BPM:','DELAY','MEASURE','SCROLL','GOGOSTART','GOGOEND','BARLINEON','BARLINEOFF','BRANCHSTART','BRANCHEND','N','E','M']);
 function timeline(chart){
  let cursor=0;const events=[];let count=0,big=0,roll=0,balloon=0;let active=null;const diagnostics=[];
@@ -46,7 +46,7 @@ function timeline(chart){
   cursor+=barIntervalMs(params,slots,0,slots,true);
  }
  if(active)diagnostics.push('UNCLOSED_LONG_NOTE');
- if(!Number.isFinite(cursor)||events.some(e=>e.timeMs!==undefined&&!Number.isFinite(e.timeMs)))diagnostics.push('NONFINITE_TIMELINE');
+ if(!Number.isFinite(cursor)||events.some(e=>e.timeMs!==undefined&&e.timeMs!==null&&!Number.isFinite(e.timeMs)))diagnostics.push('NONFINITE_TIMELINE');
  return {noteCount:count,bigNotes:big,rolls:roll,balloons:balloon,balloonMetadata:chart.balloonCounts,chartRelativeDurationMs:cursor,eventTimeline:events,diagnostics};
 }
 function scan(raw,source){
@@ -91,7 +91,7 @@ const golden=[
 const goldenResults=[];
 for(const g of golden){
  const text=`TITLE:Golden\nBPM:120\nOFFSET:1.5\n${g.headers??''}\nCOURSE:Oni\nLEVEL:1\n#START\n${g.body}\n#END`;
- const result=scan(Buffer.from(text),'synthetic:'+g.name);const actual=result.courses.oni.paths.unbranched.eventTimeline.filter(e=>e.kind==='NOTE'&&'1234'.includes(e.type)).map(e=>e.timeMs);
+ const result=scan(Buffer.from(text),'synthetic:'+g.name);if(result.status!=='COMPLETE')throw new Error('Golden status mismatch '+g.name+' '+result.status);const actual=result.courses.oni.paths.unbranched.eventTimeline.filter(e=>e.kind==='NOTE'&&'1234'.includes(e.type)).map(e=>e.timeMs);
  if(JSON.stringify(actual)!==JSON.stringify(g.expected))throw new Error('Golden mismatch '+g.name+' '+JSON.stringify({actual,expected:g.expected}));
  goldenResults.push({...g,tja:text,result,oracle:'independent hand calculation; beat duration 60/BPM seconds, 4 beats per 4/4 bar'});
 }

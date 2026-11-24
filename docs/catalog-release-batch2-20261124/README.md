@@ -26,3 +26,5 @@ Publication：916个current实际验hash，原1个对象长度/hash不符且与p
 Kinoko2765手动导入标记不列为修复异常，新回归确保不生成play/growth事件。Weekly允许跨模型比较，保留差值，仅增加模型变化/信息不完整的中文日文说明，并验证窄屏布局。
 
 保留位置：本批Viewer `/var/tmp/taiko-batch2-20261124/integration`、Bot `/var/tmp/taiko-batch2-20261124/bot`、Core `/var/tmp/taiko-batch2-20261124/core`；最终wheel与SHA清单 `/var/tmp/taiko-batch2-20261124/release-candidate/`；原始私有证据 `/var/tmp/taiko-batch2-20261124/evidence/integrity-private/`。详细分支/commit与证据归档见 `handoff.json`。只等待验收，没有隐式后续发布动作。
+
+[最终交付联检](delivery-verification.json)已验证5,253,837个event、3003份原文hash与制品hash；[持久证据归档](durable-evidence.json)包含私有原字节和源码/日志快照，请勿公开发布。

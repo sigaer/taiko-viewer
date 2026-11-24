@@ -1,7 +1,7 @@
 {
   "parserVersion": {
     "viewerCandidate": "26930740",
-    "scannerVersion": "batch2-2",
+    "scannerVersion": "batch2-3",
     "files": {
       "vendor/tja/TJARenderer/src/tja-parser.ts": "8c019de91b82668ecb2cbe10027d85502149bc800e284c7f6b30029a2e765de9",
       "vendor/tja/TJARenderer/src/primitives.ts": "df7372d650a809f9af1eccdbf919e8e112b0c3b02e11a1872284dc891a234ef6",
@@ -24,7 +24,7 @@
         "encoding": "utf-8",
         "parserVersion": {
           "viewerCandidate": "26930740",
-          "scannerVersion": "batch2-2",
+          "scannerVersion": "batch2-3",
           "files": {
             "vendor/tja/TJARenderer/src/tja-parser.ts": "8c019de91b82668ecb2cbe10027d85502149bc800e284c7f6b30029a2e765de9",
             "vendor/tja/TJARenderer/src/primitives.ts": "df7372d650a809f9af1eccdbf919e8e112b0c3b02e11a1872284dc891a234ef6",
@@ -110,7 +110,7 @@
         "encoding": "utf-8",
         "parserVersion": {
           "viewerCandidate": "26930740",
-          "scannerVersion": "batch2-2",
+          "scannerVersion": "batch2-3",
           "files": {
             "vendor/tja/TJARenderer/src/tja-parser.ts": "8c019de91b82668ecb2cbe10027d85502149bc800e284c7f6b30029a2e765de9",
             "vendor/tja/TJARenderer/src/primitives.ts": "df7372d650a809f9af1eccdbf919e8e112b0c3b02e11a1872284dc891a234ef6",
@@ -140,9 +140,7 @@
           "status": "UNVERIFIED",
           "absoluteTimes": null
         },
-        "diagnostics": [
-          "oni/unbranched:NONFINITE_TIMELINE"
-        ],
+        "diagnostics": [],
         "courses": {
           "oni": {
             "course": "oni",
@@ -190,14 +188,12 @@
                     "timeMs": 750
                   }
                 ],
-                "diagnostics": [
-                  "NONFINITE_TIMELINE"
-                ]
+                "diagnostics": []
               }
             }
           }
         },
-        "status": "INVALID",
+        "status": "COMPLETE",
         "completeScope": "candidate static chart-relative note/event representation only; absolute music alignment is never implied"
       },
       "oracle": "independent hand calculation; beat duration 60/BPM seconds, 4 beats per 4/4 bar"
@@ -217,7 +213,7 @@
         "encoding": "utf-8",
         "parserVersion": {
           "viewerCandidate": "26930740",
-          "scannerVersion": "batch2-2",
+          "scannerVersion": "batch2-3",
           "files": {
             "vendor/tja/TJARenderer/src/tja-parser.ts": "8c019de91b82668ecb2cbe10027d85502149bc800e284c7f6b30029a2e765de9",
             "vendor/tja/TJARenderer/src/primitives.ts": "df7372d650a809f9af1eccdbf919e8e112b0c3b02e11a1872284dc891a234ef6",
@@ -247,9 +243,7 @@
           "status": "UNVERIFIED",
           "absoluteTimes": null
         },
-        "diagnostics": [
-          "oni/unbranched:NONFINITE_TIMELINE"
-        ],
+        "diagnostics": [],
         "courses": {
           "oni": {
             "course": "oni",
@@ -297,14 +291,12 @@
                     "timeMs": 2000
                   }
                 ],
-                "diagnostics": [
-                  "NONFINITE_TIMELINE"
-                ]
+                "diagnostics": []
               }
             }
           }
         },
-        "status": "INVALID",
+        "status": "COMPLETE",
         "completeScope": "candidate static chart-relative note/event representation only; absolute music alignment is never implied"
       },
       "oracle": "independent hand calculation; beat duration 60/BPM seconds, 4 beats per 4/4 bar"
@@ -324,7 +316,7 @@
         "encoding": "utf-8",
         "parserVersion": {
           "viewerCandidate": "26930740",
-          "scannerVersion": "batch2-2",
+          "scannerVersion": "batch2-3",
           "files": {
             "vendor/tja/TJARenderer/src/tja-parser.ts": "8c019de91b82668ecb2cbe10027d85502149bc800e284c7f6b30029a2e765de9",
             "vendor/tja/TJARenderer/src/primitives.ts": "df7372d650a809f9af1eccdbf919e8e112b0c3b02e11a1872284dc891a234ef6",
@@ -354,9 +346,7 @@
           "status": "UNVERIFIED",
           "absoluteTimes": null
         },
-        "diagnostics": [
-          "oni/unbranched:NONFINITE_TIMELINE"
-        ],
+        "diagnostics": [],
         "courses": {
           "oni": {
             "course": "oni",
@@ -404,14 +394,12 @@
                     "timeMs": 750
                   }
                 ],
-                "diagnostics": [
-                  "NONFINITE_TIMELINE"
-                ]
+                "diagnostics": []
               }
             }
           }
         },
-        "status": "INVALID",
+        "status": "COMPLETE",
         "completeScope": "candidate static chart-relative note/event representation only; absolute music alignment is never implied"
       },
       "oracle": "independent hand calculation; beat duration 60/BPM seconds, 4 beats per 4/4 bar"
@@ -431,7 +419,7 @@
         "encoding": "utf-8",
         "parserVersion": {
           "viewerCandidate": "26930740",
-          "scannerVersion": "batch2-2",
+          "scannerVersion": "batch2-3",
           "files": {
             "vendor/tja/TJARenderer/src/tja-parser.ts": "8c019de91b82668ecb2cbe10027d85502149bc800e284c7f6b30029a2e765de9",
             "vendor/tja/TJARenderer/src/primitives.ts": "df7372d650a809f9af1eccdbf919e8e112b0c3b02e11a1872284dc891a234ef6",
@@ -526,7 +514,7 @@
         "encoding": "utf-8",
         "parserVersion": {
           "viewerCandidate": "26930740",
-          "scannerVersion": "batch2-2",
+          "scannerVersion": "batch2-3",
           "files": {
             "vendor/tja/TJARenderer/src/tja-parser.ts": "8c019de91b82668ecb2cbe10027d85502149bc800e284c7f6b30029a2e765de9",
             "vendor/tja/TJARenderer/src/primitives.ts": "df7372d650a809f9af1eccdbf919e8e112b0c3b02e11a1872284dc891a234ef6",
