@@ -1,6 +1,6 @@
 # Consumer integration status
 
-以下均指候选源码。生产未部署。逐原始引用、当前文件 SHA、静态调用路径和保留原因见 [494-reference ledger](consumer-migration-494.json) 与 [187-file matrix](consumer-migration-matrix.md)。静态迁移与实际执行证据分别记录。
+以下均指候选源码。生产未部署。Viewer RC1 全量 build 通过；RC2 字节传输修正的 Node/HTTP/远端联检通过，完整 RC2 build 仍待内存准入。逐原始引用、当前文件 SHA、静态调用路径和保留原因见 [494-reference ledger](consumer-migration-494.json) 与 [187-file matrix](consumer-migration-matrix.md)。静态迁移与实际执行证据分别记录。
 
 | 消费者 | 已迁移的实际入口 | 策略及版本报告 | 验证范围 |
 |---|---|---|---|

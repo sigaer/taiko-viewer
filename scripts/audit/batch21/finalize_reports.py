@@ -22,7 +22,7 @@ pending='--pending-build' in sys.argv
 if not pending:
     assert entry.is_file() and ('Nuxt build complete' in text or 'You can preview this build' in text or 'Build complete!' in text),'Successful final build evidence required'
     assert 'Build failed' not in text and 'AssertionError' not in text
-checks['viewer-build']={'result':'BLOCKED_HEADROOM' if pending else 'PASS','log':str(build_log),'logSha256':sha(build_log),'entrySha256':None if pending else sha(entry),'sourceCommit':subprocess.check_output(['git','rev-parse','79d07cfc'],cwd=VIEWER,text=True).strip(),'productionDeployed':False}
+checks['viewer-build']={'result':'BLOCKED_HEADROOM' if pending else 'PASS','log':str(build_log),'logSha256':sha(build_log),'entrySha256':None if pending else sha(entry),'sourceCommit':subprocess.check_output(['git','rev-parse','3567ba77'],cwd=VIEWER,text=True).strip(),'productionDeployed':False}
 manifest=read(RELEASE/'release-manifest.json');assert all(value==0 for key,value in manifest['verification'].items() if key.endswith('ResolverExit'))
 assert manifest['verification']['pipCheck']=='PASS'
 for name,item in manifest['artifacts'].items():assert sha(RELEASE/name)==item['sha256'] and (RELEASE/name).stat().st_size==item['bytes']

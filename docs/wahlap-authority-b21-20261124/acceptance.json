@@ -1,5 +1,5 @@
 {
-  "allCandidateGatesPassed": true,
+  "allCandidateGatesPassed": false,
   "checks": {
     "contract": {
       "passed": 12,
@@ -37,20 +37,20 @@
     },
     "node-installed": {
       "passed": 310,
-      "qaRun": "qa-84d3fc435eaa",
-      "logSha256": "ac24a214a2a87d39a95a039759c140cf5188d3d32ba830860dce80f997788920"
+      "qaRun": "qa-cdfcc8689d6b",
+      "logSha256": "c2b2ba8b31cebab077d76e2df1dddd5e8aa68178ec6ed5653c019aa102d0b54e"
     },
     "node-additional": {
-      "passed": 10,
-      "qaRun": "qa-1a9e4f92e7e3",
-      "logSha256": "23ff410aa4369db21060a5095bf02cb949f9d66af8a615301564c6a908ac3879"
+      "passed": 11,
+      "qaRun": "qa-1520a603840e",
+      "logSha256": "994e22e0e29749620f0ebd5ac1d08023955885f841d24b2b8325eb0ffdc53a47"
     },
     "viewer-build": {
-      "result": "PASS",
-      "log": "/var/tmp/taiko-batch21-20261124/evidence/viewer-build-review.log",
-      "logSha256": "6744a7967cb209e5c247481be2591d63fdc562f96102dea38c3f6a8e2da38444",
-      "entrySha256": "14c45983c3d15fa4a72ed93a48cc761f9b23d4e3c4bc6ea90a86d0228a5146f9",
-      "sourceCommit": "79d07cfc9057de1ee31ce0ab70deea5d08266818",
+      "result": "BLOCKED_HEADROOM",
+      "log": "/var/tmp/taiko-batch21-20261124/evidence/viewer-build-rc2.log",
+      "logSha256": "ccf01a6106b5a78e9434a50c333354d6df1fa6a52817a9103ce09e11c450cf07",
+      "entrySha256": null,
+      "sourceCommit": "3567ba770e415514324ca4c06c4703206a533015",
       "productionDeployed": false
     },
     "numerical-golden": {
@@ -83,38 +83,41 @@
     "productionActivated": false
   },
   "crossConsumerConsistency": {
-    "qaRun": "qa-4af565e13fc7",
+    "qaRun": "qa-ec6e5730118d",
     "execution": "installed Bot/Core plus actual Node adapter and UGC loader; no production HTTP or business-data writes",
     "catalogRevision": "891a2a0aa47dff10f576e1ec273721a26ebfcb8bcd3f41521139f4ecc769c52f",
     "policyVersion": "wahlap-cn-1",
     "cnOniUra": 1387,
     "crossConsumerConsistency": "PASS",
+    "rawSnapshotTransportAndRemoteStorageSha256": "d93cf2a4030c4e8744b28bf07aa34f501492d487be905fedcfa186b18aac9357",
+    "remoteHashFailurePreservesLkg": true,
     "consumers": [
       "Python Reader",
       "Core availability",
       "Core progress active IDs",
       "Bot availability masks",
       "Node Reader",
-      "UGC actual loader"
+      "UGC actual loader",
+      "Remote distribution actual install/activation"
     ],
     "python": {
-      "coldMs": 1212.2345864772797,
+      "coldMs": 1189.3772520124912,
       "warm": {
-        "medianMs": 0.058280304074287415,
-        "maxMs": 0.12406706809997559,
+        "medianMs": 0.059217214584350586,
+        "maxMs": 0.12499094009399414,
         "samples": 30
       }
     },
     "node": {
-      "coldMs": 568.995265,
+      "coldMs": 555.940128,
       "warm": {
-        "medianMs": 0.33054200000003675,
-        "maxMs": 0.5087399999999889,
+        "medianMs": 0.2633025000000089,
+        "maxMs": 0.4356230000000778,
         "samples": 30
       }
     },
-    "activationMs": 1630.96396997571,
-    "rollbackMs": 1314.5480304956436,
+    "activationMs": 1832.4480950832367,
+    "rollbackMs": 1278.6808982491493,
     "failedFetchPreservesPointer": true,
     "olderRevisionsRetained": true,
     "snapshotLinkCount": 1,

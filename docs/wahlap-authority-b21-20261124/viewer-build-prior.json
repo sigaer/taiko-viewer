@@ -1,0 +1,8 @@
+{
+  "result": "PASS",
+  "log": "/var/tmp/taiko-batch21-20261124/evidence/viewer-build-review.log",
+  "logSha256": "6744a7967cb209e5c247481be2591d63fdc562f96102dea38c3f6a8e2da38444",
+  "entrySha256": "14c45983c3d15fa4a72ed93a48cc761f9b23d4e3c4bc6ea90a86d0228a5146f9",
+  "sourceCommit": "79d07cfc9057de1ee31ce0ab70deea5d08266818",
+  "productionDeployed": false
+}

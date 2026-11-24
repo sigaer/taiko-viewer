@@ -3191,7 +3191,7 @@
     "authorityPort": "captureCatalogAuthority / getSongCatalog / pinned Python env",
     "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
     "note": "",
-    "sourceSha256": "e226f552223068f08e2fa5f082c7c90229dd09c0f1909021dc85e13a4db1871a",
+    "sourceSha256": "727ac604b29f36978ef590b16e3df36fa2338451e74513237fb0601fc9fd7520",
     "staticEvidence": [
       {
         "line": 11,

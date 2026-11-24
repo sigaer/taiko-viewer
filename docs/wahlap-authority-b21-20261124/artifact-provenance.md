@@ -24,5 +24,3 @@ New Python 3.11 venv uses no system site packages and no editable/source overlay
 | Viewer child | explicit installed-rc9 Python and request Catalog revision | Python regression, Node bridge and H3 child-env checks |
 
 Pure old compatibility tests remain; actual production runtime stays unchanged until acceptance. Source branches, installed paths and final evidence are separate from deployment claims.
-
-RC8 的三个新 wheel 均已完成两次一致构建；后续依赖目录拼写错误发生在 wheel 阶段之后。修正路径后复用原字节，仅恢复全新环境安装；原失败与恢复日志均保留，未覆写或重建为不同内容。最终 Bot RC9 另行从新 commit 双构建；Core/Application RC2 原字节复用。

@@ -1,6 +1,6 @@
 {
-  "qaRun": "qa-92ed73116a50",
-  "candidateTechnicalChecks": "PASS",
+  "qaRun": "qa-b996de78a705",
+  "candidateTechnicalChecks": "BLOCKED_VIEWER_BUILD",
   "catalogRevision": "891a2a0aa47dff10f576e1ec273721a26ebfcb8bcd3f41521139f4ecc769c52f",
   "policyVersion": "wahlap-cn-1",
   "baselineReferences": 494,
@@ -18,7 +18,8 @@
     "correctness-viewer": "2693074043c6dc60d17d83e595e3fa383340cab6",
     "correctness-bot": "62c4d3e22965cef78eaf79794689b6614895433c"
   },
-  "frontendMatchesAcceptedBuildCommit": "79d07cfc",
+  "frontendCodeCommit": "3567ba77",
+  "frontendMatchesAcceptedBuildCommit": null,
   "positionAuthority": {
     "catalogRevision": "891a2a0aa47dff10f576e1ec273721a26ebfcb8bcd3f41521139f4ecc769c52f",
     "policyVersion": "wahlap-cn-1",

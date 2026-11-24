@@ -1,36 +1,39 @@
 {
-  "qaRun": "qa-4af565e13fc7",
+  "qaRun": "qa-ec6e5730118d",
   "execution": "installed Bot/Core plus actual Node adapter and UGC loader; no production HTTP or business-data writes",
   "catalogRevision": "891a2a0aa47dff10f576e1ec273721a26ebfcb8bcd3f41521139f4ecc769c52f",
   "policyVersion": "wahlap-cn-1",
   "cnOniUra": 1387,
   "crossConsumerConsistency": "PASS",
+  "rawSnapshotTransportAndRemoteStorageSha256": "d93cf2a4030c4e8744b28bf07aa34f501492d487be905fedcfa186b18aac9357",
+  "remoteHashFailurePreservesLkg": true,
   "consumers": [
     "Python Reader",
     "Core availability",
     "Core progress active IDs",
     "Bot availability masks",
     "Node Reader",
-    "UGC actual loader"
+    "UGC actual loader",
+    "Remote distribution actual install/activation"
   ],
   "python": {
-    "coldMs": 1212.2345864772797,
+    "coldMs": 1189.3772520124912,
     "warm": {
-      "medianMs": 0.058280304074287415,
-      "maxMs": 0.12406706809997559,
+      "medianMs": 0.059217214584350586,
+      "maxMs": 0.12499094009399414,
       "samples": 30
     }
   },
   "node": {
-    "coldMs": 568.995265,
+    "coldMs": 555.940128,
     "warm": {
-      "medianMs": 0.33054200000003675,
-      "maxMs": 0.5087399999999889,
+      "medianMs": 0.2633025000000089,
+      "maxMs": 0.4356230000000778,
       "samples": 30
     }
   },
-  "activationMs": 1630.96396997571,
-  "rollbackMs": 1314.5480304956436,
+  "activationMs": 1832.4480950832367,
+  "rollbackMs": 1278.6808982491493,
   "failedFetchPreservesPointer": true,
   "olderRevisionsRetained": true,
   "snapshotLinkCount": 1,

@@ -26,4 +26,4 @@
 
 保留 Correctness Repair Viewer26930740/Bot62c4d3e、Batch 2 Viewer6af2a292/Botcda0a85/Core52909ec。原工作区未 stash、reset、clean 或覆盖。所有本批 commit 只在隔离本地候选分支；不推送、不合并 main、不创建正式 Release、不部署。
 
-候选前端 build 已在准入恢复后通过；之前内存拒绝日志保留，没有调整守门条件。当前技术验收均通过，生产 HTTP/容量/运维 rollout 与数据恢复仍未执行。位序、定数、指标、历史 alias 及错误特征 schema 的额外收敛也有已安装制品测试。
+Viewer RC1 build 在准入恢复后通过；RC2 原字节传输修正的 Node/HTTP/远端 SHA 验证通过，但完整 build 又被内存准入阻断。未调整守门条件。RC2 build 是当前技术验收的剩余阻断；生产 HTTP/容量/运维 rollout 与数据恢复仍未执行。位序、定数、指标、历史 alias 及错误特征 schema 的额外收敛也有已安装制品测试。

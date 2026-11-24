@@ -33,8 +33,8 @@ flowchart LR
 | Rollback | 校验已有兼容 revision 后切换 pointer；保留旧版本，不自动清理；不改玩家数据 |
 | Consumer reporting | Viewer HTTP 三个 X-Catalog headers；Python View.report；Application context stamp；Bot health 中 active + 实际使用过的 handler revision/PV/time；UGC audit report |
 | Request consistency | Viewer AsyncLocalStorage 包住整个 H3 handler；Bot ContextVar 懒捕获同一 generation；Python 子进程接收显式 root/revision；无目录需求的命令不被强制初始化 Catalog |
-| Cache invalidation | Reader 最多 3 revisions；搜索索引、身份组、prepared rating、模型 fingerprint、annual fingerprint 及 goal receipt 输入包含 Catalog revision；独立模型文件仍有自身 revision |
-| Remote distribution | Viewer manifest 给 revision/PV、传输 SHA/size 和 revision-bound URL；远端校验完整后安装/激活；manifest 与下载期间切换返回 409，保留 LKG 并重取 manifest |
+| Cache invalidation | Reader 最多 3 revisions（Node 同时保留已校验原字节与解析投影）；搜索索引、身份组、prepared rating、模型 fingerprint、annual fingerprint 及 goal receipt 输入包含 Catalog revision；独立模型文件仍有自身 revision |
+| Remote distribution | Viewer 下载接口直接发送已校验的原始 Snapshot Buffer，保留 JSON 数字拼写等字节；manifest 给原始 SHA/size、revision/PV 和 revision-bound URL；远端校验完整后安装/激活；manifest 与下载期间切换返回 409，保留 LKG 并重取 manifest |
 
 位置分类成员也由同一官方响应冻结，已有位序索引只作参考顺序；Center/Client 不另读实时位序文件。历史身份继承已验证的 previous snapshot；旧元数据/legacy ID 缺失也保留历史行和 alias。前一代无法验证时拒绝建立新的身份宇宙。激活 journal 与保留的 revision 提供前后代关联。
 
@@ -45,3 +45,5 @@ flowchart LR
 中央生产者采用**单 writer 调度**。当前 atomic pointer 保证完整可见，不提供多个并发 Builder 的先后顺序仲裁；上线须确认现有 daily job 单实例锁。跨进程抢占/最后写入排序不能用现有测试虚报已解决。每个请求保证单版本；跨机器同时无版本差异需要部署协调及 health 监测，不作虚假全局事务承诺。
 
 本批只在 `/var/tmp/taiko-batch21-20261124/catalog` 激活 QA Snapshot。原运行目录没有新 Catalog 激活，生产仍是原版本。发布验收后才可按独立流程配置同一中心 root 和远端同步，当前不执行部署。
+
+原始 Snapshot 文件、实际 H3 响应、远端 Python 安装对象 SHA 完全一致；不通过 Node parse/stringify 再序列化。实际 remote install/activation 与错误 hash 保留 LKG 已纳入跨消费者验证。

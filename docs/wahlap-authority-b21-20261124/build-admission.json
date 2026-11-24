@@ -1,0 +1,16 @@
+{
+  "observedAt": "2026-11-24T06:27:21.221376+00:00",
+  "viewerCodeCommit": "3567ba770e415514324ca4c06c4703206a533015",
+  "status": "BLOCKED_HEADROOM",
+  "availableGiB": 11.706729888916016,
+  "requiredGiB": 12.652185440063477,
+  "guardScript": "scripts/memory/run_build.sh",
+  "guardSha256": "3fa5ec523fef924d8804d748caf61fcb07276bd5e3f3a0c3ce66774c21847cb4",
+  "guard": "MemAvailable >= 25% MemTotal + 5 GiB",
+  "latestAttemptLog": "/var/tmp/taiko-batch21-20261124/evidence/viewer-build-rc2.log",
+  "compileStarted": false,
+  "boundedReadinessWaitSeconds": 300,
+  "readinessWaitExit": 75,
+  "guardBypassed": false,
+  "productionProcessesStopped": false
+}

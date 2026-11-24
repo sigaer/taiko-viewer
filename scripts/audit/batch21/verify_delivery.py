@@ -1,5 +1,5 @@
 """Read-only acceptance joins, source/link checks and retained baseline proof."""
-import hashlib,json,re,subprocess,os
+import hashlib,json,re,subprocess,os,sys
 from pathlib import Path
 BASE=Path('/var/tmp/taiko-batch21-20261124');VIEWER=BASE/'viewer';OUT=VIEWER/'docs/wahlap-authority-b21-20261124'
 def sha(path):
@@ -7,8 +7,9 @@ def sha(path):
 def read(path):return json.loads(path.read_bytes())
 from taiko_bot.catalog.reader import capture
 os.environ['TAIKO_CATALOG_ROOT']=str(BASE/'catalog');view=capture();data=view.data
-assert read(OUT/'acceptance.json')['allCandidateGatesPassed']
-assert not subprocess.check_output(['git','diff','79d07cfc','--name-only','--','taiko_viewer'],cwd=VIEWER,text=True).strip(),'Frontend changed after accepted build'
+ready=read(OUT/'acceptance.json')['allCandidateGatesPassed']
+assert ready or ('--pending-build' in sys.argv and read(OUT/'acceptance.json')['checks']['viewer-build']['result']=='BLOCKED_HEADROOM')
+assert not subprocess.check_output(['git','diff','3567ba77','--name-only','--','taiko_viewer'],cwd=VIEWER,text=True).strip(),'Frontend changed after accepted build'
 feature=read(OUT/'coverage/cn-1387-coverage.json')
 records=feature['charts'] if isinstance(feature,dict) and 'charts' in feature else feature
 assert len(records)==1387
@@ -39,5 +40,5 @@ for path in OUT.glob('*.md'):
         resolved=(path.parent/target.split('#')[0]).resolve()
         if not resolved.exists():missing.append({'file':path.name,'target':target})
 assert not missing,'Broken report links '+repr(missing)
-result={'qaRun':os.environ['QA_RUN_ID'],'candidateTechnicalChecks':'PASS','catalogRevision':view.revision,'policyVersion':view.policy_version,'baselineReferences':494,'additionalAuditedFiles':len(extra),'cnFeatureCharts':len(records),'parserSourceHashesUnchanged':verified_parser,'retainedBaselines':baselines,'frontendMatchesAcceptedBuildCommit':'79d07cfc','positionAuthority':position_report,'reportLinks':'PASS','productionDeployed':False,'publicationRecoveryOrMeasurementBackfill':False}
+result={'qaRun':os.environ['QA_RUN_ID'],'candidateTechnicalChecks':'PASS' if ready else 'BLOCKED_VIEWER_BUILD','catalogRevision':view.revision,'policyVersion':view.policy_version,'baselineReferences':494,'additionalAuditedFiles':len(extra),'cnFeatureCharts':len(records),'parserSourceHashesUnchanged':verified_parser,'retainedBaselines':baselines,'frontendCodeCommit':'3567ba77','frontendMatchesAcceptedBuildCommit':'3567ba77' if ready else None,'positionAuthority':position_report,'reportLinks':'PASS','productionDeployed':False,'publicationRecoveryOrMeasurementBackfill':False}
 (OUT/'delivery-verification.json').write_text(json.dumps(result,indent=2)+'\n');print(json.dumps(result))
