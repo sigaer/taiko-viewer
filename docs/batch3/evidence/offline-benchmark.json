@@ -1,0 +1,321 @@
+{
+  "baselineSha256": "ed6ed2b0f0bfce8ef197536a0e81f32a9115d133b235f5dd69d8e3b02b53f36f",
+  "syntheticDatasetSha256": "70759cd2132ded73e4bab7a536e172cb52dd22c0c517db09d0437c5f442b6901",
+  "existingPolicy": {
+    "protocol": {
+      "version": "viewer-offline/1",
+      "horizonMs": 604800000,
+      "repeatWindowMs": 1209600000,
+      "minPlays": 2,
+      "requiredSuccessFraction": 1
+    },
+    "datasetKind": "synthetic-harness",
+    "datasetRevision": "e9ef77baf564e599f167f639c8a7805c8f79f6fccf95a16c6494e26b064690a9",
+    "freezeAt": "2026-11-20T00:00:00Z",
+    "algorithmPromotion": "not-authorized",
+    "decisions": {
+      "total": 126,
+      "accepted": 126,
+      "excluded": []
+    },
+    "excludedLabels": 0,
+    "reachabilityPrecisionAtK": {
+      "conservativeLowerBound": {
+        "value": 0,
+        "numerator": 0,
+        "denominator": 841,
+        "unknownCount": 841,
+        "status": "available"
+      },
+      "conditional": {
+        "value": null,
+        "numerator": 0,
+        "denominator": 0,
+        "unknownCount": 841,
+        "status": "unavailable"
+      },
+      "labelCoverage": {
+        "value": 0,
+        "numerator": 0,
+        "denominator": 841,
+        "unknownCount": 0,
+        "status": "available"
+      },
+      "emitted": 841,
+      "requested": 1176
+    },
+    "actionableCoverage": {
+      "value": null,
+      "numerator": 0,
+      "denominator": 0,
+      "unknownCount": 126,
+      "status": "unavailable"
+    },
+    "slotCoverage": {
+      "value": 0.7151360544217688,
+      "numerator": 841,
+      "denominator": 1176,
+      "unknownCount": 0,
+      "status": "available"
+    },
+    "scorePredictionError": {
+      "mae": null,
+      "rmse": null,
+      "bias": null,
+      "denominator": 0,
+      "unknownCount": 841
+    },
+    "predictionCalibration": {
+      "brier": null,
+      "denominator": 0,
+      "unknownCount": 841,
+      "status": "unavailable",
+      "bins": [
+        {
+          "lower": 0,
+          "upper": 0.2,
+          "count": 0,
+          "meanProbability": null,
+          "observedRate": null
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.4,
+          "count": 0,
+          "meanProbability": null,
+          "observedRate": null
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.6,
+          "count": 0,
+          "meanProbability": null,
+          "observedRate": null
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.8,
+          "count": 0,
+          "meanProbability": null,
+          "observedRate": null
+        },
+        {
+          "lower": 0.8,
+          "upper": 1,
+          "count": 0,
+          "meanProbability": null,
+          "observedRate": null
+        }
+      ]
+    },
+    "recommendationDiversity": {
+      "distinctSongPairs": {
+        "value": 1,
+        "numerator": 4127,
+        "denominator": 4127,
+        "unknownCount": 0,
+        "status": "available"
+      },
+      "uniqueChartRatio": {
+        "value": 0.026159334126040427,
+        "numerator": 22,
+        "denominator": 841,
+        "unknownCount": 0,
+        "status": "available"
+      },
+      "genreCoverage": {
+        "value": 0,
+        "numerator": 0,
+        "denominator": 841,
+        "unknownCount": 0,
+        "status": "available"
+      }
+    },
+    "repeatRate": {
+      "value": null,
+      "numerator": 0,
+      "denominator": 0,
+      "unknownCount": 841,
+      "status": "unavailable"
+    },
+    "goalProgression": {
+      "completed": 0,
+      "completionRate": {
+        "value": null,
+        "numerator": 0,
+        "denominator": 0,
+        "unknownCount": 0,
+        "status": "unavailable"
+      },
+      "observationCoverage": {
+        "value": null,
+        "numerator": 0,
+        "denominator": 0,
+        "unknownCount": 0,
+        "status": "unavailable"
+      },
+      "causalClaim": false
+    }
+  },
+  "syntheticMetricOracle": {
+    "protocol": {
+      "version": "viewer-offline/1",
+      "horizonMs": 604800000,
+      "repeatWindowMs": 1209600000,
+      "minPlays": 2,
+      "requiredSuccessFraction": 1
+    },
+    "datasetKind": "synthetic-harness",
+    "datasetRevision": "metric-oracle/1",
+    "freezeAt": "2026-11-20T00:00:00Z",
+    "algorithmPromotion": "not-authorized",
+    "decisions": {
+      "total": 2,
+      "accepted": 2,
+      "excluded": []
+    },
+    "excludedLabels": 2,
+    "reachabilityPrecisionAtK": {
+      "conservativeLowerBound": {
+        "value": 0.25,
+        "numerator": 1,
+        "denominator": 4,
+        "unknownCount": 2,
+        "status": "available"
+      },
+      "conditional": {
+        "value": 0.5,
+        "numerator": 1,
+        "denominator": 2,
+        "unknownCount": 2,
+        "status": "available"
+      },
+      "labelCoverage": {
+        "value": 0.5,
+        "numerator": 2,
+        "denominator": 4,
+        "unknownCount": 0,
+        "status": "available"
+      },
+      "emitted": 4,
+      "requested": 4
+    },
+    "actionableCoverage": {
+      "value": 1,
+      "numerator": 2,
+      "denominator": 2,
+      "unknownCount": 0,
+      "status": "available"
+    },
+    "slotCoverage": {
+      "value": 1,
+      "numerator": 4,
+      "denominator": 4,
+      "unknownCount": 0,
+      "status": "available"
+    },
+    "scorePredictionError": {
+      "mae": 15,
+      "rmse": 15.811388300841896,
+      "bias": 5,
+      "denominator": 2,
+      "unknownCount": 2
+    },
+    "predictionCalibration": {
+      "brier": null,
+      "denominator": 0,
+      "unknownCount": 4,
+      "status": "unavailable",
+      "bins": [
+        {
+          "lower": 0,
+          "upper": 0.2,
+          "count": 0,
+          "meanProbability": null,
+          "observedRate": null
+        },
+        {
+          "lower": 0.2,
+          "upper": 0.4,
+          "count": 0,
+          "meanProbability": null,
+          "observedRate": null
+        },
+        {
+          "lower": 0.4,
+          "upper": 0.6,
+          "count": 0,
+          "meanProbability": null,
+          "observedRate": null
+        },
+        {
+          "lower": 0.6,
+          "upper": 0.8,
+          "count": 0,
+          "meanProbability": null,
+          "observedRate": null
+        },
+        {
+          "lower": 0.8,
+          "upper": 1,
+          "count": 0,
+          "meanProbability": null,
+          "observedRate": null
+        }
+      ]
+    },
+    "recommendationDiversity": {
+      "distinctSongPairs": {
+        "value": 1,
+        "numerator": 2,
+        "denominator": 2,
+        "unknownCount": 0,
+        "status": "available"
+      },
+      "uniqueChartRatio": {
+        "value": 0.75,
+        "numerator": 3,
+        "denominator": 4,
+        "unknownCount": 0,
+        "status": "available"
+      },
+      "genreCoverage": {
+        "value": 0,
+        "numerator": 0,
+        "denominator": 4,
+        "unknownCount": 0,
+        "status": "available"
+      }
+    },
+    "repeatRate": {
+      "value": 0.25,
+      "numerator": 1,
+      "denominator": 4,
+      "unknownCount": 0,
+      "status": "available"
+    },
+    "goalProgression": {
+      "completed": 1,
+      "completionRate": {
+        "value": 1,
+        "numerator": 1,
+        "denominator": 1,
+        "unknownCount": 1,
+        "status": "available"
+      },
+      "observationCoverage": {
+        "value": 0.5,
+        "numerator": 1,
+        "denominator": 2,
+        "unknownCount": 0,
+        "status": "available"
+      },
+      "causalClaim": false
+    }
+  },
+  "limitations": [
+    "Ordinary policy has no stable target or identifiable outcome labels; these fields remain null.",
+    "Synthetic metric oracle is not an algorithm quality comparison.",
+    "No production recommendation replacement is authorized."
+  ]
+}

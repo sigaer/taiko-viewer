@@ -1,0 +1,5159 @@
+{
+  "kind": "synthetic-existing-policy-replay",
+  "coreVersion": "0.1.4rc2",
+  "dependencyVersions": {
+    "sakura-taiko-contract": "0.1.0"
+  },
+  "fixtureSha256": "e9ef77baf564e599f167f639c8a7805c8f79f6fccf95a16c6494e26b064690a9",
+  "targetFixtureSha256": "6db08d5cefd25311c564d18e40d76e7ccba48f4fbf1188409d24f793289eed79",
+  "sourceManifestSha256": "3f786033c5590c1efd489dad41326606ee3312b57094c0bfd4c69c2ed33160a3",
+  "sourceHashes": {
+    "__init__.py": "1eb72ad8140e57f08a24d326ee7ed98b6b9c925b7fc053851de1a339fe39f090",
+    "chart/__init__.py": "89da1a00bf11ff1d64e37f118835cb3d534007698340c692be98d3f18264c979",
+    "chart/availability.py": "50153b7422a4e2880971321f6f8f4cb6f0ec7aeba0098d72ed7ebfdd45d18638",
+    "chart/catalog.py": "b0e078f417a84d9a737eb181920c2724115d3a548d55af6a90c50e7cd4c53736",
+    "chart/client_groups.py": "400f8f2cd9e255c782884e8fbcd3fd2b0a9edf84ef2b671cdb2ebf319ec3f482",
+    "chart/identity.py": "554c2f7cc69b21bdeacb960f20f49ac538cd213c6271e915b0acd6bff48a352e",
+    "chart/matching.py": "6da98e555d7427bd885f1c4dd473266b869f40c5c17f3c30b944f5ea0439d1c3",
+    "chart/position.py": "f8f2c7fa26ff48eb2ef0176e1c0a11e58606b45517bea411abed569144d7dcc1",
+    "chart/progress_catalog.py": "d9ec34bdee0cca24840613d830dc881c80be78df6edbd5817f6f5a857f02f778",
+    "chart/roll.py": "0d146360abe66c894d361da4322a8850386a9cd03b18e9adb370d2a7fed33ede",
+    "chart/roll_metadata.py": "e59374e70a9ccc21a14c8c52d250810db2bdfdbcf635c3b6f4fcbe35e3e460ce",
+    "chart/scoreline_dataset.py": "62a5021e96a66b98f6794ccbe6ba508a7c0ce4fa4bc9941eea067717911cf025",
+    "chart/scoreline_lookup.py": "0063cf2f462a60754965582675fda65ffeebc1630886db76f022667384048409",
+    "chart/visibility.py": "fa4b7326ede21ed350236e7ff309e8e0e3846bfa8bb71250ac2d84792a9cb84f",
+    "dimension/__init__.py": "89da1a00bf11ff1d64e37f118835cb3d534007698340c692be98d3f18264c979",
+    "dimension/v1.py": "34fccd9fe1c8611793a28923a002f7e179a03f1f1756b574baba95cc8d429a2f",
+    "models/__init__.py": "c09b4af69438c98d48969f05caeeff8f05ad230b2df36a4b2bae13d29f859800",
+    "models/calculation.py": "3a3341e67343f8c111d507258fd28c0af6ce947893eb4176d0428b17dea9e674",
+    "parser/__init__.py": "89da1a00bf11ff1d64e37f118835cb3d534007698340c692be98d3f18264c979",
+    "parser/chart_analysis.py": "1dabaa21ad9c03218d07ff207a7816f451079344a89e674195eb766bbd720983",
+    "parser/client_dataset.py": "95cab54901dc76c8dcc98279c783fa094b290348f7c6165a8bb18430c9aa6f80",
+    "parser/hiroba.py": "779d21494e055cdaa8682f2295f29af2d86a66b56fe69128b0bf516319cb615e",
+    "parser/hiroba_score.py": "679255d13b2077730df3f4261f87c29ee09f40c81e09d5b8ca7210e70dbdfaa5",
+    "parser/title_catalog.py": "ff335e86b7461be863853f1830bd17406e4e36184ffe94d7c8d75ab4aa8b9d2d",
+    "parser/tja.py": "31b858d3785d626f3186e07ca0b59fc1d1652340109e086660610f5c9e33570a",
+    "parser/tja_mapping.py": "a598de29148b71def656c9b311f8b45a90cb9efe2c557a62f5a0b38f81343707",
+    "parser/v2_dataset.py": "6450521a9f5021b2ce55d258a541e5277ecd21236c07b265baf0c2c6f6bfae59",
+    "rating/__init__.py": "89da1a00bf11ff1d64e37f118835cb3d534007698340c692be98d3f18264c979",
+    "rating/target.py": "3a1e07520cae3e6ea751a9eb14e2a1a6a3b4a50646d98a1fddffbff589f671d8",
+    "rating/v1.py": "83abaa3c046a15bde771775babc77951414355e96146e29747eaea919b4acb58",
+    "rating/v2.py": "19dc42f1d17f333b6caaa8dde9716a00c077bc396fd45e7da81ecbe0668e990b",
+    "recommendation/__init__.py": "89da1a00bf11ff1d64e37f118835cb3d534007698340c692be98d3f18264c979",
+    "recommendation/candidates.py": "81f5a7c9a87a8d2c83b7616dc7c1f584fcfe7356f4fa6169f6e59b72698d29d0",
+    "recommendation/catalog_inputs.py": "cb7578ff5d81c82949d5579bda68b98f64424fdd542dadf5b25957f134e2b58a",
+    "recommendation/center.py": "7f8e80d13439dc198e303b630c077571b301b91a6f2b5b5a620154de6f0d3586",
+    "recommendation/client.py": "bae14c5e5eaab92ee3db92a92fa797930a173cb9f018ad6c9c5d308b0f06b8de",
+    "recommendation/client_selection.py": "4925bdfb2068da3baf54fdbe444380bf8d95a40f4f68ebd6b9e32ead0157dcd7",
+    "recommendation/entries.py": "24a75245342c94bb0135358f95db52a4355684c705e3739c90c46233188054c1",
+    "recommendation/estimator.py": "48f18cb0fea5a57d430d682ff214a6bde0c9ac991532d6a959bd95bb9b4b77e5",
+    "recommendation/selection.py": "81f02025d4d438659b0d66ffdcbc6306690f114ca015f7c4f5d911b40d29f446",
+    "recommendation/support.py": "fb3ac42eec26f45c06d7eb54a8c58ef78043377e0c6353f102800a330c5e6baa",
+    "recommendation/target_score.py": "e1e3afdf1793b6ca51d4f437a8188dc9e58dbe3b68e6650ee434297f1aafb348",
+    "score/__init__.py": "1189887dbb9dec817fdfb2f4a9ef4e003a349daafda48dc8b8fc03ac54172330",
+    "score/calculation.py": "99444c5eabef723d477635ef1f64862bbb4f8597496cc4e8086cc390198b6316",
+    "score/client_scoreline.py": "e924a302316f00f169cee49f2a613c2cbd31f4de71e7f3149c012d5b204c3e50",
+    "score/dojo.py": "33b115503119b77596f67e23b626891221f47d96fd69526d091040789336c09a",
+    "score/forecast.py": "4f1ec0a3e52712c7d147a51ff48b490c5b8adc5e8500adb3cbd2b2e8aa006944",
+    "score/points.py": "897be143b70831ccf16beeb705ba521232a243663e6591ce752221c159944ee4",
+    "score/progress.py": "bab611a20874c53c53d5f90c66670bcd122ca02ef0963a90801f7077eec24031",
+    "score/scoreline.py": "618d9c0f3f3ba913de96a50893f016b1ca52ed72f891335d2984fab8d155bba4",
+    "score/single.py": "c2b6f894a2b831bdb99dcb04209d067496d05c42d0c68a52be33a1a03453ba60",
+    "score/time.py": "e2ddf3262e9d24cadfe4b63ba822897df3aeabe3227dd776d72f629335e05b2d",
+    "score/v2.py": "b6bc27b8916b28e2b49102533cb1e718a98b01c02db428937af6181ef88a5d8a"
+  },
+  "goldenCases": 126,
+  "regressionTests": 3,
+  "cases": [
+    {
+      "profile": "center",
+      "dimension": "rating",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "rating",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "rating",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 43,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 44,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 45,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 46,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 47,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 48,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 49,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 31,
+          "level": 1,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "rating",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "rating",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "rating",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 43,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 44,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 45,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 46,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 47,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 48,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 49,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 31,
+          "level": 1,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "rating",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "rating",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "rating",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 43,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 44,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 45,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 46,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "daigouryoku",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "daigouryoku",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 8,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "daigouryoku",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 8,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 31,
+          "level": 1,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "daigouryoku",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "daigouryoku",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 8,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "daigouryoku",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 8,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 31,
+          "level": 1,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "daigouryoku",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "daigouryoku",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "daigouryoku",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "stamina",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "stamina",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "stamina",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "stamina",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "stamina",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "stamina",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "stamina",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "stamina",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "stamina",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "speed",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "speed",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "speed",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "speed",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "speed",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "speed",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "speed",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "speed",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "speed",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "accuracy_power",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "accuracy_power",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "accuracy_power",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 43,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 44,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 45,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 46,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 47,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 48,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 49,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 50,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "accuracy_power",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "accuracy_power",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "accuracy_power",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 43,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 44,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 45,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 46,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 47,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 48,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 49,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 50,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "accuracy_power",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "accuracy_power",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "accuracy_power",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 43,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 44,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 45,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 46,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "rhythm",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "rhythm",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "rhythm",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "rhythm",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "rhythm",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "rhythm",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "rhythm",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "rhythm",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "rhythm",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "complex",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "complex",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "complex",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "complex",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "complex",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "complex",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "complex",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "complex",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "center",
+      "dimension": "complex",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "rating",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "rating",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "rating",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 43,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 44,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 45,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 46,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 47,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 48,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 49,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 31,
+          "level": 1,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "rating",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "rating",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "rating",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 43,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 44,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 45,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 46,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 47,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 48,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 49,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 31,
+          "level": 1,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "rating",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "rating",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "rating",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 43,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 44,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 45,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 46,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 47,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 48,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 49,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 31,
+          "level": 1,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "daigouryoku",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "daigouryoku",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 8,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "daigouryoku",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 8,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 31,
+          "level": 1,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "daigouryoku",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "daigouryoku",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 8,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "daigouryoku",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 8,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 31,
+          "level": 1,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "daigouryoku",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "daigouryoku",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 8,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "daigouryoku",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 8,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 31,
+          "level": 1,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "stamina",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "stamina",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "stamina",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "stamina",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "stamina",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "stamina",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "stamina",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "stamina",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "stamina",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "speed",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "speed",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "speed",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "speed",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "speed",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "speed",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "speed",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "speed",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "speed",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "accuracy_power",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "accuracy_power",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "accuracy_power",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 43,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 44,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 45,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 46,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 47,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 48,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 49,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 50,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "accuracy_power",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "accuracy_power",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "accuracy_power",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 43,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 44,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 45,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 46,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 47,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 48,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 49,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 50,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "accuracy_power",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "accuracy_power",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "accuracy_power",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 40,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 41,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 42,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 43,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 44,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 45,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 46,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 47,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 48,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 49,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": true
+        },
+        {
+          "song_id": 50,
+          "level": 4,
+          "is_in_strict_range": true
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "rhythm",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "rhythm",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "rhythm",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "rhythm",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "rhythm",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "rhythm",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "rhythm",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "rhythm",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "rhythm",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "complex",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "complex",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "complex",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "complex",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "complex",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "complex",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "complex",
+      "limit": 1,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "complex",
+      "limit": 7,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    },
+    {
+      "profile": "client",
+      "dimension": "complex",
+      "limit": 20,
+      "rows": [
+        {
+          "song_id": 6,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 32,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 33,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 34,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 35,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 36,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 37,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 38,
+          "level": 4,
+          "is_in_strict_range": false
+        },
+        {
+          "song_id": 39,
+          "level": 4,
+          "is_in_strict_range": false
+        }
+      ]
+    }
+  ],
+  "stablePrediction": "not-present-in-ordinary-rows",
+  "realPlayerLabels": 0,
+  "algorithmPromotion": "not-authorized"
+}

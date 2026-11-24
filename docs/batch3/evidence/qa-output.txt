@@ -1,0 +1,100 @@
+✔ replay score-pb {"high_score":900001} (2.72527ms)
+✔ replay ng-reduced {"ng_cnt":4,"good_cnt":594} (0.285398ms)
+✔ replay clear {"clear_cnt":1} (0.398341ms)
+✔ replay clear {"full_combo_cnt":1} (0.211349ms)
+✔ replay clear {"dondaful_combo_cnt":1} (0.283963ms)
+✔ replay fc {"full_combo_cnt":1} (0.21671ms)
+✔ replay fc {"dondaful_combo_cnt":1} (0.20525ms)
+✔ replay df {"dondaful_combo_cnt":1} (0.185178ms)
+✔ replay rank-upgrade {"best_score_rank":7} (0.211013ms)
+✔ unchanged score-pb (0.332601ms)
+✔ unchanged ng-reduced (0.155265ms)
+✔ unchanged clear (0.133493ms)
+✔ unchanged fc (0.084572ms)
+✔ unchanged df (0.088635ms)
+✔ unchanged rank-upgrade (0.10906ms)
+✔ missing (0.175345ms)
+✔ regression (0.101765ms)
+✔ judgement missing (0.101643ms)
+✔ note count (0.12315ms)
+✔ invalid rank (0.11246ms)
+✔ boundary ownerId (0.134445ms)
+✔ boundary profileId (0.076315ms)
+✔ boundary songId (0.10844ms)
+✔ boundary difficultyType (0.079798ms)
+✔ boundary revision (0.076005ms)
+✔ boundary provenance (0.072076ms)
+✔ boundary capturedAt (0.076138ms)
+✔ provenance source (0.130009ms)
+✔ provenance account (0.109823ms)
+✔ provenance topology (0.108217ms)
+✔ provenance marker (0.117989ms)
+✔ provenance observedAt (0.104671ms)
+✔ provenance contentHash (0.099688ms)
+✔ rank 7 to 8 and one observation multiple achievements (0.192557ms)
+✔ hash rejects edits retaining metadata and imported provenance (1.485829ms)
+✔ real Python ujson serialization with non-ASCII and slash (21.854122ms)
+✔ S1 single observation and one time cluster yields one inferred candidate (2.560978ms)
+✔ S2 one real round split across consecutive observations is merged (0.935765ms)
+✔ S3 one bulk observation containing two distant clusters is split (9.609425ms)
+✔ S4 midnight is not a hard boundary (0.331032ms)
+✔ S5 imported history remains L0 and cannot become a candidate (0.260035ms)
+✔ S6 manual updates remain L0 (0.267733ms)
+✔ S7 two clear same-day clusters remain separate (0.328784ms)
+✔ S8 a missing chart event time is only a recent observation (0.186645ms)
+✔ S9 source changes are never merged (0.430546ms)
+✔ S10 repair and counter regression observations break evidence (0.379478ms)
+✔ S11 repeated improvements on one chart preserve both observation revisions (0.314882ms)
+✔ S12 Goal and score facts from the same evidence window compose without redefining facts (0.238099ms)
+✔ authoritative source session ids produce L3 regardless of sync boundaries (0.323269ms)
+✔ a missing source sequence prevents L2 inference (0.147647ms)
+✔ freezes authoritative numbers, timestamp and distinct causal capture (1.667648ms)
+✔ all six approved types available independently of recommendation dimension (0.939229ms)
+✔ achieved crowns and maximum rank excluded (0.231183ms)
+✔ missing optional fields are unknown, not zero; types independent (0.255043ms)
+✔ unplayed requires server-proven complete coverage and manual stays excluded (0.300054ms)
+✔ invalid and unavailable charts excluded (0.305227ms)
+✔ targets use relative conditions, no arbitrary score target (0.309747ms)
+✔ selects the lowest valid dimension with stable tie ordering (1.852512ms)
+✔ treats top20 sample size as ready and avoids calling missing evidence weak (0.374917ms)
+✔ calendar day follows the business timezone and preserves local timestamps (16.957406ms)
+✔ greeting period follows the business timezone (1.214805ms)
+✔ context preserves V1 authority, refuses stale revisions, and never substitutes a rating (3.254103ms)
+✔ recent projections reject future knowledge and cross-owner facts; incompatible models do not yield trend (1.525544ms)
+✔ stable gate never admits PB-only, future, mismatched or low-confidence candidates to fill K (1.119211ms)
+✔ diversity and explicit preferences operate only inside the admitted pool (0.630018ms)
+✔ next action and home retain public content and explicit navigation without fabricating plays (0.562015ms)
+✔ completed goals require existing completion evidence, never automatically create successors (0.337872ms)
+✔ external draft envelopes quarantine valid unknown schemas and reject stale coverage (0.700095ms)
+✔ existing ordinary rows require independent estimator evidence; strict range cannot supply it (0.70911ms)
+✔ breakthrough does not relax stable reach and user commitments remain review actions (0.464661ms)
+✔ late confirmation is recent knowledge, frozen inputs are not mutated, non-finite rating fails closed (0.48955ms)
+✔ seven-metric oracle exposes unknowns instead of treating clicks or PB as identifiable plays (13.474876ms)
+✔ probability calibration requires actual first-play probability, never predictor confidence (2.121475ms)
+✔ time leakage, immature windows, duplicate outcomes and absent labels fail explicitly (1.16021ms)
+✔ PB-only labels never resolve stability and one-item slates have no pair diversity (0.318438ms)
+✔ repeat history warmup is explicit and an early active goal evaluation is not an endpoint (0.638055ms)
+ℹ tests 76
+ℹ suites 0
+ℹ pass 76
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 871.67745
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.092s
+
+OK
+{"goldenCases": 126, "regressionTests": 3, "output": "docs/batch3/evidence/existing-baseline.json"}
+{"outputPath":"docs/batch3/evidence/offline-benchmark.json","existingDecisions":126,"syntheticDecisions":2}
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.082s
+
+OK
+{"goldenCases": 126, "regressionTests": 3, "output": "docs/batch3/evidence/existing-baseline.json"}
+{"outputPath":"docs/batch3/evidence/offline-benchmark.json","existingDecisions":126,"syntheticDecisions":2}
+docs/batch3/evidence/existing-baseline.json: OK
+docs/batch3/evidence/offline-benchmark.json: OK
