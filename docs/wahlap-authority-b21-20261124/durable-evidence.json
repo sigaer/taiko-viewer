@@ -1,28 +1,30 @@
 {
-  "privateRoot": "/home/sigaer/taiko/qa-vault/evidence/wahlap-authority-batch21-20261124",
+  "privateRoot": "/home/sigaer/taiko/qa-vault/evidence/wahlap-authority-batch21-20261124/candidate-rc9",
   "sourceArchives": {
     "viewer": {
-      "commit": "79d07cfc9057de1ee31ce0ab70deea5d08266818",
-      "archive": "sources/viewer-79d07cfc9057de1ee31ce0ab70deea5d08266818.tar.gz",
-      "sha256": "ce815c2d3560ee391b504a2424d394621967d5e15fc8041141460d52b431020b",
-      "bytes": 227887612
+      "commit": "43c1272b72a693b58c33f5f3626ac67488464fee",
+      "archive": "sources/viewer-43c1272b72a693b58c33f5f3626ac67488464fee.tar.gz",
+      "sha256": "121801f60c74ac86f4f1671717cb8b307e54cfbc444a38fc5d8bbce0fba229c8",
+      "bytes": 228061127
     },
     "bot": {
-      "commit": "ccfabff7b2f17a67ea86b64de869225d82cae444",
-      "archive": "sources/bot-ccfabff7b2f17a67ea86b64de869225d82cae444.tar.gz",
-      "sha256": "608bdbd29349c63086b75d2eb93d8891d69eb114f6b5d3c371006bd75580846d",
-      "bytes": 3680460
+      "commit": "c1ff685e0cd1880e19de123885641b66d25eaa28",
+      "archive": "sources/bot-c1ff685e0cd1880e19de123885641b66d25eaa28.tar.gz",
+      "sha256": "9323ed45299b42219a8507611570889b0a04473790d75a21e3088b644edc3d8a",
+      "bytes": 3682380
     },
     "core": {
-      "commit": "d1bc3bf25a8d90a6a5bca92c1905e9e2fac51bd6",
-      "archive": "sources/core-d1bc3bf25a8d90a6a5bca92c1905e9e2fac51bd6.tar.gz",
-      "sha256": "e78ddae1f3072ee265716dbf20d26bf3bc1812744f8446bb223afa6ced6caa86",
-      "bytes": 276032
+      "commit": "e254f3ee3216c8de418aea4c995315ab2cf9b89f",
+      "archive": "sources/core-e254f3ee3216c8de418aea4c995315ab2cf9b89f.tar.gz",
+      "sha256": "665cbcb410f1f7a0f0865112d163b65427d6f9bcb15d41b76241e7b360f8ceac",
+      "bytes": 276509
     }
   },
-  "files": 158,
-  "bytes": 477903252,
-  "sha256Sums": "ee69c57167ef3893e66de2f216c436e37ea1e43a876754de8408d130aef973dd",
+  "files": 264,
+  "bytes": 521811296,
+  "sha256Sums": "ba0a4e10027dd750a0d93aa4b06e26092d1cc4535b693ca27ca087224cb053a3",
   "productionDataTraversal": false,
-  "sourceOfPrivateEvidence": "Previously captured Batch 2/2.1 read-only evidence only; no Publication reader/recovery or production DB invoked."
+  "sourceOfPrivateEvidence": "Previously captured Batch 2/2.1 read-only evidence only; no Publication reader/recovery or production DB invoked.",
+  "preservationRun": "qa-04664e741573",
+  "sealedByRun": "qa-779546c045d4"
 }
