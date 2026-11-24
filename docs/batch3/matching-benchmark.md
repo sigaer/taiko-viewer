@@ -39,6 +39,10 @@ ReachEvidence 与 profile、scoreRevision、catalogRevision、sourceHash 和 cha
 
 排序不计算第二个 Rating。先活动 goal，再显式 preference，再模式匹配，再已有 baselineRank，最终精确 key 保证确定性。`ranking=existing-order` 关闭新增提序；`contextual` 才加入上下文。两者均使用相同 stable gate 与 identityGroup 去重，最多同一歌曲身份一个谱面。多样性目前保证歌曲身份，不假称技能/音乐风格多样性；无足够 genre 信息明确报告 coverage。
 
+Review Fix：Growth 提序要求 `growthConsistency=consistent`、对应维度的 `dimensionConsistency=consistent`、现有 Growth State 为 ready/lowest-valid-dimension，并且 chart 明确验证了同一维度。空/部分维度的全局状态为 unknown，不以空数组 `.every()` 的真值作为可信度。
+
+Active Goal 由 `goal-target.ts` 的同一纯校验同时约束 adapter 标记与 matching 理由，不能仅凭相同 chart 或传入 goalId 提序。仅允许当前 profile 的 active、可用 score-pb Goal；targetData 必须为 `field=highScore, comparison=greater`，baseline 必须有非负安全整数 highScore。当前既有 evaluator 比较 `highScore > baseline.highScore`，而候选 targetScore 是包含等号的得分门槛，因此精确等价的整数门槛为 `baseline.highScore + 1`；高于或低于此门槛均不能标 active-goal。既有 score-pb 的 targetData 没有 value；若输入显式给出 value，它只能重述 baseline 比较值，不能与 evaluator 所用值不同。缺 baseline、越界、其他字段/方向/Goal 类型均不绑定；普通可达性可独立保留。没有改动原 Goal evaluator 或现行推荐算法。
+
 解释提供 reasonCodes、target/stableScore、confidence、policyVersion 和原始 evidenceRefs；始终带无音乐/手法分析、confidence 不是成功概率的能力边界。后续 UI 用简短产品文案映射代码，不直接呈现本文规格文字。
 
 ## 评估协议 `viewer-offline/1`

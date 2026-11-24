@@ -19,6 +19,7 @@ fi
 "$node_bin" "$tsc_js" -p taiko_viewer/tests/fixtures/playerIntelligence.tsconfig.json
 "$node_bin" --experimental-strip-types --test --test-concurrency=1 \
   taiko_viewer/tests/playerIntelligence.test.ts \
+  taiko_viewer/tests/playerDecisionReview.test.ts \
   taiko_viewer/tests/recommendationBenchmark.test.ts \
   taiko_viewer/tests/playerGrowth.test.ts \
   taiko_viewer/tests/playerGoal.test.ts \

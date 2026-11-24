@@ -2,6 +2,8 @@
 
 状态：候选实现，等待审查；不具备算法替换或生产发布批准。
 
+最新 Review Fix：仅修复 Snapshot provenance、六维一致性、Goal target 绑定和近期事实时间语义。原有 76 项 Node 测试保留，新增 16 项后 92/92 通过；126 Golden Cases、3 项 core 回归、strict TypeScript 和双次报告哈希全部通过。完整结果见 [Review Fix 验收报告](review-fix-acceptance.md)。
+
 基础提交：Viewer Batch 2.1 `ae46bfd6`。候选分支：`candidate/viewer-player-intelligence-b3-20261124`。源工作树位于 `/var/tmp/taiko-batch3-20261124/viewer`，没有修改生产工作树或真实玩家资料。
 
 ## 交付索引

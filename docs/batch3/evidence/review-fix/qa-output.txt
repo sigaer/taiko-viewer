@@ -1,0 +1,116 @@
+✔ replay score-pb {"high_score":900001} (4.065058ms)
+✔ replay ng-reduced {"ng_cnt":4,"good_cnt":594} (0.294206ms)
+✔ replay clear {"clear_cnt":1} (0.471616ms)
+✔ replay clear {"full_combo_cnt":1} (0.23148ms)
+✔ replay clear {"dondaful_combo_cnt":1} (0.295022ms)
+✔ replay fc {"full_combo_cnt":1} (0.217271ms)
+✔ replay fc {"dondaful_combo_cnt":1} (0.198612ms)
+✔ replay df {"dondaful_combo_cnt":1} (0.155352ms)
+✔ replay rank-upgrade {"best_score_rank":7} (0.331329ms)
+✔ unchanged score-pb (0.37373ms)
+✔ unchanged ng-reduced (0.209462ms)
+✔ unchanged clear (0.142107ms)
+✔ unchanged fc (0.086953ms)
+✔ unchanged df (0.085212ms)
+✔ unchanged rank-upgrade (0.138159ms)
+✔ missing (0.177621ms)
+✔ regression (0.112742ms)
+✔ judgement missing (0.095492ms)
+✔ note count (0.123282ms)
+✔ invalid rank (0.119815ms)
+✔ boundary ownerId (0.134463ms)
+✔ boundary profileId (0.081389ms)
+✔ boundary songId (0.10556ms)
+✔ boundary difficultyType (0.099261ms)
+✔ boundary revision (0.083544ms)
+✔ boundary provenance (0.117294ms)
+✔ boundary capturedAt (0.082178ms)
+✔ provenance source (0.136078ms)
+✔ provenance account (0.110775ms)
+✔ provenance topology (0.101026ms)
+✔ provenance marker (0.106465ms)
+✔ provenance observedAt (0.113323ms)
+✔ provenance contentHash (0.111135ms)
+✔ rank 7 to 8 and one observation multiple achievements (0.203815ms)
+✔ hash rejects edits retaining metadata and imported provenance (20.449821ms)
+✔ real Python ujson serialization with non-ASCII and slash (21.70099ms)
+✔ S1 single observation and one time cluster yields one inferred candidate (2.51526ms)
+✔ S2 one real round split across consecutive observations is merged (0.979295ms)
+✔ S3 one bulk observation containing two distant clusters is split (9.553726ms)
+✔ S4 midnight is not a hard boundary (0.273708ms)
+✔ S5 imported history remains L0 and cannot become a candidate (0.260302ms)
+✔ S6 manual updates remain L0 (0.255698ms)
+✔ S7 two clear same-day clusters remain separate (0.322743ms)
+✔ S8 a missing chart event time is only a recent observation (0.172626ms)
+✔ S9 source changes are never merged (0.426019ms)
+✔ S10 repair and counter regression observations break evidence (0.382554ms)
+✔ S11 repeated improvements on one chart preserve both observation revisions (0.308723ms)
+✔ S12 Goal and score facts from the same evidence window compose without redefining facts (0.232423ms)
+✔ authoritative source session ids produce L3 regardless of sync boundaries (0.305543ms)
+✔ a missing source sequence prevents L2 inference (0.142171ms)
+✔ review provenance: every accepted snapshot retains its own revision and observation time (2.983873ms)
+✔ review provenance: missing sources remain null and null source revision is preserved (0.439804ms)
+✔ review provenance: stale rating and growth revisions do not enter accepted provenance (0.262058ms)
+✔ review provenance: rejected identity, future time, payload or invalid rating cannot claim a source (0.335348ms)
+✔ review dimensions: empty arrays are unknown, preserve overall Rating and cannot boost growth (1.301445ms)
+✔ review dimensions: matching partial evidence never proves whole-profile consistency (0.977945ms)
+✔ review dimensions: complete equal evidence permits only the corresponding verified chart dimension (0.511764ms)
+✔ review dimensions: conflicts are inconsistent even when other evidence is missing (0.522097ms)
+✔ review dimensions: missing sources and zero-filled skills are unknown; limited evidence cannot boost (0.570074ms)
+✔ review goal: relative score-pb binds exactly the minimum integer satisfying the existing greater comparison (1.358695ms)
+✔ review goal: below, equal and higher-than-exact targets never gain a goal marker or reason (1.220241ms)
+✔ review goal: mismatched field, direction, value, status and type cannot bind (1.421762ms)
+✔ review goal: explicit bound must restate the baseline; invalid or unrepresentable baseline stays unbound (0.618299ms)
+✔ review recent facts: a late-confirmed historical PB retains all three clocks in context and Home (0.847969ms)
+✔ review recent facts: observation-only knowledge never fills missing occurrence or confirmation (0.286629ms)
+✔ review recent facts: future and invalid confirmation are not silently replaced with an earlier observation (0.294554ms)
+✔ freezes authoritative numbers, timestamp and distinct causal capture (1.718038ms)
+✔ all six approved types available independently of recommendation dimension (0.973677ms)
+✔ achieved crowns and maximum rank excluded (0.25067ms)
+✔ missing optional fields are unknown, not zero; types independent (0.25139ms)
+✔ unplayed requires server-proven complete coverage and manual stays excluded (0.304805ms)
+✔ invalid and unavailable charts excluded (0.281393ms)
+✔ targets use relative conditions, no arbitrary score target (0.337204ms)
+✔ selects the lowest valid dimension with stable tie ordering (2.61498ms)
+✔ treats top20 sample size as ready and avoids calling missing evidence weak (0.486882ms)
+✔ calendar day follows the business timezone and preserves local timestamps (97.967938ms)
+✔ greeting period follows the business timezone (1.259729ms)
+✔ context preserves V1 authority, refuses stale revisions, and never substitutes a rating (2.632427ms)
+✔ recent projections reject future knowledge and cross-owner facts; incompatible models do not yield trend (1.629532ms)
+✔ stable gate never admits PB-only, future, mismatched or low-confidence candidates to fill K (1.691965ms)
+✔ diversity and explicit preferences operate only inside the admitted pool (1.077092ms)
+✔ next action and home retain public content and explicit navigation without fabricating plays (0.745114ms)
+✔ completed goals require existing completion evidence, never automatically create successors (0.366591ms)
+✔ external draft envelopes quarantine valid unknown schemas and reject stale coverage (0.719289ms)
+✔ existing ordinary rows require independent estimator evidence; strict range cannot supply it (0.912569ms)
+✔ breakthrough does not relax stable reach and user commitments remain review actions (0.623802ms)
+✔ late confirmation is recent knowledge, frozen inputs are not mutated, non-finite rating fails closed (0.529017ms)
+✔ seven-metric oracle exposes unknowns instead of treating clicks or PB as identifiable plays (14.149059ms)
+✔ probability calibration requires actual first-play probability, never predictor confidence (0.582078ms)
+✔ time leakage, immature windows, duplicate outcomes and absent labels fail explicitly (1.061025ms)
+✔ PB-only labels never resolve stability and one-item slates have no pair diversity (0.310273ms)
+✔ repeat history warmup is explicit and an early active goal evaluation is not an endpoint (0.675159ms)
+ℹ tests 92
+ℹ suites 0
+ℹ pass 92
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 1208.37424
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.080s
+
+OK
+{"goldenCases": 126, "regressionTests": 3, "output": "docs/batch3/evidence/existing-baseline.json"}
+{"outputPath":"docs/batch3/evidence/offline-benchmark.json","existingDecisions":126,"syntheticDecisions":2}
+...
+----------------------------------------------------------------------
+Ran 3 tests in 0.083s
+
+OK
+{"goldenCases": 126, "regressionTests": 3, "output": "docs/batch3/evidence/existing-baseline.json"}
+{"outputPath":"docs/batch3/evidence/offline-benchmark.json","existingDecisions":126,"syntheticDecisions":2}
+docs/batch3/evidence/existing-baseline.json: OK
+docs/batch3/evidence/offline-benchmark.json: OK

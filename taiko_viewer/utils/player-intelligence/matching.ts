@@ -1,5 +1,6 @@
 import { instant, type PlayerDecisionContext } from './context.ts';
 import type { RatingDimensionKey } from '../../types/recommendation-intelligence.ts';
+import { matchesActiveScorePbGoal } from './goal-target.ts';
 
 export type ChartFeature = {
   key: string; songId: number; difficultyType: number; identityGroup: string;
@@ -58,11 +59,15 @@ export function matchCandidates(context: PlayerDecisionContext, candidates: read
   });
   const focus = context.preferences?.focus || 'skill-match';
   const active = context.goals?.outcome === 'active' ? context.goals.activeGoal : null;
-  const goalMatch = (c: MatchCandidate) => !!active && active.goalType === 'score-pb' && !active.unavailable && active.profileId === context.profileId
-    && active.songId === c.chart.songId && active.difficultyType === c.chart.difficultyType && active.id === c.goalId;
+  const goalMatch = (c: MatchCandidate) => !!active && active.id === c.goalId
+    && matchesActiveScorePbGoal(active, context.profileId, { songId: c.chart.songId, difficultyType: c.chart.difficultyType, targetScore: c.targetScore });
   const preferred = (c: MatchCandidate) => context.preferences?.preferredChartKeys.includes(c.chart.key) ? 1 : 0;
+  const growth = context.longTerm.growthState;
+  const growthDimension = context.longTerm.growthConsistency === 'consistent' && growth?.dataSufficiency === 'ready'
+    && growth.basis === 'lowest-valid-dimension' && growth.priorityDimension
+    && context.longTerm.dimensionConsistency[growth.priorityDimension] === 'consistent' ? growth.priorityDimension : null;
   const focusMatch = (c: MatchCandidate) => focus === 'discovery' ? Number(c.isUnplayed)
-    : focus === 'growth' ? Number(context.longTerm.growthConsistent && !!context.longTerm.growthState?.priorityDimension && c.chart.verifiedDimensions.includes(context.longTerm.growthState.priorityDimension))
+    : focus === 'growth' ? Number(!!growthDimension && c.chart.verifiedDimensions.includes(growthDimension))
     : focus === 'goal' ? Number(goalMatch(c)) : 0;
   const contextual = options.ranking !== 'existing-order';
   eligible.sort((a,b) => (contextual ? Number(goalMatch(b)) - Number(goalMatch(a)) || preferred(b) - preferred(a) || focusMatch(b) - focusMatch(a) : 0)

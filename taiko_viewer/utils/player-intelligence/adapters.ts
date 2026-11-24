@@ -2,6 +2,7 @@ import type { RecommendationToolPayload } from '../../types/recommendation-tool.
 import type { PlayerDecisionContext } from './context.ts';
 import { instant } from './context.ts';
 import type { ChartFeature, MatchCandidate } from './matching.ts';
+import { matchesActiveScorePbGoal } from './goal-target.ts';
 
 /** Existing core ChartScoreEstimate wire fields, projected without changing its calculation. */
 export type ExistingScoreEstimate = {
@@ -28,7 +29,7 @@ export function adaptExistingCandidates(context: PlayerDecisionContext, ordinary
     const source = estimateMap.get(key), estimate = source?.estimate;
     const active = context.goals?.outcome === 'active' ? context.goals.activeGoal : null;
     return [{ chart, targetScore: target, baselineRank: index + 1, isUnplayed: row.isUnplayed,
-      goalId: active?.songId === row.songId && active?.difficultyType === row.level ? active.id : undefined,
+      goalId: matchesActiveScorePbGoal(active, context.profileId, { songId: row.songId, difficultyType: row.level, targetScore: target }) ? active!.id : undefined,
       currentBestScore: estimate?.current_score ?? null,
       reach: source && estimate ? { profileId: source.profileId, chartKey: key, scoreRevision: source.scoreRevision,
         catalogRevision: source.catalogRevision, sourceHash: source.sourceHash, generatedAt: source.generatedAt, featureCutoff: source.featureCutoff,

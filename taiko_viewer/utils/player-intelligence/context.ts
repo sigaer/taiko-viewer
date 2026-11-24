@@ -1,6 +1,7 @@
 import type { PlayerRatingIntelligence } from '../../types/recommendation-intelligence.ts';
 import type { PlayerGrowthState, GrowthHistoryResponse, GrowthMeasurement } from '../../types/player-growth.ts';
 import type { GoalEvaluationResponse } from '../../types/goal-evaluation.ts';
+import { compareGrowthEvidence } from './dimension-consistency.ts';
 
 export const DECISION_VERSION = 'viewer-player-decision/1' as const;
 export type Snapshot<T> = { profileId: string; observedAt: string; revision: string | null; value: T };
@@ -19,6 +20,8 @@ export function instant(value: string): number {
   return Date.parse(value);
 }
 const finite = (v: unknown): v is number => typeof v === 'number' && Number.isFinite(v);
+const acceptedSource = <T>(source: Snapshot<T> | undefined, value: T | null) => source && value !== null
+  ? { revision: source.revision, observedAt: source.observedAt } : null;
 export type DecisionInput = {
   ownerId: string; profileId: string; asOf: string; recentFrom: string;
   catalogRevision: string; scoreRevision: string;
@@ -57,11 +60,20 @@ export function buildPlayerDecisionContext(input: DecisionInput) {
     && rating.dimensions.every(d => finite(d.value) && d.value >= 0) && new Set(rating.dimensions.map(d => d.key)).size === rating.dimensions.length;
   const currentRating = input.rating?.revision === input.scoreRevision && ratingValid ? rating : null;
   const currentGrowth = input.growth?.revision === input.scoreRevision ? growth : null;
-  if (rating && !currentRating) diagnostics.push('rating:score-revision');
+  if (rating && !ratingValid) diagnostics.push('rating:invalid');
+  if (rating && input.rating?.revision !== input.scoreRevision) diagnostics.push('rating:score-revision');
   if (growth && !currentGrowth) diagnostics.push('growth:score-revision');
-  const growthConsistent = !currentRating || !currentGrowth || currentRating.overallRating === currentGrowth.overallRating
-    && currentRating.dimensions.every(d => currentGrowth.skills.some(s => s.key === d.key && s.value === d.value));
-  if (!growthConsistent) diagnostics.push('growth:rating-disagreement');
+  const growthEvidence = compareGrowthEvidence(currentRating, currentGrowth);
+  if (growthEvidence.consistency === 'inconsistent') diagnostics.push('growth:rating-disagreement');
+  if (growthEvidence.consistency === 'unknown') diagnostics.push('growth:consistency-unknown');
+  // Only record metadata for the payload actually accepted after all source checks.
+  const sources = {
+    rating: acceptedSource(input.rating, currentRating),
+    growth: acceptedSource(input.growth, currentGrowth),
+    history: acceptedSource(input.history, history),
+    goals: acceptedSource(input.goals, goals),
+    preferences: acceptedSource(input.preferences, preferences)
+  };
   function inWindow(value: string | null | undefined) {
     try { const t = instant(value!); return t >= start && t <= end; } catch { return false; }
   }
@@ -92,18 +104,26 @@ export function buildPlayerDecisionContext(input: DecisionInput) {
   }
   const facts = (history?.facts || []).filter(f => {
     // Knowledge time, never a backdated event timestamp, controls replay inclusion.
-    const knownAt = f.temporal.confirmedAt || f.temporal.observedAt;
+    const knownAt = f.temporal.confirmedAt ?? f.temporal.observedAt;
     if (f.ownerId !== input.ownerId || f.bindingId !== input.profileId || !inWindow(knownAt)) return false;
     for (const t of [f.temporal.confirmedAt, f.temporal.observedAt, f.temporal.occurredAt]) {
       if (t) { try { if (instant(t) > end) return false; } catch { return false; } }
     }
     return true;
   });
+  // References retain the source's three clocks; confirmation/observation never replace occurrence.
+  const factReferences = facts.map(f => ({ factKey: f.factKey,
+    occurredAt: f.temporal.occurredAt ?? null, observedAt: f.temporal.observedAt ?? null,
+    confirmedAt: f.temporal.confirmedAt ?? null, precision: f.temporal.precision,
+    knownAt: (f.temporal.confirmedAt ?? f.temporal.observedAt)!,
+    knowledgeBasis: f.temporal.confirmedAt != null ? 'confirmedAt' as const : 'observedAt' as const
+  }));
   return {
     version: DECISION_VERSION, ownerId: input.ownerId, profileId: input.profileId,
     asOf: input.asOf, catalogRevision: input.catalogRevision, scoreRevision: input.scoreRevision,
-    longTerm: { rating: currentRating, growthState: currentGrowth, growthConsistent, v2: null, v2Status: 'separate-model-not-supplied' as const },
-    recent: { from: input.recentFrom, to: input.asOf, measurements, factKeys: [...new Set(facts.map(f => f.factKey))].sort(),
+    longTerm: { rating: currentRating, growthState: currentGrowth, growthConsistency: growthEvidence.consistency,
+      dimensionConsistency: growthEvidence.dimensions, v2: null, v2Status: 'separate-model-not-supplied' as const },
+    recent: { from: input.recentFrom, to: input.asOf, measurements, factKeys: [...new Set(facts.map(f => f.factKey))].sort(), factReferences,
       factSemantics: 'recently-known-fact-references' as const,
       comparison: { comparable, ratingDelta: delta, measurementIds: comparable ? [first.id, last.id] : [],
         model: first ? { measurementVersion: first.measurementVersion, algorithmVersion: first.algorithmVersion, modelRevision: first.modelRevision } : null,
@@ -113,10 +133,8 @@ export function buildPlayerDecisionContext(input: DecisionInput) {
     confidence: { ratingSampleCount: currentRating?.sampleCount ?? 0,
       historyWindowCovered, originalCoverage: history?.coverage || null,
       measurementCoverage: historyWindowCovered ? history!.coverage.measurementState : 'unknown', scoreHistoryCoverage: historyWindowCovered ? history!.coverage.scoreHistoryState : 'unknown',
-      observedAt: input.rating?.observedAt || null, diagnostics: [...new Set(diagnostics)] },
-    sources: Object.fromEntries(['rating', 'growth', 'history', 'goals', 'preferences'].map(key => {
-      const source = input[key as 'rating']; return [key, source ? { revision: source.revision, observedAt: source.observedAt } : null];
-    }))
+      observedAt: sources.rating?.observedAt ?? null, diagnostics: [...new Set(diagnostics)] },
+    sources
   };
 }
 export type PlayerDecisionContext = ReturnType<typeof buildPlayerDecisionContext>;

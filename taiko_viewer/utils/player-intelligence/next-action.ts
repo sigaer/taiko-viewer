@@ -39,7 +39,9 @@ export function projectLivingHome(context: PlayerDecisionContext, matches: Match
 }, intent?: UserIntent) {
   return {
     nextAction: projectNextAction(context, matches, intent),
-    recent: { factKeys: context.recent.factKeys, from: context.recent.from, to: context.recent.to, semantics: 'observed-changes' as const },
+    recent: { factKeys: context.recent.factKeys, factReferences: context.recent.factReferences,
+      from: context.recent.from, to: context.recent.to, factSemantics: context.recent.factSemantics,
+      sessionIdentifiability: context.recent.sessionIdentifiability },
     longTerm: context.longTerm,
     latestSongKeys: publicContent.latestSongKeys.slice(0, 6), eventIds: publicContent.eventIds.slice(0, 4), communityIds: publicContent.communityIds.slice(0, 4)
   };

@@ -8,6 +8,8 @@
     "noEmit": true,
     "allowJs": true,
     "strict": true,
+    "baseUrl": "../..",
+    "paths": { "~/*": ["./*"] },
     "skipLibCheck": true,
     "types": []
   },

@@ -28,9 +28,13 @@
 - `preferences`：用户此次显式关注模式/偏好/排除；排除优先，错 profile 或未来意图不使用；不落库。
 - `confidence`：样本量、原覆盖状态、请求窗口是否覆盖、来源时间及诊断；不是单一“玩家可信分数”。
 
+Review Fix 收敛：`sources` 显式分别读取 rating/growth/history/goals/preferences 自身的 Snapshot，并且只有对应 payload 最终被接受才记录其 revision/observedAt；缺失、错身份、未来时间、错 payload profile、无效 Rating 或不符 scoreRevision 的来源为 null。`confidence.observedAt` 也只取已接受的 Rating 来源。rating/growth 都须匹配当前 scoreRevision，但时间仍独立；history/goals/preferences 的 revision 互不替代，合法的 null revision 保留。
+
+`growthConsistency` 现在为 `consistent / inconsistent / unknown`，并提供逐维 `dimensionConsistency`。只有完整六维、两侧每维都有唯一正有限值、数值一致且 overallRating 已知一致时才是 consistent。空数组、缺维、零填充或缺来源为 unknown；已有数值冲突为 inconsistent（即使其余维度缺失）。整体 Rating 不因空/部分维度而丢弃。Growth 提序只消费完整一致且 ready 的现有 priorityDimension，并要求该维在 chart 的 verifiedDimensions 内；部分证据不证明“最低维度”，不进行提序。
+
 时间必须含时区。History 查询范围是上海日期闭区间，转换到上海日界后才能声称覆盖所请求的时刻窗口。原始 coverage 保留；请求窗口不完整时有效 coverage 为 unknown。Measurements 按 owner/binding/time 筛选，同 ID 冲突排除，按时间与 ID 确定排序。至少两个不同时间、所有记录 ready、measurementVersion/algorithmVersion/非空 modelRevision 一致时才比较；不同 scoreRevision 属于正常成长，不因此排除。单条、未知版本、模型切换或中间 limited 均不能解释成“没有成长”。
 
-Fact 纳入时间使用 `confirmedAt || observedAt`，还检查所有非空时刻不在未来。晚确认的旧 PB 可以出现在“近期获知变化”，不能被描述成今天打出。字段 `factSemantics=recently-known-fact-references` 固定这个含义；它不是最近实际游玩的采样序列。
+Fact 纳入时间使用 `confirmedAt ?? observedAt`，还检查所有非空时刻不在未来；无效的非 null confirmation 不静默退回 observation。`factReferences` 保留原始 occurredAt（实际发生）、observedAt（观察）、confirmedAt（确认）、precision，并明确 knownAt 与 knowledgeBasis。缺失的时刻仍是 null，不相互补值。Context 和 Living Home 使用完全相同的 `factSemantics=recently-known-fact-references` 与时间引用；晚确认的旧 PB 可以出现在“近期获知变化”，不能被描述成今天打出或今天实际游玩。它不是最近实际游玩的采样序列，也不改变 Session Identifiability。
 
 ## 长期与近期的产品语义
 

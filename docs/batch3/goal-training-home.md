@@ -37,7 +37,7 @@ flowchart TD
 | 无活动目标且有合格推荐 | choose-next-goal |
 | 无稳定合格候选 | insufficient-evidence |
 
-Goal 只在已通过准入的候选中影响排序；score-pb 可精确关联，FC/DF 等暂不使用分数稳定估计作训练保证。完成后重新构造 context/matching，再让用户选择下一目标，不能沿用完成前 receipt 或自动续订。
+Goal 只在已通过准入的候选中影响排序；score-pb 的候选门槛必须精确对应既有 `highScore > baseline.highScore`，并校验 targetData 字段、方向和可选比较值；具体整数门槛规则见 [匹配合同](matching-benchmark.md)。FC/DF 等继续由既有 evaluator 处理，不能因同谱面挂上 score-pb 排序理由。完成后重新构造 context/matching，再让用户选择下一目标，不能沿用完成前 receipt 或自动续订。
 
 多目标现在不伪装成已支持。保留一个活动目标和最多三个可重建建议；这不是持久 Training Queue。未来有明确需求时可新增唯一的用户计划意向集合（排序/移除/收藏），其中每项只引用 chart/目标意图，不包含另一个 active/completed 状态机。激活仍走现有 CAS。没有必要为了当前推荐建立队列数据库。
 
@@ -46,6 +46,8 @@ Goal 只在已通过准入的候选中影响排序；score-pb 可精确关联，
 现有 `pages/index.vue` 已通过 `useHomeContent` 加载 latestSongs、提供活动 slides，并分 guest/loading/public_error/authenticated。`components/rework/today/SignedIn.vue` 已同时消费 `usePlayerGrowth` 与 `useRecentGrowth`，通过 `HomePlayerGrowthSurface` 注入 LatestSongs/Events；社区内容已有 `components/rework/community/HomeSide.vue` / Today Feed 等组件。当前活动 slides 是页面静态资源与文案，不假定其已经有可维护活动日历 API。
 
 本批实现 `projectLivingHome`，在离线 pure projection 中同时输出 Next Action、近期 fact 引用、长期原始投影和公共内容 ID；空推荐不会阻断新曲/活动/社区。这条接线无需等所有算法完成或外部 Agent 提供能力。
+
+Review Fix 后，Home recent 直接保留 Context 的 `factSemantics`、`factReferences` 与 `sessionIdentifiability`，不再另称 observed-changes。每条引用的 occurredAt/observedAt/confirmedAt 独立保留；例如去年发生、今天确认的 PB，knownAt 可以是今天，但 occurredAt 仍是去年。不存在从确认时间推导今天游玩次数的路径。
 
 下一候选阶段接线顺序：
 
