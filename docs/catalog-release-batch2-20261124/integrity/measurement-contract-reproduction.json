@@ -1,0 +1,9 @@
+{
+  "qaRun": "qa-c979facce5ef",
+  "syntheticOnly": true,
+  "writer": "actual function AST, no production import/IO",
+  "writerAcceptsSampleCountZero": true,
+  "readerZeroError": "Invalid daily ability point",
+  "readerAcceptsPositiveControl": true,
+  "sqlUpsertReachedOnReaderError": false
+}

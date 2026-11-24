@@ -49,6 +49,7 @@ test('weekly renders all seven metrics for changed versions, limited data, zeroe
       [start, point('end')],
       ...[{ modelRevision: 'b' }, { modelRevision: null }, { algorithmVersion: 'daily-v1' }, { measurementVersion: 2 }, { availabilityState: 'limited' }]
         .map(metadata => [start, point('end', { ...metadata, rating: 10.6, dimensions: { ...dimensions, speed: 10.8 } })]),
+      [start, point('end', { availabilityState: 'limited', algorithmVersion: 'changed', rating: 10.6 })],
       [start, point('end', { rating: null, dimensions: { ...dimensions, speed: null } })],
       [point('end')], [], null
     ];
@@ -60,7 +61,13 @@ test('weekly renders all seven metrics for changed versions, limited data, zeroe
       if (points?.length === 2 && change.ratingDelta === 0) assert.match(html, /wc-delta[^>]*>0\.00</);
       if (points?.length === 2 && points[1].rating === 10.6) {
         assert.match(html, /\+0\.30/);
-        assert.match(html, /\+0\.40/);
+        if (points[1].dimensions.speed === 10.8) assert.match(html, /\+0\.40/);
+      }
+      if (points?.length === 2 && (points[0].algorithmVersion !== points[1].algorithmVersion ||
+        points[0].measurementVersion !== points[1].measurementVersion ||
+        points[0].modelRevision && points[1].modelRevision && points[0].modelRevision !== points[1].modelRevision)) {
+        assert.match(html, /wc-model-notice/);
+        assert.match(html, locale === 'zh' ? /期间计算模型有变化/ : /期間中に計算モデルが変更/);
       }
       if (!points?.length || points.length === 1) assert.match(html, /wc-delta[^>]*>—</);
       rendered.push(html);

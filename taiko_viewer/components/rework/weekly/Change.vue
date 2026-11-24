@@ -2,6 +2,7 @@
 import type { WeeklyMeasurementChange } from "~/types/player-growth";
 import { GROWTH_DIMENSION_ORDER } from "~/utils/playerGrowth";
 import { deltaRows, dimensionLabelKey, signedFixed } from "~/utils/rework/today";
+import { weeklyModelNotice } from "~/utils/weeklyMeasurementModel";
 
 const props = defineProps<{
   change: WeeklyMeasurementChange | null;
@@ -9,6 +10,7 @@ const props = defineProps<{
   focusText: string;
 }>();
 const { t, locale } = useI18n();
+const modelNotice = computed(() => weeklyModelNotice(props.change));
 const rows = computed(() => [
   { key: 'rating', label: 'Rating', before: props.change?.start?.rating, after: props.change?.end?.rating, delta: props.change?.ratingDelta, top: false },
   ...deltaRows(GROWTH_DIMENSION_ORDER, props.change?.dimensionDeltas).map(row => ({
@@ -45,6 +47,7 @@ const time = (raw: string | undefined) => raw ? new Intl.DateTimeFormat(locale.v
         </tr>
       </tbody>
     </table>
+    <p v-if="modelNotice" class="wc-say wc-model-notice">{{ t(modelNotice === 'changed' ? 'weekly.measurement.modelChanged' : 'weekly.measurement.modelUnverified') }}</p>
     <p v-if="!change?.start || !change?.end" class="wc-say">{{ t('weekly.measurement.insufficient') }}</p>
     <p v-if="focusText" class="wc-say">{{ focusText }}</p>
   </ReworkPanel>

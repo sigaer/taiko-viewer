@@ -1,0 +1,4482 @@
+[
+  {
+    "repo": "integration",
+    "path": "packages/sakura-taiko-contract/sakura_taiko_contract/catalog.py",
+    "line": 45,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "raw_status = row.get('shelf_status')"
+  },
+  {
+    "repo": "integration",
+    "path": "packages/sakura-taiko-contract/sakura_taiko_contract/catalog.py",
+    "line": 54,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "song_aliases = [value[:256] for value in raw_aliases if isinstance(value, str)][:100] if isinstance(raw_aliases, list) else []"
+  },
+  {
+    "repo": "integration",
+    "path": "packages/sakura-taiko-contract/sakura_taiko_contract/catalog.py",
+    "line": 55,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "songs.append(dict(songId=song_id, song_name=song_name, song_name_jp=song_name_jp, aliases=song_aliases, catalogRevision=revision, availability=availability))"
+  },
+  {
+    "repo": "integration",
+    "path": "packages/sakura-taiko-contract/src/catalog.mjs",
+    "line": 18,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "const status=row.shelf_status===0||row.shelf_status==='0'?'active':row.shelf_status===1||row.shelf_status==='1'?'removed':'unknown';"
+  },
+  {
+    "repo": "integration",
+    "path": "preview/song-detail/server/utils/entry-fixtures.ts",
+    "line": 29,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "const all=empty?[]:Array.from({length:26},(_,i)=>({...publicSongs[i%publicSongs.length],id:900000+shelf*100+i,song_name:`合成${shelf===1?'已下架':shelf===2?'其他':'实装'}歌曲 ${i+1} · 长标题の楽曲で折り返しを確認するためのテスト`,song_name_jp:`テスト楽曲 ${i+1} 長いタイトルの表示と操作を確認`,shelf_status:shelf})).filter(x=>!keywor"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/arbitrate-growth-identity.py",
+    "line": 16,
+    "terms": [
+      "song_data.json",
+      "rating_structured",
+      "song_alias"
+    ],
+    "excerpt": "for label in ('songs/rating_structured_with_ids.json','songs/song_data.json','songs/song_alias.json'):"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/arbitrate-growth-identity.py",
+    "line": 25,
+    "terms": [
+      "song_data.json",
+      "rating_structured",
+      "song_alias"
+    ],
+    "excerpt": "for name in ['rating_structured_with_ids.json','song_data.json','song_alias.json']:(directory/'songs'/name).write_text('[]')"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/reproduce-source-switch.py",
+    "line": 24,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "(root / 'songs' / 'song_data.json').write_text('[]')"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/run-recovered-key-gates.py",
+    "line": 12,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "(scratch/'userdata').mkdir();(scratch/'songs').mkdir();(scratch/'songs/song_data.json').write_text('[]')"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/components/account/AccountSongEditorDialog.vue",
+    "line": 181,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "const status = Number(song.shelf_status || 0) === 1 ? copy.value.removed : copy.value.available;"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/components/account/AccountSongEditorDialog.vue",
+    "line": 293,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "const leftStatus = Number(left.shelf_status || 0);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/components/account/AccountSongEditorDialog.vue",
+    "line": 294,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "const rightStatus = Number(right.shelf_status || 0);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/components/account/AccountSongEditorDialog.vue",
+    "line": 424,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "<el-tag size=\"small\" :type=\"Number(selectedCatalogSong.shelf_status || 0) === 1 ? 'warning' : 'success'\" effect=\"light\">"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/components/account/AccountSongEditorDialog.vue",
+    "line": 425,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "{{ Number(selectedCatalogSong.shelf_status || 0) === 1 ? copy.removedSong : copy.availableSong }}"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/components/rework/Library.vue",
+    "line": 229,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "shelf: t(`rework.library.shelf.${shelfOf(song.shelf_status)}`)"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/components/rework/song/DetailHead.vue",
+    "line": 28,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "<span class=\"tag\">{{ t(`rework.library.shelf.${shelfOf(song.shelf_status)}`) }}</span>"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/prepare-annual-candidate.py",
+    "line": 11,
+    "terms": [
+      "song_data.json",
+      "song_data_raw.json",
+      "rating_structured",
+      "song_alias"
+    ],
+    "excerpt": "for name in ['plugins/utils/annual_summary','plugins/utils/snapshot_history.py','plugins/utils/score_calculator.py','plugins/utils/chart_availability.py','plugins/utils/duplicate_versions.py','plugins/utils/chart_roll_metadata.py','songs/song_data.json','songs/song_data_raw.json'"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/pages/admin/taiko/songs.vue",
+    "line": 48,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "shelf_status: 0,"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/pages/admin/taiko/songs.vue",
+    "line": 89,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "shelf_status: 0,"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/pages/admin/taiko/songs.vue",
+    "line": 276,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "<el-select v-model=\"form.shelf_status\">"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/pages/songs/[id].vue",
+    "line": 112,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "const normalizedShelfStatus = (value: SongCatalogItem[\"shelf_status\"]) => {"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/pages/songs/[id].vue",
+    "line": 117,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "const songListShelf = computed(() => detailFallbackShelf(route.query.list, song.value?.shelf_status));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/pages/songs/[id].vue",
+    "line": 131,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "() => [song.value?.shelf_status, route.query.list] as const,"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/pages/songs/[id].vue",
+    "line": 412,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": ":show-shape=\"normalizedShelfStatus(song.shelf_status) !== 2 || hasRadarData\""
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/audit_postgres_catalog.py",
+    "line": 71,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "path = Path(paths.get(\"NUXT_SONG_DATA_PATH\") or paths.get(\"TAIKO_SONG_DATA_PATH\") or root / \"songs/song_data.json\")"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/audit_postgres_catalog.py",
+    "line": 183,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "def shelf_status(song):"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/audit_postgres_catalog.py",
+    "line": 184,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "value = song.get(\"shelf_status\")"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/audit_postgres_catalog.py",
+    "line": 226,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "base = {\"viewer_id\": identity, \"viewer_title\": song.get(\"song_name\"), \"viewer_title_ja\": song.get(\"song_name_jp\"), \"shelf_status\": shelf_status(song)}"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/audit_postgres_catalog.py",
+    "line": 280,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "for key in (\"open_day\", \"version\", \"artists\", \"max_combo\", \"shelf_status\", \"roll_time\", \"roll_times\", \"balloons\", \"balloon_num\")}"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/audit_postgres_catalog.py",
+    "line": 292,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "\"viewer_by_shelf_status\": dict(sorted(Counter(shelf_status(song) for song in songs).items())),"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/audit_postgres_catalog.py",
+    "line": 293,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "\"unmatched_by_shelf_status\": dict(sorted(Counter(item[\"shelf_status\"] for item in unmatched).items())),"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/audit_postgres_catalog.py",
+    "line": 334,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "for status, count in summary[\"viewer_by_shelf_status\"].items():"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/audit_postgres_catalog.py",
+    "line": 335,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "lines.append(f\"| {status} | {count} | {summary['unmatched_by_shelf_status'].get(status, 0)} |\")"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/audit_postgres_catalog.py",
+    "line": 343,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "lines += [\"- \" + json.dumps(item, ensure_ascii=False) for item in report[\"viewer_unmatched\"] if item[\"shelf_status\"] == \"0\"]"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/audit_postgres_catalog.py",
+    "line": 358,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "parser.add_argument(\"--song-data\", help=\"Explicit public song_data.json; default resolves the running Viewer service\")"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/extract_title_song_relations.py",
+    "line": 26,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_CATALOG_DEFAULT = ROOT_DIR / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/generate_v2_console_constants.py",
+    "line": 180,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "family = sorted((s for s in songs if str(s.get(\"shelf_status\")) == \"2\"), key=lambda s: int(s[\"id\"]))"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/lib/ugc-catalog.mjs",
+    "line": 20,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "songDataPath: resolve(String(options.songDataPath || process.env.TAIKO_SONG_DATA_PATH || resolve(taikoRoot, \"songs/song_data.json\"))),"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/lib/ugc-catalog.mjs",
+    "line": 21,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "ratingPath: resolve(String(options.ratingPath || process.env.TAIKO_RATING_STRUCT_PATH || resolve(taikoRoot, \"songs/rating_structured_with_ids.json\"))),"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/lib/ugc-catalog.mjs",
+    "line": 75,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "throw new TypeError(\"song_data.json must contain an array\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/lib/ugc-catalog.mjs",
+    "line": 123,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "const inactive = Number(song.shelf_status || 0) === 1;"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/catalog-check.mjs",
+    "line": 23,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "await writeFile(data + \"/songs/rating_structured_with_ids.json\", \"[]\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/catalog-check.mjs",
+    "line": 24,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "await writeFile(data + \"/songs/song_alias.json\", \"{}\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/catalog-scenarios.mjs",
+    "line": 34,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "shelf_status: status === 0 ? (n % 10 === 0 ? \"\" : 0) : n % 3 ? status : String(status),"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/catalog-scenarios.mjs",
+    "line": 71,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "let filtered = dataset.filter((s) => shelfStatus === undefined || !Number.isFinite(shelfStatus) || normalizeShelfStatus(s.shelf_status) === shelfStatus);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/catalog-selfcheck.mjs",
+    "line": 23,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "const songFile = resolve(data, \"song_data.json\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/detail-data.mjs",
+    "line": 3,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "//   song_data.json              TAIKO_SONG_DATA_PATH             /api/content/songs/:id, chart images, V2 rows"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/detail-data.mjs",
+    "line": 18,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "removed: 3, // shelf_status 1 → the page adds list=removed"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/detail-data.mjs",
+    "line": 19,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "other: 4, // shelf_status 2, no rating values → no six-dimension block"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/detail-data.mjs",
+    "line": 52,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "shelf_status: 0,"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/detail-data.mjs",
+    "line": 77,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "Object.assign(songs[IDS.removed - 1], { shelf_status: 1 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/detail-data.mjs",
+    "line": 78,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "Object.assign(songs[IDS.other - 1], { shelf_status: 2 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/detail-data.mjs",
+    "line": 96,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "shelf_status: 0,"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/detail-data.mjs",
+    "line": 168,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "const songFile = resolve(dir, \"song_data.json\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/pages-data.mjs",
+    "line": 3,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "//   song_data.json etc.              detail-data.mjs (song catalogue, rating, V2 snapshot, TJA bundle of song 1), plus"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/pages-data.mjs",
+    "line": 33,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "data.songs.push({ id: song.id, song_name: song.zh, song_name_jp: song.jp, type: \"南梦宫原创音乐\", bpm: \"200\", open_day: \"1/1/2025\", shelf_status: 0, level_1: 3, level_2: 5, level_3: 7, level_4: 9, level_5: 10 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "line": 39,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "await writeFile(data+'/songs/song_data.json',JSON.stringify(prepared.data.songs));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "line": 43,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "await writeFile(data+'/songs/rating_structured_with_ids.json',JSON.stringify({songs:charts,const_table:vector.const_table}));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "line": 44,
+    "terms": [
+      "song_data_raw.json"
+    ],
+    "excerpt": "await writeFile(data+'/songs/song_data_raw.json',JSON.stringify(prepared.data.songs));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "line": 45,
+    "terms": [
+      "taiko_goku_onis",
+      "song_alias"
+    ],
+    "excerpt": "for(const name of ['song_alias','song_score','taiko_goku_onis','taiko_goku_all_levels_stream'])await writeFile(data+'/songs/'+name+'.json','[]');"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "line": 50,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "prepared.env={...prepared.env,TAIKO_PYTHON_EXECUTABLE:launcher,NUXT_SONG_DATA_PATH:data+'/song_data.json',NUXT_RATING_STRUCT_PATH:data+'/rating.json',NUXT_BRANCH_AUDIO_MANIFEST_PATH:data+'/branch_audio_manifest.json',NUXT_TAIKO_API_BASE:prepared.upstream.base,NUXT_TAIKO_TITLE_API"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/selfcheck-runner.mjs",
+    "line": 39,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "TAIKO_SONG_DATA_PATH: resolve(data, \"song_data.json\"),"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/shell-check.mjs",
+    "line": 24,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "await writeFile(data + \"/songs/rating_structured_with_ids.json\", \"[]\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/shell-check.mjs",
+    "line": 25,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "await writeFile(data + \"/songs/song_alias.json\", \"{}\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/shell-check.mjs",
+    "line": 34,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "shelf_status: 0,"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_goal_evaluation_production_smoke.mjs",
+    "line": 24,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "const catalog=JSON.parse(await readFile('/home/sigaer/taiko/songs/song_data.json','utf8'));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_goal_evaluation_production_smoke.mjs",
+    "line": 26,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "for(const song of catalog){if(Number(song.shelf_status||0)!==0)continue;for(const level of [4,5])if(Number(song[`level_${level}`])>0){const notes=Number(song.max_combo?.[level-1])||600;songs.push({song_no:Number(song.id),level,song_name:song.song_name,high_score:900000,best_score"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_goal_production_smoke.mjs",
+    "line": 23,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "const catalog=JSON.parse(await readFile('/home/sigaer/taiko/songs/song_data.json','utf8'));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_goal_production_smoke.mjs",
+    "line": 25,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "for(const song of catalog){if(Number(song.shelf_status||0)!==0)continue;for(const level of [4,5])if(Number(song[`level_${level}`])>0){const notes=Number(song.max_combo?.[level-1])||600;songs.push({song_no:Number(song.id),level,song_name:song.song_name,high_score:900000,best_score"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_experience_production_smoke.mjs",
+    "line": 87,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "const catalog = JSON.parse(await readFile('/home/sigaer/taiko/songs/song_data.json', 'utf8'));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_experience_production_smoke.mjs",
+    "line": 89,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "for (const song of catalog) if (Number(song.shelf_status || 0) === 0) for (const level of [4, 5]) if (Number(song[`level_${level}`]) > 0) {"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_history_production_smoke.mjs",
+    "line": 87,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "const catalog = JSON.parse(await readFile(\"/home/sigaer/taiko/songs/song_data.json\", \"utf8\"));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_history_production_smoke.mjs",
+    "line": 90,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if (Number(song.shelf_status || 0) !== 0) continue;"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_passport_production_smoke.mjs",
+    "line": 73,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "const catalog = JSON.parse(await readFile(\"/home/sigaer/taiko/songs/song_data.json\", \"utf8\"));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_passport_production_smoke.mjs",
+    "line": 76,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if (Number(song.shelf_status || 0) !== 0) continue;"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_weekly_production_smoke.mjs",
+    "line": 74,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "const catalog = JSON.parse(await readFile(\"/home/sigaer/taiko/songs/song_data.json\", \"utf8\"));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_weekly_production_smoke.mjs",
+    "line": 77,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if (Number(song.shelf_status || 0) !== 0) continue;"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/sync_nijiiro_2026_grade_dojo.py",
+    "line": 134,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "return taiko_root() / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/title_relation_ids.py",
+    "line": 84,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "and self.songs[sid].get(\"shelf_status\") in {0, 1}"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/title_relation_ids.py",
+    "line": 96,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "and self.songs[sid].get(\"shelf_status\") in {0, 1}"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_goal_browser.mjs",
+    "line": 23,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "state.catalog.push({id:102,level_4:9,shelf_status:0});"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_goal_evaluation_browser.mjs",
+    "line": 23,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "state.catalog.push({id:102,level_4:9,shelf_status:0});"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_home_desktop_layout.mjs",
+    "line": 29,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "const latest = [101, 102, 103, 104, 105].map((id, i) => ({ id, song_name: [...titles, '新しい一曲', 'リズムの旅'][i], type: 'ナムコオリジナル', level_4: 9, open_day: '2026-11-19', shelf_status: 0 }));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_training_loop_browser.mjs",
+    "line": 45,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "else if(path==='/api/content/songs/100')json={song:{id:100,song_name:'Training song',level_4:9,level_5:9,shelf_status:0,genre:'ナムコオリジナル'},ratingEntries:[],branchAudioVariants:{},tjaBundleUrl:null};"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/infrastructure/catalog-identity.ts",
+    "line": 7,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "const path = process.env.TAIKO_SONG_DATA_PATH || resolve(repoRoot, \"songs/song_data.json\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/internal/account/shared.ts",
+    "line": 125,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "shelf_status?: number | string;"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/internal/account/shared.ts",
+    "line": 675,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "shelfStatus: meta?.shelf_status === undefined || meta?.shelf_status === null || meta?.shelf_status === \"\""
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/internal/account/shared.ts",
+    "line": 677,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": ": Number(meta.shelf_status),"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/account/annual-summary/runtime.ts",
+    "line": 189,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "const songDataPath = resolve(String(runtimeConfig.songDataPath || resolve(repoRoot, \"songs\", \"song_data.json\")));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/account/annual-summary/runtime.ts",
+    "line": 191,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "String(runtimeConfig.ratingStructPath || resolve(repoRoot, \"songs\", \"rating_structured_with_ids.json\"))"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/account/annual-summary/runtime.ts",
+    "line": 283,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "const songDataPath = resolve(String(runtimeConfig.songDataPath || resolve(repoRoot, \"songs\", \"song_data.json\")));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/account/annual-summary/runtime.ts",
+    "line": 285,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "String(runtimeConfig.ratingStructPath || resolve(repoRoot, \"songs\", \"rating_structured_with_ids.json\"))"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/account/annual-summary/runtime.ts",
+    "line": 331,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "const songDataPath = resolve(String(runtimeConfig.songDataPath || resolve(repoRoot, 'songs', 'song_data.json')));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/account/annual-summary/runtime.ts",
+    "line": 332,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "const ratingPath = resolve(String(runtimeConfig.ratingStructPath || resolve(repoRoot, 'songs', 'rating_structured_with_ids.json')));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/account/annual-summary/runtime.ts",
+    "line": 538,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "const songDataPath = resolve(String(runtimeConfig.songDataPath || resolve(repoRoot, \"songs\", \"song_data.json\")));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/account/annual-summary/runtime.ts",
+    "line": 540,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "String(runtimeConfig.ratingStructPath || resolve(repoRoot, \"songs\", \"rating_structured_with_ids.json\"))"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/account/charts.ts",
+    "line": 217,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "const jsonPath = `${repoRoot}/songs/rating_structured_with_ids.json`;"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/account/developer-analytics.ts",
+    "line": 35,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "'cfg=sc.load_rating_config(\"./songs/rating_structured_with_ids.json\")',"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/account/personal.ts",
+    "line": 31,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "const payload = (await runPythonJson([\"rating\", binding.taiko_id, \"--rating-data\", `${repoRoot}/songs/rating_structured_with_ids.json`])) as Omit<PlayerRatingIntelligence, \"current\" | \"scoreCount\">;"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/account/recommendation-tool.ts",
+    "line": 34,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "result = JSON.parse((await runPythonImage(code,[binding.taiko_id,JSON.stringify({basis:resolved.dimKey,limit,path:`${repoRoot}/songs/rating_structured_with_ids.json`,image:!!options.image,subtitle:`维度：${resolved.dimLabel}  数量：${limit}`})])).toString());"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/content/runtime.ts",
+    "line": 17,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "runtimeConfig.songDataPath || process.env.TAIKO_SONG_DATA_PATH || resolve(repoRoot, \"songs\", \"song_data.json\")"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/content/runtime.ts",
+    "line": 22,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "resolve(repoRoot, \"songs\", \"rating_structured_with_ids.json\")"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/content/songTjaBundleIndex.py",
+    "line": 114,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "parser.add_argument(\"--song-data\", required=True, help=\"Path to song_data.json\")"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/content/songs.ts",
+    "line": 22,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "const normalizeShelfStatus = (value: SongCatalogItem[\"shelf_status\"]) => {"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/content/songs.ts",
+    "line": 61,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": ": songs.filter((song) => normalizeShelfStatus(song.shelf_status) === shelfStatus);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/content/songs.ts",
+    "line": 91,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "shelf_status: song.shelf_status,"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/content/songs.ts",
+    "line": 106,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "(song) => options.shelfStatus === undefined || normalizeShelfStatus(song.shelf_status) === options.shelfStatus"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/content/songs.ts",
+    "line": 151,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": ".filter((song) => normalizeShelfStatus(song.shelf_status) === 0)"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/content/v2ConstantsModel.ts",
+    "line": 142,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "...(Number(localSong.shelf_status) === 2 || localSong.legacy_ids?.length ? [[supplemental, provenance]] : []),"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/developer-api-v1/catalog.ts",
+    "line": 32,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "const songPath=String(runtime.songDataPath||process.env.TAIKO_SONG_DATA_PATH||resolve(paths.repoRoot,'songs/song_data.json'));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/developer-api-v1/catalog.ts",
+    "line": 33,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "const aliasPath=resolve(songPath,'..','song_alias.json');"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/goals/recommendation.ts",
+    "line": 23,
+    "terms": [
+      "song_data.json",
+      "song_data_raw.json",
+      "rating_structured",
+      "song_alias"
+    ],
+    "excerpt": "for (const name of ['song_data_raw.json','song_data.json','rating_structured_with_ids.json','song_alias.json']) {"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/growth-history/model-revision.ts",
+    "line": 18,
+    "terms": [
+      "song_data.json",
+      "rating_structured",
+      "song_alias"
+    ],
+    "excerpt": "for (const name of [\"rating_structured_with_ids.json\", \"song_data.json\", \"song_alias.json\"]) {"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/my-taiko/catalog-consistency.ts",
+    "line": 4,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "// The legacy reader loads only song_data.json. Compare that same raw source,"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/utils/admin/shared.ts",
+    "line": 41,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "songAliasPath: resolve(repoRoot, \"songs\", \"song_alias.json\"),"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/utils/admin/songs.ts",
+    "line": 94,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "shelf_status: Number(payload.shelf_status ?? 0)"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/utils/admin/songs.ts",
+    "line": 179,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if (shelfStatus !== null && Number(item.shelf_status || 0) !== shelfStatus) return false;"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/utils/taiko-open.ts",
+    "line": 37,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "song_alias: () => resolve(getContentRuntimePaths().repoRoot, \"songs\", \"song_alias.json\"),"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/utils/taiko-open.ts",
+    "line": 38,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "rating_structured_with_ids: () => getContentRuntimePaths().ratingStructPath,"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/utils/taiko-open.ts",
+    "line": 44,
+    "terms": [
+      "taiko_goku_onis"
+    ],
+    "excerpt": "taiko_goku_onis: () => resolve(getContentRuntimePaths().repoRoot, \"songs\", \"taiko_goku_onis.json\"),"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/types/content.ts",
+    "line": 21,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "shelf_status?: number | string;"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/utils/playerGoal.ts",
+    "line": 27,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "export function goalChartAvailable(song: { shelf_status?: unknown; [key: string]: unknown } | undefined, difficulty: number): boolean {"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/utils/playerGoal.ts",
+    "line": 28,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "return !!song && Number(song.shelf_status || 0) === 0 && Number(song[`level_${difficulty}`]) > 0;"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/chart/availability.py",
+    "line": 10,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "status = song.get(\"shelf_status\")"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/chart/availability.py",
+    "line": 39,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "def cn_available_chart_keys(merged_rows, raw_rows=None) -> set[tuple[int, int]]:"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/chart/position.py",
+    "line": 28,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "status = item.get('shelf_status', 0)"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/chart/progress_catalog.py",
+    "line": 40,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if not is_song_on_shelf(song.get('shelf_status')):"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/chart/progress_catalog.py",
+    "line": 150,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "for song_id, level in catalog.cn_available_chart_keys:"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/chart/progress_catalog.py",
+    "line": 154,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if not song or song.get('shelf_status') not in (None, 0, '0', '未下架'):"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/chart/progress_catalog.py",
+    "line": 196,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "cn_available_chart_keys: Set[Tuple[int, int]] = field(default_factory=set)"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/chart/visibility.py",
+    "line": 25,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "def is_song_marked_down_shelf(song_id: Any, shelf_status: Any) -> bool:"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/chart/visibility.py",
+    "line": 29,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "return shelf_status in (1, '1', '已下架')"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/chart/visibility.py",
+    "line": 31,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "def is_song_publicly_visible(song: Mapping[str, Any] | None=None, *, song_id: Any=None, title: Any=None, shelf_status: Any=None) -> bool:"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/chart/visibility.py",
+    "line": 35,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "shelf_status = song.get('shelf_status', shelf_status)"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/chart/visibility.py",
+    "line": 41,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if is_song_marked_down_shelf(normalized_id, shelf_status):"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/parser/tja_mapping.py",
+    "line": 25,
+    "terms": [
+      "song_id2tjapath"
+    ],
+    "excerpt": "raise ValueError('song_id2tjapath must be a JSON object')"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/recommendation/candidates.py",
+    "line": 126,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "def recommend_songs(all_stats: List[SongStats], songs_cfg: dict, const_table: List[tuple], best_key: str='rating', limit: int=20, *, default_ids: Mapping[int, int] | None=None, cn_available_chart_keys: set[tuple[int, int]] | None=None, on_shelf_song_ids: set[int] | None=None, vis"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/recommendation/candidates.py",
+    "line": 171,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "if cn_available_chart_keys is not None:"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/recommendation/candidates.py",
+    "line": 172,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "if (song_id, lvl) not in cn_available_chart_keys:"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/recommendation/client_selection.py",
+    "line": 32,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if song_id < 0 or row.get('shelf_status') in (1, '1', '已下架'):"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/recommendation/client_selection.py",
+    "line": 104,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if song_meta is not None and song_meta.get('shelf_status') in (1, '1', '已下架'):"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/taiko-application/src/taiko_application/commands/constant.py",
+    "line": 28,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "include_shelf_status = False"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/taiko-application/src/taiko_application/commands/constant.py",
+    "line": 31,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "include_shelf_status = True"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/taiko-application/src/taiko_application/commands/constant.py",
+    "line": 46,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "const_value, include_shelf_status=include_shelf_status"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/taiko-application/src/taiko_application/commands/constant.py",
+    "line": 51,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "and not include_shelf_status"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/taiko-application/src/taiko_application/commands/constant.py",
+    "line": 52,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "and ports.query_charts_by_const(const_value, include_shelf_status=True)"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/taiko-application/src/taiko_application/commands/constant.py",
+    "line": 80,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "show_shelf_status=include_shelf_status,"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/taiko-application/src/taiko_application/query/constant.py",
+    "line": 36,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "shelf_status: int"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/taiko-application/src/taiko_application/query/constant.py",
+    "line": 73,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "include_shelf_status = context.include_shelf_status"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/taiko-application/src/taiko_application/query/constant.py",
+    "line": 86,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if not include_shelf_status and ("
+  },
+  {
+    "repo": "bot",
+    "path": "packages/taiko-application/src/taiko_application/query/constant.py",
+    "line": 87,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "not is_song_on_shelf((song or {}).get(\"shelf_status\"))"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/taiko-application/src/taiko_application/query/constant.py",
+    "line": 111,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "shelf_status=int((song or {}).get(\"shelf_status\", 0) or 0),"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/taiko-application/src/taiko_application/query/context.py",
+    "line": 36,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "include_shelf_status: bool = False"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/benchmark.py",
+    "line": 192,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "return prepare_v1_results(calculate,profile=a.profile,collapse=bool(kw.get('collapse_duplicate_versions')) if a.profile=='center' else True,song_path=a.fixture/'songs/song_data.json',user_id=_uid,records=records)"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/fixtures.py",
+    "line": 26,
+    "terms": [
+      "song_data.json",
+      "rating_structured"
+    ],
+    "excerpt": "for name in ['song_data.json', 'rating_structured_with_ids.json', 'constants_id_v2.csv',"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/fixtures.py",
+    "line": 27,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "'song_alias.json', 'song_merged.json', 'song_title.json', 'song_removed.json',"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/fixtures.py",
+    "line": 34,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "cfg = json.loads((root/'songs/rating_structured_with_ids.json').read_text())"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/fixtures.py",
+    "line": 35,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "songs = json.loads((root/'songs/song_data.json').read_text())"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/fixtures.py",
+    "line": 94,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "cfg=json.loads((root/'songs/rating_structured_with_ids.json').read_text())"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/fixtures.py",
+    "line": 95,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "songs=json.loads((root/'songs/song_data.json').read_text())"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/song_query/report.py",
+    "line": 55,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "f'冻结输入：歌曲 {manifest[\"song_data.json\"][\"rows\"]} 条 / {manifest[\"song_data.json\"][\"bytes\"]:,} bytes；'"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/song_query/report.py",
+    "line": 56,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "f'别名记录 {manifest[\"song_alias.json\"][\"rows\"]} 条 / {manifest[\"song_alias.json\"][\"bytes\"]:,} bytes。', '',"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/song_query/run.py",
+    "line": 213,
+    "terms": [
+      "song_data.json",
+      "song_alias"
+    ],
+    "excerpt": "for name in ('song_data.json', 'song_alias.json'):"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/song_query/validate.py",
+    "line": 79,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "songs = read(args.work/'catalog/songs/song_data.json')"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/song_query/validate.py",
+    "line": 80,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "aliases = read(args.work/'catalog/songs/song_alias.json')"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/readiness/check-my-don-dress.py",
+    "line": 25,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "(root / 'songs/song_data.json').write_text('[]')"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/readiness/run-installed-reappearance.py",
+    "line": 35,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "(root / 'songs/song_data.json').write_text('[]')"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/upload_ourtaiko_covers.py",
+    "line": 60,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "plan = build_plan(args.charts, args.root / 'songs/song_data.json', args.root / 'assets/cover')"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/catalog_identity.py",
+    "line": 1,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "\"\"\"Canonical song identity, owned by song_data.json's legacy_ids metadata."
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/cli/backfill_daily_ability.py",
+    "line": 63,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "cfg = score.load_rating_config(\"./songs/rating_structured_with_ids.json\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/cli/taiko_admin_backup.py",
+    "line": 25,
+    "terms": [
+      "song_data.json",
+      "song_alias"
+    ],
+    "excerpt": "MANAGED_FILES = [REPO_ROOT / \"songs\" / \"song_data.json\", REPO_ROOT / \"songs\" / \"song_alias.json\"]"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/cli/taiko_admin_backup.py",
+    "line": 118,
+    "terms": [
+      "song_data.json",
+      "song_alias"
+    ],
+    "excerpt": "required = {\"manifest.json\", \"payload/song_data.json\", \"payload/song_alias.json\", *(f\"payload/db/{table}.json\" for table in MANAGED_TABLES)}"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/annual_summary/aggregates.py",
+    "line": 543,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "# Real annual builds always load song_data.json, so the speed definition is"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/annual_summary/constants.py",
+    "line": 9,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = BASE / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/annual_summary/constants.py",
+    "line": 10,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "RATING_DATA_PATH = BASE / \"songs\" / \"rating_structured_with_ids.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/annual_summary/eligibility.py",
+    "line": 18,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "``song_data.json`` (``level_1`` .. ``level_5``): 1 = 简单, 2 = 普通, 3 = 困难,"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/annual_summary/eligibility.py",
+    "line": 26,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "``song_data.json`` still has no structured player-count flag, so the only"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/annual_summary/eligibility.py",
+    "line": 32,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "``shelf_status`` is the canonical availability field, with the same meaning it"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/annual_summary/eligibility.py",
+    "line": 50,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "#: ``shelf_status`` values that mean \"已下架\"."
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/annual_summary/eligibility.py",
+    "line": 67,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "return entry.get(\"shelf_status\") not in OFF_SHELF_STATUS"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/annual_summary/helpers.py",
+    "line": 69,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "return normalize_score_payload(payload, load_identity_map(root() / \"songs/song_data.json\"))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/build_nijiiro_history_simple.py",
+    "line": 26,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "CURRENT_SONG_DATA_PATH = BASE / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/build_nijiiro_history_simple.py",
+    "line": 28,
+    "terms": [
+      "song_data_raw.json"
+    ],
+    "excerpt": "BASE / \"songs\" / \"song_data_raw.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/build_nijiiro_history_simple.py",
+    "line": 116,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "return safe_int(song.get(\"shelf_status\"), 0) == 0"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_constants.py",
+    "line": 57,
+    "terms": [
+      "song_id2tjapath"
+    ],
+    "excerpt": "mapping_path = output.parent / \"song_id2tjapath.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_constants.py",
+    "line": 165,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "path = args.root / \"songs/song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_images.py",
+    "line": 110,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "catalog = json.loads((args.root / 'songs/song_data.json').read_text(encoding='utf-8'))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_import.py",
+    "line": 20,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "catalog = args.root / \"songs/song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_import.py",
+    "line": 26,
+    "terms": [
+      "song_data.json",
+      "song_data_raw.json",
+      "song_id2tjapath",
+      "ourtaiko_charts"
+    ],
+    "excerpt": "for name in (\"song_data.json\", \"song_data_raw.json\", \"song_id2tjapath.json\", \"ourtaiko_charts.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_import.py",
+    "line": 27,
+    "terms": [
+      "taiko_goku_onis",
+      "song_alias"
+    ],
+    "excerpt": "\"song_alias.json\", \"song_alias_new.json\", \"song_score.json\", \"taiko_goku_onis.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_import.py",
+    "line": 28,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "\"rating_structured_with_ids.json\", \"catalog_constants.json\", \"constants_id_v2.csv\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_reconcile.py",
+    "line": 32,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "protected = {\"id\", \"sort\", \"shelf_status\", \"catalog_source\", \"ourtaiko_ids\", \"nijiiro_id\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_reconcile.py",
+    "line": 102,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "song[\"shelf_status\"] = 2"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_reconcile.py",
+    "line": 105,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "song[\"shelf_status\"] = 0 if (ids & mainland_ids if mainland_ids is not None else song.get(\"shelf_status\") == 0) else 1"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_references.py",
+    "line": 58,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "for name in (\"song_alias.json\", \"song_alias_new.json\"):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_references.py",
+    "line": 73,
+    "terms": [
+      "song_data_raw.json",
+      "taiko_goku_onis"
+    ],
+    "excerpt": "for name in (\"song_data_raw.json\", \"song_score.json\", \"taiko_goku_onis.json\"):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_references.py",
+    "line": 78,
+    "terms": [
+      "song_data_raw.json"
+    ],
+    "excerpt": "if name == \"song_data_raw.json\":"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_references.py",
+    "line": 82,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "row[\"shelf_status\"] = by_id[row[\"id\"]][\"shelf_status\"]"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_references.py",
+    "line": 84,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "old = read(\"rating_structured_with_ids.json\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_references.py",
+    "line": 95,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "stage(\"rating_structured_with_ids.json\", old, value)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/chart_availability.py",
+    "line": 26,
+    "terms": [
+      "song_data.json",
+      "load_on_shelf_song_ids"
+    ],
+    "excerpt": "def load_on_shelf_song_ids(song_data_path=str(_runtime_root() / 'songs/song_data.json')):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/chart_availability.py",
+    "line": 30,
+    "terms": [
+      "song_data.json",
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "def load_cn_available_chart_keys(song_data_path=str(_runtime_root() / 'songs/song_data.json'), raw_song_data_path=None):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/chart_availability.py",
+    "line": 33,
+    "terms": [
+      "song_data_raw.json"
+    ],
+    "excerpt": "raw_path=Path(raw_song_data_path) if raw_song_data_path is not None else path.with_name(\"song_data_raw.json\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/chart_availability.py",
+    "line": 37,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "return domain_availability.cn_available_chart_keys(merged, raw)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/cover_summary.py",
+    "line": 13,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DB_PATH = \"songs/song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/cover_summary.py",
+    "line": 101,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "raise ValueError(\"song_data.json 期望为 json list\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/dani_overview.py",
+    "line": 81,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "payload = json.loads((BASE / \"songs\" / \"song_data.json\").read_text(encoding=\"utf-8\"))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/dani_overview.py",
+    "line": 92,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "return song_info.get(\"shelf_status\") not in (1, \"1\", \"已下架\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/drawinfo.py",
+    "line": 107,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "RATING_DB_PATH = str(_runtime_root() / 'songs/rating_structured_with_ids.json')"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/drawinfo.py",
+    "line": 212,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "song_data_path = ROOT_DIR / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/ese_audio_sync.py",
+    "line": 44,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = Path(str(_runtime_root() / 'songs/song_data.json'))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/ese_audio_sync.py",
+    "line": 817,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if on_shelf_only and song.get(\"shelf_status\") not in (0, \"未下架\"):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/ese_audio_sync.py",
+    "line": 839,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "status = song.get(\"shelf_status\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/fingerprint.py",
+    "line": 65,
+    "terms": [
+      "song_data.json",
+      "rating_structured",
+      "song_alias"
+    ],
+    "excerpt": "for label in ('songs/rating_structured_with_ids.json', 'songs/song_data.json', 'songs/song_alias.json'):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/fumen_rename.py",
+    "line": 79,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "raise ValueError(\"song_data.json 不是列表结构\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/fumen_rename.py",
+    "line": 179,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "description=\"将太鼓谱面文件按 song_data.json 的 id 复制重命名到新目录（模糊匹配>=阈值）\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/fumen_rename.py",
+    "line": 185,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "help=\"项目根目录（包含 song_data.json 与 assets/）\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/fumen_rename.py",
+    "line": 190,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "default=\"songs/song_data.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/grade_dojo_extract.py",
+    "line": 454,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "default=str(repo_root / \"songs\" / \"song_data.json\"),"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/grade_dojo_extract.py",
+    "line": 455,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "help=\"Path to song_data.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/merge_index.py",
+    "line": 42,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "DEFAULT_SONG_DATA_PATH = ROOT_DIR / \"songs/song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/merge_index.py",
+    "line": 150,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "online_songs = [song for song in song_data if song.get(\"shelf_status\") == 0]"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/merge_json.py",
+    "line": 51,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "songs_data_path = Path(\"songs/song_data.json\")  # 歌曲数据 JSON 文件路径"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/merge_json.py",
+    "line": 52,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "structured_data_path = Path(\"songs/rating_structured.json\")  # 结构化 JSON 文件路径"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/merge_json.py",
+    "line": 62,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "save_json(merged_data, \"songs/rating_structured_with_ids.json\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/merge_json.py",
+    "line": 63,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "print(\"合并完成，已保存到 'songs/rating_structured_with_ids.json'\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/ourtaiko_catalog.py",
+    "line": 139,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "\"bpm\": str(chart.get(\"bpm\") or \"\"), \"shelf_status\": status,"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/ourtaiko_catalog.py",
+    "line": 194,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if key not in {\"id\", \"sort\", \"shelf_status\", \"catalog_source\"} and song.get(key) in (None, \"\", \"-\", []):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/ourtaiko_catalog.py",
+    "line": 214,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "song[\"shelf_status\"] = 0 if rainbow in mainland_ids else 1"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/ourtaiko_catalog.py",
+    "line": 216,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "song[\"shelf_status\"] = 2"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/ourtaiko_catalog.py",
+    "line": 227,
+    "terms": [
+      "ourtaiko_charts"
+    ],
+    "excerpt": "cache = root / \"songs/ourtaiko_charts.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/ourtaiko_catalog.py",
+    "line": 240,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "mainland_ids = {int(s[\"id\"]) for s in songs if s.get(\"shelf_status\", 0) == 0 and int(s[\"id\"]) < OTHER_ID_START}"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/ourtaiko_catalog.py",
+    "line": 243,
+    "terms": [
+      "song_id2tjapath"
+    ],
+    "excerpt": "mapping_path = root / \"songs/song_id2tjapath.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/progress_catalog.py",
+    "line": 10,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = BASE / \"songs/song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/recommendation_intelligence.py",
+    "line": 37,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/recommendation_intelligence.py",
+    "line": 61,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/recommendation_intelligence.py",
+    "line": 104,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "rating.add_argument(\"--rating-data\", default=\"./songs/rating_structured_with_ids.json\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/recommendation_intelligence.py",
+    "line": 110,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "ordinary.add_argument(\"--rating-data\", default=\"./songs/rating_structured_with_ids.json\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_calculator.py",
+    "line": 52,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "load_cn_available_chart_keys,"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_calculator.py",
+    "line": 53,
+    "terms": [
+      "load_on_shelf_song_ids"
+    ],
+    "excerpt": "load_on_shelf_song_ids,"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_calculator.py",
+    "line": 88,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "读取 rating_structured.json："
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_calculator.py",
+    "line": 133,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_calculator.py",
+    "line": 164,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_calculator.py",
+    "line": 400,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "def build_all_stats_for_user(user_id, json_path=\"./songs/rating_structured_with_ids.json\", *, collapse_duplicate_versions=True):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_calculator.py",
+    "line": 416,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "available = load_cn_available_chart_keys()"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_calculator.py",
+    "line": 420,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "default_ids=default_ids, cn_available_chart_keys=available,"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_calculator.py",
+    "line": 421,
+    "terms": [
+      "load_on_shelf_song_ids"
+    ],
+    "excerpt": "on_shelf_song_ids=load_on_shelf_song_ids())"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_calculator.py",
+    "line": 428,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_line.py",
+    "line": 46,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = BASE / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_line.py",
+    "line": 48,
+    "terms": [
+      "taiko_goku_onis"
+    ],
+    "excerpt": "UNIFIED_PATH = BASE / \"songs\" / \"taiko_goku_onis.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_prediction_support.py",
+    "line": 43,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "load_cn_available_chart_keys,"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_prediction_support.py",
+    "line": 44,
+    "terms": [
+      "load_on_shelf_song_ids"
+    ],
+    "excerpt": "load_on_shelf_song_ids,"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_prediction_support.py",
+    "line": 54,
+    "terms": [
+      "taiko_goku_onis"
+    ],
+    "excerpt": "SCORELINE_PATH = BASE / \"songs\" / \"taiko_goku_onis.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_prediction_support.py",
+    "line": 55,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "RATING_PATH = BASE / \"songs\" / \"rating_structured_with_ids.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_prediction_support.py",
+    "line": 56,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = BASE / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_prediction_support.py",
+    "line": 129,
+    "terms": [
+      "cn_available_chart_keys",
+      "load_on_shelf_song_ids"
+    ],
+    "excerpt": "return domain_catalog_inputs.candidate_charts(load_scoreline_data(scoreline_path), cn_available_keys=load_cn_available_chart_keys(song_data_path), on_shelf_ids=load_on_shelf_song_ids(song_data_path), groups_by_id=by_id, groups_by_title=by_title)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_tja_mapping.py",
+    "line": 27,
+    "terms": [
+      "song_id2tjapath"
+    ],
+    "excerpt": "DEFAULT_MAPPING_PATH = ROOT_DIR / \"songs/song_id2tjapath.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_tja_mapping.py",
+    "line": 84,
+    "terms": [
+      "song_id2tjapath"
+    ],
+    "excerpt": "f\"remote song_id2tjapath has only {len(mapping)} entries; \""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 80,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = Path(str(_runtime_root() / 'songs/song_data.json'))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 81,
+    "terms": [
+      "song_data_raw.json"
+    ],
+    "excerpt": "SONG_DATA_RAW_PATH = Path(str(_runtime_root() / 'songs/song_data_raw.json'))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 84,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "str(_runtime_root() / 'songs/rating_structured_with_ids.json')"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 94,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "OSS_SONG_DATA_PATH = \"oss://sigaer/json/song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 95,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "OSS_RATING_STRUCTURED_WITH_IDS_PATH = \"oss://sigaer/json/rating_structured_with_ids.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 103,
+    "terms": [
+      "taiko_goku_onis"
+    ],
+    "excerpt": "SCORELINE_DATA_PATH = Path(str(_runtime_root() / 'songs/taiko_goku_onis.json'))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 283,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "merged[\"shelf_status\"] = SHELF_STATUS_UP"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 335,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "\"shelf_status\": SHELF_STATUS_DOWN,"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 396,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "song_record[\"shelf_status\"] = SHELF_STATUS_OTHER"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 417,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "\"shelf_status\": SHELF_STATUS_OTHER,"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 732,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "status = song.get(\"shelf_status\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 736,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "def _is_down_shelf_status(status):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 1212,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "def sync_rating_structured_with_song_data(song_data):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 1220,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "raise ValueError(\"rating_structured_with_ids.json 的 songs 字段不是 dict\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2168,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "song.get(\"shelf_status\") == SHELF_STATUS_OTHER"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2184,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "status = song.get(\"shelf_status\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2187,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "raw_shelf_status_by_id = {}"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2193,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "raw_shelf_status_by_id = {"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2194,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "song.get(\"id\"): song.get(\"shelf_status\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2205,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "raw_shelf_status_by_id = {}"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2227,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if updated_song.get(\"shelf_status\") not in ("
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2233,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "updated_song[\"shelf_status\"] = SHELF_STATUS_UP"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2260,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if song_id in raw_shelf_status_by_id:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2261,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "is_down_shelf = _is_down_shelf_status(raw_shelf_status_by_id.get(song_id))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2266,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "updated_song[\"shelf_status\"] = ("
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2280,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if song_id in raw_shelf_status_by_id:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2281,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "appended_song[\"shelf_status\"] = ("
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2283,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if _is_down_shelf_status(raw_shelf_status_by_id.get(song_id))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2317,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "updated_song[\"shelf_status\"] = SHELF_STATUS_OTHER"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2412,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "sync_rating_structured_with_song_data(merged)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2493,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "retained[\"shelf_status\"] = SHELF_STATUS_DOWN"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/target_recommend.py",
+    "line": 179,
+    "terms": [
+      "taiko_goku_onis"
+    ],
+    "excerpt": "SCORELINE_PATH = BASE / \"songs\" / \"taiko_goku_onis.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/target_recommend.py",
+    "line": 180,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "RATING_PATH = BASE / \"songs\" / \"rating_structured_with_ids.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/target_recommend.py",
+    "line": 181,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = BASE / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/title_update.py",
+    "line": 34,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "\"--songs\", str(runtime_root / \"songs/song_data.json\"),"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/tja_roll_sync.py",
+    "line": 39,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "DEFAULT_SONG_DATA = Path(str(_runtime_root() / 'songs/song_data.json'))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/tja_roll_sync.py",
+    "line": 122,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if not isinstance(song, dict) or (not include_shelf_down and song.get(\"shelf_status\") != 0):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/tja_roll_sync.py",
+    "line": 128,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "\"shelfStatus\": song.get(\"shelf_status\"),"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/viewer.py",
+    "line": 107,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "def generate_rating_trend_image(user_id, N=20, json_path='./songs/rating_structured_with_ids.json', max_days=30, **kwargs):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/progress_visibility.py",
+    "line": 7,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "# Wahlap still reports these retired CN songs as shelf_status=0. Keep the"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/progress_visibility.py",
+    "line": 15,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if song.get(\"shelf_status\") not in (None, 0, \"0\", \"未下架\"):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/community/center/cover.py",
+    "line": 53,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = (_CENTER_ROOT / \"songs/song_data.json\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/community/center/draw_guess.py",
+    "line": 99,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = (_CENTER_ROOT / \"songs/song_data.json\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/community/center/draw_guess.py",
+    "line": 287,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "\"\"\"读取 song_data.json（dict 列表）\"\"\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/community/client/cover.py",
+    "line": 46,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = SONGS_DIR / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/community/client/draw_guess.py",
+    "line": 107,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = SONGS_DIR / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/community/client/draw_guess.py",
+    "line": 138,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "\"\"\"读取 song_data.json（dict 列表）\"\"\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/b30.py",
+    "line": 63,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "song_path=root()/'songs/song_data.json',user_id=_user_id,records=data)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/b30_history.py",
+    "line": 109,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/b30_support/b30_render.py",
+    "line": 25,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DB_DEFAULT = ROOT_DIR / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/b30_support/b30_render.py",
+    "line": 27,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "RATING_JSON_DEFAULT = ROOT_DIR / \"songs\" / \"rating_structured_with_ids.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/b30_support/duplicate_versions.py",
+    "line": 18,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = BASE / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/b30_support/score_calculator.py",
+    "line": 63,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "读取 rating_structured.json："
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/b30_support/score_calculator.py",
+    "line": 76,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/bxx_capture.py",
+    "line": 11,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "path = root() / 'songs/rating_structured_with_ids.json'"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/custom_title.py",
+    "line": 31,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = ROOT_DIR / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/daily_ability.py",
+    "line": 106,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "cfg = score.load_rating_config(str(_runtime_root() / 'songs/rating_structured_with_ids.json'))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/daily_ability.py",
+    "line": 123,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "load_identity_map(publication_store.root.parent / 'songs/song_data.json'))['songs']"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_host_support/custom_title.py",
+    "line": 26,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = ROOT_DIR / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_host_support/duplicate_versions.py",
+    "line": 18,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = BASE / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_host_support/song_title_showcase.py",
+    "line": 26,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = ROOT_DIR / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_host_support/song_title_showcase.py",
+    "line": 28,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "RATING_DB_PATH = ROOT_DIR / \"songs\" / \"rating_structured_with_ids.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_host_support/song_title_showcase.py",
+    "line": 291,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "def _load_song_alias_lookup() -> Dict[str, Tuple[str, ...]]:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_host_support/song_title_showcase.py",
+    "line": 340,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "alias_lookup = _load_song_alias_lookup()"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_support/draw_dress.py",
+    "line": 26,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = ROOT_DIR / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_support/draw_dress.py",
+    "line": 355,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "\"shelf_status\": _safe_int(row.get(\"shelf_status\", 0), 0),"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_support/draw_dress.py",
+    "line": 382,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "return _safe_int(song_meta.get(\"shelf_status\", 0), 0) == 0"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_support/metric.py",
+    "line": 12,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH=root()/\"songs/song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_support/metric.py",
+    "line": 33,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "\"\"\"读取 song_data.json（dict 列表）\"\"\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_support/metric.py",
+    "line": 59,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "shelf_status = item.get(\"shelf_status\", 0)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_support/metric.py",
+    "line": 73,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "\"shelf_status\": shelf_status,"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_support/metric.py",
+    "line": 124,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "# 过滤已下架歌曲（shelf_status=1 表示已下架）"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_support/metric.py",
+    "line": 125,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if isinstance(song_meta, dict) and song_meta.get(\"shelf_status\") == 1:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_support/tcloud.py",
+    "line": 20,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = ROOT_DIR / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/draw_dress.py",
+    "line": 44,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = ROOT_DIR / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/draw_dress.py",
+    "line": 411,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "\"shelf_status\": _safe_int(row.get(\"shelf_status\", 0), 0),"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/draw_dress.py",
+    "line": 438,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "return _safe_int(song_meta.get(\"shelf_status\", 0), 0) == 0"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/duplicate_versions.py",
+    "line": 25,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = BASE / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/management_cluster.py",
+    "line": 49,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = root() / \"songs/song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/management_cluster.py",
+    "line": 102,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "\"\"\"读取 song_alias.json（dict 列表）\"\"\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/management_cluster.py",
+    "line": 103,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "with open(\"songs/song_alias.json\", \"r\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/management_cluster.py",
+    "line": 107,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "with open(\"songs/song_alias.json\", \"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/presentation.py",
+    "line": 105,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "RATING_DB_PATH = str(Path(os.getenv(\"TAIKO_CENTER_ROOT\", \"/home/sigaer/taiko\")) / \"songs/rating_structured_with_ids.json\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/presentation.py",
+    "line": 209,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "song_data_path = ROOT_DIR / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/presentation.py",
+    "line": 455,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "db_path: str = \"songs/song_data.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/progress_support/dani_progress.py",
+    "line": 107,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "(BASE / \"songs\" / \"song_data.json\").read_text(encoding=\"utf-8\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/progress_support/dani_progress.py",
+    "line": 122,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "(BASE / \"songs\" / \"rating_structured_with_ids.json\").read_text("
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/progress_support/progress_catalog.py",
+    "line": 19,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "from ..recommendation_support.chart_availability import load_cn_available_chart_keys"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/progress_support/progress_catalog.py",
+    "line": 23,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = BASE / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/progress_support/progress_catalog.py",
+    "line": 25,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "RATING_PATH = BASE / \"songs\" / \"rating_structured_with_ids.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/progress_support/progress_catalog.py",
+    "line": 85,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "catalog=_progress_inputs(\"song_index\", \"cn_available_chart_keys\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/progress_support/progress_catalog.py",
+    "line": 92,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "catalog=_progress_inputs(\"song_index\", \"cn_available_chart_keys\"),"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/progress_support/progress_catalog.py",
+    "line": 99,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "return {key for key in load_cn_available_chart_keys(SONG_DATA_PATH)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/progress_support/progress_catalog.py",
+    "line": 108,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "\"cn_available_chart_keys\":_load_progress_chart_keys,"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/progress_support/progress_catalog.py",
+    "line": 135,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "catalog=_progress_inputs(\"song_index\", \"cn_available_chart_keys\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/progress_support/render.py",
+    "line": 28,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "PATH_SONG_DATA = BASE / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/progress_support/render.py",
+    "line": 30,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "PATH_RATING_STRUCT = BASE / \"songs\" / \"rating_structured_with_ids.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/query_cluster.py",
+    "line": 48,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = root() / \"songs/song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/query_cluster.py",
+    "line": 615,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "song_alias, diff_id, province_id, province_name = _parse_song_rank_args(arg_str, region_map)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/query_cluster.py",
+    "line": 616,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "if not song_alias:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/query_cluster.py",
+    "line": 618,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "music_list = queryMusic(song_alias)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/chart_availability.py",
+    "line": 25,
+    "terms": [
+      "song_data.json",
+      "load_on_shelf_song_ids"
+    ],
+    "excerpt": "def load_on_shelf_song_ids(song_data_path=str(_ROOT / 'songs/song_data.json')):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/chart_availability.py",
+    "line": 28,
+    "terms": [
+      "song_data.json",
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "def load_cn_available_chart_keys(song_data_path=str(_ROOT / 'songs/song_data.json'), raw_song_data_path=None):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/chart_availability.py",
+    "line": 31,
+    "terms": [
+      "song_data_raw.json"
+    ],
+    "excerpt": "raw_path=Path(raw_song_data_path) if raw_song_data_path is not None else path.with_name(\"song_data_raw.json\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/chart_availability.py",
+    "line": 35,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "return domain_availability.cn_available_chart_keys(merged, raw)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/duplicate_versions.py",
+    "line": 19,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = BASE / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/recommend_image.py",
+    "line": 19,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "PATH_SONG_DATA = BASE / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_calculator.py",
+    "line": 27,
+    "terms": [
+      "cn_available_chart_keys",
+      "load_on_shelf_song_ids"
+    ],
+    "excerpt": "from .chart_availability import load_cn_available_chart_keys, load_on_shelf_song_ids"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_calculator.py",
+    "line": 38,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "读取 rating_structured.json："
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_calculator.py",
+    "line": 52,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_calculator.py",
+    "line": 75,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "def build_all_stats_from_records(records, json_path=\"./songs/rating_structured_with_ids.json\", *, collapse_duplicate_versions=True):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_calculator.py",
+    "line": 120,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "available = load_cn_available_chart_keys()"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_calculator.py",
+    "line": 124,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "default_ids=default_ids, cn_available_chart_keys=available,"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_calculator.py",
+    "line": 125,
+    "terms": [
+      "load_on_shelf_song_ids"
+    ],
+    "excerpt": "on_shelf_song_ids=load_on_shelf_song_ids())"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_calculator.py",
+    "line": 131,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_line.py",
+    "line": 19,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = BASE / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_line.py",
+    "line": 23,
+    "terms": [
+      "taiko_goku_onis"
+    ],
+    "excerpt": "UNIFIED_PATH = BASE / \"songs\" / \"taiko_goku_onis.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_prediction_support.py",
+    "line": 22,
+    "terms": [
+      "cn_available_chart_keys",
+      "load_on_shelf_song_ids"
+    ],
+    "excerpt": "from .chart_availability import load_cn_available_chart_keys, load_on_shelf_song_ids"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_prediction_support.py",
+    "line": 30,
+    "terms": [
+      "taiko_goku_onis"
+    ],
+    "excerpt": "SCORELINE_PATH = BASE / \"songs\" / \"taiko_goku_onis.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_prediction_support.py",
+    "line": 32,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "RATING_PATH = BASE / \"songs\" / \"rating_structured_with_ids.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_prediction_support.py",
+    "line": 34,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = BASE / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_prediction_support.py",
+    "line": 94,
+    "terms": [
+      "cn_available_chart_keys",
+      "load_on_shelf_song_ids"
+    ],
+    "excerpt": "return domain_catalog_inputs.candidate_charts(load_scoreline_data(scoreline_path), cn_available_keys=load_cn_available_chart_keys(song_data_path), on_shelf_ids=load_on_shelf_song_ids(song_data_path), groups_by_id=by_id, groups_by_title=by_title)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/target_recommend.py",
+    "line": 25,
+    "terms": [
+      "taiko_goku_onis"
+    ],
+    "excerpt": "SCORELINE_PATH = BASE / \"songs\" / \"taiko_goku_onis.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/target_recommend.py",
+    "line": 27,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "RATING_PATH = BASE / \"songs\" / \"rating_structured_with_ids.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/target_recommend.py",
+    "line": 29,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = BASE / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/score_calculator.py",
+    "line": 24,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "读取 rating_structured.json："
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/score_calculator.py",
+    "line": 38,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/score_rating_target.py",
+    "line": 18,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "RATING_PATH = root() / \"songs/rating_structured_with_ids.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/song_title_query.py",
+    "line": 31,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = root() / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/song_title_showcase.py",
+    "line": 29,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = ROOT_DIR / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/song_title_showcase.py",
+    "line": 31,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "RATING_DB_PATH = ROOT_DIR / \"songs\" / \"rating_structured_with_ids.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/song_title_showcase.py",
+    "line": 294,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "def _load_song_alias_lookup() -> Dict[str, Tuple[str, ...]]:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/song_title_showcase.py",
+    "line": 343,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "alias_lookup = _load_song_alias_lookup()"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/song_title_showcase.py",
+    "line": 1139,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "_load_song_alias_lookup.cache_clear()"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/summary_host.py",
+    "line": 32,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "results = calculator.compute_all_from_userdata_records(current.get('songs') or [], json_path=root()/'songs/rating_structured_with_ids.json')"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/summary_render.py",
+    "line": 13,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "- 歌曲库：songs/song_data.json"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/summary_render.py",
+    "line": 53,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DB_PATH = Path(\"./songs/song_data.json\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/summary_render.py",
+    "line": 58,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "# score_calculator 内部会读取 rating_structured_with_ids.json（你项目若不同请改）"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/summary_render.py",
+    "line": 59,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "RATING_STRUCT_PATH = Path(\"./songs/rating_structured_with_ids.json\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/trend_history.py",
+    "line": 26,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "common = dict(N=options[\"N\"], json_path=str(root()/\"songs/rating_structured_with_ids.json\"),"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/trend_support/score_calculator.py",
+    "line": 158,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/trend_support/score_calculator.py",
+    "line": 221,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/trend_support/score_calculator.py",
+    "line": 444,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/userdata_storage.py",
+    "line": 74,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "aliases = load_identity_map(_runtime_root() / \"songs/song_data.json\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/b30_history.py",
+    "line": 57,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/b30_history.py",
+    "line": 70,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "lambda:(revision(base/'song_data.json'), 'v1-client'))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/b30_support/b30_render.py",
+    "line": 34,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DB_DEFAULT = ROOT_DIR / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/b30_support/b30_render.py",
+    "line": 36,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "RATING_JSON_DEFAULT = ROOT_DIR / \"songs\" / \"rating_structured_with_ids.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/b30_support/b30_single.py",
+    "line": 23,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "RATING_JSON_DEFAULT = ROOT_DIR / \"songs\" / \"rating_structured_with_ids.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/b30_support/score_calculator.py",
+    "line": 38,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "def build_duplicate_song_groups(song_data_path=get_settings().root_dir / \"songs/song_data.json\"):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/b30_support/score_calculator.py",
+    "line": 75,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "读取 rating_structured.json："
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/b30_support/score_calculator.py",
+    "line": 95,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/b30_support/song_visibility.py",
+    "line": 16,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = get_settings().root_dir / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/display_support/draw_dress.py",
+    "line": 22,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = ROOT_DIR / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/display_support/metric.py",
+    "line": 12,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH=root()/\"songs/song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/display_support/metric.py",
+    "line": 36,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "\"\"\"读取 song_data.json（dict 列表）\"\"\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/display_support/metric.py",
+    "line": 68,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "shelf_status = 0 if is_song_publicly_visible(item) else 1"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/display_support/metric.py",
+    "line": 82,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "\"shelf_status\": shelf_status,"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/display_support/song_visibility.py",
+    "line": 16,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = get_settings().root_dir / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/display_support/tcloud.py",
+    "line": 20,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = ROOT_DIR / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/management_cluster.py",
+    "line": 33,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = SONGS_DIR / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/management_cluster.py",
+    "line": 39,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "\"\"\"读取 song_alias.json（dict 列表）\"\"\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/management_cluster.py",
+    "line": 40,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "with open(\"songs/song_alias.json\", \"r\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/management_cluster.py",
+    "line": 44,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "with open(\"songs/song_alias.json\", \"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/presentation.py",
+    "line": 9,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "db_path:         songs/song_data.json          # 曲目信息库（含 song_name, song_name_jp, level_1..5, bpm, id）"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/presentation.py",
+    "line": 100,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "RATING_DB_PATH = str(_SETTINGS.root_dir / \"songs\" / \"rating_structured_with_ids.json\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/presentation.py",
+    "line": 761,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "db_path: str = \"songs/song_data.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/progress_support/dani_progress.py",
+    "line": 332,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "(BASE / \"songs\" / \"song_data.json\").read_text(encoding=\"utf-8\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/progress_support/progress_catalog.py",
+    "line": 19,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = BASE / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/progress_support/progress_catalog.py",
+    "line": 21,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "RATING_PATH = BASE / \"songs\" / \"rating_structured_with_ids.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/progress_support/render.py",
+    "line": 31,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "PATH_SONG_DATA = BASE / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/progress_support/render.py",
+    "line": 33,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "PATH_RATING_STRUCT = BASE / \"songs\" / \"rating_structured_with_ids.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/provider.py",
+    "line": 102,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path=self.settings.root_dir/'songs/rating_structured_with_ids.json',history_snapshots=thaw(private.history) or ())"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/query_cluster.py",
+    "line": 56,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = SONGS_DIR / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/query_cluster.py",
+    "line": 599,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "song_alias, diff_id, province_id, province_name = _parse_song_rank_args(arg_str, region_map)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/query_cluster.py",
+    "line": 600,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "if not song_alias:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/query_cluster.py",
+    "line": 602,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "music_list = queryMusic(song_alias)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/catalog.py",
+    "line": 10,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = get_settings().root_dir / 'songs/song_data.json'"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/score_calculator.py",
+    "line": 35,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "from taiko_bot.offline.chart_availability import load_cn_available_chart_keys"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/score_calculator.py",
+    "line": 45,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "def build_duplicate_song_groups(song_data_path=get_settings().root_dir / \"songs/song_data.json\"):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/score_calculator.py",
+    "line": 60,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "读取 rating_structured.json："
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/score_calculator.py",
+    "line": 77,
+    "terms": [
+      "load_on_shelf_song_ids"
+    ],
+    "excerpt": "def load_on_shelf_song_ids("
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/score_calculator.py",
+    "line": 78,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "song_data_path: str | Path = get_settings().root_dir / \"songs\" / \"song_data.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/score_calculator.py",
+    "line": 105,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/score_calculator.py",
+    "line": 129,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "def build_all_stats_from_records(records, json_path=\"./songs/rating_structured_with_ids.json\"):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/score_calculator.py",
+    "line": 373,
+    "terms": [
+      "load_on_shelf_song_ids"
+    ],
+    "excerpt": "on_shelf = load_on_shelf_song_ids()"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/score_calculator.py",
+    "line": 374,
+    "terms": [
+      "song_data.json",
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "available = load_cn_available_chart_keys(get_settings().root_dir / \"songs/song_data.json\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/score_calculator.py",
+    "line": 379,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "on_shelf_song_ids=on_shelf, cn_available_chart_keys=available, identity_namespace=\"pair\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/score_calculator.py",
+    "line": 385,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/target_recommend.py",
+    "line": 5,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "from taiko_bot.offline.chart_availability import load_cn_available_chart_keys"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/target_recommend.py",
+    "line": 23,
+    "terms": [
+      "taiko_goku_onis"
+    ],
+    "excerpt": "SCORELINE_PATH = ROOT_DIR / \"songs\" / \"taiko_goku_onis.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/target_recommend.py",
+    "line": 25,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "RATING_PATH = ROOT_DIR / \"songs\" / \"rating_structured_with_ids.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/target_recommend.py",
+    "line": 27,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = ROOT_DIR / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/target_recommend.py",
+    "line": 67,
+    "terms": [
+      "cn_available_chart_keys"
+    ],
+    "excerpt": "available = load_cn_available_chart_keys(SONG_DATA_PATH)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/score_data.py",
+    "line": 19,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = BASE / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/score_data.py",
+    "line": 20,
+    "terms": [
+      "taiko_goku_onis"
+    ],
+    "excerpt": "UNIFIED_PATH = BASE / \"songs\" / \"taiko_goku_onis.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/score_data.py",
+    "line": 163,
+    "terms": [
+      "taiko_goku_onis"
+    ],
+    "excerpt": "读取并缓存统一后的 taiko_goku_onis.json。"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/summary_host.py",
+    "line": 32,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "results = calculator.compute_all_from_userdata_records(current.get('songs') or [], json_path=root()/'songs/rating_structured_with_ids.json')"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/summary_render.py",
+    "line": 13,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "- 歌曲库：songs/song_data.json"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/summary_render.py",
+    "line": 54,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DB_PATH = Path(\"./songs/song_data.json\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/summary_render.py",
+    "line": 59,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "# score_calculator 内部会读取 rating_structured_with_ids.json（你项目若不同请改）"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/summary_render.py",
+    "line": 60,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "RATING_STRUCT_PATH = Path(\"./songs/rating_structured_with_ids.json\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/trend_support/score_calculator.py",
+    "line": 199,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/trend_support/score_calculator.py",
+    "line": 250,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/trend_support/score_calculator.py",
+    "line": 294,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/trend_support/score_calculator.py",
+    "line": 508,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "json_path: str | Path = \"./songs/rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/management_access.py",
+    "line": 10,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "payload = json.loads((root() / 'songs/song_data.json').read_text(encoding='utf-8'))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/prepared_rating.py",
+    "line": 24,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "paths = (str(Path('songs/rating_structured_with_ids.json').resolve()), str(Path(song_path).resolve()))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/catalog.py",
+    "line": 156,
+    "terms": [
+      "song_data.json",
+      "song_alias"
+    ],
+    "excerpt": "key = (base/'song_data.json', base/'song_alias.json', mode)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/catalog_provider.py",
+    "line": 10,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "with (root()/'songs/song_data.json').open(encoding='utf-8') as handle:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/catalog_provider.py",
+    "line": 16,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "with (root()/'songs/rating_structured_with_ids.json').open(encoding='utf-8') as handle:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/catalog_provider.py",
+    "line": 21,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "def query_charts_by_const(value, *, include_shelf_status=False):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/catalog_provider.py",
+    "line": 36,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if include_shelf_status or is_song_publicly_visible(index.get(sid),song_id=sid):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/catalog_provider.py",
+    "line": 39,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "include_shelf_status=True"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/catalog_provider.py",
+    "line": 40,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "return constant.query_charts_by_const(ConstantQueryContext(index,entries,value,include_shelf_status))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/client_provider.py",
+    "line": 12,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = root() / \"songs/song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/constant_center_renderer.py",
+    "line": 223,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "show_shelf_status: bool = False,"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/constant_center_renderer.py",
+    "line": 312,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if show_shelf_status:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/constant_center_renderer.py",
+    "line": 417,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if show_shelf_status and row.shelf_status == 1:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/constant_client_renderer.py",
+    "line": 153,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "show_shelf_status: bool = False,"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/constant_client_renderer.py",
+    "line": 332,
+    "terms": [
+      "shelf_status"
+    ],
+    "excerpt": "if show_shelf_status and row.shelf_status == 1:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/provider.py",
+    "line": 54,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "payload = json.loads((root()/'songs/song_alias.json').read_text(encoding='utf-8'))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/provider.py",
+    "line": 63,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "songs = json.loads((root()/'songs/song_data.json').read_text(encoding='utf-8'))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/provider.py",
+    "line": 75,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "rows = json.loads((root() / 'songs/song_data.json').read_text(encoding='utf-8'))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/provider.py",
+    "line": 82,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "rows = json.loads((root()/'songs/song_data.json').read_text(encoding='utf-8'))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/services/public_api.py",
+    "line": 23,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = BASE_DIR / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/services/public_api.py",
+    "line": 24,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "ALIAS_DATA_PATH = BASE_DIR / \"songs\" / \"song_alias.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/services/public_api.py",
+    "line": 154,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "\"message\": \"song_data.json is not valid JSON.\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/services/public_api.py",
+    "line": 186,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "\"message\": \"song_alias.json is not valid JSON.\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/services/public_api.py",
+    "line": 391,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "description=\"Simple API server that returns songs/song_data.json.\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/settings.py",
+    "line": 12,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "\"song_data\": \"song_data.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/settings.py",
+    "line": 13,
+    "terms": [
+      "song_alias"
+    ],
+    "excerpt": "\"song_alias\": \"song_alias.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/settings.py",
+    "line": 14,
+    "terms": [
+      "rating_structured"
+    ],
+    "excerpt": "\"rating_structured_with_ids\": \"rating_structured_with_ids.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/settings.py",
+    "line": 20,
+    "terms": [
+      "taiko_goku_onis"
+    ],
+    "excerpt": "\"taiko_goku_onis\": \"taiko_goku_onis.json\","
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_store/merge_reference.py",
+    "line": 8,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "SONG_DATA_PATH = Path(os.getenv(\"TAIKO_CENTER_ROOT\", \"/home/sigaer/taiko\")) / \"songs\" / \"song_data.json\""
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_store/reader.py",
+    "line": 65,
+    "terms": [
+      "song_data.json"
+    ],
+    "excerpt": "catalog = self.store.root.parent / \"songs/song_data.json\""
+  }
+]

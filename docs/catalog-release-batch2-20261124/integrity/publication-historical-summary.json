@@ -1,0 +1,13 @@
+{
+  "qaRun": "qa-530f9045cc92",
+  "cases": [
+    {
+      "case": 1,
+      "uniqueObjects": 751,
+      "referenceCount": 1499,
+      "badReferences": 1,
+      "generations": 2,
+      "currentlyBoundAccounts": 1
+    }
+  ]
+}

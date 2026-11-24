@@ -1,0 +1,9 @@
+{
+  "qaRun": "qa-3ba8fd7d81b2",
+  "files": 3003,
+  "allSourceHashesMatchScan": true,
+  "path": "/var/tmp/taiko-batch2-20261124/evidence/tja-source-corpus.tar.gz",
+  "bytes": 2932460,
+  "sha256": "18731b747a40c7329e2980d0176c41fefc03215b9bca4146de141f46c8a4670a",
+  "distribution": "private QA evidence only; not part of public release"
+}

@@ -1,0 +1,1874 @@
+[
+  {
+    "repo": "bot",
+    "path": "packages/python-memory-runtime/runtime_memory/store.py",
+    "line": 82,
+    "text": "with os.fdopen(fd, 'w') as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/python-memory-runtime/runtime_memory/store.py",
+    "line": 83,
+    "text": "json.dump(entries, f)"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/command_latency.py",
+    "line": 149,
+    "text": "args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2))"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/fixtures.py",
+    "line": 75,
+    "text": "path.write_text(json.dumps(fixture,ensure_ascii=False))"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/fixtures.py",
+    "line": 80,
+    "text": "(root/'fixture-manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2))"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/fixtures.py",
+    "line": 105,
+    "text": "path.write_text(json.dumps(fixture,ensure_ascii=False))"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/fixtures.py",
+    "line": 114,
+    "text": "path.write_text(json.dumps(fixture,ensure_ascii=False))"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/fixtures.py",
+    "line": 121,
+    "text": "(root/'fixture-manifest.json').write_text(json.dumps(manifest,ensure_ascii=False,indent=2))"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/fixtures.py",
+    "line": 146,
+    "text": "path=root/'fixtures'/f'{uid}.json';path.write_text(json.dumps(value,ensure_ascii=False))"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/fixtures.py",
+    "line": 148,
+    "text": "(root/'edge-fixture-manifest.json').write_text(json.dumps(dict(seed=SEED,now=NOW,users=manifest),ensure_ascii=False,indent=2))"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/host_events.py",
+    "line": 225,
+    "text": "(a.work/'host-events.json').write_text(json.dumps(dict(status='PASS',profile=a.profile,cases=cases,io_violations=violations,"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/report.py",
+    "line": 86,
+    "text": "(a.output/f\"benchmark-{data['variant']}.json\").write_text(json.dumps(data,ensure_ascii=False,indent=2)+'\\n')"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/report.py",
+    "line": 143,
+    "text": "(a.output/'optimization-steps.json').write_text(json.dumps(local,ensure_ascii=False,indent=2)+'\\n')"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/report.py",
+    "line": 180,
+    "text": "(a.output/'b30-performance-report.md').write_text('\\n'.join(lines))"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/report.py",
+    "line": 181,
+    "text": "(a.output/'correctness.json').write_text(json.dumps(correct,indent=2)+'\\n')"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/song_query/report.py",
+    "line": 173,
+    "text": "(args.output/'report.md').write_text('\\n'.join(lines), encoding='utf-8')"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/song_query/report.py",
+    "line": 174,
+    "text": "(args.output/'artifacts.json').write_text(json.dumps(artifacts, indent=2)+'\\n')"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/song_query/run.py",
+    "line": 204,
+    "text": "args.output.write_text(json.dumps(payload, ensure_ascii=False, indent=2)+'\\n')"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/song_query/run.py",
+    "line": 221,
+    "text": "(args.fixture/'manifest.json').write_text(json.dumps(manifest, indent=2)+'\\n')"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/song_query/run.py",
+    "line": 241,
+    "text": "args.output.write_text(json.dumps(payload, indent=2)+'\\n')"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/song_query/run.py",
+    "line": 257,
+    "text": "args.output.write_text(json.dumps(dict(cold=cold, source_files=fingerprints,"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/song_query/run.py",
+    "line": 283,
+    "text": "destination.write_text(json.dumps(dict(before=initial_resources, after=cgroup_resources(),"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/song_query/validate.py",
+    "line": 94,
+    "text": "(args.work/'validation.json').write_text(json.dumps(output, ensure_ascii=False, indent=2)+'\\n')"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/readiness/check-my-don-dress.py",
+    "line": 25,
+    "text": "(root / 'songs/song_data.json').write_text('[]')"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/readiness/check-my-don-dress.py",
+    "line": 70,
+    "text": "(args.output / f'{role}-{label}.png').write_bytes(image)"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/readiness/check-my-don-dress.py",
+    "line": 73,
+    "text": "(args.output / 'my-don-validation.json').write_text(json.dumps(result, ensure_ascii=False, indent=2))"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/readiness/run-installed-reappearance.py",
+    "line": 35,
+    "text": "(root / 'songs/song_data.json').write_text('[]')"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/readiness/run-installed-reappearance.py",
+    "line": 116,
+    "text": "args.output.write_text(json.dumps(report, indent=2) + '\\n')"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/upload_ourtaiko_covers.py",
+    "line": 21,
+    "text": "with temporary.open('w', encoding='utf-8') as stream:"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/upload_ourtaiko_covers.py",
+    "line": 22,
+    "text": "json.dump(value, stream, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/upload_ourtaiko_covers.py",
+    "line": 58,
+    "text": "with (state / 'upload.lock').open('w') as lock:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/cli/audit_annual_reporting_window.py",
+    "line": 225,
+    "text": "compact_path.write_text("
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/cli/audit_annual_reporting_window.py",
+    "line": 283,
+    "text": "with records_path.open(\"w\", encoding=\"utf-8\") as record_file:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/cli/audit_annual_reporting_window.py",
+    "line": 317,
+    "text": "output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + \"\\n\", encoding=\"utf-8\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/cli/backfill_daily_ability.py",
+    "line": 102,
+    "text": "with open(os.devnull,'w') as quiet, contextlib.redirect_stdout(quiet):"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/cli/storage_maintenance.py",
+    "line": 161,
+    "text": "with LOCK_PATH.open(\"w\", encoding=\"utf-8\") as lock:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/cli/taiko_admin_backup.py",
+    "line": 86,
+    "text": "dump_path.write_text(json.dumps(dump_table_rows(table_name), ensure_ascii=False, indent=2), encoding=\"utf-8\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/cli/taiko_admin_backup.py",
+    "line": 148,
+    "text": "temporary.write_text(f\"{checksum}  {ARCHIVE_NAME}\\n\", encoding=\"ascii\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/cli/taiko_admin_backup.py",
+    "line": 263,
+    "text": "(backup_dir / \"manifest.json\").write_text(json.dumps(created_manifest, ensure_ascii=False, indent=2), encoding=\"utf-8\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/cli/taiko_admin_backup.py",
+    "line": 266,
+    "text": "(backup_dir / \"manifest.json\").write_text(json.dumps(created_manifest, ensure_ascii=False, indent=2), encoding=\"utf-8\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/annual_summary/__main__.py",
+    "line": 67,
+    "text": "with os.fdopen(fd, \"w\", encoding=\"utf-8\") as file:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/build_nijiiro_history_simple.py",
+    "line": 105,
+    "text": "cache_path.write_text(text, encoding=\"utf-8\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/build_nijiiro_history_simple.py",
+    "line": 529,
+    "text": "OUTPUT_PATH.write_text("
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_constants.py",
+    "line": 147,
+    "text": "with os.fdopen(fd, \"w\", encoding=\"utf-8\", newline=\"\") as handle:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/ese_audio_sync.py",
+    "line": 169,
+    "text": "with open(ESE_AUDIO_SYNC_REPORT_PATH, \"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/ese_audio_sync.py",
+    "line": 170,
+    "text": "json.dump(report, f, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/fumen_rename.py",
+    "line": 351,
+    "text": "log_path.write_text(\"\\n\".join(log_lines + summary), encoding=\"utf-8\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/grade_dojo_extract.py",
+    "line": 470,
+    "text": "output_path.write_text("
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/merge_index.py",
+    "line": 85,
+    "text": "with os.fdopen(fd, \"w\", encoding=\"utf-8\") as handle:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/merge_index.py",
+    "line": 86,
+    "text": "json.dump(payload, handle, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/merge_json.py",
+    "line": 44,
+    "text": "with open(file_path, \"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/merge_json.py",
+    "line": 45,
+    "text": "json.dump(data, f, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_line.py",
+    "line": 76,
+    "text": "output_path.write_text(json.dumps(merged, ensure_ascii=False, indent=2) + '\\n', encoding='utf-8')"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_tja_mapping.py",
+    "line": 65,
+    "text": "with os.fdopen(fd, \"w\", encoding=\"utf-8\") as handle:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_tja_mapping.py",
+    "line": 66,
+    "text": "json.dump(payload, handle, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 516,
+    "text": "target_path.write_bytes(resp.content)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 630,
+    "text": "target_path.write_bytes(resp.content)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 828,
+    "text": "with open(AUDIO_MISSING_REPORT_PATH, \"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 829,
+    "text": "json.dump(report, f, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 1342,
+    "text": "with open(RATING_STRUCTURED_WITH_IDS_PATH, \"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 1343,
+    "text": "json.dump(payload, f, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 1418,
+    "text": "cache_path.write_text(text, encoding=\"utf-8\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 1429,
+    "text": "cache_path.write_text(text, encoding=\"utf-8\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 1476,
+    "text": "cache_path.write_text(html, encoding=\"utf-8\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 1829,
+    "text": "with open(SCORE_PATH, \"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 1830,
+    "text": "json.dump(rows, f, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2124,
+    "text": "with open(SCORE_PATH, \"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2125,
+    "text": "json.dump(merged_rows, f, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2395,
+    "text": "with open(SONG_DATA_PATH, \"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2396,
+    "text": "json.dump(merged, f, ensure_ascii=False, indent=4)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2511,
+    "text": "with open(SONG_DATA_RAW_PATH, \"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2512,
+    "text": "json.dump(merged, f, ensure_ascii=False, indent=4)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2516,
+    "text": "with open(SONG_DATA_PATH, \"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "line": 2517,
+    "text": "json.dump(merged, f, ensure_ascii=False, indent=4)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/tja_roll_sync.py",
+    "line": 291,
+    "text": "with os.fdopen(fd, \"w\", encoding=\"utf-8\") as handle:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/tja_roll_sync.py",
+    "line": 292,
+    "text": "json.dump(songs, handle, ensure_ascii=False, indent=4)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/tja_roll_sync.py",
+    "line": 304,
+    "text": "path.write_text(json.dumps(payload, ensure_ascii=False, indent=2) + \"\\n\", encoding=\"utf-8\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/community/center/draw_guess.py",
+    "line": 587,
+    "text": "with DRAW_GUESS_DB_PATH.open(\"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/community/center/draw_guess.py",
+    "line": 588,
+    "text": "json.dump(_default_draw_guess_db(), f, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/community/center/draw_guess.py",
+    "line": 672,
+    "text": "with DRAW_GUESS_DB_PATH.open(\"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/community/center/draw_guess.py",
+    "line": 673,
+    "text": "json.dump(data, f, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/community/client/draw_guess.py",
+    "line": 380,
+    "text": "with DRAW_GUESS_DB_PATH.open(\"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/community/client/draw_guess.py",
+    "line": 381,
+    "text": "json.dump(_default_draw_guess_db(), f, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/community/client/draw_guess.py",
+    "line": 465,
+    "text": "with DRAW_GUESS_DB_PATH.open(\"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/community/client/draw_guess.py",
+    "line": 466,
+    "text": "json.dump(data, f, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/lifecycle_host.py",
+    "line": 482,
+    "text": "with BIND_QQ_ACTION_LOG_PATH.open(\"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/lifecycle_host.py",
+    "line": 483,
+    "text": "json.dump(data, f, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/management_cluster.py",
+    "line": 107,
+    "text": "with open(\"songs/song_alias.json\", \"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/management_cluster.py",
+    "line": 108,
+    "text": "json.dump(data, f, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/management_cluster.py",
+    "line": 123,
+    "text": "with ALIAS_LOG_PATH.open(\"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/management_cluster.py",
+    "line": 124,
+    "text": "json.dump(data, f, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_line.py",
+    "line": 45,
+    "text": "output_path.write_text(json.dumps(merged, ensure_ascii=False, indent=2) + '\\n', encoding='utf-8')"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/summary_host.py",
+    "line": 39,
+    "text": "path.write_bytes(image)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/summary_host.py",
+    "line": 41,
+    "text": "stamp.write_text(json.dumps({'target':target,'image':sha256(image).hexdigest()},sort_keys=True))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/twso.py",
+    "line": 15,
+    "text": "with open(root() / \"songs/twso_cn_data.json\", \"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/twso.py",
+    "line": 16,
+    "text": "json.dump(cn_data, f, ensure_ascii=False, indent=4)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/twso.py",
+    "line": 57,
+    "text": "with open(root() / \"songs/twso_data.json\", \"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/twso.py",
+    "line": 58,
+    "text": "json.dump(data, f, ensure_ascii=False, indent=4)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/update_cluster.py",
+    "line": 169,
+    "text": "export_path.write_text("
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/management_cluster.py",
+    "line": 44,
+    "text": "with open(\"songs/song_alias.json\", \"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/management_cluster.py",
+    "line": 45,
+    "text": "json.dump(data, f, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/management_cluster.py",
+    "line": 60,
+    "text": "with ALIAS_LOG_PATH.open(\"w\", encoding=\"utf-8\") as f:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/management_cluster.py",
+    "line": 61,
+    "text": "json.dump(data, f, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/score_data.py",
+    "line": 60,
+    "text": "output_path.write_text(json.dumps(merged, ensure_ascii=False, indent=2) + \"\\n\", encoding=\"utf-8\")"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/summary_host.py",
+    "line": 39,
+    "text": "path.write_bytes(image)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/summary_host.py",
+    "line": 41,
+    "text": "stamp.write_text(json.dumps({'target':target,'image':sha256(image).hexdigest()},sort_keys=True))"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/twso.py",
+    "line": 62,
+    "text": "TWSO_DATA_PATH.write_text("
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/update_cluster.py",
+    "line": 181,
+    "text": "export_path.write_text("
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/services/public_api.py",
+    "line": 97,
+    "text": "with os.fdopen(descriptor, \"w\", encoding=\"utf-8\") as stream:"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/services/public_api.py",
+    "line": 99,
+    "text": "json.dump(data, stream, ensure_ascii=False, indent=4)"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/storage.py",
+    "line": 26,
+    "text": "temp_path.write_text("
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_store/publication.py",
+    "line": 473,
+    "text": "os.link(self.objects / reference[\"sha256\"], temporary, follow_symlinks=False)"
+  },
+  {
+    "repo": "integration",
+    "path": "preview/song-detail/review/batch2_tests.py",
+    "line": 8,
+    "text": "with (out/'related-tests.log').open('w') as log:"
+  },
+  {
+    "repo": "integration",
+    "path": "preview/song-detail/review/batch2_tests.py",
+    "line": 14,
+    "text": "with (out/('contract-'+Path(script).stem+'.log')).open('w') as log:"
+  },
+  {
+    "repo": "integration",
+    "path": "preview/song-detail/review/batch2_tests.py",
+    "line": 18,
+    "text": "(out/'unit-tests.json').write_text(json.dumps({'pass':True,'tests':count,'passed':passed,'testFiles':tests,'contractChecks':checks,'run':os.environ.get('QA_RUN_DIR'),'seconds':round(time.monotonic()-start,2)},indent=2)+'\\n')"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/memory/tmp_cleanup.py",
+    "line": 310,
+    "text": "with os.fdopen(descriptor, 'w') as stream:"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/memory/tmp_cleanup.py",
+    "line": 311,
+    "text": "json.dump(report, stream, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/arbitrate-growth-identity.py",
+    "line": 25,
+    "text": "for name in ['rating_structured_with_ids.json','song_data.json','song_alias.json']:(directory/'songs'/name).write_text('[]')"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/arbitrate-growth-identity.py",
+    "line": 34,
+    "text": "out.write_text(json.dumps(result,indent=2)+'\\n');print(json.dumps({'status':result['status'],'domains':{k:v['domain'] for k,v in results.items()}}))"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/audit-runtime.py",
+    "line": 411,
+    "text": "args.output.write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\\n')"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/record-closeout-evidence.py",
+    "line": 36,
+    "text": "json.dump(report, output, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/record-closeout-evidence.py",
+    "line": 54,
+    "text": "json.dump({'scope': 'Viewer source replay and synthetic product fixtures with original installed Publication runtime',"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/reproduce-source-switch.py",
+    "line": 24,
+    "text": "(root / 'songs' / 'song_data.json').write_text('[]')"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/reproduce-source-switch.py",
+    "line": 49,
+    "text": "(folder / f'data_202601{day:02d}_000000_000000.json').write_text(json.dumps(payload))"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/run-installed-image-golden.py",
+    "line": 79,
+    "text": "(work / 'image-golden-evidence.json').write_text(json.dumps(report, ensure_ascii=False, indent=2) + '\\n')"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/run-my-taiko-catalog-qa.py",
+    "line": 27,
+    "text": "(evidence / 'my-taiko-build.json').write_text(json.dumps({"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/run-recovered-key-gates.py",
+    "line": 12,
+    "text": "(scratch/'userdata').mkdir();(scratch/'songs').mkdir();(scratch/'songs/song_data.json').write_text('[]')"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/run-recovered-key-gates.py",
+    "line": 27,
+    "text": "tmp=out/'key-gates.partial.json';tmp.write_text(json.dumps(report,indent=2)+'\\n');tmp.replace(out/'key-gates.json')"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/run-viewer1-integration-qa.py",
+    "line": 16,
+    "text": "build=Path(sys.argv[2]).resolve();assert build.is_relative_to(V/'evidence');receipt=json.loads(build.read_text());assert receipt['status']=='PASS';(E/'integration-build.json').write_bytes(build.read_bytes())"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/run-viewer1-integration-qa.py",
+    "line": 25,
+    "text": "report={'records':records,'inputs':[{'file':f,'sha256':hashlib.sha256((R/f).read_bytes()).hexdigest()} for f in files],'contractFrozen':True,'productionAccess':False,'installedPython':m['candidate']['python']};(E/(mode+'-summary.json')).write_text(json.dumps(report,indent=2)+'\\n');sys.exit(0 if all(r['status']=='PASS' "
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/serve-oidc-loopback.mjs",
+    "line": 62,
+    "text": "try{await writeFile(clientPath,JSON.stringify({clientId:'',clientSecret:''},null,2)+'\\n',{flag:'wx',mode:0o600});}catch(error){if(error.code!=='EEXIST')throw error;}"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/serve-oidc-loopback.mjs",
+    "line": 79,
+    "text": "await writeFile(ext,'subjectAltName=DNS:localhost,IP:127.0.0.1,IP:::1\\nbasicConstraints=critical,CA:FALSE\\nkeyUsage=critical,digitalSignature,keyEncipherment\\nextendedKeyUsage=serverAuth\\n');"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/serve-oidc-loopback.mjs",
+    "line": 92,
+    "text": "await writeFile(resolve(root,'config.json'),'{}');await writeFile(resolve(root,'catalog.json'),'[]');"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/serve-oidc-loopback.mjs",
+    "line": 106,
+    "text": "hostLog=await open(resolve(evidence,'oidc-loopback-nuxt.log'),'w',0o600);"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/serve-oidc-loopback.mjs",
+    "line": 171,
+    "text": "await writeFile(resolve(privateRoot,'status.json'),JSON.stringify({...report,status:'READY'},null,2)+'\\n',{mode:0o600});"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/serve-oidc-loopback.mjs",
+    "line": 172,
+    "text": "await writeFile(resolve(evidence,'oidc-loopback-ready.json'),JSON.stringify(report,null,2)+'\\n');"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/serve-oidc-loopback.mjs",
+    "line": 178,
+    "text": "const browserLog=await open(resolve(evidence,'oidc-loopback-browser.log'),'w',0o600);"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/serve-oidc-loopback.mjs",
+    "line": 205,
+    "text": "if(process.env.QA_EVIDENCE_DIR)await writeFile(resolve(process.env.QA_EVIDENCE_DIR,'oidc-loopback-result.json'),JSON.stringify(report,null,2)+'\\n').catch(()=>{});"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/serve-oidc-loopback.mjs",
+    "line": 206,
+    "text": "await writeFile(resolve(privateRoot,'status.json'),JSON.stringify({...report,status:'STOPPED'},null,2)+'\\n').catch(()=>{});"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/serve-ourtaiko-persistent.mjs",
+    "line": 61,
+    "text": "await writeFile(root+'/config.json','{}');await writeFile(root+'/catalog.json','[]');"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/serve-ourtaiko-persistent.mjs",
+    "line": 74,
+    "text": "stage='nuxt';const hostLog=await open(persistent+'/private/nuxt.log','w',0o600);"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/serve-ourtaiko-persistent.mjs",
+    "line": 97,
+    "text": "const browserLog=await open(persistent+'/private/browser.log','w',0o600);"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/serve-ourtaiko-persistent.mjs",
+    "line": 114,
+    "text": "await writeFile(persistent+'/evidence/result.json',JSON.stringify(report,null,2)+'\\n',{mode:0o600});"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/source_repair_rehearsal.py",
+    "line": 109,
+    "text": "path.write_bytes(b'{\"synthetic\":2,\"damaged\":true}')"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/source_repair_rehearsal.py",
+    "line": 116,
+    "text": "protected.write_bytes(b'{\"session\":\"revoked\",\"key\":\"revoked\",\"grant\":\"revoked\",\"goal\":7,\"growth\":11}')"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/source_repair_rehearsal.py",
+    "line": 227,
+    "text": "(store.base / 'pending.json').write_bytes(raw_json({'schema': 1, 'identity': identity,"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/source_repair_rehearsal.py",
+    "line": 268,
+    "text": "candidate.write_bytes(b'synthetic disk corruption')"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/source_repair_rehearsal.py",
+    "line": 304,
+    "text": "receipt.write_bytes(raw_json(uncommitted))"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/source_repair_rehearsal.py",
+    "line": 366,
+    "text": "(out / 'source-repair-rehearsal.json').write_text(json.dumps(summary, indent=2) + '\\n')"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/test_source_u1_readonly.py",
+    "line": 264,
+    "text": "path.write_bytes(b'x' * (1024**2 + 1))"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/verify-installed-runtime.py",
+    "line": 207,
+    "text": "with log.open('w') as output:"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/verify-installed-runtime.py",
+    "line": 223,
+    "text": "with log.open('w') as output:"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/verify-installed-runtime.py",
+    "line": 398,
+    "text": "args.output.write_text(json.dumps(result, ensure_ascii=False, indent=2) + '\\n')"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/verify-private-worker-modules.py",
+    "line": 20,
+    "text": "(root / 'taiko_bot.py').write_text('raise RuntimeError(\"cwd injection\")\\n')"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/verify-runtime-integration.py",
+    "line": 198,
+    "text": "json.dump(report, output, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/annual-bot-smoke.mjs",
+    "line": 11,
+    "text": "const policy=async(g=false,r=false)=>writeFile(root+'/annual-policy.json',JSON.stringify({mode:'public',pauseGeneration:g,pauseRendering:r,refreshImports:true,archiveFallback:true}));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/annual-bot-smoke.mjs",
+    "line": 22,
+    "text": "await writeFile(root+'/userdata/'+fresh+'/'+file,JSON.stringify(p));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/annual-bot-smoke.mjs",
+    "line": 25,
+    "text": "await writeFile(root+'/userdata/'+fresh+'data.json',JSON.stringify(current));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/annual-bot-smoke.mjs",
+    "line": 29,
+    "text": "await policy();const [a,b]=await Promise.all([bot('qq_official:botonly2'),bot('qq_official:botonly')]);assert.ok(a.equals(b),'deduplicated PNG must match');await writeFile(c.output+'/bot-only.png',a);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/annual-bot-smoke.mjs",
+    "line": 34,
+    "text": "const card=Buffer.from(await fetch(c.base+shareCard.imageUrl,{headers:{cookie:`stv_session=${normal.cookie}`}}).then(r=>r.arrayBuffer()));const reused=await bot('qq_official:web');assert.ok(card.equals(reused),'existing exported web PNG reused');await writeFile(c.output+'/bot-web-reused.png',reused);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/annual-bot-smoke.mjs",
+    "line": 36,
+    "text": "await writeFile(c.output+'/bot-smoke.json',JSON.stringify({noFakeWebAccounts:true,botOnly:true,webImageReused:true,pauseRestore:true,sameUserDedup:true,trace},null,2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/annual-fixtures.mjs",
+    "line": 27,
+    "text": "await writeFile(`${dir}/data_${stamp.slice(0,10)}_${stamp.slice(11).replaceAll(':','_')}.json`,JSON.stringify(payload));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/annual-fixtures.mjs",
+    "line": 28,
+    "text": "if(i===count-1)await writeFile(`${root}/userdata/${taikoId}data.json`,JSON.stringify(payload));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/annual-fixtures.mjs",
+    "line": 30,
+    "text": "if(count===0)await writeFile(`${root}/userdata/${taikoId}data.json`,JSON.stringify({_meta:{full:false,source:'wahlap',observed_at:'2026-09-01T12:00:00'},profile:{mydon_name:nickname},achievement:{},songs:[]}));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/annual-fixtures.mjs",
+    "line": 35,
+    "text": "await writeFile(`${root}/accounts.json`,JSON.stringify(accounts,null,2),{mode:0o600,flag:'wx'});"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/annual-fixtures.mjs",
+    "line": 36,
+    "text": "await writeFile(`${root}/evidence/fixture-manifest.json`,JSON.stringify(accounts.map(({cookie,...a})=>a),null,2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/annual-refresh-smoke.mjs",
+    "line": 14,
+    "text": "const policy=async(refreshImports,archiveFallback,pauseGeneration=false)=>writeFile(root+'/annual-policy.json',JSON.stringify({mode:'public',refreshImports,archiveFallback,pauseGeneration,pauseRendering:false}));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/annual-refresh-smoke.mjs",
+    "line": 28,
+    "text": "const png=Buffer.from(await r.arrayBuffer());const info=await sharp(png).metadata();await sharp(png).stats();assert.equal(info.width,1080);assert.equal(info.height,1872);await writeFile(c.output+'/'+name+'.png',png);return card.shareCard.imageUrl;"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/annual-refresh-smoke.mjs",
+    "line": 40,
+    "text": "await writeFile(dir+'/data_20260929_kinoko-history_abcdef.json',JSON.stringify(payload));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/annual-refresh-smoke.mjs",
+    "line": 59,
+    "text": "await writeFile(dir+'/data_20261001_kinoko-import.json',JSON.stringify(failedPayload));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/annual-refresh-smoke.mjs",
+    "line": 69,
+    "text": "await writeFile(root+'/userdata/'+fresh.taikoId+'data.json',JSON.stringify(current));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/annual-refresh-smoke.mjs",
+    "line": 70,
+    "text": "await writeFile(root+'/userdata/'+fresh.taikoId+'/data_20261001.json',JSON.stringify(current));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/annual-refresh-smoke.mjs",
+    "line": 80,
+    "text": "await writeFile(c.output+'/refresh-smoke.json',JSON.stringify({candidate:c.candidate,oldId:old.summaryId,newId:updated.summaryId,playsBefore:old.overview.data.playCount,playsAfter:updated.overview.data.playCount,oldImagePreserved:true,workerFailurePreservesReport:true,featureRollbackPreservesReports:true,fallbackId:fal"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/bootstrap-annual-isolated.mjs",
+    "line": 24,
+    "text": "await writeFile(`${root}/config.json`,'{}',{mode:0o600});"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/bootstrap-annual-isolated.mjs",
+    "line": 25,
+    "text": "await writeFile(`${root}/runtime.env`,'',{mode:0o600});"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/bootstrap-annual-isolated.mjs",
+    "line": 40,
+    "text": "await writeFile(`${root}/server.env`,Object.entries(env).map(([k,v])=>`${k}=${v}`).join('\\n'),{mode:0o600});"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/bootstrap-annual-isolated.mjs",
+    "line": 42,
+    "text": "const proof=await assertTestDatabaseMutationAllowed(db);await writeFile(`${root}/evidence/db-boundary.json`,JSON.stringify(proof,null,2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/bootstrap-annual-isolated.mjs",
+    "line": 61,
+    "text": "await writeFile(`${root}/probe.json`,JSON.stringify(config,null,2),{mode:0o600});"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/bootstrap-annual-isolated.mjs",
+    "line": 62,
+    "text": "await writeFile(`${root}/evidence/isolation.txt`,JSON.stringify({root:await realpath(root),unit,serverPid,mysqlPid:mysqld.pid,database:proof,properties:execFileSync('systemctl',['show',unit,'-p','ControlGroup','-p','IPAddressDeny','-p','IPAddressAllow','-p','ProtectSystem','-p','ReadWritePaths','-p','InaccessiblePaths'"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/bootstrap-annual-isolated.mjs",
+    "line": 71,
+    "text": "const [exe,...args]=allowed[task.kind];const out=await open(`${root}/evidence/${task.id}.log`,'w');"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/bootstrap-annual-isolated.mjs",
+    "line": 74,
+    "text": "await writeFile(`${root}/${task.id}.done`,JSON.stringify({code}));console.log(`TASK ${task.id} exit=${code}`);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/prepare-annual-candidate.py",
+    "line": 17,
+    "text": "(r/'evidence/input-manifest.json').write_text(json.dumps({'commit':commit,'version':json.loads((target/'taiko-forum/taiko_viewer/package.json').read_text())['version'],'algorithm':re.search(r'ANNUAL_ALGORITHM_VERSION = \"([^\"]+)\"',(target/'taiko-forum/taiko_viewer/server/services/account/annual-summary/constants.ts').re"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/audit_postgres_catalog.py",
+    "line": 388,
+    "text": "(output / \"report.json\").write_text(content, encoding=\"utf8\")"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/audit_postgres_catalog.py",
+    "line": 389,
+    "text": "(output / \"report.md\").write_text(markdown_report(report), encoding=\"utf8\")"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/audit_recent_growth_session.mjs",
+    "line": 520,
+    "text": "await writeFile(outputPath, serialized, \"utf8\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/benchmark_passport_final_ux.mjs",
+    "line": 21,
+    "text": "await writeFile(`${out}/selection-traces.json`,JSON.stringify(trace,null,2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/benchmark_passport_final_ux.mjs",
+    "line": 40,
+    "text": "await writeFile(`${out}/curation.json`,JSON.stringify(report,null,2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/benchmark_passport_recovery.mjs",
+    "line": 32,
+    "text": "await writeFile(`${out}/curation.json`,JSON.stringify(report,null,2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/extract_title_song_relations.py",
+    "line": 562,
+    "text": "with tempfile.NamedTemporaryFile(mode=\"w\", encoding=\"utf-8\", dir=output_path.parent, delete=False) as target:"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/extract_title_song_relations.py",
+    "line": 564,
+    "text": "json.dump(result, target, ensure_ascii=False, indent=2)"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/performance/benchmark-growth-request.mjs",
+    "line": 41,
+    "text": "await writeFile(metadata, JSON.stringify(fixture), { mode: 0o600 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/performance/benchmark-growth-request.mjs",
+    "line": 56,
+    "text": "results.push(item); await writeFile(resolve(out, `${mode}.result.json`), JSON.stringify(item, null, 2) + '\\n', { mode: 0o600 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/performance/benchmark-growth-request.mjs",
+    "line": 60,
+    "text": "await writeFile(resolve(out, 'summary.json'), JSON.stringify({ status: 'offline measurement only', results }, null, 2) + '\\n', { mode: 0o600 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/performance/growth-benchmark-fixtures.mjs",
+    "line": 40,
+    "text": "await writeFile(resolve(userdataDir, id, name), mode === \"invalid\" && i === 5 ? \"bad-json\" : mode === \"invalid\" && i === 15 ? '{\"songs\":null}' : JSON.stringify(payload));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/performance/growth-module-loader.mjs",
+    "line": 14,
+    "text": "await writeFile(path, code);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/performance/oracle-arbitration.mjs",
+    "line": 26,
+    "text": "await writeFile(resolve(fixture.userdataDir,fixture.id,'daily-ability-v1-top20.json'),JSON.stringify({version:1,namespace:'v1-top20',days:{'2026-10-07':{capturedAt:'2026-10-07T05:00:00Z',rating:8,dimensions:Object.fromEntries(['大歌力','体力','高速处理','精度力','节奏处理','复合处理'].map(k=>[k,8])),sampleCount:30}}}));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/performance/oracle-arbitration.mjs",
+    "line": 40,
+    "text": "await writeFile(frozenFile,code);const frozen=await import(pathToFileURL(frozenFile));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/performance/oracle-arbitration.mjs",
+    "line": 62,
+    "text": "await writeFile(output,JSON.stringify(report,null,2)+'\\n',{flag:'wx'});"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/performance/oracle-chart-continuity-audit.mjs",
+    "line": 60,
+    "text": "await writeFile(path, text); scenario.inputHashes[`data_${name}.json`] = sha(text);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/performance/oracle-chart-continuity-audit.mjs",
+    "line": 91,
+    "text": "await writeFile(output,JSON.stringify(report,null,2)+'\\n',{flag:'wx'});"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/performance/oracle-chart-continuity-audit.mjs",
+    "line": 95,
+    "text": "await writeFile(output,JSON.stringify(report,null,2)+'\\n',{flag:'wx'});"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/performance/oracle-multichart-audit.mjs",
+    "line": 59,
+    "text": "await writeFile(path, text); scenario.inputHashes[`data_${name}.json`] = sha(text);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/performance/oracle-multichart-audit.mjs",
+    "line": 95,
+    "text": "await writeFile(output,JSON.stringify(report,null,2)+'\\n',{flag:'wx'});"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/performance/oracle-multichart-audit.mjs",
+    "line": 99,
+    "text": "await writeFile(output,JSON.stringify(report,null,2)+'\\n',{flag:'wx'});"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/performance/summarize-growth-remediation.mjs",
+    "line": 47,
+    "text": "await writeFile(destination, JSON.stringify(report, null, 2) + \"\\n\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/catalog-check.mjs",
+    "line": 22,
+    "text": "await writeFile(data + \"/config.json\", \"{}\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/catalog-check.mjs",
+    "line": 23,
+    "text": "await writeFile(data + \"/songs/rating_structured_with_ids.json\", \"[]\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/catalog-check.mjs",
+    "line": 24,
+    "text": "await writeFile(data + \"/songs/song_alias.json\", \"{}\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/catalog-check.mjs",
+    "line": 28,
+    "text": "await writeFile(catalog, content);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/catalog-check.mjs",
+    "line": 82,
+    "text": "const log = await open(out + \"/catalog-nitro.log\", \"w\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/catalog-check.mjs",
+    "line": 131,
+    "text": "await writeFile(out + \"/catalog-result.json\", JSON.stringify(report, null, 2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/catalog-selfcheck.mjs",
+    "line": 25,
+    "text": "await writeFile(songFile, content);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/catalog-selfcheck.mjs",
+    "line": 30,
+    "text": "await writeFile(resolve(data, \"rating.json\"), JSON.stringify({ songs: [] }));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/catalog-selfcheck.mjs",
+    "line": 31,
+    "text": "await writeFile(resolve(data, \"branch_audio_manifest.json\"), \"{}\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/detail-data.mjs",
+    "line": 170,
+    "text": "await writeFile(songFile, content);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/detail-data.mjs",
+    "line": 175,
+    "text": "await writeFile(resolve(dir, \"rating.json\"), JSON.stringify(data.rating));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/detail-data.mjs",
+    "line": 176,
+    "text": "await writeFile(resolve(dir, \"branch_audio_manifest.json\"), JSON.stringify(data.branchManifest));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/detail-data.mjs",
+    "line": 181,
+    "text": "await writeFile(resolve(folder, `${id}${side ? `-${side}` : \"\"}.png`), stripedPng(1200, 640, id + difficulty));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/detail-data.mjs",
+    "line": 186,
+    "text": "await writeFile(resolve(tjaRoot, \"song1\", \"song1.tja\"), \"TITLE:Synthetic\\nBPM:150\\nWAVE:song1.ogg\\nCOURSE:Oni\\nLEVEL:9\\n#START\\n1010,\\n#END\\n\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/detail-data.mjs",
+    "line": 187,
+    "text": "await writeFile(resolve(tjaRoot, \"song1\", \"song1.ogg\"), Buffer.from(\"OggS synthetic audio placeholder\"));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/detail-data.mjs",
+    "line": 190,
+    "text": "await writeFile(report, JSON.stringify({ repo: { repo_path: tjaRoot } }));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/detail-data.mjs",
+    "line": 202,
+    "text": "await writeFile(resolve(cache, \"song-tja-index.json\"), JSON.stringify({ version: 1, savedAt: new Date().toISOString(), data: { cacheKey, data: index } }));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/detail-data.mjs",
+    "line": 207,
+    "text": "await writeFile(resolve(cache, \"v2-constants.json\"), JSON.stringify({ version: 1, savedAt: fetchedAt, data: { payload: data.v2Payload, fetchedAt, expiresAt: Date.now() + 3600000 } }));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/pages-data.mjs",
+    "line": 156,
+    "text": "await writeFile(resolve(dir, \"songs\", \"analyze_result_filtered.json\"), JSON.stringify(PATTERN_DATA));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/pages-data.mjs",
+    "line": 157,
+    "text": "await writeFile(resolve(dir, \"songs\", \"tja_note_counts.json\"), JSON.stringify(noteCountData()));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/pages-data.mjs",
+    "line": 167,
+    "text": "const writeAlias = async (rows) => writeFile(aliasFile, JSON.stringify(rows));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "line": 24,
+    "text": "await writeFile(launcher,`#!/usr/bin/python3"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "line": 33,
+    "text": "Path(${JSON.stringify(data+'/growth-stderr.txt')}).write_bytes(result.stderr[:16384])"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "line": 39,
+    "text": "await writeFile(data+'/songs/song_data.json',JSON.stringify(prepared.data.songs));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "line": 43,
+    "text": "await writeFile(data+'/songs/rating_structured_with_ids.json',JSON.stringify({songs:charts,const_table:vector.const_table}));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "line": 44,
+    "text": "await writeFile(data+'/songs/song_data_raw.json',JSON.stringify(prepared.data.songs));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "line": 45,
+    "text": "for(const name of ['song_alias','song_score','taiko_goku_onis','taiko_goku_all_levels_stream'])await writeFile(data+'/songs/'+name+'.json','[]');"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "line": 47,
+    "text": "await writeFile(data+'/userdata/'+identity+'data.json',JSON.stringify(authoritativeFixture({profile:{userid:identity,mydon_name:'RC synthetic'},songs},identity)));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "line": 48,
+    "text": "await writeFile(data+'/sync-current-options.json',JSON.stringify({root:data,userId:account,taikoId:identity,payload:{profile:{userid:identity,mydon_name:'RC synthetic',gameCostume:{title:'RC synthetic',titleplate_id:2}},songs,achievement:{gold:0},dojo:{}}}));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "line": 49,
+    "text": "await writeFile(data+'/config.json',JSON.stringify({cookie:'synthetic-public-cookie'}));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "line": 129,
+    "text": "await writeFile(out+'/goal-input.json',JSON.stringify(body));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "line": 191,
+    "text": "await writeFile(out+'/pwa-runtime.json',JSON.stringify(cache,null,2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "line": 197,
+    "text": "await writeFile(out+'/rc-result.json',JSON.stringify({results,faults,realDevice:'not-run; nonblocking per owner',productionAccess:false},null,2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "line": 198,
+    "text": "await writeFile(out+'/growth-stderr.txt',await readFile(process.env.QA_RUN_TMPDIR+'/manual-source-sql-rc/growth-stderr.txt').catch(()=>''));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "line": 203,
+    "text": "const log=await open(out+'/scope.log','w');"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/selfcheck-runner.mjs",
+    "line": 115,
+    "text": "const log = openSync(resolve(out, \"nuxt-dev.log\"), \"w\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/selfcheck-runner.mjs",
+    "line": 153,
+    "text": "await writeFile(resolve(out, `${label}.json`), JSON.stringify(report, null, 2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/shell-check.mjs",
+    "line": 23,
+    "text": "await writeFile(data + \"/config.json\", \"{}\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/shell-check.mjs",
+    "line": 24,
+    "text": "await writeFile(data + \"/songs/rating_structured_with_ids.json\", \"[]\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/shell-check.mjs",
+    "line": 25,
+    "text": "await writeFile(data + \"/songs/song_alias.json\", \"{}\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/shell-check.mjs",
+    "line": 26,
+    "text": "await writeFile("
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/shell-check.mjs",
+    "line": 174,
+    "text": "const log = await open(out + \"/nitro.log\", \"w\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/shell-check.mjs",
+    "line": 272,
+    "text": "await writeFile("
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/shell-check.mjs",
+    "line": 562,
+    "text": "await writeFile("
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_goal_evaluation_production_smoke.mjs",
+    "line": 39,
+    "text": "await writeFile(path,JSON.stringify(authoritativeFixture({_goalSmoke:true,profile:{mydon_name:'Goal Smoke',userid:taikoId},achievement:{ary_crown_count:[songs.length,0,0],ary_score_rank_count:[0,0,songs.length,0,0,0,0]},songs},taikoId,new Date(Date.now()-10000))),{flag:'wx',mode:0o600});ownedFiles.push(path);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_goal_evaluation_production_smoke.mjs",
+    "line": 42,
+    "text": "await writeFile(authPath,JSON.stringify({owner:login.sessionToken,profileA:profiles[0],profileB:profiles[1],userId:user,username,password,scorePath:ownedFiles[0]}),{mode:0o600});"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_goal_evaluation_production_smoke.mjs",
+    "line": 57,
+    "text": "await writeFile(`${out}/production-lifecycle.json`,JSON.stringify(report,null,2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_goal_production_smoke.mjs",
+    "line": 38,
+    "text": "await writeFile(path,JSON.stringify({_meta:{full:true,source:'goal-smoke-fixture'},profile:{mydon_name:'Goal Smoke',userid:taikoId},achievement:{ary_crown_count:[songs.length,0,0],ary_score_rank_count:[0,0,songs.length,0,0,0,0]},songs}),{flag:'wx',mode:0o600});ownedFiles.push(path);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_goal_production_smoke.mjs",
+    "line": 41,
+    "text": "await writeFile(authPath,JSON.stringify({owner:login.sessionToken,profileA:profiles[0],profileB:profiles[1],userId:user,username,password}),{mode:0o600});"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_goal_production_smoke.mjs",
+    "line": 55,
+    "text": "await writeFile(`${out}/production-lifecycle.json`,JSON.stringify(report,null,2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_experience_production_smoke.mjs",
+    "line": 95,
+    "text": "await writeFile(`${historyDirectory}/data_${moveDay(-2)}_08_00_00_closure.json`, JSON.stringify(authoritativeFixture(payload, taikoId, new Date(`${moveDay(-2)}T08:00:00+08:00`))), { flag: 'wx', mode: 0o600 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_experience_production_smoke.mjs",
+    "line": 96,
+    "text": "await writeFile(currentPath, JSON.stringify(authoritativeFixture(payload, taikoId, new Date(Date.now() - 10000))), { flag: 'wx', mode: 0o600 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_experience_production_smoke.mjs",
+    "line": 128,
+    "text": "await writeFile(currentPath, JSON.stringify(updated));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_experience_production_smoke.mjs",
+    "line": 129,
+    "text": "await writeFile(`${historyDirectory}/data_${day}_12_00_00_closure.json`, JSON.stringify(updated), { flag: 'wx', mode: 0o600 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_experience_production_smoke.mjs",
+    "line": 150,
+    "text": "await writeFile(`${out}/home-layout.json`, JSON.stringify(homeLayout, null, 2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_experience_production_smoke.mjs",
+    "line": 215,
+    "text": "await writeFile(currentPath, JSON.stringify(authoritativeFixture(limitedPayload, taikoId, new Date())));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_experience_production_smoke.mjs",
+    "line": 221,
+    "text": "} finally { await writeFile(currentPath, originalCurrent); }"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_experience_production_smoke.mjs",
+    "line": 251,
+    "text": "await writeFile(`${out}/production-smoke.json`, JSON.stringify(report, null, 2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_history_production_smoke.mjs",
+    "line": 108,
+    "text": "await writeFile(`${historyDirectory}/data_${day}_${hour}_00_00_smoke.json`, JSON.stringify(currentPayload), { flag: \"wx\", mode: 0o600 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_history_production_smoke.mjs",
+    "line": 110,
+    "text": "await writeFile(currentPath, JSON.stringify(currentPayload), { flag: \"wx\", mode: 0o600 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_history_production_smoke.mjs",
+    "line": 155,
+    "text": "await writeFile(currentPath, nextEncoded);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_history_production_smoke.mjs",
+    "line": 156,
+    "text": "await writeFile(`${historyDirectory}/data_2026-09-19_14_00_00_smoke.json`, nextEncoded, { flag: \"wx\", mode: 0o600 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_history_production_smoke.mjs",
+    "line": 193,
+    "text": "await writeFile(reportPath, JSON.stringify(report, null, 2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_passport_production_smoke.mjs",
+    "line": 95,
+    "text": "await writeFile(`${historyDirectory}/data_${day}_${hour}_00_00_passport.json`, JSON.stringify(currentPayload), { flag: \"wx\", mode: 0o600 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_passport_production_smoke.mjs",
+    "line": 97,
+    "text": "await writeFile(currentPath, JSON.stringify(currentPayload), { flag: \"wx\", mode: 0o600 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_passport_production_smoke.mjs",
+    "line": 124,
+    "text": "await writeFile(currentPath, encoded);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_passport_production_smoke.mjs",
+    "line": 125,
+    "text": "await writeFile(`${historyDirectory}/data_${shanghaiDay}_00_01_00_passport.json`, encoded, { flag: \"wx\", mode: 0o600 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_passport_production_smoke.mjs",
+    "line": 222,
+    "text": "await writeFile(`${out}/production-smoke.json`, JSON.stringify(report, null, 2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_weekly_production_smoke.mjs",
+    "line": 96,
+    "text": "await writeFile(`${historyDirectory}/data_${day}_${hour}_00_00_weekly.json`, JSON.stringify(currentPayload), { flag: \"wx\", mode: 0o600 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_weekly_production_smoke.mjs",
+    "line": 98,
+    "text": "await writeFile(currentPath, JSON.stringify(currentPayload), { flag: \"wx\", mode: 0o600 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_weekly_production_smoke.mjs",
+    "line": 126,
+    "text": "await writeFile(currentPath, encoded);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_weekly_production_smoke.mjs",
+    "line": 127,
+    "text": "await writeFile(`${historyDirectory}/data_${shanghaiDay}_00_01_00_weekly.json`, encoded, { flag: \"wx\", mode: 0o600 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_weekly_production_smoke.mjs",
+    "line": 202,
+    "text": "await writeFile(`${out}/production-smoke.json`, JSON.stringify(report, null, 2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/seed_ugc_test_fixture.mjs",
+    "line": 34,
+    "text": "await writeFile(resolve(resolvedUserdataDir, `${taikoId}data.json`), `${JSON.stringify(payload)}\\n`, \"utf8\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/sync_nijiiro_2026_grade_dojo.py",
+    "line": 826,
+    "text": "viewer_path.write_text(json.dumps(viewer_payload, ensure_ascii=False, indent=2) + \"\\n\", encoding=\"utf-8\")"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/sync_nijiiro_2026_grade_dojo.py",
+    "line": 830,
+    "text": "simple_path.write_text(json.dumps(simple_payload, ensure_ascii=False, indent=2) + \"\\n\", encoding=\"utf-8\")"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/validate_viewer_domain_migration.mjs",
+    "line": 45,
+    "text": "await writeFile(path, JSON.stringify(fixture), { mode: 0o600 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/validate_viewer_domain_migration.mjs",
+    "line": 56,
+    "text": "await writeFile(resolve(out, 'summary.json'), JSON.stringify(summary, null, 2) + '\\n', { mode: 0o600 });"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_annual_e2e.mjs",
+    "line": 1737,
+    "text": "await writeFile(summaryPath, `${JSON.stringify(rawSummary)}\\n`);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_annual_e2e.mjs",
+    "line": 1754,
+    "text": "await writeFile(summaryPath, `${JSON.stringify(rawSummary)}\\n`);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_annual_e2e.mjs",
+    "line": 1775,
+    "text": "await writeFile(summaryPath, `${JSON.stringify(rawSummary)}\\n`);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_growth_closure.mjs",
+    "line": 22,
+    "text": "serverLog=await open(`${out}/server.log`,'w');"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_growth_closure.mjs",
+    "line": 117,
+    "text": "await writeFile(`${out}/${production?'production':'browser'}.json`,JSON.stringify(report,null,2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_growth_recent_browser.mjs",
+    "line": 52,
+    "text": "await writeFile(`${historyDir}/data_2026-09-22_12_00_00.json`, JSON.stringify(baseline));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_growth_recent_browser.mjs",
+    "line": 53,
+    "text": "await writeFile(`${historyDir}/data_2026-09-23_12_00_00.json`, JSON.stringify(current));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_growth_recent_browser.mjs",
+    "line": 54,
+    "text": "await writeFile(`${userdataDir}/${taikoId}data.json`, JSON.stringify(current));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_home_desktop_layout.mjs",
+    "line": 23,
+    "text": "const log = await open(`${out}/viewer.log`, 'w');"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_home_desktop_layout.mjs",
+    "line": 40,
+    "text": "await writeFile(`${runtime}/layer/nuxt.config.ts`, `export default ${JSON.stringify({ devtools: { enabled: false }, vite: { server: { fs: { allow: [await realpath(new URL('../node_modules', import.meta.url))] } } } })}`);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_home_desktop_layout.mjs",
+    "line": 185,
+    "text": "await writeFile(`${out}/${stage}-layout.json`, JSON.stringify(results, null, 2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_my_navigation_browser.mjs",
+    "line": 18,
+    "text": "const log = await open(`${out}/dev.log`, 'w');"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_my_navigation_browser.mjs",
+    "line": 213,
+    "text": "await writeFile(`${out}/online-smoke.json`, JSON.stringify({ base, status: response.status(), version, guest: 'PASS', loginNavigation: 'PASS', apiReads, actualProductionSession: true, productionWrites: 0 }, null, 2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_my_navigation_browser.mjs",
+    "line": 227,
+    "text": "await writeFile(`${out}/my-navigation.json`, JSON.stringify(results, null, 2));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_reverse_oidc_wire.mjs",
+    "line": 49,
+    "text": "const initLog=await open(dir+'/mysql-init.log','w');"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_reverse_oidc_wire.mjs",
+    "line": 53,
+    "text": "const log=await open(dir+'/mysql.log','w');"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_reverse_oidc_wire.mjs",
+    "line": 70,
+    "text": "const configPath=dir+'/provider.json';await writeFile(configPath,JSON.stringify({clientId:'OurTaiko',clientSecret:secret,cookieKeys:[randomBytes(32).toString('hex')],jwks:{keys:[key]}}),{mode:0o600});"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_reverse_oidc_wire.mjs",
+    "line": 79,
+    "text": "await writeFile(runtimeDir+'/config.json','{}');"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_reverse_oidc_wire.mjs",
+    "line": 80,
+    "text": "const runtimeLog=await open(dir+'/op.log','w');"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_reverse_oidc_wire.mjs",
+    "line": 119,
+    "text": "const pyLog=await open(dir+'/rp.log','w');py.stderr.on('data',c=>pyLog.write(c));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_reverse_oidc_wire.mjs",
+    "line": 249,
+    "text": "await writeFile(dir+'/result.json',JSON.stringify(result));console.log(JSON.stringify(result));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_reverse_oidc_wire.mjs",
+    "line": 253,
+    "text": "if(p)await writeFile(dir+'/failure.json',JSON.stringify({path:new URL(p.url()).pathname,text:(await p.locator('body').innerText()).slice(0,3000),requests:wireRequests.slice(0,40)}));"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_training_loop_browser.mjs",
+    "line": 11,
+    "text": "const log=await open(`${out}/dev.log`,'w');let server,browser;const results=[];"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_training_loop_browser.mjs",
+    "line": 90,
+    "text": "clearTimeout(timer);if(browser)await browser.close();if(server&&server.exitCode===null){const exit=once(server,'exit');server.kill('SIGTERM');const kill=setTimeout(()=>server.kill('SIGKILL'),5000);await exit;clearTimeout(kill);}await log.close();await writeFile(`${out}/training-browser.json`,JSON.stringify(results,null"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/account/annual-summary/runtime.ts",
+    "line": 114,
+    "text": "await handle.writeFile(content);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/content/songTjaBundleIndex.py",
+    "line": 122,
+    "text": "json.dump(payload, sys.stdout, ensure_ascii=False)"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/utils/account/my-don.ts",
+    "line": 303,
+    "text": "await writeFile(cachePath, buffer);"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/utils/admin/shared.ts",
+    "line": 94,
+    "text": "await writeFile(tempPath, content, \"utf-8\");"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/utils/admin/shared.ts",
+    "line": 96,
+    "text": "await writeFile(tempPath, content);"
+  }
+]

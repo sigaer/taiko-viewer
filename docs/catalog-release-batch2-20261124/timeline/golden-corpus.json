@@ -1,0 +1,665 @@
+{
+  "parserVersion": {
+    "viewerCandidate": "26930740",
+    "scannerVersion": "batch2-2",
+    "files": {
+      "vendor/tja/TJARenderer/src/tja-parser.ts": "8c019de91b82668ecb2cbe10027d85502149bc800e284c7f6b30029a2e765de9",
+      "vendor/tja/TJARenderer/src/primitives.ts": "df7372d650a809f9af1eccdbf919e8e112b0c3b02e11a1872284dc891a234ef6",
+      "vendor/tja/TJAAnalyzer/src/utils/bar-timeline.ts": "2514de2c51f820642887ebf83e2599c207a0489bea3839a555a4deec99c91cc4"
+    }
+  },
+  "cases": [
+    {
+      "name": "constant",
+      "body": "10001000,",
+      "expected": [
+        0,
+        1000
+      ],
+      "tja": "TITLE:Golden\nBPM:120\nOFFSET:1.5\n\nCOURSE:Oni\nLEVEL:1\n#START\n10001000,\n#END",
+      "result": {
+        "source": "synthetic:constant",
+        "sourceHash": "2a26cbfbc1b29cc10c22a34e0235bcef5d414ffb3bff9d0905ba873ef8365211",
+        "bytes": 73,
+        "encoding": "utf-8",
+        "parserVersion": {
+          "viewerCandidate": "26930740",
+          "scannerVersion": "batch2-2",
+          "files": {
+            "vendor/tja/TJARenderer/src/tja-parser.ts": "8c019de91b82668ecb2cbe10027d85502149bc800e284c7f6b30029a2e765de9",
+            "vendor/tja/TJARenderer/src/primitives.ts": "df7372d650a809f9af1eccdbf919e8e112b0c3b02e11a1872284dc891a234ef6",
+            "vendor/tja/TJAAnalyzer/src/utils/bar-timeline.ts": "2514de2c51f820642887ebf83e2599c207a0489bea3839a555a4deec99c91cc4"
+          }
+        },
+        "courseHeaders": [
+          {
+            "line": 5,
+            "value": "Oni"
+          }
+        ],
+        "rawCommands": [],
+        "offsetHeaders": [
+          {
+            "line": 3,
+            "value": "1.5"
+          }
+        ],
+        "absoluteMusicAlignment": {
+          "status": "UNVERIFIED",
+          "absoluteTimes": null
+        },
+        "diagnostics": [],
+        "courses": {
+          "oni": {
+            "course": "oni",
+            "level": 1,
+            "bpm": 120,
+            "offset": "1.5",
+            "paths": {
+              "unbranched": {
+                "noteCount": 2,
+                "bigNotes": 0,
+                "rolls": 0,
+                "balloons": 0,
+                "balloonMetadata": [],
+                "chartRelativeDurationMs": 2000,
+                "eventTimeline": [
+                  {
+                    "kind": "MEASURE",
+                    "bar": 0,
+                    "ratio": 1,
+                    "timeMs": 0
+                  },
+                  {
+                    "kind": "NOTE",
+                    "bar": 0,
+                    "slot": 0,
+                    "type": "1",
+                    "timeMs": 0
+                  },
+                  {
+                    "kind": "NOTE",
+                    "bar": 0,
+                    "slot": 4,
+                    "type": "1",
+                    "timeMs": 1000
+                  }
+                ],
+                "diagnostics": []
+              }
+            }
+          }
+        },
+        "status": "COMPLETE",
+        "completeScope": "candidate static chart-relative note/event representation only; absolute music alignment is never implied"
+      },
+      "oracle": "independent hand calculation; beat duration 60/BPM seconds, 4 beats per 4/4 bar"
+    },
+    {
+      "name": "mid-bar-bpm",
+      "body": "10\n#BPMCHANGE 240\n001000,",
+      "expected": [
+        0,
+        750
+      ],
+      "tja": "TITLE:Golden\nBPM:120\nOFFSET:1.5\n\nCOURSE:Oni\nLEVEL:1\n#START\n10\n#BPMCHANGE 240\n001000,\n#END",
+      "result": {
+        "source": "synthetic:mid-bar-bpm",
+        "sourceHash": "4bc7215d1f1bfd34b2be8e24ca3acd0e575f8378252fe6ac70c11bf60e58ed69",
+        "bytes": 89,
+        "encoding": "utf-8",
+        "parserVersion": {
+          "viewerCandidate": "26930740",
+          "scannerVersion": "batch2-2",
+          "files": {
+            "vendor/tja/TJARenderer/src/tja-parser.ts": "8c019de91b82668ecb2cbe10027d85502149bc800e284c7f6b30029a2e765de9",
+            "vendor/tja/TJARenderer/src/primitives.ts": "df7372d650a809f9af1eccdbf919e8e112b0c3b02e11a1872284dc891a234ef6",
+            "vendor/tja/TJAAnalyzer/src/utils/bar-timeline.ts": "2514de2c51f820642887ebf83e2599c207a0489bea3839a555a4deec99c91cc4"
+          }
+        },
+        "courseHeaders": [
+          {
+            "line": 5,
+            "value": "Oni"
+          }
+        ],
+        "rawCommands": [
+          {
+            "line": 9,
+            "command": "BPMCHANGE",
+            "args": "240"
+          }
+        ],
+        "offsetHeaders": [
+          {
+            "line": 3,
+            "value": "1.5"
+          }
+        ],
+        "absoluteMusicAlignment": {
+          "status": "UNVERIFIED",
+          "absoluteTimes": null
+        },
+        "diagnostics": [
+          "oni/unbranched:NONFINITE_TIMELINE"
+        ],
+        "courses": {
+          "oni": {
+            "course": "oni",
+            "level": 1,
+            "bpm": 120,
+            "offset": "1.5",
+            "paths": {
+              "unbranched": {
+                "noteCount": 2,
+                "bigNotes": 0,
+                "rolls": 0,
+                "balloons": 0,
+                "balloonMetadata": [],
+                "chartRelativeDurationMs": 1250,
+                "eventTimeline": [
+                  {
+                    "kind": "BPM",
+                    "bar": 0,
+                    "slot": 2,
+                    "timeMs": null,
+                    "boundaryBeforeDelayMs": 500,
+                    "boundaryAfterDelayMs": 500,
+                    "ordering": "raw source command order retained separately; same-slot command instants unverified",
+                    "index": 2,
+                    "bpm": 240
+                  },
+                  {
+                    "kind": "MEASURE",
+                    "bar": 0,
+                    "ratio": 1,
+                    "timeMs": 0
+                  },
+                  {
+                    "kind": "NOTE",
+                    "bar": 0,
+                    "slot": 0,
+                    "type": "1",
+                    "timeMs": 0
+                  },
+                  {
+                    "kind": "NOTE",
+                    "bar": 0,
+                    "slot": 4,
+                    "type": "1",
+                    "timeMs": 750
+                  }
+                ],
+                "diagnostics": [
+                  "NONFINITE_TIMELINE"
+                ]
+              }
+            }
+          }
+        },
+        "status": "INVALID",
+        "completeScope": "candidate static chart-relative note/event representation only; absolute music alignment is never implied"
+      },
+      "oracle": "independent hand calculation; beat duration 60/BPM seconds, 4 beats per 4/4 bar"
+    },
+    {
+      "name": "delay",
+      "body": "10\n#DELAY 1\n001000,",
+      "expected": [
+        0,
+        2000
+      ],
+      "tja": "TITLE:Golden\nBPM:120\nOFFSET:1.5\n\nCOURSE:Oni\nLEVEL:1\n#START\n10\n#DELAY 1\n001000,\n#END",
+      "result": {
+        "source": "synthetic:delay",
+        "sourceHash": "26026d98bfe28f97cee1cca93acafa53a023b43050c6324349f8f3f556825971",
+        "bytes": 83,
+        "encoding": "utf-8",
+        "parserVersion": {
+          "viewerCandidate": "26930740",
+          "scannerVersion": "batch2-2",
+          "files": {
+            "vendor/tja/TJARenderer/src/tja-parser.ts": "8c019de91b82668ecb2cbe10027d85502149bc800e284c7f6b30029a2e765de9",
+            "vendor/tja/TJARenderer/src/primitives.ts": "df7372d650a809f9af1eccdbf919e8e112b0c3b02e11a1872284dc891a234ef6",
+            "vendor/tja/TJAAnalyzer/src/utils/bar-timeline.ts": "2514de2c51f820642887ebf83e2599c207a0489bea3839a555a4deec99c91cc4"
+          }
+        },
+        "courseHeaders": [
+          {
+            "line": 5,
+            "value": "Oni"
+          }
+        ],
+        "rawCommands": [
+          {
+            "line": 9,
+            "command": "DELAY",
+            "args": "1"
+          }
+        ],
+        "offsetHeaders": [
+          {
+            "line": 3,
+            "value": "1.5"
+          }
+        ],
+        "absoluteMusicAlignment": {
+          "status": "UNVERIFIED",
+          "absoluteTimes": null
+        },
+        "diagnostics": [
+          "oni/unbranched:NONFINITE_TIMELINE"
+        ],
+        "courses": {
+          "oni": {
+            "course": "oni",
+            "level": 1,
+            "bpm": 120,
+            "offset": "1.5",
+            "paths": {
+              "unbranched": {
+                "noteCount": 2,
+                "bigNotes": 0,
+                "rolls": 0,
+                "balloons": 0,
+                "balloonMetadata": [],
+                "chartRelativeDurationMs": 3000,
+                "eventTimeline": [
+                  {
+                    "kind": "DELAY",
+                    "bar": 0,
+                    "slot": 2,
+                    "timeMs": null,
+                    "boundaryBeforeDelayMs": 500,
+                    "boundaryAfterDelayMs": 1500,
+                    "ordering": "raw source command order retained separately; same-slot command instants unverified",
+                    "index": 2,
+                    "seconds": 1
+                  },
+                  {
+                    "kind": "MEASURE",
+                    "bar": 0,
+                    "ratio": 1,
+                    "timeMs": 0
+                  },
+                  {
+                    "kind": "NOTE",
+                    "bar": 0,
+                    "slot": 0,
+                    "type": "1",
+                    "timeMs": 0
+                  },
+                  {
+                    "kind": "NOTE",
+                    "bar": 0,
+                    "slot": 4,
+                    "type": "1",
+                    "timeMs": 2000
+                  }
+                ],
+                "diagnostics": [
+                  "NONFINITE_TIMELINE"
+                ]
+              }
+            }
+          }
+        },
+        "status": "INVALID",
+        "completeScope": "candidate static chart-relative note/event representation only; absolute music alignment is never implied"
+      },
+      "oracle": "independent hand calculation; beat duration 60/BPM seconds, 4 beats per 4/4 bar"
+    },
+    {
+      "name": "fractional-negative-delay",
+      "body": "10\n#DELAY -.25\n001000,",
+      "expected": [
+        0,
+        750
+      ],
+      "tja": "TITLE:Golden\nBPM:120\nOFFSET:1.5\n\nCOURSE:Oni\nLEVEL:1\n#START\n10\n#DELAY -.25\n001000,\n#END",
+      "result": {
+        "source": "synthetic:fractional-negative-delay",
+        "sourceHash": "e488510451e943237030d31d9c823658ce83616c56a378d552cc6ec835ea2c40",
+        "bytes": 86,
+        "encoding": "utf-8",
+        "parserVersion": {
+          "viewerCandidate": "26930740",
+          "scannerVersion": "batch2-2",
+          "files": {
+            "vendor/tja/TJARenderer/src/tja-parser.ts": "8c019de91b82668ecb2cbe10027d85502149bc800e284c7f6b30029a2e765de9",
+            "vendor/tja/TJARenderer/src/primitives.ts": "df7372d650a809f9af1eccdbf919e8e112b0c3b02e11a1872284dc891a234ef6",
+            "vendor/tja/TJAAnalyzer/src/utils/bar-timeline.ts": "2514de2c51f820642887ebf83e2599c207a0489bea3839a555a4deec99c91cc4"
+          }
+        },
+        "courseHeaders": [
+          {
+            "line": 5,
+            "value": "Oni"
+          }
+        ],
+        "rawCommands": [
+          {
+            "line": 9,
+            "command": "DELAY",
+            "args": "-.25"
+          }
+        ],
+        "offsetHeaders": [
+          {
+            "line": 3,
+            "value": "1.5"
+          }
+        ],
+        "absoluteMusicAlignment": {
+          "status": "UNVERIFIED",
+          "absoluteTimes": null
+        },
+        "diagnostics": [
+          "oni/unbranched:NONFINITE_TIMELINE"
+        ],
+        "courses": {
+          "oni": {
+            "course": "oni",
+            "level": 1,
+            "bpm": 120,
+            "offset": "1.5",
+            "paths": {
+              "unbranched": {
+                "noteCount": 2,
+                "bigNotes": 0,
+                "rolls": 0,
+                "balloons": 0,
+                "balloonMetadata": [],
+                "chartRelativeDurationMs": 1750,
+                "eventTimeline": [
+                  {
+                    "kind": "DELAY",
+                    "bar": 0,
+                    "slot": 2,
+                    "timeMs": null,
+                    "boundaryBeforeDelayMs": 500,
+                    "boundaryAfterDelayMs": 250,
+                    "ordering": "raw source command order retained separately; same-slot command instants unverified",
+                    "index": 2,
+                    "seconds": -0.25
+                  },
+                  {
+                    "kind": "MEASURE",
+                    "bar": 0,
+                    "ratio": 1,
+                    "timeMs": 0
+                  },
+                  {
+                    "kind": "NOTE",
+                    "bar": 0,
+                    "slot": 0,
+                    "type": "1",
+                    "timeMs": 0
+                  },
+                  {
+                    "kind": "NOTE",
+                    "bar": 0,
+                    "slot": 4,
+                    "type": "1",
+                    "timeMs": 750
+                  }
+                ],
+                "diagnostics": [
+                  "NONFINITE_TIMELINE"
+                ]
+              }
+            }
+          }
+        },
+        "status": "INVALID",
+        "completeScope": "candidate static chart-relative note/event representation only; absolute music alignment is never implied"
+      },
+      "oracle": "independent hand calculation; beat duration 60/BPM seconds, 4 beats per 4/4 bar"
+    },
+    {
+      "name": "measure-three-quarter",
+      "body": "#MEASURE 3/4\n30004000,",
+      "expected": [
+        0,
+        750
+      ],
+      "tja": "TITLE:Golden\nBPM:120\nOFFSET:1.5\n\nCOURSE:Oni\nLEVEL:1\n#START\n#MEASURE 3/4\n30004000,\n#END",
+      "result": {
+        "source": "synthetic:measure-three-quarter",
+        "sourceHash": "3bcf2c2e2db2a03e2a3eb2216ea9e1e6016591f0b5aae71003ba1191a135441e",
+        "bytes": 86,
+        "encoding": "utf-8",
+        "parserVersion": {
+          "viewerCandidate": "26930740",
+          "scannerVersion": "batch2-2",
+          "files": {
+            "vendor/tja/TJARenderer/src/tja-parser.ts": "8c019de91b82668ecb2cbe10027d85502149bc800e284c7f6b30029a2e765de9",
+            "vendor/tja/TJARenderer/src/primitives.ts": "df7372d650a809f9af1eccdbf919e8e112b0c3b02e11a1872284dc891a234ef6",
+            "vendor/tja/TJAAnalyzer/src/utils/bar-timeline.ts": "2514de2c51f820642887ebf83e2599c207a0489bea3839a555a4deec99c91cc4"
+          }
+        },
+        "courseHeaders": [
+          {
+            "line": 5,
+            "value": "Oni"
+          }
+        ],
+        "rawCommands": [
+          {
+            "line": 8,
+            "command": "MEASURE",
+            "args": "3/4"
+          }
+        ],
+        "offsetHeaders": [
+          {
+            "line": 3,
+            "value": "1.5"
+          }
+        ],
+        "absoluteMusicAlignment": {
+          "status": "UNVERIFIED",
+          "absoluteTimes": null
+        },
+        "diagnostics": [],
+        "courses": {
+          "oni": {
+            "course": "oni",
+            "level": 1,
+            "bpm": 120,
+            "offset": "1.5",
+            "paths": {
+              "unbranched": {
+                "noteCount": 2,
+                "bigNotes": 2,
+                "rolls": 0,
+                "balloons": 0,
+                "balloonMetadata": [],
+                "chartRelativeDurationMs": 1500,
+                "eventTimeline": [
+                  {
+                    "kind": "MEASURE",
+                    "bar": 0,
+                    "ratio": 0.75,
+                    "timeMs": 0
+                  },
+                  {
+                    "kind": "NOTE",
+                    "bar": 0,
+                    "slot": 0,
+                    "type": "3",
+                    "timeMs": 0
+                  },
+                  {
+                    "kind": "NOTE",
+                    "bar": 0,
+                    "slot": 4,
+                    "type": "4",
+                    "timeMs": 750
+                  }
+                ],
+                "diagnostics": []
+              }
+            }
+          }
+        },
+        "status": "COMPLETE",
+        "completeScope": "candidate static chart-relative note/event representation only; absolute music alignment is never implied"
+      },
+      "oracle": "independent hand calculation; beat duration 60/BPM seconds, 4 beats per 4/4 bar"
+    },
+    {
+      "name": "roll-balloon",
+      "headers": "BALLOON:5",
+      "body": "15008001,\n17008001,",
+      "expected": [
+        0,
+        1750,
+        2000,
+        3750
+      ],
+      "tja": "TITLE:Golden\nBPM:120\nOFFSET:1.5\nBALLOON:5\nCOURSE:Oni\nLEVEL:1\n#START\n15008001,\n17008001,\n#END",
+      "result": {
+        "source": "synthetic:roll-balloon",
+        "sourceHash": "54a47ded96dd98f91882e43315bccfce5fdd62f6f4f721e6ad8fd1b81ffad060",
+        "bytes": 92,
+        "encoding": "utf-8",
+        "parserVersion": {
+          "viewerCandidate": "26930740",
+          "scannerVersion": "batch2-2",
+          "files": {
+            "vendor/tja/TJARenderer/src/tja-parser.ts": "8c019de91b82668ecb2cbe10027d85502149bc800e284c7f6b30029a2e765de9",
+            "vendor/tja/TJARenderer/src/primitives.ts": "df7372d650a809f9af1eccdbf919e8e112b0c3b02e11a1872284dc891a234ef6",
+            "vendor/tja/TJAAnalyzer/src/utils/bar-timeline.ts": "2514de2c51f820642887ebf83e2599c207a0489bea3839a555a4deec99c91cc4"
+          }
+        },
+        "courseHeaders": [
+          {
+            "line": 5,
+            "value": "Oni"
+          }
+        ],
+        "rawCommands": [],
+        "offsetHeaders": [
+          {
+            "line": 3,
+            "value": "1.5"
+          }
+        ],
+        "absoluteMusicAlignment": {
+          "status": "UNVERIFIED",
+          "absoluteTimes": null
+        },
+        "diagnostics": [],
+        "courses": {
+          "oni": {
+            "course": "oni",
+            "level": 1,
+            "bpm": 120,
+            "offset": "1.5",
+            "paths": {
+              "unbranched": {
+                "noteCount": 4,
+                "bigNotes": 0,
+                "rolls": 1,
+                "balloons": 1,
+                "balloonMetadata": [
+                  5
+                ],
+                "chartRelativeDurationMs": 4000,
+                "eventTimeline": [
+                  {
+                    "kind": "MEASURE",
+                    "bar": 0,
+                    "ratio": 1,
+                    "timeMs": 0
+                  },
+                  {
+                    "kind": "NOTE",
+                    "bar": 0,
+                    "slot": 0,
+                    "type": "1",
+                    "timeMs": 0
+                  },
+                  {
+                    "kind": "NOTE",
+                    "bar": 0,
+                    "slot": 1,
+                    "type": "5",
+                    "timeMs": 250
+                  },
+                  {
+                    "kind": "NOTE",
+                    "bar": 0,
+                    "slot": 4,
+                    "type": "8",
+                    "timeMs": 1000
+                  },
+                  {
+                    "kind": "LONG_NOTE_SPAN",
+                    "type": "5",
+                    "startMs": 250,
+                    "endMs": 1000
+                  },
+                  {
+                    "kind": "NOTE",
+                    "bar": 0,
+                    "slot": 7,
+                    "type": "1",
+                    "timeMs": 1750
+                  },
+                  {
+                    "kind": "MEASURE",
+                    "bar": 1,
+                    "ratio": 1,
+                    "timeMs": 2000
+                  },
+                  {
+                    "kind": "NOTE",
+                    "bar": 1,
+                    "slot": 0,
+                    "type": "1",
+                    "timeMs": 2000
+                  },
+                  {
+                    "kind": "NOTE",
+                    "bar": 1,
+                    "slot": 1,
+                    "type": "7",
+                    "timeMs": 2250
+                  },
+                  {
+                    "kind": "NOTE",
+                    "bar": 1,
+                    "slot": 4,
+                    "type": "8",
+                    "timeMs": 3000
+                  },
+                  {
+                    "kind": "LONG_NOTE_SPAN",
+                    "type": "7",
+                    "startMs": 2250,
+                    "endMs": 3000
+                  },
+                  {
+                    "kind": "NOTE",
+                    "bar": 1,
+                    "slot": 7,
+                    "type": "1",
+                    "timeMs": 3750
+                  }
+                ],
+                "diagnostics": []
+              }
+            }
+          }
+        },
+        "status": "COMPLETE",
+        "completeScope": "candidate static chart-relative note/event representation only; absolute music alignment is never implied"
+      },
+      "oracle": "independent hand calculation; beat duration 60/BPM seconds, 4 beats per 4/4 bar"
+    }
+  ],
+  "absoluteAlignment": "UNVERIFIED",
+  "dynamicLevelhold": "UNVERIFIED"
+}

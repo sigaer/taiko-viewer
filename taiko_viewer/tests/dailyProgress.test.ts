@@ -7,6 +7,18 @@ const after = { ...before, highscore_datetime: '2026-09-17 12:00:00', update_dat
 const run = (row = after, baseline: any = before, extra: any[] = []) => deriveDailyProgress([row], [{ full: true, timestamp: '2026-09-17 00:00:00', songs: baseline ? [baseline] : [] }, { full: false, timestamp: '', songs: [row] }, ...extra], day, s => `Song ${s.song_no}`);
 const types = (r: ReturnType<typeof run>) => r.events.flatMap(e => e.facts.map(f => f.type));
 test('no play has no events and zero metrics are not part of DTO', () => { const r = run(before); assert.equal(r.attendance, 'not_played'); assert.deepEqual(r.events, []); assert.equal('newBestCount' in r, false); });
+test('Kinoko 2765 manual import marker never becomes a play or growth event', () => {
+  const imported = { ...after, high_score: 990000, update_datetime: '2765-01-01 00:00:00', highscore_datetime: '2765-01-01 00:00:00' };
+  const snapshots = [
+    { full: true, timestamp: '2026-09-17 00:00:00', songs: [before] },
+    { full: false, timestamp: '2026-09-17 12:00:00', source: 'kinoko-import', excludedReason: 'import', songs: [imported] }
+  ];
+  for (const targetDay of [day, '2765-01-01']) {
+    const result = deriveDailyProgress([imported], snapshots, targetDay, () => 'Song');
+    assert.equal(result.events.length, 0);
+    assert.notEqual(result.attendance, 'played');
+  }
+});
 test('ordinary play uses update time even with an old PB time', () => { const r = run({...after, highscore_datetime: before.highscore_datetime}); assert.equal(r.uniqueCharts, 1); assert.deepEqual(types(r), ['played']); });
 test('score PB carries exact before/after delta', () => { const r = run({...after, high_score: 907130}); assert.deepEqual(r.events[0].facts[0], { type: 'score-pb', before: 900000, after: 907130, delta: 7130 }); });
 test('NG decrease needs complete comparable judgments', () => { assert.ok(types(run({...after, good_cnt: 93, ng_cnt: 4})).includes('ng-reduced')); assert.ok(!types(run({...after, ng_cnt: 4})).includes('ng-reduced')); });

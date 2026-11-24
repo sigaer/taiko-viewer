@@ -1,0 +1,22 @@
+import {build} from '../../../taiko_viewer/node_modules/esbuild/lib/main.js';
+import {mkdir,writeFile,readFile} from 'node:fs/promises';
+import {spawnSync} from 'node:child_process';
+const base='/var/tmp/taiko-batch2-20261124';
+const scratch=process.env.QA_RUN_TMPDIR;
+const writerScript=`import ast,datetime as dt,json,math\nfrom zoneinfo import ZoneInfo\nfrom pathlib import Path\nt=ast.parse(Path('${base}/bot/taiko_bot/runtime/player/center/daily_ability.py').read_text())\nns={'dt':dt,'SHANGHAI':ZoneInfo('Asia/Shanghai'),'math':math}\nexec(compile(ast.Module(body=[n for n in t.body if isinstance(n,ast.FunctionDef) and n.name in ['local_time','needs_measurement','store_measurement']],type_ignores=[]),'actual-writer-functions','exec'),ns)\nrow=ns['store_measurement']({},dt.datetime(2026,11,22,23,32),{k:0.0 for k in ['大歌力','体力','高速处理','精度力','节奏处理','复合处理']},0.0,0)\nprint(json.dumps(row,ensure_ascii=False))`;
+const result=spawnSync(base+'/installed-center-rc/bin/python',['-I','-c',writerScript],{encoding:'utf8',timeout:10000});
+if(result.status!==0)throw Error('writer reproduction failed');
+const row=JSON.parse(result.stdout);if(row.sampleCount!==0)throw Error('writer no longer accepts zero');
+const root=base+'/integration/taiko_viewer';const outfile=scratch+'/reader.mjs';
+await build({stdin:{contents:"export {readDailyAbilityArchive} from './server/services/growth-history/daily-archive.ts';",resolveDir:root,loader:'ts'},bundle:true,platform:'node',format:'esm',outfile,alias:{'~':root},logLevel:'silent'});
+const {readDailyAbilityArchive}=await import('file://'+outfile);
+await mkdir(scratch+'/synthetic',{recursive:true});
+const file=scratch+'/synthetic/daily-ability-v1-top20.json';const day='2026-11-22';
+await writeFile(file,JSON.stringify({version:1,namespace:'v1-top20',days:{[day]:row}}));
+let error;try{await readDailyAbilityArchive(scratch,'synthetic',1,1,day,day)}catch(e){error=e.message}
+if(error!=='Invalid daily ability point')throw Error('reader reproduction mismatch');
+await writeFile(file,JSON.stringify({version:1,namespace:'v1-top20',days:{[day]:{...row,sampleCount:1}}}));
+const rows=await readDailyAbilityArchive(scratch,'synthetic',1,1,day,day);if(rows.length!==1)throw Error('positive control rejected');
+const report={qaRun:process.env.QA_RUN_ID,syntheticOnly:true,writer:'actual function AST, no production import/IO',writerAcceptsSampleCountZero:true,readerZeroError:error,readerAcceptsPositiveControl:true,sqlUpsertReachedOnReaderError:false};
+await writeFile(base+'/integration/docs/catalog-release-batch2-20261124/integrity/measurement-contract-reproduction.json',JSON.stringify(report,null,2)+'\n');
+console.log(JSON.stringify(report));

@@ -1,0 +1,385 @@
+[
+  {
+    "source": "ESE/09 Namco Original/Clotho/Clotho.tja",
+    "sourceHash": "aa98ad3031d2aa1d7350f93fdbb85b21662c8f676ceac18a432b6a0f3f741f3c",
+    "status": "COMPLETE",
+    "diagnostics": [],
+    "courses": {
+      "oni": {
+        "bpm": 185,
+        "level": 10,
+        "paths": {
+          "unbranched": {
+            "noteCount": 983,
+            "bigNotes": 9,
+            "rolls": 1,
+            "balloons": 0,
+            "chartRelativeDurationMs": 115459.45945945935,
+            "diagnostics": []
+          }
+        }
+      },
+      "hard": {
+        "bpm": 185,
+        "level": 7,
+        "paths": {
+          "unbranched": {
+            "noteCount": 560,
+            "bigNotes": 16,
+            "rolls": 2,
+            "balloons": 2,
+            "chartRelativeDurationMs": 115459.45945945935,
+            "diagnostics": []
+          }
+        }
+      },
+      "normal": {
+        "bpm": 185,
+        "level": 7,
+        "paths": {
+          "unbranched": {
+            "noteCount": 385,
+            "bigNotes": 14,
+            "rolls": 3,
+            "balloons": 2,
+            "chartRelativeDurationMs": 115459.45945945935,
+            "diagnostics": []
+          }
+        }
+      },
+      "easy": {
+        "bpm": 185,
+        "level": 5,
+        "paths": {
+          "unbranched": {
+            "noteCount": 235,
+            "bigNotes": 14,
+            "rolls": 6,
+            "balloons": 2,
+            "chartRelativeDurationMs": 115459.45945945935,
+            "diagnostics": []
+          }
+        }
+      }
+    },
+    "expertReview": "PENDING"
+  },
+  {
+    "source": "ESE/09 Namco Original/Donkama 2000/Donkama 2000.tja",
+    "sourceHash": "610da4ab9fc67efc9c3bbab3c99cd94b20683319ce81d3553f7178ed63256742",
+    "status": "INVALID",
+    "diagnostics": [
+      "oni/unbranched:NONFINITE_TIMELINE",
+      "hard/unbranched:NONFINITE_TIMELINE",
+      "normal/unbranched:NONFINITE_TIMELINE",
+      "easy/unbranched:NONFINITE_TIMELINE"
+    ],
+    "courses": {
+      "oni": {
+        "bpm": 120,
+        "level": 10,
+        "paths": {
+          "unbranched": {
+            "noteCount": 765,
+            "bigNotes": 6,
+            "rolls": 0,
+            "balloons": 0,
+            "chartRelativeDurationMs": 126062.41147921125,
+            "diagnostics": [
+              "NONFINITE_TIMELINE"
+            ]
+          }
+        }
+      },
+      "hard": {
+        "bpm": 120,
+        "level": 8,
+        "paths": {
+          "unbranched": {
+            "noteCount": 588,
+            "bigNotes": 6,
+            "rolls": 0,
+            "balloons": 0,
+            "chartRelativeDurationMs": 128062.41147921125,
+            "diagnostics": [
+              "NONFINITE_TIMELINE"
+            ]
+          }
+        }
+      },
+      "normal": {
+        "bpm": 120,
+        "level": 7,
+        "paths": {
+          "unbranched": {
+            "noteCount": 481,
+            "bigNotes": 6,
+            "rolls": 0,
+            "balloons": 0,
+            "chartRelativeDurationMs": 128062.41147921125,
+            "diagnostics": [
+              "NONFINITE_TIMELINE"
+            ]
+          }
+        }
+      },
+      "easy": {
+        "bpm": 120,
+        "level": 5,
+        "paths": {
+          "unbranched": {
+            "noteCount": 342,
+            "bigNotes": 6,
+            "rolls": 0,
+            "balloons": 0,
+            "chartRelativeDurationMs": 128062.41147921125,
+            "diagnostics": [
+              "NONFINITE_TIMELINE"
+            ]
+          }
+        }
+      }
+    },
+    "expertReview": "PENDING"
+  },
+  {
+    "source": "ESE/09 Namco Original/Tenjiku 2000/Tenjiku 2000.tja",
+    "sourceHash": "370abb1ac13e2afe4184f5d483a7156719c0616eab7901066804a2e297231aae",
+    "status": "PARTIAL",
+    "diagnostics": [
+      "normal/unbranched:LONG_NOTE_OVERLAP",
+      "normal/unbranched:LONG_NOTE_OVERLAP",
+      "normal/unbranched:LONG_NOTE_OVERLAP",
+      "normal/unbranched:LONG_NOTE_OVERLAP",
+      "easy/unbranched:LONG_NOTE_OVERLAP",
+      "easy/unbranched:LONG_NOTE_OVERLAP",
+      "easy/unbranched:LONG_NOTE_OVERLAP",
+      "easy/unbranched:LONG_NOTE_OVERLAP"
+    ],
+    "courses": {
+      "oni": {
+        "bpm": 180,
+        "level": 10,
+        "paths": {
+          "unbranched": {
+            "noteCount": 831,
+            "bigNotes": 13,
+            "rolls": 4,
+            "balloons": 4,
+            "chartRelativeDurationMs": 134999.9999999999,
+            "diagnostics": []
+          }
+        }
+      },
+      "hard": {
+        "bpm": 180,
+        "level": 8,
+        "paths": {
+          "unbranched": {
+            "noteCount": 593,
+            "bigNotes": 11,
+            "rolls": 4,
+            "balloons": 5,
+            "chartRelativeDurationMs": 137666.6666666666,
+            "diagnostics": []
+          }
+        }
+      },
+      "normal": {
+        "bpm": 180,
+        "level": 7,
+        "paths": {
+          "unbranched": {
+            "noteCount": 214,
+            "bigNotes": 11,
+            "rolls": 7,
+            "balloons": 9,
+            "chartRelativeDurationMs": 137666.6666666666,
+            "diagnostics": [
+              "LONG_NOTE_OVERLAP",
+              "LONG_NOTE_OVERLAP",
+              "LONG_NOTE_OVERLAP",
+              "LONG_NOTE_OVERLAP"
+            ]
+          }
+        }
+      },
+      "easy": {
+        "bpm": 180,
+        "level": 4,
+        "paths": {
+          "unbranched": {
+            "noteCount": 147,
+            "bigNotes": 5,
+            "rolls": 5,
+            "balloons": 9,
+            "chartRelativeDurationMs": 137666.6666666666,
+            "diagnostics": [
+              "LONG_NOTE_OVERLAP",
+              "LONG_NOTE_OVERLAP",
+              "LONG_NOTE_OVERLAP",
+              "LONG_NOTE_OVERLAP"
+            ]
+          }
+        }
+      }
+    },
+    "expertReview": "PENDING"
+  },
+  {
+    "source": "ESE/09 Namco Original/Yokuderu 15300/Yokuderu 15300.tja",
+    "sourceHash": "fda6711aedb7ad3098640bc934440d5fb46ad5beff86a2b3d48ff53e815b2203",
+    "status": "INVALID",
+    "diagnostics": [
+      "oni/unbranched:NONFINITE_TIMELINE",
+      "hard/unbranched:NONFINITE_TIMELINE",
+      "normal/unbranched:NONFINITE_TIMELINE",
+      "easy/unbranched:NONFINITE_TIMELINE"
+    ],
+    "courses": {
+      "oni": {
+        "bpm": 225.27,
+        "level": 1,
+        "paths": {
+          "unbranched": {
+            "noteCount": 115,
+            "bigNotes": 0,
+            "rolls": 0,
+            "balloons": 0,
+            "chartRelativeDurationMs": 17660.327728454235,
+            "diagnostics": [
+              "NONFINITE_TIMELINE"
+            ]
+          }
+        }
+      },
+      "hard": {
+        "bpm": 225.27,
+        "level": 2,
+        "paths": {
+          "unbranched": {
+            "noteCount": 17,
+            "bigNotes": 0,
+            "rolls": 0,
+            "balloons": 1,
+            "chartRelativeDurationMs": 17660.327728454235,
+            "diagnostics": [
+              "NONFINITE_TIMELINE"
+            ]
+          }
+        }
+      },
+      "normal": {
+        "bpm": 225.27,
+        "level": 3,
+        "paths": {
+          "unbranched": {
+            "noteCount": 17,
+            "bigNotes": 0,
+            "rolls": 0,
+            "balloons": 1,
+            "chartRelativeDurationMs": 17660.327728454235,
+            "diagnostics": [
+              "NONFINITE_TIMELINE"
+            ]
+          }
+        }
+      },
+      "easy": {
+        "bpm": 225.27,
+        "level": 4,
+        "paths": {
+          "unbranched": {
+            "noteCount": 17,
+            "bigNotes": 0,
+            "rolls": 0,
+            "balloons": 1,
+            "chartRelativeDurationMs": 17660.327728454235,
+            "diagnostics": [
+              "NONFINITE_TIMELINE"
+            ]
+          }
+        }
+      }
+    },
+    "expertReview": "PENDING"
+  },
+  {
+    "source": "ESE/09 Namco Original/Yokuderu 2000/Yokuderu 2000.tja",
+    "sourceHash": "78bfbf3289361cdef84815a717034d6f109c94d087f025ef4003771dddc4721f",
+    "status": "INVALID",
+    "diagnostics": [
+      "oni/unbranched:NONFINITE_TIMELINE",
+      "hard/unbranched:NONFINITE_TIMELINE",
+      "normal/unbranched:NONFINITE_TIMELINE",
+      "easy/unbranched:NONFINITE_TIMELINE"
+    ],
+    "courses": {
+      "oni": {
+        "bpm": 186,
+        "level": 9,
+        "paths": {
+          "unbranched": {
+            "noteCount": 657,
+            "bigNotes": 15,
+            "rolls": 2,
+            "balloons": 0,
+            "chartRelativeDurationMs": 114173.74031593428,
+            "diagnostics": [
+              "NONFINITE_TIMELINE"
+            ]
+          }
+        }
+      },
+      "hard": {
+        "bpm": 186,
+        "level": 7,
+        "paths": {
+          "unbranched": {
+            "noteCount": 483,
+            "bigNotes": 27,
+            "rolls": 2,
+            "balloons": 0,
+            "chartRelativeDurationMs": 115141.48225141814,
+            "diagnostics": [
+              "NONFINITE_TIMELINE"
+            ]
+          }
+        }
+      },
+      "normal": {
+        "bpm": 186,
+        "level": 6,
+        "paths": {
+          "unbranched": {
+            "noteCount": 292,
+            "bigNotes": 23,
+            "rolls": 2,
+            "balloons": 0,
+            "chartRelativeDurationMs": 115141.48225141814,
+            "diagnostics": [
+              "NONFINITE_TIMELINE"
+            ]
+          }
+        }
+      },
+      "easy": {
+        "bpm": 186,
+        "level": 5,
+        "paths": {
+          "unbranched": {
+            "noteCount": 232,
+            "bigNotes": 20,
+            "rolls": 2,
+            "balloons": 0,
+            "chartRelativeDurationMs": 115141.48225141814,
+            "diagnostics": [
+              "NONFINITE_TIMELINE"
+            ]
+          }
+        }
+      }
+    },
+    "expertReview": "PENDING"
+  }
+]

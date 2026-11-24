@@ -524,6 +524,8 @@
       "focusChanged": "最近更值得关注的方向，从{from}转到了{to}。",
       "focusSame": "最近仍可以多留意{focus}。",
       "insufficient": "缺少的记录以 — 显示。",
+      "modelChanged": "期间计算模型有变化，差值包含模型变化的影响。",
+      "modelUnverified": "模型版本信息不完整，差值可能受计算方式影响。",
       "limited": "这周留下的成绩还不多，暂时看不出明显的趋势。",
       "algorithm-mismatch": "记录方式更新过",
       "model-mismatch": "记录方式更新过",

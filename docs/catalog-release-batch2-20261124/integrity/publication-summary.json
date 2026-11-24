@@ -1,0 +1,37 @@
+{
+  "qaRun": "qa-33b57dd8344f",
+  "currentObjectsHashed": 916,
+  "anomalies": [
+    {
+      "case": 1,
+      "sequence": 2,
+      "manifestHash": "20654bf3eb1b3b8a593142d713add63d0b64af3ae4869eedecccc7a8a92572dc",
+      "reference": {
+        "bytes": 428002,
+        "sha256": "66b61224c72bee75a583d83febfc618319897ac6f088b1457952e795b12544c7"
+      },
+      "stableManifest": true,
+      "object": {
+        "dev": 65025,
+        "inode": 5877662,
+        "bytes": 428028,
+        "links": 2,
+        "mtimeNs": 1792230769908000000,
+        "ctimeNs": 1792230769908000000
+      },
+      "actualSha256": "d186ad57ea8f36b20ac6106d58880b00dba63018384554bdca605fdfbf45feb2",
+      "stableObject": true,
+      "projection": {
+        "dev": 65025,
+        "inode": 5877662,
+        "bytes": 428028,
+        "links": 2,
+        "mtimeNs": 1792230769908000000,
+        "ctimeNs": 1792230769908000000
+      },
+      "sameInode": true,
+      "pendingExists": false
+    }
+  ],
+  "privateEvidence": "/var/tmp/taiko-batch2-20261124/evidence/integrity-private"
+}

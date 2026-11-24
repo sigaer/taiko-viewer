@@ -1,0 +1,49 @@
+{
+  "qaRun": "qa-1326748bfd25",
+  "botVersion": "0.26.3",
+  "pythonPrefix": "/opt/taiko-bot/current",
+  "files": [
+    {
+      "path": "taiko_store/publication.py",
+      "installedPath": "/opt/taiko-bot/current/lib/python3.11/site-packages/taiko_store/publication.py",
+      "installedSha256": "25c52abfe87d3c2b10b26527c49da8c95c8e4fa23d6a4f377dad2e93b1f3718c",
+      "candidateSha256": "25c52abfe87d3c2b10b26527c49da8c95c8e4fa23d6a4f377dad2e93b1f3718c",
+      "matches": true
+    },
+    {
+      "path": "taiko_store/bridge.py",
+      "installedPath": "/opt/taiko-bot/current/lib/python3.11/site-packages/taiko_store/bridge.py",
+      "installedSha256": "03c2309bebb05f5af373f7ac5583fcbe44a092a889019da7362bfc8f0867c053",
+      "candidateSha256": "03c2309bebb05f5af373f7ac5583fcbe44a092a889019da7362bfc8f0867c053",
+      "matches": true
+    },
+    {
+      "path": "taiko_store/daily.py",
+      "installedPath": "/opt/taiko-bot/current/lib/python3.11/site-packages/taiko_store/daily.py",
+      "installedSha256": "9409a2b508ff1c5823b09ffc02e16b0003e6445e878c782bdc8204389ab97f2a",
+      "candidateSha256": "9409a2b508ff1c5823b09ffc02e16b0003e6445e878c782bdc8204389ab97f2a",
+      "matches": true
+    },
+    {
+      "path": "taiko_store/reader.py",
+      "installedPath": "/opt/taiko-bot/current/lib/python3.11/site-packages/taiko_store/reader.py",
+      "installedSha256": "9103d4052d021b1d872809ea7e28c19e2834797ff4294fb756cc777d732eb7f3",
+      "candidateSha256": "9103d4052d021b1d872809ea7e28c19e2834797ff4294fb756cc777d732eb7f3",
+      "matches": true
+    },
+    {
+      "path": "taiko_bot/runtime/player/center/daily_ability.py",
+      "installedPath": "/opt/taiko-bot/current/lib/python3.11/site-packages/taiko_bot/runtime/player/center/daily_ability.py",
+      "installedSha256": "73733c6d96997d94d98ace89c0487ab614661a9219686c3c86b575634bfd7a8d",
+      "candidateSha256": "73733c6d96997d94d98ace89c0487ab614661a9219686c3c86b575634bfd7a8d",
+      "matches": true
+    },
+    {
+      "path": "taiko_bot/runtime/player/center/userdata_storage.py",
+      "installedPath": "/opt/taiko-bot/current/lib/python3.11/site-packages/taiko_bot/runtime/player/center/userdata_storage.py",
+      "installedSha256": "972a2738fa5785146c39321fae1ee3df53d54bc4e6464c2bbb2dd319933002c2",
+      "candidateSha256": "972a2738fa5785146c39321fae1ee3df53d54bc4e6464c2bbb2dd319933002c2",
+      "matches": true
+    }
+  ]
+}
