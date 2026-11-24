@@ -23,6 +23,11 @@
     "files": {
       "LICENSE": "4e3e72dc82c5d2e9017bde73e92aaea79d35c2a8",
       "offline-analysis/tja-gaps.ts": "cb64181dfc72312c2f30f6a261c426db50b5e719",
+      "src/utils/note-gap.ts": "c232135f247294b68d4c1b4a6852b4fdfc7d5f3b",
+      "src/utils/bar-timeline.ts": "0a2aec24e73d300800bd7850f32830edf802ab16"
+    },
+    "localPatch": "correctness-repair-20261124: piecewise BPM, delay positions, measure boundary",
+    "upstreamFiles": {
       "src/utils/note-gap.ts": "d5c1271c62539e365c5959cc7923a528c959a3ce"
     }
   },
@@ -32,6 +37,10 @@
     "files": {
       "LICENSE": "4e3e72dc82c5d2e9017bde73e92aaea79d35c2a8",
       "src/primitives.ts": "7e1bf58a43c388e61248ea7b7552944bd929e7b2",
+      "src/tja-parser.ts": "e3de2d5c1812a7bfd257727e5579c3e5607d412c"
+    },
+    "localPatch": "correctness-repair-20261124: piecewise BPM, delay positions, measure boundary",
+    "upstreamFiles": {
       "src/tja-parser.ts": "d789953be3d885c68d58487e87974d59fdb03bee"
     }
   }

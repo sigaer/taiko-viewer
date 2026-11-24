@@ -11,6 +11,11 @@ export interface BPMChange {
   bpm: number;
 }
 
+export interface DelayChange {
+  index: number;
+  seconds: number;
+}
+
 export interface ScrollChange {
   index: number;
   scroll: number;
@@ -56,6 +61,7 @@ export interface BarParams {
     master: boolean;
   };
   bpmChanges?: BPMChange[];
+  delayChanges?: DelayChange[];
   scrollChanges?: ScrollChange[];
   gogoChanges?: GogoChange[];
   nextSongChanges?: NextSongChange[];
@@ -131,6 +137,7 @@ interface ParserState {
 
   currentBarBuffer: string;
   currentBarBpmChanges: BPMChange[];
+  currentBarDelayChanges: DelayChange[];
   currentBarScrollChanges: ScrollChange[];
   currentBarGogoChanges: GogoChange[];
   currentBarNextSongChanges: NextSongChange[];
@@ -144,6 +151,7 @@ function createInitialState(bpm: number): ParserState {
     gogoTime: false,
     currentBarBuffer: "",
     currentBarBpmChanges: [],
+    currentBarDelayChanges: [],
     currentBarScrollChanges: [],
     currentBarGogoChanges: [],
     currentBarNextSongChanges: [],
@@ -281,7 +289,8 @@ export function parseTJA(content: string): Record<string, ParsedChart> {
       // Metadata Extraction
       const title = headers.TITLEJA || headers.TITLE || "";
       const subtitle = headers.SUBTITLEJA || headers.SUBTITLE || "";
-      const bpm = parseFloat(headers.BPM) || 120;
+      const parsedBpm = Number(headers.BPM);
+      const bpm = Number.isFinite(parsedBpm) && parsedBpm > 0 ? parsedBpm : 120;
       const level = parseInt(headers.LEVEL, 10) || 0;
       const course = headers.COURSE || courseName;
 
@@ -320,6 +329,7 @@ export function parseTJA(content: string): Record<string, ParsedChart> {
         let barStartBpm = state.bpm;
         let barStartScroll = state.scroll;
         let barStartGogoTime = state.gogoTime;
+        let barMeasureRatio = state.measureRatio;
         // Note: Measure ratio logic in TJA is tricky. Usually #MEASURE applies to the NEXT bar.
         // We use state.measureRatio as the ratio for the CURRENT accumulating bar.
 
@@ -333,7 +343,7 @@ export function parseTJA(content: string): Record<string, ParsedChart> {
               const parts = line.split(/[:\s]+/);
               if (parts.length >= 2) {
                 const val = parseFloat(parts[1]);
-                if (!Number.isNaN(val)) {
+                if (Number.isFinite(val) && val > 0) {
                   state.bpm = val;
                   state.currentBarBpmChanges.push({ index: state.currentBarBuffer.length, bpm: val });
                 }
@@ -341,7 +351,7 @@ export function parseTJA(content: string): Record<string, ParsedChart> {
             } else if (upperLine.startsWith("#BPM:")) {
               // Handle incorrect usage
               const val = parseFloat(line.substring(5));
-              if (!Number.isNaN(val)) {
+              if (Number.isFinite(val) && val > 0) {
                 state.bpm = val;
                 state.currentBarBpmChanges.push({ index: state.currentBarBuffer.length, bpm: val });
               }
@@ -354,6 +364,9 @@ export function parseTJA(content: string): Record<string, ParsedChart> {
                   state.currentBarScrollChanges.push({ index: state.currentBarBuffer.length, scroll: val });
                 }
               }
+            } else if (upperLine.startsWith("#DELAY")) {
+              const seconds = Number(line.split(/[:\s]+/)[1]);
+              if (Number.isFinite(seconds)) state.currentBarDelayChanges.push({ index: state.currentBarBuffer.length, seconds });
             } else if (upperLine.startsWith("#MEASURE")) {
               const parts = line.split(/[:\s]+/);
               if (parts.length >= 2) {
@@ -361,8 +374,9 @@ export function parseTJA(content: string): Record<string, ParsedChart> {
                 if (fraction.length === 2) {
                   const num = parseFloat(fraction[0]);
                   const den = parseFloat(fraction[1]);
-                  if (!Number.isNaN(num) && !Number.isNaN(den) && den !== 0) {
+                  if (Number.isFinite(num) && Number.isFinite(den) && num > 0 && den > 0) {
                     state.measureRatio = num / den;
+                    if (state.currentBarBuffer.length === 0) barMeasureRatio = state.measureRatio;
                   }
                 }
               }
@@ -420,12 +434,13 @@ export function parseTJA(content: string): Record<string, ParsedChart> {
               params.push({
                 initialBpm: barStartBpm,
                 scroll: barStartScroll,
-                measureRatio: state.measureRatio,
+                measureRatio: barMeasureRatio,
                 gogoTime: barStartGogoTime,
                 isBranched: isBranched,
                 isBranchStart: isBranched && markFirstAsBranchStart && isFirstBar,
                 branchStartParams: isBranched && markFirstAsBranchStart && isFirstBar ? branchStartParams : undefined,
                 reachableBranches: reachable,
+                delayChanges: state.currentBarDelayChanges.length ? [...state.currentBarDelayChanges] : undefined,
                 bpmChanges: state.currentBarBpmChanges.length > 0 ? [...state.currentBarBpmChanges] : undefined,
                 scrollChanges:
                   state.currentBarScrollChanges.length > 0 ? [...state.currentBarScrollChanges] : undefined,
@@ -436,11 +451,13 @@ export function parseTJA(content: string): Record<string, ParsedChart> {
 
               isFirstBar = false;
 
+              barMeasureRatio = state.measureRatio;
               barStartBpm = state.bpm;
               barStartScroll = state.scroll;
               barStartGogoTime = state.gogoTime;
 
               state.currentBarBpmChanges = [];
+              state.currentBarDelayChanges = [];
               state.currentBarScrollChanges = [];
               state.currentBarGogoChanges = [];
               state.currentBarNextSongChanges = [];

@@ -1,6 +1,8 @@
 import * as Renderer from "tja-renderer";
 
-const { RENDERABLE_NOTES, getEffectiveBpm, NoteType } = Renderer.Private;
+import { barIntervalMs } from "./bar-timeline.js";
+
+const { RENDERABLE_NOTES, NoteType } = Renderer.Private;
 type ParsedChart = Renderer.Private.ParsedChart;
 
 const LONG_NOTE_TYPES = [NoteType.Drumroll, NoteType.DrumrollBig, NoteType.Balloon, NoteType.Kusudama, NoteType.End];
@@ -28,81 +30,40 @@ export interface GapOptions {
 
 interface BarSegment {
   fraction: number;
-  bpm: number;
+  milliseconds: number;
 }
 
-/**
- * Walk backwards from (currentBarIdx, currentCharIdx) to the previous renderable note,
- * collecting per-bar segments with their measure fractions and BPMs.
- * Returns null if no previous note is found (or options filter it out).
- */
 function getGapSegments(
-  chart: ParsedChart,
-  currentBarIdx: number,
-  currentCharIdx: number,
-  options: GapOptions = {},
+  chart: ParsedChart, currentBarIdx: number, currentCharIdx: number, options: GapOptions = {},
 ): BarSegment[] | null {
   const { longNoteHandling = LongNoteHandling.End, maxMeasures } = options;
-  const currentBar = chart.bars[currentBarIdx];
-  const currentTotal = currentBar.length;
-  const currentParams = chart.barParams?.[currentBarIdx];
-  if (!currentParams) return null;
-  const currentRatio = currentParams.measureRatio;
-  const currentBpm = getEffectiveBpm(currentParams, currentCharIdx);
-
-  // Check within current bar
-  for (let i = currentCharIdx - 1; i >= 0; i--) {
-    if (RENDERABLE_NOTES.includes(currentBar[i])) {
-      if (LONG_NOTE_TYPES.includes(currentBar[i])) {
+  const segments: BarSegment[] = [];
+  let totalMeasures = 0;
+  for (let b = currentBarIdx; b >= 0; b--) {
+    const bar = chart.bars[b];
+    const params = chart.barParams?.[b];
+    if (!bar || !params) return null;
+    const slots = bar.length || 1; // A bare comma still lasts one measure.
+    const end = b === currentBarIdx ? currentCharIdx : slots;
+    let start = 0;
+    let found = false;
+    for (let i = Math.min(end - 1, bar.length - 1); i >= 0; i--) {
+      if (!RENDERABLE_NOTES.includes(bar[i])) continue;
+      if (LONG_NOTE_TYPES.includes(bar[i])) {
         if (longNoteHandling === LongNoteHandling.Strict) return null;
         if (longNoteHandling === LongNoteHandling.Skip) continue;
-        if (longNoteHandling === LongNoteHandling.Start && currentBar[i] === NoteType.End) continue;
+        if (longNoteHandling === LongNoteHandling.Start && bar[i] === NoteType.End) continue;
       }
-      const fraction = ((currentCharIdx - i) / currentTotal) * currentRatio;
-      return [{ fraction, bpm: getEffectiveBpm(currentParams, i) }];
+      start = i;
+      found = true;
+      break;
     }
+    const fraction = (end - start) / slots * params.measureRatio;
+    totalMeasures += fraction;
+    if (maxMeasures !== undefined && totalMeasures > maxMeasures + 1e-9) return null;
+    segments.push({ fraction, milliseconds: barIntervalMs(params, slots, start, end, !found) });
+    if (found) return segments;
   }
-
-  // Accumulate across previous bars
-  const segments: BarSegment[] = [{ fraction: (currentCharIdx / currentTotal) * currentRatio, bpm: currentBpm }];
-  let totalMeasures = segments[0].fraction;
-
-  for (let b = currentBarIdx - 1; b >= 0; b--) {
-    const prevBar = chart.bars[b];
-    const prevParams = chart.barParams?.[b];
-    const prevRatio = prevParams?.measureRatio ?? 1.0;
-    if (!prevParams) return null;
-    const prevBpm = getEffectiveBpm(prevParams, prevBar?.length ?? 0);
-
-    if (!prevBar || prevBar.length === 0) {
-      if (maxMeasures !== undefined && totalMeasures + prevRatio > maxMeasures + 0.001) return null;
-      segments.push({ fraction: prevRatio, bpm: prevBpm });
-      totalMeasures += prevRatio;
-      continue;
-    }
-
-    const prevTotal = prevBar.length;
-
-    for (let i = prevTotal - 1; i >= 0; i--) {
-      if (RENDERABLE_NOTES.includes(prevBar[i])) {
-        if (LONG_NOTE_TYPES.includes(prevBar[i])) {
-          if (longNoteHandling === LongNoteHandling.Strict) return null;
-          if (longNoteHandling === LongNoteHandling.Skip) continue;
-          if (longNoteHandling === LongNoteHandling.Start && prevBar[i] === NoteType.End) continue;
-        }
-        const distInPrev = ((prevTotal - i) / prevTotal) * prevRatio;
-        const candidateTotal = totalMeasures + distInPrev;
-        if (maxMeasures !== undefined && candidateTotal > maxMeasures + 0.0001) return null;
-        segments.push({ fraction: distInPrev, bpm: getEffectiveBpm(prevParams, i) });
-        return segments;
-      }
-    }
-
-    if (maxMeasures !== undefined && totalMeasures + prevRatio > maxMeasures) return null;
-    segments.push({ fraction: prevRatio, bpm: prevBpm });
-    totalMeasures += prevRatio;
-  }
-
   return null;
 }
 
@@ -128,7 +89,7 @@ export function getGapMs(chart: ParsedChart, barIdx: number, charIdx: number, op
   if (!segments) return null;
   let totalMs = 0;
   for (const seg of segments) {
-    totalMs += (seg.fraction * 240000) / seg.bpm;
+    totalMs += seg.milliseconds;
   }
   return totalMs;
 }
