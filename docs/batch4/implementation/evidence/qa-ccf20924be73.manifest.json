@@ -1,0 +1,164 @@
+{
+  "schema": 1,
+  "runId": "qa-ccf20924be73",
+  "unit": "taiko-qa-ccf20924be73",
+  "startedNs": 1795529294626989297,
+  "scratchLimitBytes": 2147483648,
+  "minimumFreeBytes": 5368709120,
+  "budgetReasonId": "default",
+  "commandArgumentsRecorded": false,
+  "environmentRecorded": false,
+  "samples": [
+    {
+      "phase": "before",
+      "timeNs": 1795529294627187872,
+      "freeBytes": 34734628864,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 2
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795529294628778072,
+      "freeBytes": 34734628864,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "after-child-exit",
+      "timeNs": 1795529294746004497,
+      "freeBytes": 34734460928,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 353,
+        "logicalBytes": 353,
+        "allocatedBytes": 16384,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 353,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 353,
+        "logicalBytes": 353,
+        "allocatedBytes": 8192,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 353,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "after-cleanup",
+      "timeNs": 1795529294774567940,
+      "freeBytes": 34734465024,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 0,
+        "symlinkCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 353,
+        "logicalBytes": 353,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 353,
+        "entries": 2
+      },
+      "evidence": {
+        "bytes": 353,
+        "logicalBytes": 353,
+        "allocatedBytes": 8192,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 353,
+        "entries": 1
+      }
+    }
+  ],
+  "childrenStopped": true,
+  "exitCode": 1,
+  "processExitCode": 1,
+  "stopReason": null,
+  "log": {
+    "file": "output.log",
+    "bytes": 353,
+    "sha256": "0b28033c5d60d7911d338dc0fdd467b503bedf72c400c679651f01031439da55"
+  },
+  "archivedEvidence": [
+    {
+      "path": "output.log",
+      "bytes": 353,
+      "sha256": "0b28033c5d60d7911d338dc0fdd467b503bedf72c400c679651f01031439da55"
+    }
+  ],
+  "archiveStatus": "FSYNCED_REGULAR_FILES",
+  "cleanup": "REMOVED_OWNED_SCRATCH_ONLY",
+  "finishedNs": 1795529294774673825,
+  "wrapperExitCode": 1
+}

@@ -1,0 +1,52 @@
+/** B4 offline/1 strict candidate ingress. No fallback identity, coercion or evidence synthesis. */
+import type { MultiObjectiveCandidate, ValidationContext, ValidationResult } from './contracts.ts';
+import { candidateId, hash, result, same, unique } from './common.ts';
+import { candidateShape } from './schemas.ts';
+import { inspect } from './shape.ts';
+import { validateIntentTargetCombination } from './registries.ts';
+import { prepareValidationContext } from './context.ts';
+import { coverageIsComplete, referencedEvidence, validateEvidenceScope, validateSampleEvidence } from './evidence.ts';
+import { validateActionabilityEvaluation } from './actionability.ts';
+import { validateGoalLinks } from './goals.ts';
+export function validateCandidate(input: unknown, context: ValidationContext, prepared = prepareValidationContext(context)): ValidationResult<MultiObjectiveCandidate> {
+  const issues = inspect(candidateShape, input);
+  if (issues.length) return { ok: false, issues };
+  const c = input as MultiObjectiveCandidate;
+  issues.push(...prepared.issues);
+  if (issues.length) return result(c, issues);
+  const add = (code: string, path = 'candidate') => issues.push({ path, code });
+  issues.push(...validateIntentTargetCombination(c.intentType, c.subtype, c.target));
+  for (const key of ['decisionId', 'profileId', 'region', 'catalogRevision', 'scoreRevision', 'portfolioRevision', 'policyVersion', 'asOf', 'generatedAt'] as const) if (c[key] !== context[key]) add('CONTEXT_BINDING_MISMATCH', key);
+  if (c.source.generatedAt > c.generatedAt || c.generatedAt > c.asOf) add('EVIDENCE_FUTURE');
+  for (const code of prepared.authority.verify(c)) add(code, 'identity');
+  if (context.excludedChartIds.includes(c.chartId)) add('USER_EXCLUDED');
+  if (hash(c.target) !== c.targetHash) add('TARGET_HASH_MISMATCH');
+  if (candidateId(c) !== c.candidateId) add('CANDIDATE_ID_MISMATCH');
+  if (!same(unique(c.evidenceRefs), referencedEvidence(c, prepared.evidence))) add('EVIDENCE_UNION_MISMATCH');
+  if (c.subtype !== 'interest_discovery' && (c.sourceHash === null || c.scoreRevision === null)) add('MODEL_INPUT_REVISION_MISSING');
+  if (c.chartEvidence.availability !== 'active') add('CATALOG_UNAVAILABLE');
+  if (c.diagnostics.canCreateGoal) add('OFFLINE_GOAL_CREATION_NOT_AUTHORIZED');
+  if (c.portfolioRevision === null && c.goalLinks.length) add('PORTFOLIO_REQUIRED');
+  issues.push(...validateEvidenceScope(c, context, prepared.evidence), ...validateSampleEvidence(c, context, prepared.evidence));
+  const catalog = prepared.evidence.get(c.chartEvidence.catalogRef);
+  if (catalog?.payload.type !== 'catalog') add('CATALOG_REF_INVALID');
+  const p = c.playerEvidence, coverage = p.coverageRef ? prepared.evidence.get(p.coverageRef)?.payload : undefined;
+  if (c.target.kind === 'explore_chart' && c.target.coverageRef !== p.coverageRef) add('DISCOVERY_COVERAGE_REF_MISMATCH');
+  if (p.recordState === 'unplayed_confirmed' && (!coverageIsComplete(c, context, prepared.evidence) || coverage?.recordPresent !== false || p.snapshotRefs.length || p.attemptRefs.length)) add('UNPLAYED_COVERAGE_UNVERIFIED');
+  if (p.recordState === 'no_score_record' && (coverage?.type !== 'coverage' || coverage.queryExecuted !== true || coverage.recordPresent !== false)) add('NO_SCORE_RECORD_UNVERIFIED');
+  if (p.recordState === 'played_known' && !p.snapshotRefs.length && !p.attemptRefs.length && coverage?.recordPresent !== true) add('PLAYED_RECORD_UNVERIFIED');
+  if (c.scoreRevision === null && p.recordState !== 'coverage_unknown') add('COVERAGE_UNKNOWN_REQUIRED');
+  for (const id of p.snapshotRefs) if (prepared.evidence.get(id)?.payload.type !== 'score_snapshot') add('SNAPSHOT_REF_INVALID');
+  for (const id of p.attemptRefs) if (prepared.evidence.get(id)?.payload.type !== 'attempt') add('ATTEMPT_REF_INVALID');
+  if (p.ratingRef && prepared.evidence.get(p.ratingRef)?.payload.type !== 'rating') add('RATING_REF_INVALID');
+  if (p.estimateRef && prepared.evidence.get(p.estimateRef)?.payload.type !== 'score_estimate') add('ESTIMATE_REF_INVALID');
+  const estimate = p.estimateRef ? prepared.evidence.get(p.estimateRef)?.payload : undefined;
+  if (['unplayed_confirmed', 'no_score_record'].includes(p.recordState) && (p.snapshotRefs.length || p.attemptRefs.length || (estimate?.type === 'score_estimate' && typeof estimate.currentBestScore === 'number' && estimate.currentBestScore > 0))) add('RECORD_STATE_CONFLICT');
+  if (estimate?.type === 'score_estimate' && p.snapshotRefs.some(id => {
+    const snapshot = prepared.evidence.get(id)?.payload;
+    return snapshot?.type === 'score_snapshot' && snapshot.currentBestScore !== estimate.currentBestScore;
+  })) add('CURRENT_SCORE_CONFLICT');
+  if (p.coverageRef && coverage?.type !== 'coverage') add('COVERAGE_REF_INVALID');
+  issues.push(...validateActionabilityEvaluation(c, context, prepared.evidence), ...validateGoalLinks(c, prepared));
+  return result(structuredClone(c), issues);
+}

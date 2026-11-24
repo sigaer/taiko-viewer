@@ -1,0 +1,1814 @@
+{
+  "schema": 1,
+  "runId": "qa-9fd4ad6f4c18",
+  "unit": "taiko-qa-9fd4ad6f4c18",
+  "startedNs": 1795528789429483034,
+  "scratchLimitBytes": 2147483648,
+  "minimumFreeBytes": 5368709120,
+  "budgetReasonId": "default",
+  "commandArgumentsRecorded": false,
+  "environmentRecorded": false,
+  "samples": [
+    {
+      "phase": "before",
+      "timeNs": 1795528789429655055,
+      "freeBytes": 34759041024,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 2
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528789430872088,
+      "freeBytes": 34759041024,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528791435259596,
+      "freeBytes": 34759008256,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528793636742150,
+      "freeBytes": 34759000064,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528795732636536,
+      "freeBytes": 34758864896,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528797736411590,
+      "freeBytes": 34758815744,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528799740315802,
+      "freeBytes": 34758819840,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528801744319846,
+      "freeBytes": 34758778880,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528803748384300,
+      "freeBytes": 34758762496,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528805752524406,
+      "freeBytes": 34758750208,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528807756373071,
+      "freeBytes": 34758733824,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528809953926875,
+      "freeBytes": 34758717440,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528811958170584,
+      "freeBytes": 34758692864,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528813962586639,
+      "freeBytes": 34758680576,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528815966676979,
+      "freeBytes": 34758664192,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528817970605891,
+      "freeBytes": 34758647808,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528819974758561,
+      "freeBytes": 34758119424,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528821978844487,
+      "freeBytes": 34758090752,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528823983124845,
+      "freeBytes": 34758082560,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528825986938264,
+      "freeBytes": 34758053888,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528827990917786,
+      "freeBytes": 34758033408,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528829994974938,
+      "freeBytes": 34758012928,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528832007498534,
+      "freeBytes": 34757984256,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528834011294546,
+      "freeBytes": 34757967872,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528836015359637,
+      "freeBytes": 34757955584,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528838019530229,
+      "freeBytes": 34757935104,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528840023485825,
+      "freeBytes": 34757926912,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528842027089642,
+      "freeBytes": 34757906432,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528844030964130,
+      "freeBytes": 34757902336,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528846034824058,
+      "freeBytes": 34757873664,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528848038684357,
+      "freeBytes": 34757857280,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528850042510416,
+      "freeBytes": 34757840896,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528852046147553,
+      "freeBytes": 34757820416,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528854050204459,
+      "freeBytes": 34757804032,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528856054185511,
+      "freeBytes": 34757767168,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528858057791245,
+      "freeBytes": 34757763072,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528860062205752,
+      "freeBytes": 34757734400,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528862066089985,
+      "freeBytes": 34757718016,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528864070029414,
+      "freeBytes": 34757697536,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528866073827860,
+      "freeBytes": 34757685248,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528868077817107,
+      "freeBytes": 34757668864,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528870081687941,
+      "freeBytes": 34757660672,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528872085555274,
+      "freeBytes": 34757640192,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528874089645336,
+      "freeBytes": 34757623808,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528876093513248,
+      "freeBytes": 34757591040,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528878097243241,
+      "freeBytes": 34757578752,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528880100907810,
+      "freeBytes": 34757554176,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528882120712502,
+      "freeBytes": 34757525504,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528884125435936,
+      "freeBytes": 34757423104,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528886129984177,
+      "freeBytes": 34757402624,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528888134453745,
+      "freeBytes": 34757378048,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795528890138677680,
+      "freeBytes": 34757361664,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "after-child-exit",
+      "timeNs": 1795528890971437316,
+      "freeBytes": 34757328896,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 801,
+        "logicalBytes": 801,
+        "allocatedBytes": 16384,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 801,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 801,
+        "logicalBytes": 801,
+        "allocatedBytes": 8192,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 801,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "after-cleanup",
+      "timeNs": 1795528891003170507,
+      "freeBytes": 34757328896,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 0,
+        "symlinkCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 801,
+        "logicalBytes": 801,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 801,
+        "entries": 2
+      },
+      "evidence": {
+        "bytes": 801,
+        "logicalBytes": 801,
+        "allocatedBytes": 8192,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 801,
+        "entries": 1
+      }
+    }
+  ],
+  "childrenStopped": true,
+  "exitCode": 0,
+  "processExitCode": 0,
+  "stopReason": null,
+  "log": {
+    "file": "output.log",
+    "bytes": 801,
+    "sha256": "d40b772bad101c054d1ec514d565e80f21d75ea486d1aee0c1fb3cb4a32cf913"
+  },
+  "archivedEvidence": [
+    {
+      "path": "output.log",
+      "bytes": 801,
+      "sha256": "d40b772bad101c054d1ec514d565e80f21d75ea486d1aee0c1fb3cb4a32cf913"
+    }
+  ],
+  "archiveStatus": "FSYNCED_REGULAR_FILES",
+  "cleanup": "REMOVED_OWNED_SCRATCH_ONLY",
+  "finishedNs": 1795528891003274063,
+  "wrapperExitCode": 0
+}

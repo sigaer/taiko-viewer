@@ -1,0 +1,21 @@
+taiko_viewer/utils/multi-objective/actionability.ts(70,90): error TS18047: 'a.confidence.sourceReliability' is possibly 'null'.
+taiko_viewer/utils/multi-objective/actionability.ts(87,48): error TS18048: 'y' is possibly 'undefined'.
+taiko_viewer/utils/multi-objective/actionability.ts(87,86): error TS18048: 'x' is possibly 'undefined'.
+taiko_viewer/utils/multi-objective/actionability.ts(87,114): error TS18048: 'x' is possibly 'undefined'.
+taiko_viewer/utils/multi-objective/actionability.ts(87,125): error TS18048: 'y' is possibly 'undefined'.
+taiko_viewer/utils/multi-objective/actionability.ts(88,36): error TS18048: 'r' is possibly 'undefined'.
+taiko_viewer/utils/multi-objective/actionability.ts(88,104): error TS18048: 'r' is possibly 'undefined'.
+taiko_viewer/utils/multi-objective/actionability.ts(88,158): error TS18048: 'r' is possibly 'undefined'.
+taiko_viewer/utils/multi-objective/actionability.ts(88,190): error TS18048: 'r' is possibly 'undefined'.
+taiko_viewer/utils/multi-objective/actionability.ts(88,225): error TS18048: 'r' is possibly 'undefined'.
+taiko_viewer/utils/multi-objective/actionability.ts(89,109): error TS18048: 'r' is possibly 'undefined'.
+taiko_viewer/utils/multi-objective/actionability.ts(99,101): error TS18048: 'r' is possibly 'undefined'.
+taiko_viewer/utils/multi-objective/evidence.ts(40,9): error TS18046: 'r.ref' is of type 'unknown'.
+taiko_viewer/utils/multi-objective/evidence.ts(40,37): error TS18046: 'r.ref' is of type 'unknown'.
+taiko_viewer/utils/multi-objective/evidence.ts(41,9): error TS18046: 'r.ref' is of type 'unknown'.
+taiko_viewer/utils/multi-objective/evidence.ts(42,19): error TS18046: 'r.ref' is of type 'unknown'.
+taiko_viewer/utils/multi-objective/evidence.ts(42,48): error TS18046: 'r.ref' is of type 'unknown'.
+taiko_viewer/utils/multi-objective/evidence.ts(42,83): error TS18046: 'r.ref' is of type 'unknown'.
+taiko_viewer/utils/multi-objective/evidence.ts(43,20): error TS18046: 'r.ref' is of type 'unknown'.
+taiko_viewer/utils/multi-objective/evidence.ts(43,30): error TS2345: Argument of type 'Record<string, unknown>' is not assignable to parameter of type 'EvidenceRecord'.
+  Type 'Record<string, unknown>' is missing the following properties from type 'EvidenceRecord': schemaVersion, ref, payload

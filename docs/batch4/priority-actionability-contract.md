@@ -58,4 +58,4 @@ all primary targets.horizon == near_term
 | User Acceptance | 用户是否明确接受这次建议？ | 展示之后的显式 accept 事件；点击/浏览不算 |
 | Goal Achievement | 后续证据是否满足独立 Goal 的完成规则？ | 用户接受后冻结 baseline，权威 observation 与专用 Goal evaluator |
 
-50% 是第一行的产品硬底线，绝不是“至少一半真实玩家能达成”。无真实可识别游玩标签时，不能以系统通过率替代效果。组别与类型独立的必要反例：discovery 可 A 或 D；challenge 可 A（当前要求）或 C（长期任务）；Personal Goal 可以完全不产生 A 候选。
+50% 是第一行的产品硬底线，绝不是“至少一半真实玩家能达成”。无真实可识别游玩标签时，不能以系统通过率替代效果。组别与类型独立的必要反例：`interest_discovery` 为 D only；`level_matched_discovery` 通过专用证据门槛后可进入 A/B；challenge 可 A（当前要求，须有专用 evaluator）或 C（长期任务）；Personal Goal 可以完全不产生 A 候选。

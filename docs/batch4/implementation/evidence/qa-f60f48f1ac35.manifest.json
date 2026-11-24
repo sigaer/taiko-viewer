@@ -1,0 +1,263 @@
+{
+  "schema": 1,
+  "runId": "qa-f60f48f1ac35",
+  "unit": "taiko-qa-f60f48f1ac35",
+  "startedNs": 1795529142803130891,
+  "scratchLimitBytes": 2147483648,
+  "minimumFreeBytes": 5368709120,
+  "budgetReasonId": "default",
+  "commandArgumentsRecorded": false,
+  "environmentRecorded": false,
+  "samples": [
+    {
+      "phase": "before",
+      "timeNs": 1795529142803290868,
+      "freeBytes": 34746499072,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 2
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795529142804483259,
+      "freeBytes": 34746499072,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795529144808671071,
+      "freeBytes": 34746449920,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 12288,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795529146837043846,
+      "freeBytes": 34746433536,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 3937,
+        "logicalBytes": 3937,
+        "allocatedBytes": 16384,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 3937,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 3937,
+        "logicalBytes": 3937,
+        "allocatedBytes": 8192,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 3937,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "during",
+      "timeNs": 1795529148925849122,
+      "freeBytes": 34746327040,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 10878,
+        "logicalBytes": 10878,
+        "allocatedBytes": 24576,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 10878,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 10878,
+        "logicalBytes": 10878,
+        "allocatedBytes": 16384,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 10878,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "after-child-exit",
+      "timeNs": 1795529150438390784,
+      "freeBytes": 34746269696,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 4096,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 16099,
+        "logicalBytes": 16099,
+        "allocatedBytes": 28672,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 16099,
+        "entries": 3
+      },
+      "evidence": {
+        "bytes": 16099,
+        "logicalBytes": 16099,
+        "allocatedBytes": 20480,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 16099,
+        "entries": 1
+      }
+    },
+    {
+      "phase": "after-cleanup",
+      "timeNs": 1795529150470080415,
+      "freeBytes": 34746290176,
+      "totalBytes": 338068033536,
+      "scratch": {
+        "bytes": 0,
+        "logicalBytes": 0,
+        "allocatedBytes": 0,
+        "symlinkCount": 0,
+        "largestFileBytes": 0,
+        "entries": 0
+      },
+      "run": {
+        "bytes": 16099,
+        "logicalBytes": 16099,
+        "allocatedBytes": 24576,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 16099,
+        "entries": 2
+      },
+      "evidence": {
+        "bytes": 16099,
+        "logicalBytes": 16099,
+        "allocatedBytes": 20480,
+        "symlinkCount": 0,
+        "hardlinkEntryCount": 0,
+        "largestFileBytes": 16099,
+        "entries": 1
+      }
+    }
+  ],
+  "childrenStopped": true,
+  "exitCode": 0,
+  "processExitCode": 0,
+  "stopReason": null,
+  "log": {
+    "file": "output.log",
+    "bytes": 16099,
+    "sha256": "5c82b77225e35a1613a975a347d189de45907357f057c32a2142eaf17baa50af"
+  },
+  "archivedEvidence": [
+    {
+      "path": "output.log",
+      "bytes": 16099,
+      "sha256": "5c82b77225e35a1613a975a347d189de45907357f057c32a2142eaf17baa50af"
+    }
+  ],
+  "archiveStatus": "FSYNCED_REGULAR_FILES",
+  "cleanup": "REMOVED_OWNED_SCRATCH_ONLY",
+  "finishedNs": 1795529150470212992,
+  "wrapperExitCode": 0
+}

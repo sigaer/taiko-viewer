@@ -1,0 +1,364 @@
+{
+  "provenance": {
+    "source": "/var/tmp/taiko-batch21-20261124/catalog/revisions/891a2a0aa47dff10f576e1ec273721a26ebfcb8bcd3f41521139f4ecc769c52f/catalog.json",
+    "sourceSha256": "d93cf2a4030c4e8744b28bf07aa34f501492d487be905fedcfa186b18aac9357",
+    "purpose": "Exact unmodified Authority rows and explicit aliases; partial fixture, not complete catalog."
+  },
+  "snapshot": {
+    "schemaVersion": 1,
+    "policyVersion": "wahlap-cn-1",
+    "catalogRevision": "891a2a0aa47dff10f576e1ec273721a26ebfcb8bcd3f41521139f4ecc769c52f",
+    "charts": {
+      "1000:4": {
+        "chartId": "song:1000:course:4",
+        "cnDifficultyEvidence": "OFFERED_METADATA",
+        "diagnostics": [
+          "normal/unbranched:LONG_NOTE_OVERLAP",
+          "easy/unbranched:LONG_NOTE_OVERLAP"
+        ],
+        "difficulty": 4,
+        "exists": true,
+        "features": {
+          "balloon": "NEEDS_VALIDATION",
+          "basicNoteSequence": "AVAILABLE",
+          "bigNotes": "AVAILABLE",
+          "bpm": "AVAILABLE",
+          "branch": "AVAILABLE",
+          "delay": "AVAILABLE",
+          "localDensity": "AVAILABLE",
+          "measure": "AVAILABLE",
+          "offset": "NEEDS_VALIDATION",
+          "patternFeatures": "UNAVAILABLE",
+          "rhythmFeatures": "PARTIAL",
+          "roll": "AVAILABLE",
+          "scroll": "NEEDS_VALIDATION"
+        },
+        "metadataStar": 9,
+        "officialStar": 9,
+        "parserStatus": "PARTIAL",
+        "parserVersion": "tja-static-batch2-3:a90a475506e844c5fff59d99f58a9a154de8e56a611a6bbb7bb79481226baafd",
+        "policies": {
+          "catalog_display": {
+            "eligible": true,
+            "reasons": [
+              "KNOWN_IDENTITY"
+            ]
+          },
+          "chart_analysis_eligible": {
+            "balloon": {
+              "eligible": false,
+              "reasons": [
+                "NEEDS_VALIDATION"
+              ]
+            },
+            "basicNoteSequence": {
+              "eligible": true,
+              "reasons": [
+                "AVAILABLE"
+              ]
+            },
+            "bigNotes": {
+              "eligible": true,
+              "reasons": [
+                "AVAILABLE"
+              ]
+            },
+            "bpm": {
+              "eligible": true,
+              "reasons": [
+                "AVAILABLE"
+              ]
+            },
+            "branch": {
+              "eligible": true,
+              "reasons": [
+                "AVAILABLE"
+              ]
+            },
+            "delay": {
+              "eligible": true,
+              "reasons": [
+                "AVAILABLE"
+              ]
+            },
+            "localDensity": {
+              "eligible": true,
+              "reasons": [
+                "AVAILABLE"
+              ]
+            },
+            "measure": {
+              "eligible": true,
+              "reasons": [
+                "AVAILABLE"
+              ]
+            },
+            "offset": {
+              "eligible": false,
+              "reasons": [
+                "NEEDS_VALIDATION"
+              ]
+            },
+            "patternFeatures": {
+              "eligible": false,
+              "reasons": [
+                "UNAVAILABLE"
+              ]
+            },
+            "rhythmFeatures": {
+              "eligible": false,
+              "reasons": [
+                "PARTIAL"
+              ]
+            },
+            "roll": {
+              "eligible": true,
+              "reasons": [
+                "AVAILABLE"
+              ]
+            },
+            "scroll": {
+              "eligible": false,
+              "reasons": [
+                "NEEDS_VALIDATION"
+              ]
+            }
+          },
+          "cn_current_playable": {
+            "eligible": true,
+            "reasons": [
+              "OFFICIAL_OFFERED_DIFFICULTY"
+            ]
+          },
+          "historical_score": {
+            "eligible": true,
+            "reasons": [
+              "PRESERVE_OR_UNRESOLVED_ASSOCIATION"
+            ]
+          },
+          "recommendation_eligible": {
+            "ordinary": {
+              "eligible": true,
+              "reasons": [
+                "ELIGIBLE"
+              ]
+            },
+            "target": {
+              "eligible": true,
+              "reasons": [
+                "ELIGIBLE"
+              ]
+            }
+          }
+        },
+        "rawAvailability": "AVAILABLE",
+        "rawCourseStatus": "PARSED",
+        "songId": "song:1000",
+        "sourceHash": "2a1d531a05709d7078c82fabb4a4c94eca08aac71f3b8a7cd68b43bdeb6b9984",
+        "sourceSongId": 1000
+      },
+      "1001:4": {
+        "chartId": "song:1001:course:4",
+        "cnDifficultyEvidence": "OFFERED_METADATA",
+        "diagnostics": [
+          "hard/unbranched:LONG_NOTE_OVERLAP",
+          "hard/unbranched:LONG_NOTE_OVERLAP",
+          "normal/unbranched:LONG_NOTE_OVERLAP",
+          "normal/unbranched:LONG_NOTE_OVERLAP",
+          "easy/unbranched:LONG_NOTE_OVERLAP",
+          "easy/unbranched:LONG_NOTE_OVERLAP"
+        ],
+        "difficulty": 4,
+        "exists": true,
+        "features": {
+          "balloon": "NEEDS_VALIDATION",
+          "basicNoteSequence": "AVAILABLE",
+          "bigNotes": "AVAILABLE",
+          "bpm": "PARTIAL",
+          "branch": "AVAILABLE",
+          "delay": "AVAILABLE",
+          "localDensity": "AVAILABLE",
+          "measure": "AVAILABLE",
+          "offset": "NEEDS_VALIDATION",
+          "patternFeatures": "UNAVAILABLE",
+          "rhythmFeatures": "PARTIAL",
+          "roll": "AVAILABLE",
+          "scroll": "AVAILABLE"
+        },
+        "metadataStar": 7,
+        "officialStar": 7,
+        "parserStatus": "PARTIAL",
+        "parserVersion": "tja-static-batch2-3:a90a475506e844c5fff59d99f58a9a154de8e56a611a6bbb7bb79481226baafd",
+        "policies": {
+          "catalog_display": {
+            "eligible": true,
+            "reasons": [
+              "KNOWN_IDENTITY"
+            ]
+          },
+          "chart_analysis_eligible": {
+            "balloon": {
+              "eligible": false,
+              "reasons": [
+                "NEEDS_VALIDATION"
+              ]
+            },
+            "basicNoteSequence": {
+              "eligible": true,
+              "reasons": [
+                "AVAILABLE"
+              ]
+            },
+            "bigNotes": {
+              "eligible": true,
+              "reasons": [
+                "AVAILABLE"
+              ]
+            },
+            "bpm": {
+              "eligible": false,
+              "reasons": [
+                "PARTIAL"
+              ]
+            },
+            "branch": {
+              "eligible": true,
+              "reasons": [
+                "AVAILABLE"
+              ]
+            },
+            "delay": {
+              "eligible": true,
+              "reasons": [
+                "AVAILABLE"
+              ]
+            },
+            "localDensity": {
+              "eligible": true,
+              "reasons": [
+                "AVAILABLE"
+              ]
+            },
+            "measure": {
+              "eligible": true,
+              "reasons": [
+                "AVAILABLE"
+              ]
+            },
+            "offset": {
+              "eligible": false,
+              "reasons": [
+                "NEEDS_VALIDATION"
+              ]
+            },
+            "patternFeatures": {
+              "eligible": false,
+              "reasons": [
+                "UNAVAILABLE"
+              ]
+            },
+            "rhythmFeatures": {
+              "eligible": false,
+              "reasons": [
+                "PARTIAL"
+              ]
+            },
+            "roll": {
+              "eligible": true,
+              "reasons": [
+                "AVAILABLE"
+              ]
+            },
+            "scroll": {
+              "eligible": true,
+              "reasons": [
+                "AVAILABLE"
+              ]
+            }
+          },
+          "cn_current_playable": {
+            "eligible": true,
+            "reasons": [
+              "OFFICIAL_OFFERED_DIFFICULTY"
+            ]
+          },
+          "historical_score": {
+            "eligible": true,
+            "reasons": [
+              "PRESERVE_OR_UNRESOLVED_ASSOCIATION"
+            ]
+          },
+          "recommendation_eligible": {
+            "ordinary": {
+              "eligible": true,
+              "reasons": [
+                "ELIGIBLE"
+              ]
+            },
+            "target": {
+              "eligible": true,
+              "reasons": [
+                "ELIGIBLE"
+              ]
+            }
+          }
+        },
+        "rawAvailability": "AVAILABLE",
+        "rawCourseStatus": "PARSED",
+        "songId": "song:1001",
+        "sourceHash": "f8ec48473f5a099b84556cae356ff5c469b2b14c1a3b72ce38c0007acea19368",
+        "sourceSongId": 1001
+      }
+    },
+    "sourceAliases": [
+      {
+        "evidence": "catalog identity",
+        "key": "1001",
+        "namespace": "catalog-id",
+        "songId": "song:1001"
+      },
+      {
+        "evidence": "ourtaiko_ids",
+        "key": "8fa0c2e5ee2d4e2dbd8c16d9e7db1262",
+        "namespace": "ourtaiko",
+        "songId": "song:1001"
+      },
+      {
+        "evidence": "nijiiro_id",
+        "key": "1001",
+        "namespace": "nijiiro",
+        "songId": "song:1001"
+      },
+      {
+        "evidence": "catalog identity",
+        "key": "1000",
+        "namespace": "catalog-id",
+        "songId": "song:1000"
+      },
+      {
+        "evidence": "ourtaiko_ids",
+        "key": "c6c3cf3fde0a41348799542f37a7605a",
+        "namespace": "ourtaiko",
+        "songId": "song:1000"
+      },
+      {
+        "evidence": "nijiiro_id",
+        "key": "1000",
+        "namespace": "nijiiro",
+        "songId": "song:1000"
+      },
+      {
+        "evidence": "52a1c99d481fc7fe5ddda4e7c5a8837c4c9c1742cc743462ceac32f1113f70e5",
+        "key": "1001",
+        "namespace": "wahlap",
+        "songId": "song:1001"
+      },
+      {
+        "evidence": "52a1c99d481fc7fe5ddda4e7c5a8837c4c9c1742cc743462ceac32f1113f70e5",
+        "key": "1000",
+        "namespace": "wahlap",
+        "songId": "song:1000"
+      }
+    ]
+  }
+}

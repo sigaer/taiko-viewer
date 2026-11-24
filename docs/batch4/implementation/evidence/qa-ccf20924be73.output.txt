@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/var/tmp/taiko-b4-1-20261124/viewer/scripts/check_multi_objective_boundary.py", line 64, in <module>
+    assert (file.parent / target.split('#', 1)[0]).exists(), (file.name, target)
+AssertionError: ('canonical-identity-adapter-report.md', '../../../../taiko_viewer/tests/multi-objective/authority-slice.json')

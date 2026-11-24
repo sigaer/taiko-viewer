@@ -1,0 +1,86 @@
+{
+  "schemaVersion": "b4-qa-evidence/1",
+  "runs": [
+    {
+      "runId": "qa-fa76752bcc03",
+      "purpose": "initial strict TS, failed and corrected",
+      "exitCode": 2,
+      "childrenStopped": true,
+      "vault": "/home/sigaer/taiko/qa-vault/runs/qa-fa76752bcc03/evidence",
+      "outputSha256": "42b4a10da69fb4c4ff77ea18e8b67d2f8f1c6b87a216a9dbf905b0b70879c41d"
+    },
+    {
+      "runId": "qa-f47c01dfee6e",
+      "purpose": "strict TS after correction",
+      "exitCode": 0,
+      "childrenStopped": true,
+      "vault": "/home/sigaer/taiko/qa-vault/runs/qa-f47c01dfee6e/evidence",
+      "outputSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "runId": "qa-1aaae49eb592",
+      "purpose": "Phase A-C first ingress integration",
+      "exitCode": 0,
+      "childrenStopped": true,
+      "vault": "/home/sigaer/taiko/qa-vault/runs/qa-1aaae49eb592/evidence",
+      "outputSha256": "8b4569208e5c6c3bcedce864e59618ba3042d269fd3eb2961b189a922abf4d6c"
+    },
+    {
+      "runId": "qa-da5c73359b7e",
+      "purpose": "actual Authority slice extraction",
+      "exitCode": 0,
+      "childrenStopped": true,
+      "vault": "/home/sigaer/taiko/qa-vault/runs/qa-da5c73359b7e/evidence",
+      "outputSha256": "6ef8e98a30e97c8d1cc9979bdd6cd4d9dbbd2a8cf9ca778a84c0bb60892002e1"
+    },
+    {
+      "runId": "qa-2cf6dcbe690c",
+      "purpose": "78 B4 tests",
+      "exitCode": 0,
+      "childrenStopped": true,
+      "vault": "/home/sigaer/taiko/qa-vault/runs/qa-2cf6dcbe690c/evidence",
+      "outputSha256": "33264eaf16d9f72095ed719c0ed2fac0b3a9f415a7571c05057dbf9e16847ef8"
+    },
+    {
+      "runId": "qa-a427812f3718",
+      "purpose": "97 B4 tests",
+      "exitCode": 0,
+      "childrenStopped": true,
+      "vault": "/home/sigaer/taiko/qa-vault/runs/qa-a427812f3718/evidence",
+      "outputSha256": "9181e962ea273a5435c9778cf817615cf824081f7e9bfdb22a930b921305f624"
+    },
+    {
+      "runId": "qa-827b531fcec1",
+      "purpose": "107 B4 tests including review regressions",
+      "exitCode": 0,
+      "childrenStopped": true,
+      "vault": "/home/sigaer/taiko/qa-vault/runs/qa-827b531fcec1/evidence",
+      "outputSha256": "58f72474de49216e961e89eb9d61cb413237b18c212a125190b9deff350f2a49"
+    },
+    {
+      "runId": "qa-9fd4ad6f4c18",
+      "purpose": "performance 10/100/1000/5000 with nonempty portfolios",
+      "exitCode": 0,
+      "childrenStopped": true,
+      "vault": "/home/sigaer/taiko/qa-vault/runs/qa-9fd4ad6f4c18/evidence",
+      "outputSha256": "d40b772bad101c054d1ec514d565e80f21d75ea486d1aee0c1fb3cb4a32cf913"
+    },
+    {
+      "runId": "qa-f60f48f1ac35",
+      "purpose": "final 109 B4 + 92 original Node + strict TS + 126 Golden + 3 Core twice",
+      "exitCode": 0,
+      "childrenStopped": true,
+      "vault": "/home/sigaer/taiko/qa-vault/runs/qa-f60f48f1ac35/evidence",
+      "outputSha256": "5c82b77225e35a1613a975a347d189de45907357f057c32a2142eaf17baa50af"
+    },
+    {
+      "runId": "qa-ccf20924be73",
+      "purpose": "documentation boundary audit found incorrect relative links; corrected",
+      "exitCode": 1,
+      "childrenStopped": true,
+      "vault": "/home/sigaer/taiko/qa-vault/runs/qa-ccf20924be73/evidence",
+      "outputSha256": "0b28033c5d60d7911d338dc0fdd467b503bedf72c400c679651f01031439da55"
+    }
+  ],
+  "admissionNote": "One QA attempt returned exit 75 while host lock was occupied; retried after release, no bypass."
+}
