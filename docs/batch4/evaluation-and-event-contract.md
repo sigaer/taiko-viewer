@@ -6,6 +6,10 @@
 
 所有新增事件包含 `eventId, eventType, schemaVersion, subjectId, profileScope, occurredAt, receivedAt, knownAt, evidenceRefs`。subjectId 为受控匿名标识；occurredAt 不知道则 null，receivedAt 不能顶替它。服务器写入时间另记，客户端时间要验证合理顺序/漂移，未知不强制补齐。ID 幂等；相同 ID 不同 payload 拒收，迟到事件留原时钟。
 
+B4事件的chartId统一为Catalog Authority canonical Chart ID，带catalogRevision/identityMappingRef；原source namespace/ID只能另列作受控追溯。B3原协议/Golden报告保留原chartKey，只有唯一解析后才加入B4关联，无法解析不猜测同曲或无历史。
+
+生成/展示/接受事件记录intentType、subtype、target.discoveryMode（适用时）、evaluationScope，以及独立ratingSamples/predictionSamples证据引用。Interest Discovery与Level-matched Discovery分层报告，不能把兴趣接受率当水平匹配精度，不能用总体Rating行数充当预测样本分母。数据集须明确每项计数单位及unknown字段。
+
 | 新事件 | 必填关联与语义 |
 | --- | --- |
 | recommendation_generated | decisionId、candidate IDs/targetHashes、context/evidence/score/catalog/policy/portfolio revisions、asOf/generatedAt；只记录生成，不是曝光 |
@@ -57,6 +61,8 @@ all evaluation labels knownAt <= dataset.freezeAt
 | Goal Progression | 固定窗口内每 GoalType 的有证据正向进展 Goals / 有可比起终点的 Goals；另报 completed/resolved、resolved/all eligible | Goal ID 去重；active-at-start 队列，paused/cancelled 切断自动观察窗口并作 censoring；新建目标另队列。score delta、NG delta、皇冠离散状态分别报，不求混合平均；completed 终态或窗口终点 active 才解析完成率 |
 
 Dimension outcome 的命题是 `practiceDefinitionRef` 所定义的练习行为被独立证据验证，不是六维必升；没有该行为证据时 outcomePrecision unavailable。Discovery outcome=可识别演奏/探索任务定义的真实执行，浏览点击不能算游玩。Challenge 的同次要求不能用几天内不同 PB 拼成成功。未注册命题不纳入 outcome 分母但计 unknown。
+
+Discovery的evidencePrecision分成interest relevance和level fit两个独立命题，前者由明确兴趣依据/独立标注验证，后者由专用水平证据验证；点击只可另报engagement，不证明任一游玩结果。Interest Discovery仅D，不参与Priority三项指标，也不作为Type/Candidate Coverage中ready/stretch的分子或分母；另报interest eligible/display coverage，仍在五类型绝对浏览覆盖中计discovery一次。Level-matched Discovery沿用可行动口径。Candidate Coverage与Repeat Rate的B4 chart单位均为canonical ID，不能将同谱面多个来源键重复计数。
 
 例：A 展示10、ready6，则 System Actionability=60%。其中4明确接受、2有充分后续标签、1成功，则 conditional Achievement=1/2、label coverage=2/4、保守下界=1/4；不能宣称6/10玩家成功。若接受遥测完整且成熟，Acceptance=4/10；否则按其完整分母另算。
 

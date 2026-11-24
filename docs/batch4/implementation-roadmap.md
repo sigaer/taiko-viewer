@@ -15,6 +15,13 @@ Batch 4.0 交付十份文档，把推荐意图、优先级、行动证据、Goal
 5. 真实attempt缺失时保持不可判断；新皇冠near规则是离线策略，不是经验证的皇冠概率。新Goal类型无completion evaluator不得开放创建。
 6. Composer质量优先，多样性软约束，类型不足可不展示；同Chart聚合不合并Goal证据，歌曲去重不丢Goal。
 7. 事件分离生成/展示/接受/创建/观测/可识别play/评价；系统50%不冒充玩家达成率，点击和同步都不是play。
+8. B4-1前修订：所有新chartId使用Catalog Authority canonical ID；来源数字键仅适配且必须唯一解析。Discovery拆兴趣与水平匹配两个子类型，兴趣仅D且不依赖能力预测。Rating总体样本与谱面预测样本分开存证、分开准入，禁止sampleCount≥20代替预测充分性。
+
+## B4-1 前三项修订记录
+
+基于B4.0文档提交`b6dab5ef`修订，尚未启动B4-1。Lead实际核验Authority reader、同机B2.1 Builder、Rating聚合与Core estimator；本轮未委派子代理。十份合同同步更新schema、来源映射/迁移、Discovery分派、样本诊断、展示和评估口径，并增加对应验收用例。新适配字段/诊断均标为契约，不宣称B3已经导出；特别是neighbor_count虽在Core结果存在，当前B3 adapter没有透传。
+
+本修订直接替换未实施的B4草稿定义，不建立两种Chart ID或两套Discovery协议。B3原实现与126 Golden保留；历史协议比较通过显式canonical映射，不改写原数据。Interest Discovery未做水平判断，不能拿其兴趣confidence增加A的ready计数。
 
 ## 多 Agent 审阅及冲突裁决
 
@@ -37,7 +44,7 @@ Lead裁决：
 
 | 阶段 | 范围与交付 | 进入/退出 gate |
 | --- | --- | --- |
-| B4-1 契约与离线内核 | 只增新类型、schema validator、target/GoalType registry、纯函数专用接口、合成fixtures；不接生产 | **必须先批准本目录**；严格类型、非法组合拒收、[验收矩阵](acceptance-criteria.md)的schema/priority用例、B3 126不变 |
+| B4-1 契约与离线内核 | 只增新类型、Authority身份解析、schema validator、target/GoalType registry、Discovery双分支和独立样本证据接口、合成fixtures；不接生产 | **必须先批准本目录及三项修订**；严格类型、非法组合拒收、[验收矩阵](acceptance-criteria.md)的schema/priority/R用例、B3 126不变 |
 | B4-2 Portfolio实现候选 | v2存储/API/CAS/签名幂等、生命周期/历史adapter，迁移dry-run工具 | fixture DB隔离、并发/解绑/重放/历史hash验收；真实迁移另批，不执行线上DDL |
 | B4-3 专用evaluator候选 | 先接分数与可用证据；crown attempt、dimension特征、discovery覆盖、task定义按能力独立接 | 无数据的类型保持unsupported；阈值与语义注册，有独立oracle；不能借另一设备Agent作为阻塞或虚构其schema |
 | B4-4 Composer与事件离线 | 多Goal聚合、去重、手动排序/偏好、repeat、最终展示gate；离线事件replay | gate属性/边界用例、不同类型precision/分母、故障与客户端截断模拟通过 |

@@ -18,7 +18,10 @@ type Target = {
   | { kind: 'ng_reduction'; baselineRef: string; threshold: number; comparison: 'lte'; total: number }
   | { kind: 'dimension_practice'; dimension: { namespace: string; key: string; schemaVersion: string };
       practiceDefinitionRef: string; loadEvidenceRef: string }
-  | { kind: 'explore_chart'; coverageRef: string; relevanceRef: string | null }
+  | { kind: 'explore_chart'; discoveryMode: 'interest'; coverageRef: string;
+      relevanceRef: string }
+  | { kind: 'explore_chart'; discoveryMode: 'level_matched'; coverageRef: string;
+      relevanceRef: string; loadEvidenceRef: string }
   | { kind: 'task_requirement'; taskId: string; taskVersion: string; requirementId: string;
       requirementRef: string }
   | { kind: 'task_completion'; taskId: string; taskVersion: string; requirementRefs: string[] }
@@ -36,9 +39,13 @@ type EvidenceRef = {
 
 Target 的 threshold/total 为安全整数，分数>0、NG≥0/total>0、rank 1..8；未知 requirementRef 不可用于 rank readiness。crown 已满足时不再推荐。dimension namespace 首期固定 `viewer-six-dimension`，key 只能现有六维之一。target 规范化 JSON（字段排序、禁止 undefined/NaN）经 SHA-256 得 targetHash；同 Goal 的 exact target 不得因展示而变化。
 
-intent/subtype/target.kind必须使用判别注册表：score_pb/score_target→score，rank_upgrade→rank；clear/full_combo/dondaful_combo→同名crown值，ng_reduction→ng_reduction；dimension_practice→dimension_practice；explore_chart→explore_chart；dan_task/event_task→task_requirement或task_completion。task_completion必须horizon=long_term且列出全部要求引用，当前版本不得以完整任务为A主动作。不能只凭字段分别合法就接受交叉错误组合。
+intent/subtype/target.kind必须使用判别注册表：score_pb/score_target→score，rank_upgrade→rank；clear/full_combo/dondaful_combo→同名crown值，ng_reduction→ng_reduction；dimension_practice→dimension_practice；interest_discovery→explore_chart/discoveryMode=interest，level_matched_discovery→explore_chart/discoveryMode=level_matched；dan_task/event_task→task_requirement或task_completion。task_completion必须horizon=long_term且列出全部要求引用，当前版本不得以完整任务为A主动作。不能只凭字段分别合法就接受交叉错误组合。
 
-chartId **在本合同内**采用已有 B3 `ChartFeature.key = songId:difficultyType`，songId 为正安全整数、difficultyType 为 1..5；地区/目录/hash 是独立必需的 identity scope。它不是 package lossless `chart.chartId = song:difficulty:chartType`，映射时须明示，出现双人/变体歧义就拒绝，不截掉后缀强行合并。跨歌曲去重使用现有 catalog 的 `identityGroup`，不能按标题猜。
+`chartId` **必须逐值使用 Catalog Authority snapshot 中的 canonical Chart ID**，当前 schema=1 格式为 `song:<persistent-id>:course:<N>`；`canonicalSongId` 取同一行的 `songId`（`song:<persistent-id>`），difficultyType=该行difficulty（1..5）。ID格式不是生成权限：消费者不能把当前数字songId插入模板自行造永久ID。Authority 的 `charts` 字典仍以 `sourceSongId:difficulty` 查找，但字典键不是行内canonical chartId。
+
+保留 `songId:number` 仅作为当前 Authority 行的 sourceSongId/旧API适配字段，非永久身份；新增sourceNamespace明确其namespace。B3 `ChartFeature.key` 与 package `song:difficulty:chartType` 都只能是来源键，经指定catalogRevision的显式sourceAliases/映射证据解析到唯一Authority行。零匹配/多匹配/变体冲突拒绝候选并报 `CHART_ID_UNRESOLVED / CHART_ID_AMBIGUOUS`，不能按标题猜、不截后缀、不以数值相等跨namespace关联。历史原始ID/字节不改。
+
+Candidate、EvidenceRef、Goal关联、卡片聚合、事件与B4评估一律用canonical chartId；目录revision仍单独冻结，内容hash不是永久ID。读取到槽位不证明谱面存在：还须exists=true及对应地区policy允许。跨歌曲去重使用Authority支持的identityGroup，默认canonicalSongId；额外版本合并必须有显式权威关系，不能从旧数值ID推断。旧B3 key只在legacyChartKey与原协议回放中保留。
 
 EvidenceRef 是来源定位，不包含私密账号、token、cookie、原始个人 payload。必须在权限受控的 evidence resolver 中能复查；sourceRevision 不总是 SHA，标记 hash 的字段才强制 64 位小写 hex。与当前 B3 ReachEvidence 对应的 sourceHash/scoreRevision 等约束继续采用原规则。shared refs 可引用同一不可变证据，不能共享可变结论。
 
@@ -49,8 +56,10 @@ type MultiObjectiveCandidate = {
   schemaVersion: 'candidate/1';
   candidateId: string; decisionId: string;
   profileId: string; region: 'CN' | 'JP';
-  songId: number; chartId: string; difficultyType: number; identityGroup: string;
-  catalogRevision: string; sourceHash: string; scoreRevision: string;
+  songId: number; sourceNamespace: string; legacyChartKey: string | null;
+  canonicalSongId: string; chartId: string; difficultyType: number; identityGroup: string;
+  identityMappingRef: string;
+  catalogRevision: string; sourceHash: string | null; scoreRevision: string | null;
   portfolioRevision: string | null; policyVersion: string; generatedAt: string; asOf: string;
   intentType: IntentType; subtype: string;
   goalIds: string[];
@@ -63,6 +72,8 @@ type MultiObjectiveCandidate = {
   playerEvidence: {
     snapshotRefs: string[]; ratingRef: string | null; estimateRef: string | null;
     coverageRef: string | null; attemptRefs: string[];
+    ratingSamples: RatingSampleEvidence | null;
+    predictionSamples: ChartPredictionSampleEvidence | null;
     recordSemantics: 'aggregate_or_unknown' | 'verified_attempt';
     recordState: 'unplayed_confirmed' | 'no_score_record' | 'coverage_unknown' | 'played_known';
   };
@@ -91,6 +102,14 @@ type GoalLink = {
 
 `ActionabilityEvaluation` 定义见 [专用评估](type-specific-evaluation.md)，其 reasonCodes/missingEvidence/limitations 为权威，Candidate diagnostics 是复制出的便于消费视图，序列化时必须相等，不能双独立生成。`readiness === actionability.readiness`；evidenceRefs 为所有使用到的 source/player/chart/target/actionability/goalLink refs 的去重并集。多余 refs 不可作未核验背书。
 
+`RatingSampleEvidence={ratingRef, scoreRevision, modelVersion, sampleCount, unit:'rating_result_rows', aggregation:'per-dimension-top20', topN:20, duplicateHandling:'preserve'}`；sampleCount为非负整数，不表示目标谱面演奏次数，也不保证是唯一Chart数。
+
+`ChartPredictionSampleEvidence={estimateRef, chartId, scoreRevision, modelVersion, featureCutoff, unit:'comparable_chart_records', targetIdentityExcluded, poolKind:'same_difficulty'|'pooled'|'unknown', poolCount:number|null, stableNeighborCount:number|null, pbNeighborCount:number|null, dataSufficiency:string, sufficiencyRuleRef, evidenceRefs:string[]}`。这些是新增显式诊断字段，不是B3 adapter已提供的字段；计数只映射真实预测器结果/诊断，未导出则null。targetIdentityExcluded未知为null，不默认true。已知计数为非负安全整数；其scope必须与当前canonical chartId对应。完整充分性规则见专用评估，不能用ratingSamples.sampleCount补predictionSamples任一字段。
+
+Interest Discovery允许ratingSamples/predictionSamples均null，输出兴趣证据及LEVEL_MATCH_NOT_ASSESSED；这不产生A/B资格。Level-matched Discovery若使用score load-fit，必须有独立predictionSamples，不能仅凭Rating样本多升级。
+
+sourceHash表示被使用的谱面/模型输入内容hash，Interest Discovery没有使用这些输入时允许null；没有成绩快照时scoreRevision也允许null，coverage须为unknown，仍须可核验的catalogRef/identityMappingRef与兴趣证据。不能因无raw谱面或预测特征阻断纯兴趣探索，也不能用目录hash冒充raw/预测hash或填假scoreRevision。score等依赖这些输入的evaluator继续要求真实hash/revision并验证scope；null不是绕过其门槛的兼容值。
+
 candidateId = `sha256(canonical({decisionId,profileId,chartId,catalogRevision,policyVersion,intentType,subtype,targetHash}))`；decisionId 绑定 frozen context（含 score/portfolio/evidence revisions、asOf、preferences），同决策重复生成稳定，同 Chart 不同 target/type 不撞 ID。不使用随机展示次序决定 ID，不把用户明文 ID 暴露到公共 telemetry。外部事件使用不可逆用户范围标识。
 
 同一候选仅关联 targetHash 严格等价的 Goals；不同 target/GoalType 应为独立 Candidate，再在卡片层聚合。goalIds 是 goalLinks IDs 的 sorted unique 投影，不是选择任意 Goal 的权限。每 Goal 可有独立 baseline/evaluation；不能以共同 chartId 合并这些状态。
@@ -117,7 +136,7 @@ cardId 绑定 decisionId/chartId/primaryCandidateId，变主动作产生新 card
 
 ## 例子与错误
 
-同 chart `123:4`，G1=score-pb(baseline 900000)、G2=df。C1 的 target={kind:score,threshold:900001,...} 关联 G1，ready_now；C2 的 crown=dondaful_combo 关联 G2，not_actionable/CROWN_ATTEMPTS_MISSING。卡片主动作 C1 可进 A，G2 仍独立不可判断。不能让 C1.goalIds=[G1,G2] 伪造共同目标。
+同一经Authority解析的 chart `song:123:course:4`（示意，必须实际存在于该snapshot），G1=score-pb(baseline 900000)、G2=df。C1 的 target={kind:score,threshold:900001,...} 关联 G1，ready_now；C2 的 crown=dondaful_combo 关联 G2，not_actionable/CROWN_ATTEMPTS_MISSING。卡片主动作 C1 可进 A，G2 仍独立不可判断。不能让 C1.goalIds=[G1,G2] 伪造共同目标；来源键`123:4`不直接成为canonical chartId。
 
 相同 chart、相同 targetHash 的两个来源先合并 evidence 但逐条验版本与语义；相冲突的同 evidence ID 拒收，不任意取最新。旧 ordinary 未提供 target 或估计时，不创建假分数 Candidate；可以另走有覆盖声明的 discovery 来源，仍按其证据等级决定位置。
 

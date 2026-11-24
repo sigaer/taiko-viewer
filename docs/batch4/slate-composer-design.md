@@ -4,7 +4,7 @@
 
 ## 确定性流程
 
-1. 验证所有 candidate/evidence 身份、版本、asOf 与 context；冲突拒收。注册表不支持的类型返回 capability diagnostics；不凭 Composer 自行计算皇冠或重新评价 Goal。
+1. 验证所有 candidate/evidence 的Authority canonical chartId、identityMappingRef、版本、asOf 与 context；冲突/未解析来源键拒收。注册表不支持的类型返回 capability diagnostics；不凭 Composer 自行计算皇冠或重新评价 Goal。
 2. 过滤非法目标、用户排除、下架和已达标动作。unknown availability 不进可玩卡；Portfolio 中仍保留不可用 Goal。paused/终态 Goal 不提供 active 提序。
 3. 根据已核实 GoalType+targetHash 关联各自 goalLinks。按 chartId 建集合，保留不同类型/target 独立 Candidate，选一个明确 primary action；不可借一个 ready 把全卡 Goals 变 ready。
 4. 在可行动的 near_term 集合构建 A；以 readiness 与 [A 门槛](priority-actionability-contract.md)为硬约束，再考虑用户手动优先级、类型偏好、覆盖和重复控制。同 identityGroup 全 slate 最多一卡；跨难度竞争要保留 suppression 理由。
@@ -29,7 +29,11 @@ A 容量 K、去重后 ready 数 R、stretch 数 S，若无其他冲突则最大
 
 默认不设强制“每类至少一张”。只对有合格候选的类型施加软覆盖偏好；缺 crown/task/训练证据时允许这些类型在 A/B 为零。各类型候选生成失败、未扫描、证据不全、被去重、被容量压下必须分别报告。
 
+Interest Discovery只在D按兴趣相关性排序，不依赖Rating或score估计，不纳入A/B可行动候选池或其合格类型覆盖分母。Level-matched Discovery使用独立load-fit证据才可进入A/B；Rating样本数不能作为缺预测证据的补位理由。两子类型可在同canonical Chart卡聚合，但主动作必须明确是哪一个，不能把兴趣confidence传给水平分支；Type Coverage仍只有五种intent，subtype覆盖另报。
+
 保留 B3 chart 层 14 天 actual exposure 口径作为主 Repeat Rate；新增 song identity/intent 层仅作附加诊断，不改历史指标含义。Composer 排序以同 song identity 最近 14 天实际展示作为重复惩罚；不得以生成日志当曝光。用户显式选择的 active Goal、证据/target 真正变化或没有可替代合格项允许重复，但记录 `USER_GOAL_REQUEST / EVIDENCE_CHANGED / QUALIFIED_SHORTAGE`。正常重复降序而非一律禁止；禁止通过重复条目填 A。
+
+B4 chart层计量使用canonical chartId；B3原报告仍使用原chartKey，协议名称和输出不重写。跨协议比较只有经固定Authority revision唯一解析的旧曝光才可关联，未解析历史为unknown coverage，不当作首次曝光。
 
 历史不完整为 `repeatHistory=unknown`，不能记 repeat=false 或推断这是新歌。scoreRevision 变化只有涉及当前 target 的实质证据变化才触发 EVIDENCE_CHANGED，不能任意一次同步都重置重复窗口。
 

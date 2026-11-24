@@ -17,6 +17,8 @@
 
 `not_actionable`：不满足上述两者，包括证据未知、过期、语义不明、目标不可支持或过远。它不等于玩家无能力。错误身份/非法 target 从候选集合拒收，而不是装进 D；已达标目标进入 Goal 评估，不重复推荐同一达标动作。
 
+Interest Discovery是明确的兴趣相关性推荐，`evaluationScope=interest_relevance`，没有水平适配断言；即便兴趣证据充分也仅D/readiness=not_actionable，理由为LEVEL_MATCH_NOT_ASSESSED。Level-matched Discovery才可按专用证据进入A/B；两者不增加第六类intent。这一边界防止“喜欢这首歌”或“可以浏览”抬高A组Actionability。Rating总体样本≥20也不能代替对应chart的预测样本充分性。
+
 ## A 组硬规则
 
 N 是**最终实际展示的 A 卡片数**，在 Chart 聚合、歌曲去重、过滤、分页和可见性确认之后计数。每卡仅一个明确 `primaryCandidateId` / primary action，按其 readiness 计数，不按 Goal 数量计数。

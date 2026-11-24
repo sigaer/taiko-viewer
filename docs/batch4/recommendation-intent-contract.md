@@ -17,7 +17,7 @@ Personal Goal 是用户明确接受的意图实例，由 `goalIds` / `goalLinks`
 | `score_improvement`: `score_pb`, `score_target`, `rank_upgrade` | 权威成绩快照、当前 PB、既有 stable/PB estimator、样本口径；既有 ordinary 顺序、有效 Goal 或目录内明确分数目标 | 提高 PB、达到显式整数分数或提升 Rank；分数门槛、独立 stable 估计、模型/输入版本、充分性和时间证据 | `inStrictRange`、单 PB、孤立预测不证明稳定可达。解释当前值/目标/stable 与缺项；满足专用 evaluator 才可 A/B，可信长期目标可 C，自由查看可 D |
 | `crown_completion`: `clear`, `full_combo`, `dondaful_combo`, `ng_reduction` | 权威皇冠状态、判定语义、谱面版本；目录缺皇冠条目、旧 target 列表、Goal | 分别为 Clear、FC、DF 或可比记录 NG 减少；专属皇冠/判定 evidence，不能借分数预测 | 旧 `combo gap`/推荐指数只是候选来源。理由说明具体缺口及语义，不能说高分意味着 FC/DF；有专属可达证据才可 A/B，长期愿望 C，证据不足只能 D 浏览或不展示 |
 | `dimension_training`: `dimension_practice` | 现有六维画像与一致性；有来源的谱面维度特征、适配负荷、训练依据；维度过滤后的目录和明确用户训练意图 | 可执行的指定维度练习动作；玩家对应维度证据与谱面对应特征同时存在 | 六维最低项不能单独叫短板，星级不能替代专项特征。理由说明“为何此维度、为何此谱面”；能执行训练不等于能力会提高；A/B 需要专用准入，长期训练 C，兴趣查看 D |
-| `discovery`: `explore_chart` | 当前目录、地区可用性、成绩覆盖证明、显式偏好、负荷匹配；目录探索分支 | 探索特定谱面；输出 `unplayed_confirmed / no_score_record / coverage_unknown / played_known` | 无记录不自动等于没玩过。只有覆盖充分才在限定来源范围称未游玩。充分覆盖和匹配可 A/B，D 自由探索；通常无长期目标，不强行放 C |
+| `discovery`: `interest_discovery`, `level_matched_discovery` | 兴趣分支：目录、可用性、用户兴趣/目录相关性；水平分支额外需要玩家能力、专用load-fit与覆盖证据 | 均为探索谱面，但兴趣只承诺相关性，水平分支才声明负荷匹配；两者都如实输出四种recordState | Interest Discovery不要求Rating/stable预测，仅D，不计A行动性；Level-matched Discovery专用证据通过才可A/B。无记录不自动等于未玩，缺覆盖仍可兴趣探索但必须标未知 |
 | `challenge`: `dan_task`, `event_task` | 真实任务 ID、版本、要求、有效期/地区、当前进度与相关谱面；任务目录 | 明确 task/requirement 的下一步，或完整任务目标；每个要求有进度证据 | 任意高难谱不是 challenge；缺任务或进度不生成该类型。当前可推进且专用评估通过可 A/B，完整任务属长期目标则 C；D 仅任务浏览 |
 
 Subtype 是有命名空间的判别字段，不能自由混搭。`score_pb` 对应旧 `score-pb`，`full_combo` 对应旧 `fc`，`dondaful_combo` 对应旧 `df`，不改写历史 GoalType。旧 `TargetRecommendationKey='dondaful'` 是另一入口的已有字符串，不能全局替换。
@@ -26,11 +26,13 @@ Subtype 是有命名空间的判别字段，不能自由混搭。`score_pb` 对�
 
 保留六维 `big_song / stamina / speed / accuracy_power / rhythm / complex`，保留 V1 的 per-dimension-top20 / duplicateHandling=preserve。B4 不生成另一套 Rating。未来细分维度用新增 `{namespace, key, schemaVersion, featureRevision}` 注册，必须给出尺度、来源和与六维的关系；不得把未知细分维度塞进 `RatingDimensionKey` 或猜测手法。Chart Intelligence 当前没有被假定为已接通。
 
+Rating sampleCount是总体Rating结果行数，topN=20是逐维聚合参数；二者都不是目标谱面预测样本量。谱面估计使用自己的可比记录池、邻近样本、充分性与模型版本。具体区别、缺失诊断和两级准入见[专用评估](type-specific-evaluation.md)。所有新Candidate身份以[Catalog Authority canonical Chart ID](candidate-schema.md)为准，旧数字songId仅留作适配。
+
 用户偏好包括类型权重、排除谱面和手动 Goal 排序；不修改 evidence/readiness。用户把 DF Goal 排第一，不使它进入 A。算法选出的候选只有在用户确认目标种类、谱面和目标后才转换为真实 Goal，并在服务器冻结独立 baseline。
 
 ## 现有模式的处理
 
-现有 `DecisionPreferences.focus` 的 skill-match/growth/goal/discovery/breakthrough 是排序模式，不是上述类型。不得直接映射成五类并宣称完成迁移。ordinary 只是来源；有显式提分 target 才能生成 score 候选。growth 必须补足训练证据；goal 经 GoalType 分派；discovery 必须补覆盖状态；breakthrough 属提分意图，不能冒充段位/活动 challenge。
+现有 `DecisionPreferences.focus` 的 skill-match/growth/goal/discovery/breakthrough 是排序模式，不是上述类型。不得直接映射成五类并宣称完成迁移。ordinary 只是来源；有显式提分 target 才能生成 score 候选。growth 必须补足训练证据；goal 经 GoalType 分派；discovery 必须明确兴趣/水平子类型及覆盖状态，不能自动继承旧stable gate；breakthrough 属提分意图，不能冒充段位/活动 challenge。
 
 现有 score-pb Goal 的完成条件仍是 `highScore > baseline.highScore`，对应包含等号的候选分数恰为 baseline+1。任意更高指定分数需要新增 `score-target` GoalType/evaluator，不能复用 score-pb 名义改变旧语义。
 

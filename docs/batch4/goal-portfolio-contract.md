@@ -23,6 +23,7 @@ type GoalPortfolioV2 = {
 type PortfolioGoalV2 = {
   id: string; profileId: string; goalRevision: string;
   songId: number | null; chartId: string | null;
+  canonicalSongId: string | null; identityMappingRef: string | null;
   difficultyType: number | null;          // chart goal 必填；跨谱面 task 可 null
   goalType: string; evaluatorVersion: string;
   target: Target | null;                  // 新Goal必填；旧非法/不支持记录可null
@@ -48,6 +49,8 @@ type PortfolioGoalV2 = {
 `Target` 引用 [Candidate](candidate-schema.md)。`BaselineEnvelope={version, capturedAt, sourceRevision, evidenceRefs, value}`：version=1 时 value **逐字段保留原 GoalBaseline**（包括 provenance/sourceCompleteness/recordPresent/nullable 数值）；新增类型使用明确版本，不能强转 v1。每个 Goal 自己冻结 baseline，即使两 Goal 创建于同一 snapshot，也有各自 baseline 引用，不能后续原地刷新。
 
 legacyRecord 是只读历史证据，不是第二套可写Goal状态；保留旧targetData/title/starLevel等全部字段供v1 evaluator和历史回放。target=null 的遗留记录必须带 TARGET_UNSUPPORTED、不得生成绑定候选；仍允许查看、暂停、取消。新Goal不得以null target入库。跨谱面task Goal的songId/chartId/difficultyType可null，仅在task-progress evaluator正式注册后允许创建；具体谱面候选仍须精确chartId。
+
+所有新chart Goal的chartId必须使用Catalog Authority canonical Chart ID，canonicalSongId取Authority行，songId只保留sourceSongId适配含义。迁移旧Goal时按原来源namespace/ID/difficulty与冻结catalogRevision唯一解析，记录identityMappingRef；无法解析则chartId/canonicalSongId=null、availability=unknown且报CHART_ID_UNRESOLVED，不生成推荐关联，不删除目标或重采baseline。禁止直接拼旧数字ID为永久ID；原v1 evaluator仍在原identity/provenance scope内评价，不重写历史完成证据。
 
 `GoalOrigin={kind:'legacy'|'manual'|'accepted_recommendation', acceptanceId:null|string, candidateId:null|string, decisionId:null|string, sourceSnapshot:null|object}`；legacy sourceSnapshot 保存现有 source/sourceBasis/sourceMode/sourceRank/sourceRevision/sourceGeneratedAt，不能把旧来源重写为新算法。用户直接创建合法 Goal 不需要伪造推荐，但必须显式提交目标并冻结 baseline。
 
@@ -106,5 +109,7 @@ Personal Goal 的 readiness 经 GoalType 路由到 [同一专用 evaluator](type
 接受推荐先 preview，后显式 accept-and-create。v2 短时 signed token 绑定 owner/profile/source identity、action=accept-goal、candidateId/decisionId、intent/subtype、canonical target hash、catalog/policy/score/evidence revisions、portfolioRevision、issuedAt/expiresAt、nonce/keyId/schemaVersion。有效期 15 分钟，重启失效可要求刷新；初期保留进程内 HMAC 密钥语义，不擅自引入另一套长期凭据。多实例共享/轮换密钥是后续单一 signer 部署决策。
 
 token 验签不代替权限、CAS、目录/成绩复验。事务内用 `(owner,profile,commandId)` 唯一键：同 requestHash 重放原响应且不重采 baseline；异 payload 返回 409。成功事务记录 nonce 归属，不能更换 commandId 重放创建第二目标。精确相同未终态 Goal（规范化 type/target）返回 existingGoalId，不重置 baseline；不同 target/GoalType 同 Chart 合法。
+
+v2 token绑定的chart为canonical chartId并包含identityMappingRef，不以来源数字键替代；跨revision映射变化需重新preview。接受推荐时origin.sourceSnapshot必须保存intentType/subtype/targetHash，Discovery另保存target.discoveryMode，不能在接受时互换，也不能自动转换成score-pb。缺对应completion evaluator仍不允许建Goal。
 
 旧 API 的隔离和迁移步骤见 [backward-compatibility.md](backward-compatibility.md)。本阶段不访问或执行真实 DB schema 变更。

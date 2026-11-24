@@ -26,8 +26,12 @@
 | 分数读协议 | `packages/sakura-taiko-contract/src/score-read.ts:4`、`legacy.mjs:39` | lossless记录投影，没有attempt identity；package chartId含chartType，B3 key不含，不可直接等同 |
 | 进度/段位入口 | `taiko_viewer/server/services/account/progress.ts:76` | 已有段位版本/选项和Python进度图调用；不是统一 task-requirement/progress Candidate 接口 |
 | 离线评价 | `taiko_viewer/utils/player-intelligence/benchmark.ts:3,25` | 7天/首2次可识别play/14天repeat、单activeGoalId；合成协议，不是线上效果证据 |
+| Catalog Authority canonical身份 | `taiko_viewer/server/services/content/catalogAuthority.ts:8,20`；`docs/wahlap-authority-b21-20261124/source-of-truth.md` | 读取固定Authority snapshot；chart字典来源键与行内canonical chartId不同；B4必须读后者 |
+| Rating样本投影 | `taiko_viewer/server/services/account/personal.ts:29`；`types/recommendation-intelligence.ts:4` | scoreCount只是sampleCount别名，topN=20是聚合参数，不是目标预测样本量 |
 
 补充只读核验使用 B3 原回归所引用的本机 core 源码 `/var/tmp/taiko-batch21-20261124/core`：`core/parser/hiroba.py:327` 读取成绩详情判定/combo，`core/parser/hiroba_score.py:19` 把 captured_at 写入 highscore/update 时间；`core/recommendation/estimator.py:236` 从 best_map 构建 HistorySamples（非每次演奏）。这些不是另一设备的 Taiko Agent，也未执行同步/读玩家数据。保守结论是不能证明字段同次性，不能把 snapshot 当 attempt；未声称核实所有上游真实行为。
+
+本轮三项修订补充核验同机B2.1源码：`/var/tmp/taiko-batch21-20261124/bot/taiko_bot/catalog/builder.py:73` 写 `charts[sourceSongId:difficulty].chartId = <stable songId>:course:<difficulty>`，含exists与policies；其sourceAliases/previous snapshot维持永久身份，不能由消费者重造。`bot/packages/taiko-application/src/taiko_application/query/recommendation.py:43` 的sampleCount=len(results)，`bot/taiko_bot/offline/growth_compute.py:61`起使用正rating、level≥4的rated_stats及逐维top20。Core estimator第298/339/695行分别选择同难度池、目标特征邻近证据、排除目标identity并计算本谱面估计；ScoreEstimateSnapshot.neighbor_count存在，而B3 adapter未透传。以上均为静态源码核验，不是玩家数据抽样。
 
 ## 字段演进边界
 
@@ -42,6 +46,9 @@
 | goalId? / isUnplayed | goalLinks[] / recordState+coverage | 旧单ID包装一项，严格target校验；旧布尔不证明完整覆盖 |
 | targetScore / stableScore / confidence | score target + type-specific actionability | 只进入score分支；不可投射到FC/DF |
 | focus | 新intent + 显式偏好 | 不一一改名，不改旧报告 |
+| B3 `songId:difficultyType` / package chartId | Authority canonical chartId + identityMappingRef | 来源namespace+原ID+难度经冻结Authority唯一解析；保留legacyChartKey，拒绝猜测/歧义；songId数字字段仅作sourceSongId适配 |
+| 未区分的discovery | interest_discovery / level_matched_discovery | 旧focus/isUnplayed不能决定新子类型；兴趣不要求预测且仅D，水平匹配须独立证据；没有自动升级 |
+| Rating sampleCount / topN | ratingSamples / predictionSamples两个独立对象 | 前者总体行数，后者目标相关可比记录；缺neighbor_count等不能用Rating值填入；B3原gate只作为原行为保留 |
 
 ## 迁移计划（本阶段不执行）
 
@@ -62,3 +69,5 @@
 v1 token不具备目标和Portfolio revision绑定，不能转换为v2授权；无论是否过期一律重新preview签发。v2 command幂等在commit前建立，以完整canonical request hash校验；保留同重试原baseline，不再依赖“恰好当前Goal同chart/type”启发式。
 
 兼容adapter撤除条件：所有受支持客户端支持v2，迁移fixture及历史回放通过，观察期无旧writer调用并经审查；随后删旧writer分支和唯一目标投影依赖，保留版本化历史读取。没有无限期双写、双读或双配置路线。
+
+本轮修订不改旧数据库song_id/difficulty_type或已签v1 token。新增canonical关联是读取Authority后的版本化关联证据；没有唯一映射的旧Goal保留原baseline/history且不进入新推荐，不能迁移时强写一个推测ID。B3 Golden和旧Repeat报告不重算；B4采用canonical单位，跨版本比较需显式身份解析覆盖率。此前B4.0草稿的explore_chart单subtype与短chartId尚未实现，不设长期兼容读写，直接由本修订替换。

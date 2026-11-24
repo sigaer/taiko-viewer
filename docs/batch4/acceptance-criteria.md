@@ -64,6 +64,16 @@
 | M01 | 迁移重复执行/取消完成历史/旧非法baseline | 原ID/对象hash/事实key不变；不可恢复字段保留unsupported |
 | M02 | 迁移后旧写接口；多active旧读 | upgrade-required，不替换目标或任意选一个 |
 | M03 | 多active后回滚旧schema | 禁止重新加单active约束造成目标丢失；先冻结写保留v2 |
+| R01 | 来源键123:4与Authority行内song:…:course:4 | B4使用行内canonical ID；字符串格式正确但Authority不存在的ID仍拒绝 |
+| R02 | 两个来源alias解析同一chart；同数值不同namespace | 前者按权威关系聚合/去重，后者不能直接合并；保留mapping evidence |
+| R03 | ID未解析/映射歧义/exists=false槽位/旧Goal无映射 | 候选拒收；旧Goal保留baseline/history且标未知，不造永久ID |
+| R04 | Interest Discovery无Rating/无预测/覆盖未知，但有兴趣证据与可用chart | 可D探索，level match未评估，不能称未玩；不进A/B或Actionability分母 |
+| R05 | 高兴趣confidence与水平匹配不足 | 不升级ready；两个subtype/targetHash不混用；五类型覆盖不重复计discovery |
+| R06 | Level-matched Discovery通过/缺失load-fit | 前者按ready/stretch和A gate组合；后者不进A/B；有独立兴趣证据才另生兴趣候选 |
+| R07 | Rating.sampleCount=200但预测neighbor缺失/0或data_sufficiency不足 | 分别PREDICTION_SAMPLE_EVIDENCE_MISSING/INSUFFICIENT；不能用200填预测字段 |
+| R08 | Rating.sampleCount<20但目标预测充分 | 分数分支总体门槛仍失败；Interest Discovery不受该门槛影响 |
+| R09 | topN=20/重复Rating行/邻近样本数<20 | 不推断20次游玩或20张唯一谱面；预测按其模型规则判断，不照搬Rating门槛 |
+| R10 | B3报告/事件旧键迁到B4比较 | 原报告字节不变；明确canonical映射覆盖，未解析历史unknown而非首次曝光 |
 
 ## 本批实际验证记录
 
@@ -99,6 +109,12 @@ bash scripts/memory/run_qa.sh /bin/bash scripts/verify_player_intelligence.sh \
 ```
 
 文档检查通过隔离wrapper执行 `/usr/bin/python3 /var/tmp/taiko-batch4-20261124/check_docs.py`，检查上述文件/链接/代码块、源码差异边界、原候选状态与两报告原字节；该临时检查器不属于运行代码。`git diff --check`在提交前执行。以上不证明B4新schema、CAS事务、新类型可达性或新Composer已经实现；前述I/P/G/T/C/E/M用例全部是未来验收规范。真实玩家效果、概率校准和生产可用性未测试。
+
+## B4-1 前三项契约修订验证
+
+本轮基于`b6dab5ef`仅修订十份契约，未实施新schema/adapter/evaluator。隔离文档检查run=`qa-2d0789914a77`：10份文档、35个相对文件链接、代码块配对通过；canonical身份、Discovery两个subtype、两类样本字段和独立缺失诊断的文本断言通过，新增R01–R10验收规范。`git diff --check`通过。原B3候选HEAD/干净状态未变，126 Golden所在报告与B3基线逐字节一致，两个SHA-256仍为上表值。
+
+wrapper/process exitCode=0、childrenStopped=true、stopReason=null。证据保存在`/home/sigaer/taiko/qa-vault/runs/qa-2d0789914a77/evidence/`。本轮没有重跑源码测试；上节92/126/3回归结果是B4.0初始文档交付时的实际运行，不能当作新字段实现测试。R01–R10尚未实现或执行，不将文档断言检查称为算法/数据库验收。
 
 ## 审查停止点
 
