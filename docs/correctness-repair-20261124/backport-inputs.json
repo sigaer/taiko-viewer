@@ -1,0 +1,12 @@
+{
+  "installedCoreVersion": "0.1.1",
+  "releaseRoot": "/opt/taiko-bot/releases/0.26.3",
+  "sha256": {
+    "chart/availability.py": "6a80d0150ece1c45b6646b7a196308e817fb5bcf842fff972f8c7482bfbd8bdd",
+    "recommendation/candidates.py": "98893d3a405cd70a91f25cd0f692ff6dae131a2c802a1b80353b1a1d058f250f",
+    "recommendation/catalog_inputs.py": "7b212104a0935474413ac793b76f4e12e8b91f12b9792f23efc88b6446820ab4",
+    "parser/chart_analysis.py": "8a3f6e66758f15a198b062f825dc8eccf6b20fd0ef0a16278ba9d636fa54e3eb",
+    "parser/tja.py": "951a8838fa65660f11f925f48740afb99d97e28141887e26fa88ac0c4a94acc3"
+  },
+  "candidatePatchSha256": "c2baff5be96894fdf55b41edae6bd7d2111a2e1e685e9352f0ba38fa80a3e283"
+}
