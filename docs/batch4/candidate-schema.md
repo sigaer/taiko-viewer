@@ -29,7 +29,7 @@ type Target = {
 type EvidenceRef = {
   id: string; kind: 'score_snapshot' | 'estimate' | 'catalog' | 'chart_feature' |
     'rating' | 'growth' | 'coverage' | 'attempt' | 'task' | 'goal_baseline' | 'preference';
-  source: string; sourceRevision: string; contentHash: string | null;
+  source: string; sourceRevision: string; contentHash: string;
   profileId: string | null; chartId: string | null;
   catalogRevision: string | null; modelVersion: string | null;
   occurredAt: string | null; observedAt: string | null; confirmedAt: string | null;
@@ -46,6 +46,8 @@ intent/subtype/target.kind必须使用判别注册表：score_pb/score_target→
 保留 `songId:number` 仅作为当前 Authority 行的 sourceSongId/旧API适配字段，非永久身份；新增sourceNamespace明确其namespace。B3 `ChartFeature.key` 与 package `song:difficulty:chartType` 都只能是来源键，经指定catalogRevision的显式sourceAliases/映射证据解析到唯一Authority行。零匹配/多匹配/变体冲突拒绝候选并报 `CHART_ID_UNRESOLVED / CHART_ID_AMBIGUOUS`，不能按标题猜、不截后缀、不以数值相等跨namespace关联。历史原始ID/字节不改。
 
 Candidate、EvidenceRef、Goal关联、卡片聚合、事件与B4评估一律用canonical chartId；目录revision仍单独冻结，内容hash不是永久ID。读取到槽位不证明谱面存在：还须exists=true及对应地区policy允许。跨歌曲去重使用Authority支持的identityGroup，默认canonicalSongId；额外版本合并必须有显式权威关系，不能从旧数值ID推断。旧B3 key只在legacyChartKey与原协议回放中保留。
+
+B4-1 Review Fix：已解析 `EvidenceRecord.ref.contentHash` 必填，值为 `SHA-256(canonicalJSON(payload))` 的 64 位小写 hex；canonicalJSON 对 object keys 排序、array 顺序保留，仅接受有限 JSON 值。缺失、null、格式错误或摘要不匹配均拒绝；未知证据保留缺失诊断，不能作为已解析记录传入。此修订统一现有 payload 完整性验证，不改变 B3 wire protocol。
 
 EvidenceRef 是来源定位，不包含私密账号、token、cookie、原始个人 payload。必须在权限受控的 evidence resolver 中能复查；sourceRevision 不总是 SHA，标记 hash 的字段才强制 64 位小写 hex。与当前 B3 ReachEvidence 对应的 sourceHash/scoreRevision 等约束继续采用原规则。shared refs 可引用同一不可变证据，不能共享可变结论。
 

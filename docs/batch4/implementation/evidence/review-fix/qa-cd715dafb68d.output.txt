@@ -1,0 +1,4 @@
+{"candidates":10,"mediansMs":{"contextPreparation":3.114,"candidateValidation":2.75,"canonicalIdentityResolution":0.248,"goalAssociation":1.986,"priorityGate":0.903,"slateComposition":19.55}}
+{"candidates":100,"mediansMs":{"contextPreparation":28.072,"candidateValidation":28.885,"canonicalIdentityResolution":2.778,"goalAssociation":27.568,"priorityGate":7.804,"slateComposition":139.826}}
+{"candidates":1000,"mediansMs":{"contextPreparation":207.163,"candidateValidation":216.07,"canonicalIdentityResolution":23.378,"goalAssociation":171.108,"priorityGate":4.421,"slateComposition":1336.12}}
+{"candidates":5000,"mediansMs":{"contextPreparation":1258.857,"candidateValidation":1178.824,"canonicalIdentityResolution":142.931,"goalAssociation":822.527,"priorityGate":5.43,"slateComposition":7689.49}}

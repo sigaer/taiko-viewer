@@ -25,6 +25,9 @@ const shapes: Record<string, { kind: EvidenceRecord['ref']['kind']; source: stri
   task: { kind: 'task', source: 'task-authority', shape: s.object({ type: s.one('task'), taskId: s.str, taskVersion: s.str, authorityRef: s.str, sourceHash: s.hex, region: s.one('CN', 'JP'), platform: s.str, validFrom: s.time, validTo: s.nullable(s.time), evergreen: s.bool, progressKnownAt: s.time, requirements: s.array(s.object({ requirementId: s.str, chartId: s.str, target: targetShape, sameAttempt: s.bool, completed: s.bool }), 100), progressRevision: s.str, completed: s.bool }) },
 };
 export type EvidenceIndex = ReadonlyMap<string, EvidenceRecord>;
+// B4 resolved records require lowercase SHA-256(canonicalJSON(payload)).
+// Missing/null hashes fail the ref shape; a valid-looking but unequal digest fails below.
+// Callers must reject all preparation issues before consuming the index.
 export function prepareEvidence(records: readonly EvidenceRecord[]): { index: EvidenceIndex; issues: ValidationIssue[] } {
   const index = new Map<string, EvidenceRecord>(), issues: ValidationIssue[] = [];
   if (!Array.isArray(records) || records.length > 100000) return { index, issues: [{ path: 'evidence', code: 'EVIDENCE_BUDGET' }] };

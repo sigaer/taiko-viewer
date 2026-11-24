@@ -1,0 +1,75 @@
+{
+  "schemaVersion": "b4-review-fix-audit/1",
+  "baseCommit": "f53601362b62469eb4b1d07db94421dd35a9c6d9",
+  "boundary": "PASS",
+  "originalB4TestsAndFixturesUnchanged": 12,
+  "originalEvidenceFilesUnchanged": 23,
+  "nearEvidenceFunctionByteIdentical": true,
+  "b3ReportSha256": {
+    "existing-baseline.json": "ed6ed2b0f0bfce8ef197536a0e81f32a9115d133b235f5dd69d8e3b02b53f36f",
+    "offline-benchmark.json": "acf208e6efb5a62b44e9b4a33f526c52e7cab03574c02400d114b90337e57bbc"
+  },
+  "validDocumentationLinks": 29,
+  "originalPerformanceSha256": "2644588f2e805142df72e46359b940724672d1852bcd8ec9277a238916a39ade",
+  "reviewPerformanceSha256": "bdf27954ae7d3b2a3abc0f42abc038f6a81cd58704ddb649ad2e265ca7e28c94",
+  "kernelFileHashes": {
+    "taiko_viewer/utils/multi-objective/actionability.ts": "f07715dfb84de8809dff4298d5e83bb1f2bf1240c47376a0bd48ccafecf2d110",
+    "taiko_viewer/utils/multi-objective/candidate.ts": "d42c055dae50b7fd2148f09cef4a4a1884dc7aa57bf7c91a83afe9ea416105e0",
+    "taiko_viewer/utils/multi-objective/common.ts": "5e4fadfb0b53cf2f2857e9eff8f3081b3397ebffc1f712c4c73883841c8e8c7b",
+    "taiko_viewer/utils/multi-objective/composer.ts": "01776576947d6b2b71b3ed1d73f8f5ffee4acd82d85ab773e74ca6a8a6f1fb6e",
+    "taiko_viewer/utils/multi-objective/context.ts": "1aa7ac1dc53b139fad01bbe3bc84c3b6e98f01f03e71df0f6c640391d0e520cf",
+    "taiko_viewer/utils/multi-objective/contracts.ts": "359d185d96f650ee271a5e869bd7c3557abbe959f1f9b9566277e8bc5c29964e",
+    "taiko_viewer/utils/multi-objective/evidence-bindings.ts": "8e0d984dbeb0e0c29f445bfc4dd6f826399dbdd896d6ff6641b5aa205933a9b2",
+    "taiko_viewer/utils/multi-objective/evidence.ts": "a5d333ab77ca4a19a434262ff02cce31c7b73b212e8e81c4551f20cf8064372d",
+    "taiko_viewer/utils/multi-objective/goals.ts": "2c7c579f73b84a0139e94fa8d0914633ebd4d7a4a10c19649c88b4036740d298",
+    "taiko_viewer/utils/multi-objective/identity.ts": "1d0cf75776c2a34126eee49d9004698efd23eb52babec9546f5a766a4dc85bbe",
+    "taiko_viewer/utils/multi-objective/index.ts": "e9eccee8bd9b5579c52d59f6741fd2ebf4e244a19427d4b4cde8c15c0cee9feb",
+    "taiko_viewer/utils/multi-objective/priority.ts": "581e991d109306fbc692ab4b56b051eb772e880288cea30507c31428726a1b25",
+    "taiko_viewer/utils/multi-objective/registries.ts": "297c3b3dc7be02efdf13aebd10f73c1957a3f13309dc8991a21caef6bb6d94c9",
+    "taiko_viewer/utils/multi-objective/schemas.ts": "73dfb4f51eea5d9f91b0817bd3f13637e6dbe9ae649f60fa62a7ded1e38a11ce",
+    "taiko_viewer/utils/multi-objective/shape.ts": "692c9c3a77fac9651946afb843e776c606d74ff8190d60c167a4368cadd6108c"
+  },
+  "newTestSha256": "85d6cb047a511958799ff93f624d148f66f1bbd1604f203cb575c0c12aa75ed8",
+  "changedPathsBeforeArchival": [
+    "docs/batch4/candidate-schema.md",
+    "docs/batch4/implementation/README.md",
+    "docs/batch4/implementation/actionability-priority-report.md",
+    "docs/batch4/implementation/candidate-validation-report.md",
+    "docs/batch4/implementation/evidence/review-fix-audit.py",
+    "docs/batch4/implementation/evidence/review-fix-performance.json",
+    "docs/batch4/implementation/review-fix-acceptance.md",
+    "docs/batch4/implementation/review-fix-performance.md",
+    "taiko_viewer/tests/multi-objective/evidence-scope-baseline.test.ts",
+    "taiko_viewer/utils/multi-objective/actionability.ts",
+    "taiko_viewer/utils/multi-objective/contracts.ts",
+    "taiko_viewer/utils/multi-objective/evidence-bindings.ts",
+    "taiko_viewer/utils/multi-objective/evidence.ts",
+    "taiko_viewer/utils/multi-objective/schemas.ts"
+  ],
+  "runs": [
+    {
+      "runId": "qa-4ba877760444",
+      "purpose": "Strict TS + 270 B4 tests",
+      "exitCode": 0,
+      "childrenStopped": true,
+      "outputSha256": "6ee41599596adaa209695bb930c4c2bdac37c925405e495d75beba80a8fbbaf6",
+      "vault": "/home/sigaer/taiko/qa-vault/runs/qa-4ba877760444/evidence"
+    },
+    {
+      "runId": "qa-fd206385c55b",
+      "purpose": "Full integration: 270 B4 + 92 B3 + Strict TS + 126 Golden/3 Core twice",
+      "exitCode": 0,
+      "childrenStopped": true,
+      "outputSha256": "a98084c8e79b15c6d4f810c4e12b9eadf4fdf097211c53427639f92c01d27e6c",
+      "vault": "/home/sigaer/taiko/qa-vault/runs/qa-fd206385c55b/evidence"
+    },
+    {
+      "runId": "qa-cd715dafb68d",
+      "purpose": "Unchanged benchmark at 10/100/1000/5000, separate review-fix output",
+      "exitCode": 0,
+      "childrenStopped": true,
+      "outputSha256": "0b569e2edfdfade7c1754356a605ed742f4f6c30fbae1514ee510c1329fefc1e",
+      "vault": "/home/sigaer/taiko/qa-vault/runs/qa-cd715dafb68d/evidence"
+    }
+  ]
+}

@@ -6,6 +6,7 @@ import { evaluatorCapability } from './registries.ts';
 import { DAY, same, unique, compare } from './common.ts';
 import { actionabilityShape } from './schemas.ts';
 import { inspect } from './shape.ts';
+import { samePlayScope, validateScorePbBaseline } from './evidence-bindings.ts';
 const reasons = new Set(`EVIDENCE_MISSING EVIDENCE_STALE EVIDENCE_SCOPE_MISMATCH EVIDENCE_FUTURE CATALOG_UNAVAILABLE USER_EXCLUDED TARGET_UNSUPPORTED TARGET_ALREADY_MET EVALUATOR_UNREGISTERED
 SCORE_STABLE_SUPPORTED SCORE_BOUNDED_STRETCH SCORE_PB_ONLY RATING_SAMPLE_INSUFFICIENT PREDICTION_SAMPLE_INSUFFICIENT PREDICTION_SAMPLE_EVIDENCE_MISSING SCORE_TARGET_INVALID SCORE_TARGET_BINDING_MISMATCH SCORE_RANK_MAPPING_MISSING
 CROWN_CLEAR_NEAR_EVIDENCE CROWN_FC_NEAR_EVIDENCE CROWN_DF_NEAR_EVIDENCE CROWN_NG_NEAR_EVIDENCE CROWN_BOUNDED_STRETCH CROWN_ATTEMPTS_MISSING JUDGEMENT_SEMANTICS_UNKNOWN AGGREGATE_NOT_ATTEMPT CROWN_REQUIREMENT_UNKNOWN CROWN_BASELINE_INCOMPARABLE
@@ -51,8 +52,25 @@ export function validateActionabilityEvaluation(c: MultiObjectiveCandidate, ctx:
     const crowns = p.crowns as Record<string, unknown>;
     return crowns[crown] === true || (crown === 'clear' && (crowns.full_combo === true || crowns.dondaful_combo === true)) || (crown === 'full_combo' && crowns.dondaful_combo === true);
   };
-  if (snapshots.some(p => p && ((t.kind === 'score' && typeof p.currentBestScore === 'number' && p.currentBestScore >= t.threshold) || (t.kind === 'rank' && typeof p.rank === 'number' && p.rank >= t.threshold) || (t.kind === 'crown' && crownOwned(p, t.crown)) || (t.kind === 'ng_reduction' && p.judgeTotal === t.total && typeof p.ng === 'number' && p.ng <= t.threshold)))) add('TARGET_ALREADY_MET');
   const used = a.evidenceRefs.map(id => evidence.get(id)).filter(r => r !== undefined);
+  const windows = c.intentType === 'crown_completion' ? used.filter(r => r.payload.type === 'attempt_window') : [];
+  const window = windows.length === 1 ? windows[0]!.payload : undefined;
+  const attempts = c.playerEvidence.attemptRefs.map(id => evidence.get(id)).filter((r): r is EvidenceRecord => r?.payload.type === 'attempt');
+  const windowVerified = !!window && same(unique(window.attemptRefs as string[]), unique(c.playerEvidence.attemptRefs))
+    && window.to === ctx.asOf && Date.parse(window.from as string) <= Date.parse(ctx.asOf) - 30 * DAY;
+  const attemptsScoped = !!window && attempts.length === c.playerEvidence.attemptRefs.length
+    && new Set(attempts.map(r => r.payload.attemptId)).size === attempts.length
+    && attempts.every(r => samePlayScope(r.payload, window) && !!r.ref.occurredAt
+      && r.ref.occurredAt >= (window.from as string) && r.ref.occurredAt <= (window.to as string)
+      && Date.parse(ctx.asOf) - Date.parse(r.ref.occurredAt) <= 30 * DAY);
+  const currentScoped = snapshots.length > 0 && snapshots.every(p => samePlayScope(p, window));
+  const baseline = t.kind === 'ng_reduction' ? get(t.baselineRef) : undefined;
+  const baselineScoped = t.kind !== 'ng_reduction' || (baseline?.type === 'goal_baseline' && baseline.goalType === 'ng-reduced' && samePlayScope(baseline, window));
+  const crownScoped = windowVerified && attemptsScoped && currentScoped && baselineScoped;
+  if (snapshots.some(p => p && ((t.kind === 'score' && typeof p.currentBestScore === 'number' && p.currentBestScore >= t.threshold)
+    || (t.kind === 'rank' && typeof p.rank === 'number' && p.rank >= t.threshold)
+    || (crownScoped && ((t.kind === 'crown' && crownOwned(p, t.crown))
+      || (t.kind === 'ng_reduction' && p.judgeTotal === t.total && typeof p.ng === 'number' && p.ng <= t.threshold)))))) add('TARGET_ALREADY_MET');
   if (actionable && c.chartEvidence.availability !== 'active') add('CATALOG_UNAVAILABLE');
   const requireEvidence = (id: string) => { if (!a.evidenceRefs.includes(id)) add('EVALUATOR_REQUIRED_REF_MISSING'); };
   const loadFit = (id: string) => {
@@ -77,11 +95,7 @@ export function validateActionabilityEvaluation(c: MultiObjectiveCandidate, ctx:
       const mapping = get(t.requirementRef);
       if (mapping?.type === 'rank_requirement' && mapping.rank === t.threshold) threshold = mapping.scoreThreshold as number;
     }
-    if (t.kind === 'score' && c.subtype === 'score_pb') {
-      const b = get(t.baselineRef);
-      const baseline = b?.type === 'goal_baseline' && b.goalType === 'score-pb' ? b.highScore : estimate?.currentBestScore;
-      if (typeof baseline !== 'number' || !Number.isSafeInteger(baseline + 1) || t.threshold !== baseline + 1) add('SCORE_TARGET_BINDING_MISMATCH');
-    }
+    issues.push(...validateScorePbBaseline(c, ctx, evidence));
     if (threshold !== null && estimate?.currentBestScore !== null && typeof estimate?.currentBestScore === 'number' && threshold <= estimate.currentBestScore) add('TARGET_ALREADY_MET');
     if (actionable) {
       if (threshold === null) add('SCORE_RANK_MAPPING_MISSING');
@@ -99,14 +113,11 @@ export function validateActionabilityEvaluation(c: MultiObjectiveCandidate, ctx:
     if (actionable) {
       if (c.playerEvidence.recordSemantics !== 'verified_attempt') add('AGGREGATE_NOT_ATTEMPT');
       if (!current || (t.kind === 'crown' && (current.crowns as Record<string, unknown>)[t.crown] !== false)) add('CROWN_CURRENT_UNKNOWN');
-      const windows = used.filter(r => r.payload.type === 'attempt_window');
-      const window = windows.length === 1 ? windows[0]!.payload : undefined;
-      const attempts = c.playerEvidence.attemptRefs.map(id => evidence.get(id)).filter((r): r is EvidenceRecord => r?.payload.type === 'attempt');
-      if (!window || !same(unique(window.attemptRefs as string[]), unique(c.playerEvidence.attemptRefs)) || window.to !== ctx.asOf || Date.parse(window.from as string) > Date.parse(ctx.asOf) - 30 * DAY) add('CROWN_ATTEMPT_WINDOW_UNVERIFIED');
+      if (!windowVerified) add('CROWN_ATTEMPT_WINDOW_UNVERIFIED');
+      if (!currentScoped) add('CROWN_CURRENT_SCOPE_UNVERIFIED');
+      if (!attemptsScoped) add('CROWN_ATTEMPT_SCOPE_INVALID');
       const ordered = attempts.sort((x, y) => compare(y.ref.occurredAt ?? '', x.ref.occurredAt ?? '') || compare(x.ref.id, y.ref.id));
-      if (new Set(ordered.map(r => r.payload.attemptId)).size !== ordered.length || ordered.some(r => !r.ref.occurredAt || Date.parse(ctx.asOf) - Date.parse(r.ref.occurredAt) > 30 * DAY || r.payload.mode !== window?.mode || r.payload.platform !== window?.platform)) add('CROWN_ATTEMPT_SCOPE_INVALID');
       if (ordered.length < (stretch ? 2 : 3) || ordered.length > 3 || (!stretch && new Set(ordered.map(r => r.ref.occurredAt?.slice(0, 10))).size < 2)) add('CROWN_ATTEMPTS_MISSING');
-      const baseline = t.kind === 'ng_reduction' ? get(t.baselineRef) : undefined;
       if (t.kind === 'ng_reduction' && (!baseline || baseline.type !== 'goal_baseline' || baseline.goalType !== 'ng-reduced' || !(typeof baseline.ng === 'number' && baseline.ng > 0) || baseline.total !== t.total || t.threshold !== (baseline.ng as number) - 1 || current?.judgeTotal !== t.total)) add('CROWN_BASELINE_INCOMPARABLE');
       if (t.kind === 'ng_reduction' && (!baseline?.mode || !baseline?.platform || baseline.mode !== window?.mode || baseline.platform !== window?.platform || current?.mode !== baseline.mode || current?.platform !== baseline.platform)) add('CROWN_BASELINE_MODE_UNVERIFIED');
       const near = (p: Record<string, unknown>, loose: boolean): boolean => {

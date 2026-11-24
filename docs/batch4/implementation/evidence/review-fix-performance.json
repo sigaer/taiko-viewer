@@ -1,0 +1,464 @@
+{
+  "schemaVersion": "b4-benchmark/1",
+  "measuredAt": "2026-11-24T15:07:17.668Z",
+  "scope": "synthetic-offline-only",
+  "environment": {
+    "node": "v24.13.0",
+    "platform": "linux",
+    "architecture": "x64",
+    "cpu": "Intel(R) Xeon(R) Platinum 8255C CPU @ 2.50GHz",
+    "logicalCpus": 8,
+    "hostMemoryBytes": 32865886208,
+    "processResourceUsage": {
+      "userCPUTime": 104584248,
+      "systemCPUTime": 1596614,
+      "maxRSS": 573468,
+      "sharedMemorySize": 0,
+      "unsharedDataSize": 0,
+      "unsharedStackSize": 0,
+      "minorPageFault": 469151,
+      "majorPageFault": 25,
+      "swappedOut": 0,
+      "fsRead": 2480,
+      "fsWrite": 0,
+      "ipcSent": 0,
+      "ipcReceived": 0,
+      "signalsCount": 0,
+      "voluntaryContextSwitches": 15862,
+      "involuntaryContextSwitches": 1464
+    }
+  },
+  "methodology": {
+    "oneWarmupPerOperation": true,
+    "concurrency": 1,
+    "aggregateBatchMilliseconds": true,
+    "candidateValidationAndIdentityAndAssociationReusePreparedContext": true,
+    "compositionIncludesContextPreparationAndAllValidation": true,
+    "priorityGateUsesAtMost50CardsWithFullCandidateLookup": true,
+    "predictionsExecuted": false,
+    "liveDataRead": false,
+    "productionPerformanceConclusion": false
+  },
+  "results": [
+    {
+      "candidates": 10,
+      "goals": 10,
+      "evidenceRecords": 41,
+      "displayedCards": 10,
+      "slateHash": "ebfabccf1976f7295c16c4ca64cb2860ff820f911ccb32828eaed900d184534e",
+      "timings": {
+        "contextPreparation": {
+          "repetitions": 7,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 2.3429859999999962,
+          "median": 3.1142200000000173,
+          "max": 4.083551,
+          "samples": [
+            3.1142200000000173,
+            2.8591419999999914,
+            2.3429859999999962,
+            2.565287999999981,
+            3.5753469999999936,
+            3.513356000000016,
+            4.083551
+          ]
+        },
+        "candidateValidation": {
+          "repetitions": 7,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 2.532026999999971,
+          "median": 2.749800999999991,
+          "max": 3.027438000000018,
+          "samples": [
+            3.027438000000018,
+            2.7375620000000254,
+            3.0115249999999776,
+            2.532026999999971,
+            2.98225599999995,
+            2.749800999999991,
+            2.7128289999999993
+          ]
+        },
+        "canonicalIdentityResolution": {
+          "repetitions": 7,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 0.23746099999999615,
+          "median": 0.24780800000002046,
+          "max": 0.45757199999997056,
+          "samples": [
+            0.2895780000000059,
+            0.24780800000002046,
+            0.2962810000000218,
+            0.24615299999999252,
+            0.2461850000000254,
+            0.23746099999999615,
+            0.45757199999997056
+          ]
+        },
+        "goalAssociation": {
+          "repetitions": 7,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 1.8589319999999816,
+          "median": 1.9856220000000349,
+          "max": 2.353783999999962,
+          "samples": [
+            1.9404149999999731,
+            2.1826489999999694,
+            1.9856220000000349,
+            1.8589319999999816,
+            2.353783999999962,
+            1.9406199999999671,
+            2.129009999999994
+          ]
+        },
+        "priorityGate": {
+          "repetitions": 7,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 0.8345130000000154,
+          "median": 0.9029120000000148,
+          "max": 1.1188680000000204,
+          "samples": [
+            1.0007359999999608,
+            0.9029120000000148,
+            1.1188680000000204,
+            0.839919000000009,
+            0.8363760000000298,
+            1.0703230000000303,
+            0.8345130000000154
+          ]
+        },
+        "slateComposition": {
+          "repetitions": 7,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 15.792464000000052,
+          "median": 19.550062999999966,
+          "max": 28.675198000000023,
+          "samples": [
+            21.445740999999998,
+            19.550062999999966,
+            28.675198000000023,
+            27.641181999999958,
+            15.792464000000052,
+            15.921695,
+            16.535522999999955
+          ]
+        }
+      }
+    },
+    {
+      "candidates": 100,
+      "goals": 100,
+      "evidenceRecords": 401,
+      "displayedCards": 50,
+      "slateHash": "16cd985c6d80ea162f8c52803a5356c79ba9c7c16f078501b4c9db352e5a8724",
+      "timings": {
+        "contextPreparation": {
+          "repetitions": 7,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 24.303206000000046,
+          "median": 28.072413000000097,
+          "max": 37.93717600000002,
+          "samples": [
+            31.06624599999998,
+            37.93717600000002,
+            24.303206000000046,
+            25.08304700000008,
+            25.64129300000002,
+            29.352773999999954,
+            28.072413000000097
+          ]
+        },
+        "candidateValidation": {
+          "repetitions": 7,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 24.698716999999988,
+          "median": 28.88514500000008,
+          "max": 31.3444649999999,
+          "samples": [
+            27.83759900000007,
+            28.88514500000008,
+            31.3444649999999,
+            31.27836400000001,
+            30.197877000000062,
+            24.698716999999988,
+            25.828701000000137
+          ]
+        },
+        "canonicalIdentityResolution": {
+          "repetitions": 7,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 2.1295920000000024,
+          "median": 2.777640999999903,
+          "max": 3.995858999999882,
+          "samples": [
+            3.063329999999951,
+            3.995858999999882,
+            2.777640999999903,
+            3.0411340000000564,
+            2.1875499999998738,
+            2.1295920000000024,
+            2.2114239999998517
+          ]
+        },
+        "goalAssociation": {
+          "repetitions": 7,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 23.05648599999995,
+          "median": 27.5677740000001,
+          "max": 29.33096800000021,
+          "samples": [
+            23.05648599999995,
+            23.718118000000004,
+            29.33096800000021,
+            26.126128000000108,
+            27.5677740000001,
+            28.649103999999852,
+            28.764429999999948
+          ]
+        },
+        "priorityGate": {
+          "repetitions": 7,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 7.662756999999829,
+          "median": 7.804264999999987,
+          "max": 8.749968999999965,
+          "samples": [
+            7.976632000000109,
+            7.801940000000059,
+            7.909644999999955,
+            7.804264999999987,
+            8.749968999999965,
+            7.714615000000094,
+            7.662756999999829
+          ]
+        },
+        "slateComposition": {
+          "repetitions": 7,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 128.1166659999999,
+          "median": 139.826321,
+          "max": 163.52808900000036,
+          "samples": [
+            140.66449000000011,
+            153.35351000000014,
+            139.826321,
+            128.1166659999999,
+            130.50983099999985,
+            132.8161729999997,
+            163.52808900000036
+          ]
+        }
+      }
+    },
+    {
+      "candidates": 1000,
+      "goals": 1000,
+      "evidenceRecords": 4001,
+      "displayedCards": 50,
+      "slateHash": "6b91372ff755d59b3821ad26f9319492f9fa168e62d928545b5a4d073a39ccd5",
+      "timings": {
+        "contextPreparation": {
+          "repetitions": 5,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 204.54523999999947,
+          "median": 207.16344000000026,
+          "max": 275.0491769999999,
+          "samples": [
+            204.54523999999947,
+            275.0491769999999,
+            266.58587499999976,
+            206.74329500000022,
+            207.16344000000026
+          ]
+        },
+        "candidateValidation": {
+          "repetitions": 5,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 209.58840000000055,
+          "median": 216.06951299999946,
+          "max": 246.29972999999973,
+          "samples": [
+            216.06951299999946,
+            229.43270200000006,
+            246.29972999999973,
+            209.58840000000055,
+            215.27569500000027
+          ]
+        },
+        "canonicalIdentityResolution": {
+          "repetitions": 5,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 21.947730999999294,
+          "median": 23.378302000000076,
+          "max": 32.26469999999972,
+          "samples": [
+            21.947730999999294,
+            23.57641700000022,
+            23.378302000000076,
+            22.52857899999981,
+            32.26469999999972
+          ]
+        },
+        "goalAssociation": {
+          "repetitions": 5,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 158.14968899999985,
+          "median": 171.10839599999963,
+          "max": 243.246654999999,
+          "samples": [
+            243.246654999999,
+            171.10839599999963,
+            212.0147820000002,
+            170.0319410000011,
+            158.14968899999985
+          ]
+        },
+        "priorityGate": {
+          "repetitions": 5,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 4.220161999999618,
+          "median": 4.421249999999418,
+          "max": 7.509587999998985,
+          "samples": [
+            4.810973000001468,
+            4.274363999998968,
+            7.509587999998985,
+            4.421249999999418,
+            4.220161999999618
+          ]
+        },
+        "slateComposition": {
+          "repetitions": 5,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 1276.6789850000005,
+          "median": 1336.1196830000008,
+          "max": 1529.284861,
+          "samples": [
+            1393.7572930000006,
+            1336.1196830000008,
+            1276.6789850000005,
+            1529.284861,
+            1286.7615860000005
+          ]
+        }
+      }
+    },
+    {
+      "candidates": 5000,
+      "goals": 5000,
+      "evidenceRecords": 20001,
+      "displayedCards": 50,
+      "slateHash": "b0c2960392cb70054181077e210161ddbce4f1cdc886ff7f3c52f635db998dc8",
+      "timings": {
+        "contextPreparation": {
+          "repetitions": 5,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 1079.7960600000006,
+          "median": 1258.8565860000017,
+          "max": 1476.8263050000023,
+          "samples": [
+            1359.0136949999978,
+            1079.7960600000006,
+            1258.8565860000017,
+            1125.6489180000062,
+            1476.8263050000023
+          ]
+        },
+        "candidateValidation": {
+          "repetitions": 5,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 1090.3068429999985,
+          "median": 1178.824486999998,
+          "max": 1358.4353569999948,
+          "samples": [
+            1104.9064900000012,
+            1198.4899740000037,
+            1358.4353569999948,
+            1178.824486999998,
+            1090.3068429999985
+          ]
+        },
+        "canonicalIdentityResolution": {
+          "repetitions": 5,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 113.39883299999929,
+          "median": 142.93056100000103,
+          "max": 147.75608900000225,
+          "samples": [
+            113.39883299999929,
+            144.66318200000387,
+            147.75608900000225,
+            135.4410510000016,
+            142.93056100000103
+          ]
+        },
+        "goalAssociation": {
+          "repetitions": 5,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 785.0082079999993,
+          "median": 822.5274609999979,
+          "max": 1107.1108679999961,
+          "samples": [
+            926.7847540000002,
+            822.5274609999979,
+            785.0082079999993,
+            791.2134210000004,
+            1107.1108679999961
+          ]
+        },
+        "priorityGate": {
+          "repetitions": 5,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 5.372374000005948,
+          "median": 5.429680000001099,
+          "max": 5.721102000003157,
+          "samples": [
+            5.721102000003157,
+            5.61663899999985,
+            5.429680000001099,
+            5.4022620000032475,
+            5.372374000005948
+          ]
+        },
+        "slateComposition": {
+          "repetitions": 5,
+          "warmups": 1,
+          "unit": "ms_per_batch",
+          "min": 7399.469232000003,
+          "median": 7689.490050000008,
+          "max": 7830.094831000009,
+          "samples": [
+            7721.307277,
+            7689.490050000008,
+            7830.094831000009,
+            7637.760645999995,
+            7399.469232000003
+          ]
+        }
+      }
+    }
+  ]
+}

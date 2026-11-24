@@ -19,7 +19,7 @@ export type Target = { horizon: 'near_term' | 'long_term'; definitionVersion: st
 );
 export type EvidenceRef = {
   id: string; kind: 'score_snapshot' | 'estimate' | 'catalog' | 'chart_feature' | 'rating' | 'growth' | 'coverage' | 'attempt' | 'task' | 'goal_baseline' | 'preference';
-  source: string; sourceRevision: string; contentHash: string | null;
+  source: string; sourceRevision: string; contentHash: string; // Required SHA-256 of canonicalJSON(payload), lowercase hex.
   profileId: string | null; chartId: string | null; catalogRevision: string | null; modelVersion: string | null;
   occurredAt: string | null; observedAt: string | null; confirmedAt: string | null; knownAt: string; fieldSemanticsVersion: string;
 };
