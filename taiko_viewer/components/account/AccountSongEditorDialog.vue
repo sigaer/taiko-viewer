@@ -178,7 +178,7 @@ const copy = computed(() =>
 const dialogTitle = computed(() => (isCreateMode.value ? copy.value.createTitle : copy.value.editTitle));
 
 const buildCatalogLabel = (song: SongCatalogItem) => {
-  const status = Number(song.shelf_status || 0) === 1 ? copy.value.removed : copy.value.available;
+  const status = song.catalog?.cnRelease !== "LISTED" ? copy.value.removed : copy.value.available;
   const jp = song.song_name_jp ? ` / ${song.song_name_jp}` : "";
   return `${song.song_name}${jp} · ID ${song.id} · ${status}`;
 };
@@ -290,8 +290,8 @@ const queryCatalogSongs = (queryString: string, callback: (items: CatalogSuggest
       );
     })
     .sort((left, right) => {
-      const leftStatus = Number(left.shelf_status || 0);
-      const rightStatus = Number(right.shelf_status || 0);
+      const leftStatus = left.catalog?.cnRelease === "LISTED" ? 0 : 1;
+      const rightStatus = right.catalog?.cnRelease === "LISTED" ? 0 : 1;
       if (leftStatus !== rightStatus) return leftStatus - rightStatus;
       return Number(right.id || 0) - Number(left.id || 0);
     })
@@ -421,8 +421,8 @@ const submit = async () => {
       <div v-if="selectedCatalogSong" class="catalog-summary">
         <strong>{{ selectedCatalogSong.song_name }}</strong>
         <span>{{ selectedCatalogSong.song_name_jp || `ID ${selectedCatalogSong.id}` }}</span>
-        <el-tag size="small" :type="Number(selectedCatalogSong.shelf_status || 0) === 1 ? 'warning' : 'success'" effect="light">
-          {{ Number(selectedCatalogSong.shelf_status || 0) === 1 ? copy.removedSong : copy.availableSong }}
+        <el-tag size="small" :type="selectedCatalogSong.catalog?.cnRelease !== 'LISTED' ? 'warning' : 'success'" effect="light">
+          {{ selectedCatalogSong.catalog?.cnRelease !== 'LISTED' ? copy.removedSong : copy.availableSong }}
         </el-tag>
       </div>
       <p class="catalog-hint">{{ copy.catalogHint }}</p>

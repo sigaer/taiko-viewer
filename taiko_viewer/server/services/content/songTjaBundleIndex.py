@@ -24,8 +24,8 @@ def has_verified_title(song, candidate, debug):
 
 
 def build_song_tja_index(song_data_path: Path, tja_root: Path):
-    with song_data_path.open("r", encoding="utf-8") as handle:
-        song_data = json.load(handle)
+    from taiko_bot.catalog.reader import project_song_rows
+    song_data = project_song_rows()
 
     candidates = indexes = None
 

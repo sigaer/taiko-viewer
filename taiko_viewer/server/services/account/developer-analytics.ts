@@ -7,7 +7,7 @@ import {isMergedSource} from '../../infrastructure/account/merged-source-id';
 import {readAuthorizedSourceUserdata} from './source-access';
 import {readAuthorizedMergedSource} from './merged-source-read';
 import {enforceTaikoOpenQuota} from '../../utils/taiko-open';
-import {getTaikoPython,getTaikoPythonEnv} from '../../utils/taiko-python';
+import {getTaikoPython,getCatalogPythonEnv} from '../../utils/taiko-python';
 import {acquireDeveloperAnalysisSlot} from './developer-analysis-limits';
 import {createDeveloperAnalysisWorker} from './developer-analysis-worker';
 
@@ -42,7 +42,7 @@ const recommendationsCode=[
 const executeWorker=createDeveloperAnalysisWorker();
 async function runPython(kind:AnalysisKind,records:unknown[]){
  const {repoRoot}=getRuntimePaths();
- return executeWorker({python:getTaikoPython(),repoRoot,env:getTaikoPythonEnv(repoRoot),code:kind==='rating'?ratingCode:recommendationsCode,records});
+ return executeWorker({python:getTaikoPython(),repoRoot,env:await getCatalogPythonEnv(repoRoot),code:kind==='rating'?ratingCode:recommendationsCode,records});
 }
 export async function getDeveloperAnalysisByUserid(event:H3Event,useridInput:unknown,kind:AnalysisKind){
  const release=acquireDeveloperAnalysisSlot();

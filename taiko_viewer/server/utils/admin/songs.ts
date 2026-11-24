@@ -3,6 +3,7 @@ import { constants as fsConstants } from "node:fs";
 import { createError } from "h3";
 import type { SongCatalogItem, RatingContentItem } from "~/types/content";
 import { getRatingEntries } from "~/server/services/content";
+import { captureCatalogAuthority } from '../../services/content/catalogAuthority';
 import { createAdminBackupSnapshot } from "./backup";
 import { recordAdminAction } from "./audit";
 import { getAdminManagedPaths, readJsonFile, readOptionalJsonFile, writeFileAtomic } from "./shared";
@@ -108,13 +109,14 @@ const readSongCatalogRaw = async () => {
 };
 
 const getSongRowsWithMetadata = async () => {
-  if (songCache && songCache.expiresAt > Date.now()) {
-    return songCache.items;
-  }
 
   const { coverDir } = getAdminManagedPaths();
   const [songs, aliasEntries, ratingEntries, guideSnapshot, coverFiles] = await Promise.all([
-    readSongCatalogRaw(),
+    Promise.all([readSongCatalogRaw(),captureCatalogAuthority()]).then(([drafts,view]) => {
+      const active = new Map(view.data.songs.map(song => [Number(song.id),song]));
+      return drafts.map(draft => ({...draft, shelf_status: active.get(Number(draft.id))?.shelf_status ?? 2,
+        catalog: active.get(Number(draft.id))?.catalog, metadataState: 'draft'}));
+    }),
     readOptionalJsonFile<SongAliasEntry[]>(getAdminManagedPaths().songAliasPath, []),
     getRatingEntries(),
     import("./guides").then((module) => module.getGuideAdminSnapshot()),
@@ -286,6 +288,13 @@ export const updateAdminSong = async (
     throw createError({ statusCode: 404, statusMessage: "未找到该歌曲" });
   }
   const before = songs[index];
+  // Admin edits are metadata only; they cannot change national release state.
+  const { data } = await captureCatalogAuthority();
+  const officialProjection = data.songs.find(song => Number(song.id) === Number(nextSong.id));
+  if (payload.shelf_status !== undefined && Number(payload.shelf_status) !== Number(officialProjection?.shelf_status)) {
+    throw createError({ statusCode: 409, statusMessage: '上架状态随官方曲库更新' });
+  }
+  delete nextSong.shelf_status;
   const nextSongs = [...songs];
   nextSongs[index] = {
     ...before,

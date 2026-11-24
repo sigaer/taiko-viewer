@@ -1,4 +1,4 @@
-import { getTaikoPython, getTaikoPythonEnv } from "~/server/utils/taiko-python";
+import { getTaikoPython, getCatalogPythonEnv } from "~/server/utils/taiko-python";
 import { access } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
 import { failProgressPython, failProgressOutput } from "./progress-errors";
@@ -44,7 +44,7 @@ const runPython = async (pythonCode: string, args: string[] = [], encoding: "buf
   try {
     return await execFileAsync(getTaikoPython(), ["-I", "-c", pythonCode, ...args], {
       cwd: repoRoot,
-      env: { ...getTaikoPythonEnv(repoRoot), TAIKO_USERDATA_DIR: userdataDir },
+      env: { ...await getCatalogPythonEnv(repoRoot), TAIKO_USERDATA_DIR: userdataDir },
       timeout: 120_000, killSignal: "SIGKILL",
       encoding,
       maxBuffer: 30 * 1024 * 1024

@@ -8,6 +8,7 @@ import { getDeveloperTokenRowByHash, readDeveloperBearerToken, touchDeveloperTok
 import { ensureAccountSchema, getAccountDb } from "~/server/utils/account-db";
 import { getV2ConstantsCsvDataset } from "~/server/services/content/v2Constants";
 import {consumeOpenQuota} from '../infrastructure/account/open-quota.ts';
+import { captureCatalogAuthority } from '../services/content/catalogAuthority';
 
 type FileInfo = {
   filename: string;
@@ -237,8 +238,19 @@ export const resolveTaikoAssetBundleFile = async () => {
 
 export const buildTaikoOpenManifest = async (event: H3Event) => {
   const origin = buildViewerOrigin(event);
+  const authority = await captureCatalogAuthority();
+  const catalogBytes = Buffer.from(JSON.stringify(authority.data));
   const datasets: Record<string, Record<string, string | number>> = {};
   for (const [name, resolver] of Object.entries(DATASET_PATH_RESOLVERS)) {
+    if (name === 'song_data' || name === 'song_data_with_roll' || name === 'song_alias') {
+      const body = Buffer.from(JSON.stringify(name === 'song_alias' ? authority.data.searchAliases : authority.data.songs));
+      datasets[name] = { filename: 'song_data.json', size: body.length,
+        sha256: createHash('sha256').update(body).digest('hex'),
+        updatedAt: authority.data.sourceManifest[0].fetchedAt,
+        url: `${origin}/api/taiko/data/${name}?revision=${authority.data.catalogRevision}`, catalogRevision: authority.data.catalogRevision,
+        policyVersion: authority.data.policyVersion };
+      continue;
+    }
     if (name === "constants_id_v2") {
       const { info, stale } = await resolveTaikoV2ConstantsDataset();
       datasets[name] = {
@@ -286,6 +298,8 @@ export const buildTaikoOpenManifest = async (event: H3Event) => {
   }
 
   return {
+    catalog: { ...authority.report, bytes: catalogBytes.length, sha256: createHash('sha256').update(catalogBytes).digest('hex'),
+      url: `${origin}/api/taiko/catalog?revision=${authority.data.catalogRevision}` },
     generatedAt: new Date().toISOString(),
     datasets,
     resources,

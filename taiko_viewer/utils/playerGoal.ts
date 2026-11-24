@@ -1,9 +1,10 @@
 import type { GoalBaseline, GoalType, PlayerGoal } from '../types/player-goal.ts';
-import { legacyScoreReader, legacyScoreInstant } from '@sakura-taiko/contract';
+import { legacyScoreReader } from '@sakura-taiko/contract';
+import { realPlayInstant } from './scoreTemporalEvidence.ts';
 const integer = legacyScoreReader('viewer-goal-v1');
 export function goalBaseline(record: Record<string, unknown> | undefined, revision: string, capturedAt: string, completeness: GoalBaseline['sourceCompleteness'] = 'unknown'): GoalBaseline {
   const r = record || {};
-  const date = (v: unknown) => legacyScoreInstant(v, 'viewer-goal-v1');
+  const date = (v: unknown) => realPlayInstant(v, 'viewer-goal-v1');
   return { recordPresent: !!record, highScore: integer(r.high_score), goodCnt: integer(r.good_cnt), okCnt: integer(r.ok_cnt), ngCnt: integer(r.ng_cnt), comboCnt: integer(r.combo_cnt), clearCnt: integer(r.clear_cnt), fullComboCnt: integer(r.full_combo_cnt), dondafulComboCnt: integer(r.dondaful_combo_cnt), bestScoreRank: integer(r.best_score_rank), highscoreDatetime: date(r.highscore_datetime), updateDatetime: date(r.update_datetime), scoreObservedAt: null, capturedAt, sourceRevision: revision, sourceCompleteness: completeness };
 }
 export function goalOptions(b: GoalBaseline, source: string, available = true): GoalType[] {
@@ -25,5 +26,6 @@ export function goalTarget(type: GoalType): PlayerGoal['targetData'] {
   return { comparison: type === 'played' ? 'present' : type === 'ng-reduced' ? 'less' : 'greater', field: fields[type], ...(['clear', 'fc', 'df'].includes(type) ? { value: 0 } : {}) };
 }
 export function goalChartAvailable(song: { shelf_status?: unknown; [key: string]: unknown } | undefined, difficulty: number): boolean {
-  return !!song && Number(song.shelf_status || 0) === 0 && Number(song[`level_${difficulty}`]) > 0;
+  const catalog = song?.catalog as { cnCurrentPlayable?: number[] } | undefined;
+  return catalog?.cnCurrentPlayable?.includes(difficulty) === true;
 }

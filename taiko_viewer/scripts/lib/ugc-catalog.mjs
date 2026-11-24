@@ -1,3 +1,4 @@
+import { readCatalogAuthority } from "../../server/services/content/catalogAuthority.ts";
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { dirname, resolve } from "node:path";
@@ -17,6 +18,7 @@ export const resolveUgcCatalogPaths = (options = {}) => {
   const taikoRoot = resolve(String(options.taikoRoot || process.env.TAIKO_REPO_ROOT || DEFAULT_TAIKO_ROOT));
   return {
     taikoRoot,
+    catalogRoot: resolve(String(options.catalogRoot || process.env.TAIKO_CATALOG_ROOT || resolve(taikoRoot, "catalog"))),
     songDataPath: resolve(String(options.songDataPath || process.env.TAIKO_SONG_DATA_PATH || resolve(taikoRoot, "songs/song_data.json"))),
     ratingPath: resolve(String(options.ratingPath || process.env.TAIKO_RATING_STRUCT_PATH || resolve(taikoRoot, "songs/rating_structured_with_ids.json"))),
     noteCountPath: resolve(String(options.noteCountPath || resolve(taikoRoot, "songs/tja_note_counts.json")))
@@ -120,7 +122,7 @@ export const buildUgcCatalogAudit = ({ songs, ratingsPayload, noteCounts }) => {
       titleIds.set(normalized, ids);
     }
 
-    const inactive = Number(song.shelf_status || 0) === 1;
+    const inactive = song.catalog?.cnRelease !== "LISTED";
     if (inactive) removedSongs += 1;
     for (const difficulty of UGC_DIFFICULTIES) {
       const level = song[difficulty.levelField];
@@ -135,7 +137,7 @@ export const buildUgcCatalogAudit = ({ songs, ratingsPayload, noteCounts }) => {
       }
       const pair = `${songId}:${difficulty.code}`;
       pairCounts.set(pair, (pairCounts.get(pair) || 0) + 1);
-      const status = inactive ? "inactive" : "active";
+      const status = song.catalog?.cnCurrentPlayable?.includes(difficulty.code) === true ? "active" : "inactive";
       const sourceKey = buildUgcChartSourceKey(songId, difficulty.code);
       const chart = {
         songId,
@@ -193,10 +195,13 @@ export const buildUgcCatalogAudit = ({ songs, ratingsPayload, noteCounts }) => {
 
 export const loadUgcCatalogAudit = async (options = {}) => {
   const paths = resolveUgcCatalogPaths(options);
-  const [songs, ratingsPayload, noteCounts] = await Promise.all([
-    readFile(paths.songDataPath, "utf8").then(JSON.parse),
+  const [view, ratingsPayload, noteCounts] = await Promise.all([
+    readCatalogAuthority(paths.catalogRoot),
     readFile(paths.ratingPath, "utf8").then(JSON.parse),
     readFile(paths.noteCountPath, "utf8").then(JSON.parse)
   ]);
-  return { paths, ...buildUgcCatalogAudit({ songs, ratingsPayload, noteCounts }) };
+  const result = buildUgcCatalogAudit({ songs: view.data.songs, ratingsPayload, noteCounts });
+  result.catalog.revision = view.data.catalogRevision;
+  result.catalog.policyVersion = view.data.policyVersion;
+  return { paths, catalogReport: view.report, ...result };
 };

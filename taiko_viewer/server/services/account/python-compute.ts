@@ -3,7 +3,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { getRuntimePaths } from "../../infrastructure/runtime-paths.ts";
 import { PublicationUnavailableError } from "../../infrastructure/taiko-publication/client.ts";
-import { getTaikoPython, getTaikoPythonEnv } from "../../utils/taiko-python.ts";
+import { getTaikoPython, getCatalogPythonEnv } from "../../utils/taiko-python.ts";
 
 const execFileAsync = promisify(execFile);
 const compute = async (module: string, args: string[], failure: string) => {
@@ -12,7 +12,7 @@ const compute = async (module: string, args: string[], failure: string) => {
     const result = await execFileAsync(getTaikoPython(), ["-I", "-m", module, ...args], {
       cwd: repoRoot, encoding: "utf8", maxBuffer: 12 * 1024 * 1024,
       timeout: 120_000, killSignal: "SIGKILL",
-      env: { ...getTaikoPythonEnv(repoRoot), TAIKO_COMPUTE_ONLY: "1", TAIKO_USERDATA_DIR: userdataDir }
+      env: { ...await getCatalogPythonEnv(repoRoot), TAIKO_COMPUTE_ONLY: "1", TAIKO_USERDATA_DIR: userdataDir }
     });
     return JSON.parse(String(result.stdout || ""));
   } catch (error) {

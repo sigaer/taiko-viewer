@@ -16,7 +16,7 @@ test('unplayed requires server-proven complete coverage and manual stays exclude
  const b=goalBaseline(undefined,'r','now','complete'); assert.equal(b.recordPresent,false);assert.equal(b.clearCnt,null);assert.deepEqual(goalOptions(b,'hiroba'),['played','clear']);assert.deepEqual(goalOptions(b,'manual'),[]);assert.deepEqual(goalOptions(baseline(),'manual'),[]);
 });
 test('invalid and unavailable charts excluded',()=>{
- assert.equal(goalChartAvailable(undefined,4),false);assert.equal(goalChartAvailable({shelf_status:1,level_4:9},4),false);assert.equal(goalChartAvailable({shelf_status:0,level_4:9},5),false);assert.equal(goalChartAvailable({level_4:9},4),true);assert.deepEqual(goalOptions(baseline(),'wahlap',false),[]);
+ assert.equal(goalChartAvailable(undefined,4),false);assert.equal(goalChartAvailable({shelf_status:1,level_4:9},4),false);assert.equal(goalChartAvailable({shelf_status:0,level_4:9},5),false);assert.equal(goalChartAvailable({level_4:9},4),false);assert.equal(goalChartAvailable({catalog:{cnCurrentPlayable:[4]}},4),true);assert.deepEqual(goalOptions(baseline(),'wahlap',false),[]);
 });
 test('targets use relative conditions, no arbitrary score target',()=>{
  assert.deepEqual(goalTarget('score-pb'),{comparison:'greater',field:'highScore'});assert.deepEqual(goalTarget('ng-reduced'),{comparison:'less',field:'ngCnt'});assert.deepEqual(goalTarget('played'),{comparison:'present',field:'recordPresent'});

@@ -28,7 +28,7 @@ export async function importGrowthRequest(fixture, { baseline = false, migration
       getRuntimePaths: () => ({ userdataDir: fixture.userdataDir, repoRoot: process.env.QA_RUN_TMPDIR }), getUserdataPath: () => currentPath },
     // Services pass this inert sentinel only to the explicitly replaced repositories.
     safeDb: { getAccountDb: () => null },
-    content: { getSongCatalog: async () => fixture.current.map(row => ({ id: row.song_no, song_name: `synthetic-${row.song_no}`, level_4: 10, level_5: 10 })) },
+    content: { getSongCatalog: async () => fixture.current.map(row => ({ id: row.song_no, song_name: `synthetic-${row.song_no}`, level_4: 10, level_5: 10, catalog: {cnCurrentPlayable:[4,5],catalogRevision:"fixture-catalog",policyVersion:"wahlap-cn-1"} })) },
     personal: { runGrowthPythonJson: async () => {
       if (onPython) await onPython();
       if (failPython) throw new Error('Offline compute failure');

@@ -5,7 +5,7 @@ import { basename, isAbsolute, relative, resolve, sep } from "node:path";
 import { promisify } from "node:util";
 import { getContentRuntimePaths, readJsonFile } from "./runtime";
 import { readPersistentCache, writePersistentCache } from "./persistentCache";
-import { getTaikoPython, getTaikoPythonEnv } from "../../utils/taiko-python";
+import { getTaikoPython, getCatalogPythonEnv } from "../../utils/taiko-python";
 
 const execFileAsync = promisify(execFile);
 const songTjaBundleIndexHelperPath = resolve(process.cwd(), "server/services/content/songTjaBundleIndex.py");
@@ -128,7 +128,7 @@ const loadSongTjaIndex = async (forceRefresh = false): Promise<SongTjaIndexPaylo
           "--tja-root",
           tjaRoot
         ],
-        { maxBuffer: 16 * 1024 * 1024, timeout: 120_000, killSignal: "SIGKILL", env: getTaikoPythonEnv(repoRoot) }
+        { maxBuffer: 16 * 1024 * 1024, timeout: 120_000, killSignal: "SIGKILL", env: await getCatalogPythonEnv(repoRoot) }
       );
       stdout = result.stdout;
       stderr = result.stderr;

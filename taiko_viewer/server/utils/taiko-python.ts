@@ -18,3 +18,11 @@ export function getTaikoPythonEnv(repoRoot: string) {
     TAIKO_RUNTIME_ROOT: repoRoot
   };
 }
+import { captureCatalogAuthority } from '../services/content/catalogAuthority.ts';
+
+export async function getCatalogPythonEnv(repoRoot: string) {
+  const { data, root } = await captureCatalogAuthority();
+  return { ...getTaikoPythonEnv(repoRoot),
+    TAIKO_CATALOG_ROOT: root,
+    TAIKO_CATALOG_REVISION: data.catalogRevision };
+}

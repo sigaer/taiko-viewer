@@ -18,9 +18,9 @@ const key = randomBytes(32);
 type Receipt = { userId: number; profileId: string; account: string; source: string; songId: number; difficultyType: number; basis: string; rank: number; revision: string; inputs: string; generatedAt: string; expires: number };
 export const recommendationInputRevision = async (catalog: unknown, modelRevision?: string) => {
   const hash = createHash('sha256').update(JSON.stringify(catalog)).update(modelRevision || await getGrowthModelRevision());
-  // Include the center's raw implementation/availability input as well as the
-  // existing model identity. Re-read bytes under SQL locks without launching Python.
-  for (const name of ['song_data_raw.json','song_data.json','rating_structured_with_ids.json','song_alias.json']) {
+  // Catalog rows already contain the immutable Authority and Policy revisions.
+  // Only independent model input bytes participate outside that generation.
+  for (const name of ['rating_structured_with_ids.json']) {
     hash.update(`\0${name}\0`);
     try { for await (const chunk of createReadStream(resolve(getRuntimePaths().repoRoot,'songs',name))) hash.update(chunk); }
     catch(error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; hash.update('absent'); }

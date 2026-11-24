@@ -7,6 +7,7 @@ import {projectCatalog} from '@sakura-taiko/contract/catalog';
 import type {ApiReadVersions,CatalogVersions} from '@sakura-taiko/contract';
 import {getRuntimePaths} from '../../infrastructure/runtime-paths';
 import {hash,ApiFailure} from './common';
+import {captureCatalogAuthority} from '../content/catalogAuthority';
 export const SCHEMA_REVISION=hash(JSON.stringify(schema));
 export {difficultyToTjaCourse} from '@sakura-taiko/contract/catalog';
 export {projectCatalog as mapCatalog} from '@sakura-taiko/contract/catalog';
@@ -27,19 +28,23 @@ async function readBoundedArray(path:string,maxBytes:number,maxRows:number,code:
 
 /** One revision covers song metadata and aliases; no duplicate title field. */
 export async function catalog(){
- const runtime=useRuntimeConfig();
- const paths=getRuntimePaths();
- const songPath=String(runtime.songDataPath||process.env.TAIKO_SONG_DATA_PATH||resolve(paths.repoRoot,'songs/song_data.json'));
- const aliasPath=resolve(songPath,'..','song_alias.json');
- const [songSource,aliasSource]=await Promise.all([
-  readBoundedArray(songPath,8*1024*1024,10000,'CATALOG_LIMIT_EXCEEDED'),
-  readBoundedArray(aliasPath,4*1024*1024,20000,'CATALOG_LIMIT_EXCEEDED')
- ]);
- const songRevision=createHash('sha256').update(songSource.bytes).digest('hex');
- const aliasRevision=createHash('sha256').update(aliasSource.bytes).digest('hex');
- const revision=hash(JSON.stringify({songDataSha256:songRevision,songAliasSha256:aliasRevision}));
- const projected=projectCatalog(songSource.rows,revision,aliasSource.rows);
- return {revision,songRevision,aliasRevision,songRowsHash:hash(JSON.stringify(songSource.rows)),songs:projected.songs,charts:projected.charts};
+ const {data}=await captureCatalogAuthority();
+ const revision=data.catalogRevision;
+ const projected=projectCatalog(data.songs,revision,data.searchAliases);
+ const byId=new Map(data.songs.map(song=>[String(song.id),song]));
+ for(const song of projected.songs){
+  const source=byId.get(song.songId);
+  Object.assign(song,{catalogSongId:source.catalog.songId,policyVersion:data.policyVersion,
+    policies:{catalog_display:source.catalog.catalogDisplay,historical_score:source.catalog.historicalScore},
+    availability:{region:'CN',status:source.catalog.cnRelease==='LISTED'?'active':'unknown',releaseStatus:source.catalog.cnRelease,statusSource:source.catalog.statusSource}});
+ }
+ for(const chart of projected.charts){
+  const source=data.charts[`${chart.songId}:${chart.difficulty}`];
+  Object.assign(chart,{catalogChartId:source.chartId,policyVersion:data.policyVersion,policies:source.policies,
+    availability:{region:'CN',status:source.policies.cn_current_playable.eligible?'active':'unknown',releaseStatus:source.cnDifficultyEvidence}});
+ }
+ return {revision,policyVersion:data.policyVersion,songRevision:revision,aliasRevision:revision,
+   songRowsHash:hash(JSON.stringify(data.songs)),songs:projected.songs,charts:projected.charts};
 }
 export const versions=(catalogRevision:string,scoreRevision:string|null=null,observationSource:string|null=null,capturedAt:string|null=null):ApiReadVersions=>({contractVersion:'1.1',schemaRevision:SCHEMA_REVISION,catalogRevision,scoreRevision,calculationProfile:null,observationSource,capturedAt});
 

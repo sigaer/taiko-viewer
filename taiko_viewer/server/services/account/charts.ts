@@ -1,4 +1,4 @@
-import { getTaikoPython, getTaikoPythonEnv } from "~/server/utils/taiko-python";
+import { getTaikoPython, getCatalogPythonEnv } from "~/server/utils/taiko-python";
 import { withPersonalScoreRead } from "./personal";
 import { access } from "node:fs/promises";
 import { constants as fsConstants } from "node:fs";
@@ -85,7 +85,7 @@ export const runPythonImage = async (pythonCode: string, args: string[] = []) =>
   const { repoRoot, userdataDir } = getRuntimePaths();
   const result = await execFileAsync(getTaikoPython(), ["-I", "-c", pythonCode, ...args], {
     cwd: repoRoot,
-    env: { ...getTaikoPythonEnv(repoRoot), TAIKO_USERDATA_DIR: userdataDir },
+    env: { ...await getCatalogPythonEnv(repoRoot), TAIKO_USERDATA_DIR: userdataDir },
     timeout: 120_000, killSignal: "SIGKILL",
     encoding: "buffer",
     maxBuffer: 30 * 1024 * 1024

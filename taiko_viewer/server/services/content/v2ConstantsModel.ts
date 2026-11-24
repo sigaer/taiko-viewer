@@ -139,7 +139,7 @@ export const buildV2ConstantsRows = (
       // Every supplement must prove its current single-player chart identity.
       // Existing remote and verified console values retain priority.
       for (const [values, sources] of [
-        ...(Number(localSong.shelf_status) === 2 || localSong.legacy_ids?.length ? [[supplemental, provenance]] : []),
+        ...(localSong.ourtaiko_ids?.length || localSong.legacy_ids?.length ? [[supplemental, provenance]] : []),
         [catalogConstants, catalogProvenance]
       ]) {
         if (row) break;

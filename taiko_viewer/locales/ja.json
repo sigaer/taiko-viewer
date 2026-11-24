@@ -831,9 +831,9 @@
       },
       "removed": {
         "title": "中国版未収録曲",
-        "desc": "中国版太鼓の達人の未収録曲と配信終了曲です。",
+        "desc": "現在のWahlap公式曲目一覧に含まれない楽曲です。",
         "keyword": "中国版未収録曲",
-        "panelDesc": "中国版の未収録曲・配信終了曲。"
+        "panelDesc": "現在のWahlap公式曲目一覧に含まれない楽曲。"
       },
       "other": {
         "title": "その他の楽曲",
@@ -2455,7 +2455,7 @@
         "actions": "操作"
       },
       "judgeText": "良 {good}、可 {ok}、不可 {ng}",
-      "removed": "削除済み",
+      "removed": "現在未収録",
       "custom": "手動追加",
       "locked": "ロック中",
       "lock": "ロック",

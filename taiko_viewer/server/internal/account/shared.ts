@@ -113,6 +113,7 @@ export type DeveloperTokenRow = {
 };
 
 export type SongMeta = {
+  catalog?: import('~/types/content').SongCatalogItem['catalog'];
   id: number;
   song_name: string;
   song_name_jp?: string;

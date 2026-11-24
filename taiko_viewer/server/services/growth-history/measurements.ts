@@ -3,6 +3,7 @@ import type { GrowthMeasurement, GrowthMeasurementDimensions, PlayerGrowthState 
 import type { PlayerRatingDimension } from "~/types/recommendation-intelligence";
 import { GROWTH_ALGORITHM_VERSION, GROWTH_MEASUREMENT_VERSION } from "./constants.ts";
 import { GROWTH_DIMENSION_ORDER } from "../../../utils/playerGrowth.ts";
+import { createHash } from 'node:crypto';
 
 const sqlTime = (value: string) => value.replace("T", " ").replace("Z", "");
 const finite = (value: unknown): number | null => value === null || value === undefined || value === "" || typeof value === "boolean" ? null : Number.isFinite(Number(value)) ? Number(value) : null;
@@ -26,9 +27,10 @@ export async function upsertGrowthMeasurement(db: Pick<Pool, "execute">, input: 
   modelRevision: string;
   playerState: PlayerGrowthState;
   rawDimensions?: PlayerRatingDimension[];
+  onPersistence?: (trace: {modelRevision: string; writerPayloadHash: string}) => void;
 }) {
   const dimensions = measurementDimensions(input.playerState, input.rawDimensions);
-  const [result] = await db.execute<any>(`INSERT IGNORE INTO web_growth_measurements
+  const sql = `INSERT IGNORE INTO web_growth_measurements
     (user_id,binding_id,score_revision,measurement_version,algorithm_version,model_revision,rating,dimensions_json,focus,sample_count,availability_state,captured_at)
     SELECT ?,b.id,?,?,?,?,?,?,?,?,?,?
       FROM web_taiko_bindings b
@@ -38,7 +40,8 @@ export async function upsertGrowthMeasurement(db: Pick<Pool, "execute">, input: 
          WHERE existing.binding_id=b.id AND (existing.score_revision=? OR (
            DATE(DATE_ADD(?, INTERVAL 8 HOUR)) < DATE(DATE_ADD(UTC_TIMESTAMP(), INTERVAL 8 HOUR))
            AND DATE(DATE_ADD(existing.captured_at, INTERVAL 8 HOUR))=DATE(DATE_ADD(?, INTERVAL 8 HOUR))
-         )))`, [
+         )))`;
+  const values = [
     input.userId,
     input.scoreRevision,
     GROWTH_MEASUREMENT_VERSION,
@@ -55,7 +58,9 @@ export async function upsertGrowthMeasurement(db: Pick<Pool, "execute">, input: 
     input.scoreRevision,
     sqlTime(input.capturedAt),
     sqlTime(input.capturedAt)
-  ]);
+  ];
+  input.onPersistence?.({modelRevision: input.modelRevision, writerPayloadHash: createHash('sha256').update(JSON.stringify(values)).digest('hex')});
+  const [result] = await db.execute<any>(sql, values);
   return { created: Number(result.affectedRows || 0) === 1 };
 }
 

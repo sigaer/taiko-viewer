@@ -1,4 +1,4 @@
-import { getTaikoPythonEnv } from "~/server/utils/taiko-python";
+import { getCatalogPythonEnv } from "~/server/utils/taiko-python";
 import { createHash } from 'node:crypto';
 import { access, readFile, readdir, stat, unlink } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -49,7 +49,7 @@ const buildMyDon = async (taikoId: string, path: string) => {
   await annualAdmission.run('generator', `bot-mydon:${path}`, 60_000, async id => {
     const child = await spawnAnnualWorker('generator', id, {
       cwd: repoRoot, args: ['-I', '-m', 'taiko_bot.offline.my_don_cli', 'render', '--taiko-id', taikoId],
-      env: { ...getTaikoPythonEnv(repoRoot), TAIKO_CONFIG_PATH: configPath, TAIKO_USERDATA_DIR: userdataDir }
+      env: { ...await getCatalogPythonEnv(repoRoot), TAIKO_CONFIG_PATH: configPath, TAIKO_USERDATA_DIR: userdataDir }
     }, 60_000);
     const image = await new Promise<Buffer>((resolve, reject) => {
       const chunks: Buffer[] = []; let size = 0; let oversized = false;

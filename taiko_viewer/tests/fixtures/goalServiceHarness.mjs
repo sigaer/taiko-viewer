@@ -9,7 +9,7 @@ const data=code=>`data:text/javascript;base64,${Buffer.from(code).toString('base
 export async function goalServiceHarness(){
  const hook='__goalFixture_'+randomUUID().replaceAll('-','_');
  const row={song_no:100,level:4,high_score:900000,good_cnt:400,ok_cnt:20,ng_cnt:8,clear_cnt:0,full_combo_cnt:0,dondaful_combo_cnt:0,best_score_rank:4};
- const state={binding:{id:1,taiko_id:'fixture',source:'wahlap'},revision:'revision',row,catalog:[{id:100,level_4:9,shelf_status:0},{id:101,level_4:9,shelf_status:0}],active:null,serial:0,basis:'accuracy_power',fallback:false,plan:[100,101]};
+ const state={binding:{id:1,taiko_id:'fixture',source:'wahlap'},revision:'revision',row,catalog:[{id:100,level_4:9,shelf_status:0,catalog:{cnCurrentPlayable:[4],catalogRevision:"fixture-catalog",policyVersion:"wahlap-cn-1"}},{id:101,level_4:9,shelf_status:0,catalog:{cnCurrentPlayable:[4],catalogRevision:"fixture-catalog",policyVersion:"wahlap-cn-1"}}],active:null,serial:0,basis:'accuracy_power',fallback:false,plan:[100,101]};
  state.overview=()=>({profileId:String(state.binding.id),scoreRevision:state.revision,sourceGeneratedAt:'2026-09-19T00:00:00Z',todayPlan:{items:state.plan.map(songId=>({songId,difficultyType:4,title:`Song ${songId}`,starLevel:9,targetDimension:state.basis,reason:state.fallback?'general-fallback':'target-dimension',goalOptions:goalOptions(goalBaseline(state.row,state.revision,'now'),state.binding.source)}))}});
  globalThis[hook]=state;
  const get=`const s=globalThis.${hook};`;

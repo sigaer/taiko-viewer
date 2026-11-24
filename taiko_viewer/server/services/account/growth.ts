@@ -19,6 +19,7 @@ import { loadGrowthScoreEvidence } from "../growth-history/evidence";
 import { getGrowthModelRevision } from "../growth-history/model-revision";
 import { readDailyAbilityArchive } from "../growth-history/daily-archive";
 import { upsertGrowthMeasurement } from "../growth-history/measurements";
+import { measurementAttempt } from '../growth-history/measurement-attempt';
 import { legacyScoreReader } from "@sakura-taiko/contract";
 
 const TIMEZONE = "Asia/Shanghai" as const;
@@ -53,12 +54,17 @@ export const getPlayerGrowthOverview = async (userId: number, options: { loadSco
     const stateAggregationStartedAt = performance.now();
     const playerState = buildPlayerGrowthState(computed.playerState.dimensions, computed.playerState.sampleCount, mode, computed.playerState.overallRating);
     const measurementDay = growthCalendarDay(snapshot.capturedAt);
-    const measurementPromise = readDailyAbilityArchive(getRuntimePaths().userdataDir, binding.taiko_id, userId, Number(binding.id), measurementDay, measurementDay)
+    const measurementPromise = measurementAttempt({ userId, bindingId: Number(binding.id), scoreRevision: snapshot.revision,
+      capturedAt: snapshot.capturedAt, sampleCount: computed.playerState.sampleCount,
+      catalogRevision: catalog[0]?.catalog?.catalogRevision || null, policyVersion: catalog[0]?.catalog?.policyVersion || null },
+      () => readDailyAbilityArchive(getRuntimePaths().userdataDir, binding.taiko_id, userId, Number(binding.id), measurementDay, measurementDay),
       // A read-time calculation must not replace a value already frozen by the
       // snapshot writer/backfill, including accounts visiting Viewer first today.
-      .then(async archived => archived.length ? { created: false } : upsertGrowthMeasurement(getAccountDb(), { userId, bindingId: Number(binding.id), scoreRevision: snapshot.revision, capturedAt: snapshot.capturedAt, modelRevision: await getGrowthModelRevision(), playerState, rawDimensions: computed.playerState.dimensions }))
-      .then(result => console.info("[growth-history] measurement upsert", { userId, bindingId: Number(binding.id), result: result.created ? "create" : "hit" }))
-      .catch(error => console.error("[growth-history] measurement persistence failed", { userId, bindingId: Number(binding.id), error: error instanceof Error ? error.message : String(error) }));
+      async beginPersistence => {
+        const modelRevision = await getGrowthModelRevision();
+        return upsertGrowthMeasurement(getAccountDb(), { userId, bindingId: Number(binding.id), scoreRevision: snapshot.revision, capturedAt: snapshot.capturedAt, modelRevision, playerState, rawDimensions: computed.playerState.dimensions,
+          onPersistence: trace => beginPersistence(trace.modelRevision, trace.writerPayloadHash) });
+      });
     const stateAggregationDurationMs = performance.now() - stateAggregationStartedAt;
     const stateDurationMs = stateAggregationDurationMs;
     const progressStartedAt = performance.now();

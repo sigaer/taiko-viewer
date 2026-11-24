@@ -8,6 +8,7 @@ import type {
 import { getContentRuntimePaths, readCachedJsonFile } from "./runtime";
 import { getSongBranchAudioVariants } from "./songBranchAudio";
 import { getSongTjaBundleUrl } from "./songTjaBundle";
+import { captureCatalogAuthority } from './catalogAuthority';
 
 let songCatalogCache: { mtimeMs: number; data: SongCatalogItem[] } | null = null;
 let ratingEntriesCache: { mtimeMs: number; data: RatingContentItem[] } | null = null;
@@ -26,15 +27,12 @@ const normalizeShelfStatus = (value: SongCatalogItem["shelf_status"]) => {
 };
 
 export const getSongCatalog = async () => {
-  const { songDataPath } = getContentRuntimePaths();
-  const result = await readCachedJsonFile<SongCatalogItem[]>(songCatalogCache, songDataPath);
-  songCatalogCache = result.cache;
-  return result.data;
+  return (await captureCatalogAuthority()).data.songs as SongCatalogItem[];
 };
 
 export const resolveCatalogSongId = async (id: number) => {
-  const songs = await getSongCatalog();
-  return Number(songs.find(song => Number(song.id) === id || song.legacy_ids?.includes(id))?.id ?? id);
+  const { data } = await captureCatalogAuthority();
+  return Number(data.aliases[String(id)] ?? id);
 };
 
 export const getRatingEntries = async () => {
@@ -89,6 +87,7 @@ const toSongListItem = (song: SongCatalogItem): SongCatalogItem => ({
   type: String(song.type || ""),
   bpm: song.bpm === undefined || song.bpm === null ? undefined : String(song.bpm),
   shelf_status: song.shelf_status,
+  catalog: song.catalog,
   level_1: song.level_1,
   level_2: song.level_2,
   level_3: song.level_3,

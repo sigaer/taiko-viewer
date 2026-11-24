@@ -3,8 +3,8 @@ import test from "node:test";
 import { buildUgcCatalogAudit, buildUgcChartSourceKey } from "../scripts/lib/ugc-catalog.mjs";
 
 const baseSongs = [
-  { id: 10, song_name: "Song A", level_1: 2, level_4: 8, level_5: "-", max_combo: [100, "-", "-", 500, "-"], shelf_status: 0 },
-  { id: 20, song_name: "Song B", level_1: "-", level_4: 9, level_5: 10, max_combo: ["-", "-", "-", 700, 900], shelf_status: 1 }
+  { id: 10, catalog: {cnRelease: "LISTED", cnCurrentPlayable: [1,4]}, song_name: "Song A", level_1: 2, level_4: 8, level_5: "-", max_combo: [100, "-", "-", 500, "-"], shelf_status: 0 },
+  { id: 20, catalog: {cnRelease: "NOT_LISTED", cnCurrentPlayable: []}, song_name: "Song B", level_1: "-", level_4: 9, level_5: 10, max_combo: ["-", "-", "-", 700, 900], shelf_status: 1 }
 ];
 
 test("catalog identity and revision are deterministic", () => {
@@ -36,4 +36,11 @@ test("missing rating and note count remain non-blocking warnings", () => {
   assert.ok(audit.summary.warnings > 0);
   assert.ok(audit.issues.some((issue) => issue.code === "RATING_MISSING"));
   assert.ok(audit.issues.some((issue) => issue.code === "NOTE_COUNT_MISSING"));
+});
+
+// Old shelf fields must not authorize CN state after migration.
+test("UGC obeys authority even when metadata shelf state disagrees", () => {
+ const audit=buildUgcCatalogAudit({songs:[{...baseSongs[0],shelf_status:1},{...baseSongs[1],shelf_status:0}],ratingsPayload:{songs:[]},noteCounts:{}});
+ assert.equal(audit.summary.activeCharts,2);
+ assert.equal(audit.catalog.charts.find(chart=>chart.songId===20).status,"inactive");
 });

@@ -1,4 +1,5 @@
 export type SongCatalogItem = {
+  catalog?: { catalogRevision: string; policyVersion: string; cnRelease: string; cnCurrentPlayable: number[]; catalogDisplay: boolean; historicalScore: boolean; recommendationEligible: Record<string, number[]> };
   id: number;
   legacy_ids?: number[];
   resource_source?: 'ourtaiko';

@@ -1,13 +1,15 @@
 import type { GrowthDailyEvent, GrowthDailyProgress, GrowthEventFact } from "../types/player-growth";
 import type { LegacyScoreRecord as UserdataSong } from "../server/domain/score-read-contract";
-import { legacyScoreReader, legacyCrown, legacyJudgmentTotal, legacyScoreInstant } from "@sakura-taiko/contract";
+import { legacyScoreReader, legacyCrown, legacyJudgmentTotal } from "@sakura-taiko/contract";
 import { growthCalendarDay } from "./playerGrowth.ts";
 import { memoizeGrowthString } from "./growthRequestMemo.ts";
+import { isManualImportTimestamp, realPlayInstant } from './scoreTemporalEvidence.ts';
 
 export type GrowthSnapshot = { full: boolean; timestamp: string; songs: UserdataSong[]; revision?: string; source?: string; removed?: string[]; excludedReason?: string | null; chartExclusions?: Record<string, string>; ignoredChartKeys?: string[]; identity?: string; freshChartBaselines?: Record<string, { song: UserdataSong; observedAt: string }> };
 const num = legacyScoreReader("viewer-daily-v1");
 const key = (s: UserdataSong) => `${s.song_no}:${s.level}`;
 const epoch = (v: unknown) => {
+  if (isManualImportTimestamp(v)) return NaN;
   const s = String(v || "");
   return Date.parse(/^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}:\d{2}$/.test(s) ? s.replace(" ", "T") + "+08:00" : s);
 };
@@ -21,7 +23,7 @@ const daysBetween = (fromDay: string, toDay: string) => {
   for (let cursor = dayEpoch(fromDay), end = dayEpoch(toDay); Number.isFinite(cursor) && cursor <= end; cursor += 86_400_000) days.push(new Date(cursor).toISOString().slice(0, 10));
   return days;
 };
-const normalizedInstant = (value: unknown) => legacyScoreInstant(value, "viewer-daily-v1") || '';
+const normalizedInstant = (value: unknown) => realPlayInstant(value, "viewer-daily-v1") || '';
 
 export function deriveProgressForRange(current: UserdataSong[], history: GrowthSnapshot[], fromDay: string, toDay: string, title: (s: UserdataSong) => string, currentRevision = ''): GrowthDailyProgress[] {
   return deriveProgressForCalendarDays(current, history, daysBetween(fromDay, toDay), title, currentRevision);
@@ -29,7 +31,7 @@ export function deriveProgressForRange(current: UserdataSong[], history: GrowthS
 
 /** Replays the same canonical transitions as the range API without materializing intervening calendar days. */
 export function deriveProgressForCalendarDays(current: UserdataSong[], history: GrowthSnapshot[], requestedDays: string[], title: (s: UserdataSong) => string, currentRevision = ''): GrowthDailyProgress[] {
-  const calendarDayFor = memoizeGrowthString(growthCalendarDay);
+  const calendarDayFor = memoizeGrowthString(value => isManualImportTimestamp(value) ? '' : growthCalendarDay(value));
   const epochFor = memoizeGrowthString(epoch);
   const instantFor = memoizeGrowthString(normalizedInstant);
   const calendarDays = [...new Set(requestedDays.filter(Boolean))].sort();
