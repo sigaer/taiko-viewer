@@ -1,0 +1,12 @@
+{
+  "catalogRevision": "891a2a0aa47dff10f576e1ec273721a26ebfcb8bcd3f41521139f4ecc769c52f",
+  "policyVersion": "wahlap-cn-1",
+  "membershipSource": "Wahlap Song API",
+  "referenceStatus": "REFERENCE_ONLY",
+  "referenceUpdatedAt": "2026-11-24T09:42:01+08:00",
+  "uniqueOfficialSongs": 1128,
+  "membershipRows": 1323,
+  "orderedMemberships": 1307,
+  "pendingMemberships": 16,
+  "semantics": "Reference order only; unmatched current official members remain pending."
+}

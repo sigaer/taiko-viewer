@@ -1,0 +1,29 @@
+{
+  "lead": "/root",
+  "sourceWorktrees": {
+    "viewer": "/var/tmp/taiko-batch21-20261124/viewer",
+    "bot": "/var/tmp/taiko-batch21-20261124/bot",
+    "core": "/var/tmp/taiko-batch21-20261124/core"
+  },
+  "subagents": [
+    {
+      "name": "b21_client",
+      "actualToolExecution": false,
+      "preflight": "No terminal/filesystem tools available",
+      "creditedImplementation": false
+    },
+    {
+      "name": "b21_integrity",
+      "actualToolExecution": false,
+      "preflight": "No terminal/filesystem tools available",
+      "creditedImplementation": false
+    },
+    {
+      "name": "b21_coverage",
+      "actualToolExecution": false,
+      "preflight": "No terminal/filesystem tools available",
+      "creditedImplementation": false
+    }
+  ],
+  "execution": "Lead performed actual reads, implementations and checks; subagent Client comments were reasoning-only review."
+}

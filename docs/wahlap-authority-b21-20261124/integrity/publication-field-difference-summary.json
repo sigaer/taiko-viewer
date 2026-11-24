@@ -1,0 +1,32 @@
+{
+  "differencesBetweenGenerations": [
+    {
+      "fields": [
+        "_meta",
+        "ts"
+      ],
+      "kind": "VALUE_CHANGED"
+    },
+    {
+      "fields": [
+        "_meta",
+        "synced_at"
+      ],
+      "kind": "VALUE_CHANGED"
+    },
+    {
+      "fields": [
+        "_meta"
+      ],
+      "kind": "VALUE_CHANGED"
+    },
+    {
+      "fields": [
+        "dojo",
+        "version"
+      ],
+      "kind": "KEY_MEMBERSHIP"
+    }
+  ],
+  "interpretation": "These compare two distinct committed generations, not proven before/after corruption bytes."
+}

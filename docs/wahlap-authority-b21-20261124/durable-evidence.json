@@ -1,0 +1,28 @@
+{
+  "privateRoot": "/home/sigaer/taiko/qa-vault/evidence/wahlap-authority-batch21-20261124",
+  "sourceArchives": {
+    "viewer": {
+      "commit": "79d07cfc9057de1ee31ce0ab70deea5d08266818",
+      "archive": "sources/viewer-79d07cfc9057de1ee31ce0ab70deea5d08266818.tar.gz",
+      "sha256": "ce815c2d3560ee391b504a2424d394621967d5e15fc8041141460d52b431020b",
+      "bytes": 227887612
+    },
+    "bot": {
+      "commit": "ccfabff7b2f17a67ea86b64de869225d82cae444",
+      "archive": "sources/bot-ccfabff7b2f17a67ea86b64de869225d82cae444.tar.gz",
+      "sha256": "608bdbd29349c63086b75d2eb93d8891d69eb114f6b5d3c371006bd75580846d",
+      "bytes": 3680460
+    },
+    "core": {
+      "commit": "d1bc3bf25a8d90a6a5bca92c1905e9e2fac51bd6",
+      "archive": "sources/core-d1bc3bf25a8d90a6a5bca92c1905e9e2fac51bd6.tar.gz",
+      "sha256": "e78ddae1f3072ee265716dbf20d26bf3bc1812744f8446bb223afa6ced6caa86",
+      "bytes": 276032
+    }
+  },
+  "files": 158,
+  "bytes": 477903252,
+  "sha256Sums": "ee69c57167ef3893e66de2f216c436e37ea1e43a876754de8408d130aef973dd",
+  "productionDataTraversal": false,
+  "sourceOfPrivateEvidence": "Previously captured Batch 2/2.1 read-only evidence only; no Publication reader/recovery or production DB invoked."
+}

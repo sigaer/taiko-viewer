@@ -1,0 +1,17 @@
+{
+  "catalogRevision": "891a2a0aa47dff10f576e1ec273721a26ebfcb8bcd3f41521139f4ecc769c52f",
+  "policyVersion": "wahlap-cn-1",
+  "sourceAliasRows": 8805,
+  "uniqueNamespaceKeys": 8805,
+  "namespaceCounts": {
+    "catalog-id": 3084,
+    "ourtaiko": 2990,
+    "nijiiro": 1457,
+    "taikowiki": 146,
+    "wahlap": 1128
+  },
+  "namespaceIdentityConflicts": [],
+  "legacyAliasKeys": 91,
+  "identityConflicts": [],
+  "semantics": "Search aliases are not identity equivalence. Source namespaces are not cross-merged by text."
+}

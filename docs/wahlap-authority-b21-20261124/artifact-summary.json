@@ -1,0 +1,59 @@
+{
+  "releaseDirectory": "/var/tmp/taiko-batch21-20261124/release-candidate-rc9",
+  "versionsAndSources": {
+    "core": {
+      "version": "0.1.4rc2",
+      "sourceCommit": "e254f3ee3216c8de418aea4c995315ab2cf9b89f"
+    },
+    "application": {
+      "version": "0.10.0rc2",
+      "sourceCommit": "7bb9b83421c776f617e5743d07adfb1b7715ebae"
+    },
+    "bot": {
+      "version": "0.27.0rc9",
+      "sourceCommit": "c1ff685e0cd1880e19de123885641b66d25eaa28"
+    }
+  },
+  "artifacts": {
+    "taiko_bot-0.27.0rc9-py3-none-any.whl": {
+      "sha256": "702ee32972e4ea7e7ae20a50832a1e1f0e73b85b5eb7c51defed66fbf9db48ae",
+      "bytes": 1138583,
+      "rebuildByteIdentical": true,
+      "sourceCommit": "c1ff685e0cd1880e19de123885641b66d25eaa28"
+    },
+    "sakura_taiko_core-0.1.4rc2-py3-none-any.whl": {
+      "sha256": "0515e104332705240f9af8f2866cce47603f5ca055ab00ba3a5e3eea771f0dd5",
+      "bytes": 110439,
+      "reusedUnchangedArtifact": true,
+      "sourceManifest": "../release-candidate-rc8/release-manifest.json"
+    },
+    "taiko_application-0.10.0rc2-py3-none-any.whl": {
+      "sha256": "2bd584d1d017570b21daa7f158725e1665d0dc8bbf6b35d27cb68067e5b76d19",
+      "bytes": 97487,
+      "reusedUnchangedArtifact": true,
+      "sourceManifest": "../release-candidate-rc8/release-manifest.json"
+    },
+    "sakura_taiko_contract-0.1.0-py3-none-any.whl": {
+      "sha256": "a23e53a86905a300ab35289b359d27a57a6ea069f92016f8185992e9145c1970",
+      "bytes": 4822,
+      "reusedUnchangedArtifact": true,
+      "sourceManifest": "../release-candidate-rc8/release-manifest.json"
+    },
+    "python_memory_runtime-1.1.0-py3-none-any.whl": {
+      "sha256": "1797622c1c862da88b1cad719943a0ffdd34c5b7fd5a8e04461297bb191d50ab",
+      "bytes": 9810,
+      "reusedUnchangedArtifact": true,
+      "sourceManifest": "../release-candidate-rc8/release-manifest.json"
+    }
+  },
+  "verification": {
+    "centerResolverExit": 0,
+    "clientResolverExit": 0,
+    "center,clientResolverExit": 0,
+    "pipCheck": "PASS"
+  },
+  "buildQa": "qa-200fc28f75ee",
+  "coreAndApplicationBuildQa": "qa-28f3894c69d6",
+  "pipFreezeSha256": "e9be8e9c72e2cf51ea55e83bc09ad25a8f606963bfcec07f4323761051a89275",
+  "provenance": "Final Core/Application RC2 built twice in RC8 and reused unchanged; final Bot RC9 built twice from committed sources. Fresh non-system venv, -I imports, no source overlay."
+}

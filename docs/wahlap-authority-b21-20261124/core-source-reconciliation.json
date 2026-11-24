@@ -1,0 +1,43 @@
+{
+  "base": "0b7319d v0.1.2",
+  "retainedBatch2": "52909ec",
+  "current": "e254f3ee3216c8de418aea4c995315ab2cf9b89f",
+  "ratingAndModelFilesUnchangedFromClientBase": true,
+  "reviewedBatch2Modules": [
+    {
+      "path": "core/chart/availability.py",
+      "batch2Sha256": "1650ad624e56a6b663d347f1cfbf1747967ea99a8c28e7ed627687f9d0ed81f1",
+      "currentSha256": "50153b7422a4e2880971321f6f8f4cb6f0ec7aeba0098d72ed7ebfdd45d18638",
+      "equalToBatch2": false,
+      "changeReason": "Parser fixes retained; availability now central Authority, candidate masks retain Client namespace and explicit-empty semantics"
+    },
+    {
+      "path": "core/parser/chart_analysis.py",
+      "batch2Sha256": "1dabaa21ad9c03218d07ff207a7816f451079344a89e674195eb766bbd720983",
+      "currentSha256": "1dabaa21ad9c03218d07ff207a7816f451079344a89e674195eb766bbd720983",
+      "equalToBatch2": true,
+      "changeReason": "Parser fixes retained; availability now central Authority, candidate masks retain Client namespace and explicit-empty semantics"
+    },
+    {
+      "path": "core/parser/tja.py",
+      "batch2Sha256": "31b858d3785d626f3186e07ca0b59fc1d1652340109e086660610f5c9e33570a",
+      "currentSha256": "31b858d3785d626f3186e07ca0b59fc1d1652340109e086660610f5c9e33570a",
+      "equalToBatch2": true,
+      "changeReason": "Parser fixes retained; availability now central Authority, candidate masks retain Client namespace and explicit-empty semantics"
+    },
+    {
+      "path": "core/recommendation/candidates.py",
+      "batch2Sha256": "f76b568138399a4fa9969ce2231034cc6b8ea49b9fa6810f45cbedae97e632b9",
+      "currentSha256": "81f5a7c9a87a8d2c83b7616dc7c1f584fcfe7356f4fa6169f6e59b72698d29d0",
+      "equalToBatch2": false,
+      "changeReason": "Parser fixes retained; availability now central Authority, candidate masks retain Client namespace and explicit-empty semantics"
+    },
+    {
+      "path": "core/recommendation/catalog_inputs.py",
+      "batch2Sha256": "cb7578ff5d81c82949d5579bda68b98f64424fdd542dadf5b25957f134e2b58a",
+      "currentSha256": "cb7578ff5d81c82949d5579bda68b98f64424fdd542dadf5b25957f134e2b58a",
+      "equalToBatch2": true,
+      "changeReason": "Parser fixes retained; availability now central Authority, candidate masks retain Client namespace and explicit-empty semantics"
+    }
+  ]
+}

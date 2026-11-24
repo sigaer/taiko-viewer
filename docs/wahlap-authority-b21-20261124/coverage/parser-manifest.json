@@ -1,0 +1,11 @@
+{
+  "tja-static-batch2-3:a90a475506e844c5fff59d99f58a9a154de8e56a611a6bbb7bb79481226baafd": {
+    "viewerCandidate": "26930740",
+    "scannerVersion": "batch2-3",
+    "files": {
+      "vendor/tja/TJARenderer/src/tja-parser.ts": "8c019de91b82668ecb2cbe10027d85502149bc800e284c7f6b30029a2e765de9",
+      "vendor/tja/TJARenderer/src/primitives.ts": "df7372d650a809f9af1eccdbf919e8e112b0c3b02e11a1872284dc891a234ef6",
+      "vendor/tja/TJAAnalyzer/src/utils/bar-timeline.ts": "2514de2c51f820642887ebf83e2599c207a0489bea3839a555a4deec99c91cc4"
+    }
+  }
+}

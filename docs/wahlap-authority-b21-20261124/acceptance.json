@@ -1,0 +1,163 @@
+{
+  "allCandidateGatesPassed": true,
+  "checks": {
+    "contract": {
+      "passed": 12,
+      "skipped": 0,
+      "qaRun": "qa-86deaf1e1d82",
+      "logSha256": "85c84a9e58676716f58c8c394368d6dc09843263629e92fd9554198dbdd8e212",
+      "installedPrefix": "/var/tmp/taiko-batch21-20261124/installed-rc9"
+    },
+    "python": {
+      "passed": 76,
+      "skipped": 4,
+      "qaRun": "qa-bea8fbe43d79",
+      "logSha256": "642af3e505aefbd40c0523ad3157ad29a2cec8409da9c5723cfc4605a6ea9e05",
+      "installedPrefix": "/var/tmp/taiko-batch21-20261124/installed-rc9"
+    },
+    "core-original": {
+      "passed": 31,
+      "skipped": 0,
+      "qaRun": "qa-45a19f9df89d",
+      "logSha256": "f12e3f7b3bd2de7e41b4d203f797feca01469e8dae015d5483d5be3ca0c14ea4",
+      "installedPrefix": "/var/tmp/taiko-batch21-20261124/installed-rc9"
+    },
+    "authority": {
+      "passed": 15,
+      "skipped": 0,
+      "qaRun": "qa-5cc49d2e10a9",
+      "logSha256": "857706cd2b4a2909e5ca325452a192b1b9a81dc00d19f8577834bf8c9fd5a06b",
+      "installedPrefix": "/var/tmp/taiko-batch21-20261124/installed-rc9"
+    },
+    "bridge": {
+      "passed": 27,
+      "qaRun": "qa-24d1eab40696",
+      "actualInstalledHostFunctions": true,
+      "casesSha256": "c87cfbf4da00315d1a25922e67317503f78d9d3e2b588ad7b9b3edaa61c4298d"
+    },
+    "node-installed": {
+      "passed": 310,
+      "qaRun": "qa-84d3fc435eaa",
+      "logSha256": "ac24a214a2a87d39a95a039759c140cf5188d3d32ba830860dce80f997788920"
+    },
+    "node-additional": {
+      "passed": 10,
+      "qaRun": "qa-1a9e4f92e7e3",
+      "logSha256": "23ff410aa4369db21060a5095bf02cb949f9d66af8a615301564c6a908ac3879"
+    },
+    "viewer-build": {
+      "result": "PASS",
+      "log": "/var/tmp/taiko-batch21-20261124/evidence/viewer-build-review.log",
+      "logSha256": "6744a7967cb209e5c247481be2591d63fdc562f96102dea38c3f6a8e2da38444",
+      "entrySha256": "14c45983c3d15fa4a72ed93a48cc761f9b23d4e3c4bc6ea90a86d0228a5146f9",
+      "sourceCommit": "79d07cfc9057de1ee31ce0ab70deea5d08266818",
+      "productionDeployed": false
+    },
+    "numerical-golden": {
+      "fixturesByteUnchanged": 10,
+      "recommendationOracles": 126,
+      "baseline": "Core v0.1.2 0b7319d",
+      "inputsMigrated": "Legacy unrestricted [] -> None only; explicit empty rejects all"
+    }
+  },
+  "catalog": {
+    "manifest": {
+      "catalogRevision": "891a2a0aa47dff10f576e1ec273721a26ebfcb8bcd3f41521139f4ecc769c52f",
+      "policyVersion": "wahlap-cn-1",
+      "schemaVersion": 1,
+      "sha256": "d93cf2a4030c4e8744b28bf07aa34f501492d487be905fedcfa186b18aac9357",
+      "bytes": 36435443
+    },
+    "songs": 2993,
+    "chartSlots": 14965,
+    "knownCharts": 12052,
+    "officialSongs": 1128,
+    "cnOniUra": 1387,
+    "recommendationCounts": {
+      "ordinary": 1346,
+      "target": 1343
+    },
+    "identityConflicts": [],
+    "buildSeconds": 2.3594753332436085,
+    "activationRoot": "/var/tmp/taiko-batch21-20261124/catalog",
+    "productionActivated": false
+  },
+  "crossConsumerConsistency": {
+    "qaRun": "qa-4af565e13fc7",
+    "execution": "installed Bot/Core plus actual Node adapter and UGC loader; no production HTTP or business-data writes",
+    "catalogRevision": "891a2a0aa47dff10f576e1ec273721a26ebfcb8bcd3f41521139f4ecc769c52f",
+    "policyVersion": "wahlap-cn-1",
+    "cnOniUra": 1387,
+    "crossConsumerConsistency": "PASS",
+    "consumers": [
+      "Python Reader",
+      "Core availability",
+      "Core progress active IDs",
+      "Bot availability masks",
+      "Node Reader",
+      "UGC actual loader"
+    ],
+    "python": {
+      "coldMs": 1212.2345864772797,
+      "warm": {
+        "medianMs": 0.058280304074287415,
+        "maxMs": 0.12406706809997559,
+        "samples": 30
+      }
+    },
+    "node": {
+      "coldMs": 568.995265,
+      "warm": {
+        "medianMs": 0.33054200000003675,
+        "maxMs": 0.5087399999999889,
+        "samples": 30
+      }
+    },
+    "activationMs": 1630.96396997571,
+    "rollbackMs": 1314.5480304956436,
+    "failedFetchPreservesPointer": true,
+    "olderRevisionsRetained": true,
+    "snapshotLinkCount": 1,
+    "limits": "One synthetic second revision in an owned root, not production rollback/load testing. Single writer required. No global cross-machine transaction claim."
+  },
+  "consumerMigration": {
+    "baselineReferences": 494,
+    "files": 187,
+    "referenceClassifications": {
+      "LEGACY_TRANSPORT_SERIALIZER": 4,
+      "TEST_OR_MAINTENANCE_TOOLING": 77,
+      "MIGRATED_RUNTIME_PORT": 295,
+      "DRAFT_METADATA_ADMIN": 14,
+      "PROJECTED_RUNTIME_WITH_FROZEN_COMPATIBILITY": 12,
+      "RAW_RESOURCE_ANALYSIS": 1,
+      "MAINTENANCE_NOT_EXECUTED": 3,
+      "SOURCE_CONFIGURATION": 6,
+      "METADATA_OR_RESOURCE_PRODUCER": 77,
+      "MIGRATED_PRESENTATION_DTO": 5
+    },
+    "fileClassifications": {
+      "MIGRATED_RUNTIME_PORT": 117,
+      "PROJECTED_RUNTIME_WITH_FROZEN_COMPATIBILITY": 4,
+      "RAW_RESOURCE_ANALYSIS": 1,
+      "TEST_OR_MAINTENANCE_TOOLING": 36,
+      "MAINTENANCE_NOT_EXECUTED": 2,
+      "SOURCE_CONFIGURATION": 2,
+      "METADATA_OR_RESOURCE_PRODUCER": 16,
+      "DRAFT_METADATA_ADMIN": 5,
+      "MIGRATED_PRESENTATION_DTO": 2,
+      "LEGACY_TRANSPORT_SERIALIZER": 2
+    },
+    "productionMigration": "NOT_DEPLOYED",
+    "unclassifiedReferences": 0,
+    "verificationScope": "Static call graph + direct review; acceptance tests separately identified. Not 494 independently exercised runtime calls."
+  },
+  "productionDeployed": false,
+  "dataMutationOrRecovery": false,
+  "limits": [
+    "4 private regression fixtures intentionally skipped",
+    "494 static references are not 494 executed runtime calls",
+    "Production HTTP/DB/capacity/remote rollout not exercised",
+    "Publication writer and 14 historical scoreRevisions unresolved",
+    "Dynamic/absolute chart semantics retain feature-level limits"
+  ]
+}

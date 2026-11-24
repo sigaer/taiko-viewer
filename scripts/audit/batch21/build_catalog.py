@@ -21,11 +21,13 @@ rating,m2=load('/home/sigaer/taiko/songs/rating_structured_with_ids.json')
 scoreline,m3=load('/home/sigaer/taiko/songs/taiko_goku_onis.json')
 coverage,m4=load(BASE/'evidence/chart-feature-coverage-all.json')
 search_aliases,m5=load('/home/sigaer/taiko/songs/song_alias.json')
+try:position_reference,m6=load('/home/sigaer/taiko/songs/cn_song_positions.json')
+except (OSError,ValueError):position_reference,m6=None,{'name':'cn_song_positions.json','status':'UNAVAILABLE','role':'reference-order-only'}
 from taiko_bot.catalog.provenance import builder_identity
 identity=builder_identity()
 identity['sourceCommit']=subprocess.check_output(['git','rev-parse','HEAD'],cwd=BASE/'bot',text=True).strip()
 identity['execution']='installed-artifact' if '--installed' in sys.argv else 'development-source'
-start=time.perf_counter();snapshot=build(authority,metadata,model_keys=model_inputs(rating,scoreline),coverage=coverage,builder_identity=identity,search_aliases=search_aliases,source_manifest=[m1,m2,m3,m4,m5]);elapsed=time.perf_counter()-start
+start=time.perf_counter();snapshot=build(authority,metadata,model_keys=model_inputs(rating,scoreline),coverage=coverage,builder_identity=identity,position_reference=position_reference,search_aliases=search_aliases,source_manifest=[m1,m2,m3,m4,m5,m6]);elapsed=time.perf_counter()-start
 manifest=install(BASE/'catalog',snapshot);activate(BASE/'catalog',snapshot['catalogRevision'])
 conflicts=[]
 raw=json.loads(Path('/home/sigaer/taiko/songs/song_data_raw.json').read_text());raw={r['id']:r for r in raw}

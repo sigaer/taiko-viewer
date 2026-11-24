@@ -1,0 +1,86 @@
+[
+  {
+    "songId": 1210,
+    "chartIdentity": "song:1210:course:5",
+    "title": "ドキメキダイアリー",
+    "mergedLevel5": 8,
+    "rawLevel5": 0,
+    "officialLevel5": 0,
+    "songCnRelease": "LISTED",
+    "cnCourse5Offered": false,
+    "historicalChartPreserved": true,
+    "resolution": "JP/global difficulty metadata retained; official zero does not offer CN Ura; TJA presence does not change release."
+  },
+  {
+    "songId": 226,
+    "chartIdentity": "song:226:course:5",
+    "title": "キラメキラリ",
+    "mergedLevel5": 9,
+    "rawLevel5": 0,
+    "officialLevel5": 0,
+    "songCnRelease": "LISTED",
+    "cnCourse5Offered": false,
+    "historicalChartPreserved": true,
+    "resolution": "JP/global difficulty metadata retained; official zero does not offer CN Ura; TJA presence does not change release."
+  },
+  {
+    "songId": 197,
+    "chartIdentity": "song:197:course:5",
+    "title": "The world is all one !!",
+    "mergedLevel5": 8,
+    "rawLevel5": 0,
+    "officialLevel5": 0,
+    "songCnRelease": "LISTED",
+    "cnCourse5Offered": false,
+    "historicalChartPreserved": true,
+    "resolution": "JP/global difficulty metadata retained; official zero does not offer CN Ura; TJA presence does not change release."
+  },
+  {
+    "songId": 1103,
+    "chartIdentity": "song:1103:course:5",
+    "title": "神っぽいな",
+    "mergedLevel5": 9,
+    "rawLevel5": 0,
+    "officialLevel5": 0,
+    "songCnRelease": "LISTED",
+    "cnCourse5Offered": false,
+    "historicalChartPreserved": true,
+    "resolution": "JP/global difficulty metadata retained; official zero does not offer CN Ura; TJA presence does not change release."
+  },
+  {
+    "songId": 106,
+    "chartIdentity": "song:106:course:5",
+    "title": "Day by Day！",
+    "mergedLevel5": 9,
+    "rawLevel5": 0,
+    "officialLevel5": 0,
+    "songCnRelease": "LISTED",
+    "cnCourse5Offered": false,
+    "historicalChartPreserved": true,
+    "resolution": "JP/global difficulty metadata retained; official zero does not offer CN Ura; TJA presence does not change release."
+  },
+  {
+    "songId": 301,
+    "chartIdentity": "song:301:course:5",
+    "title": "My Mine",
+    "mergedLevel5": 9,
+    "rawLevel5": 0,
+    "officialLevel5": 0,
+    "songCnRelease": "LISTED",
+    "cnCourse5Offered": false,
+    "historicalChartPreserved": true,
+    "resolution": "JP/global difficulty metadata retained; official zero does not offer CN Ura; TJA presence does not change release."
+  },
+  {
+    "songId": 663,
+    "chartIdentity": "song:663:course:5",
+    "title": "風雲！バチお先生",
+    "mergedLevel5": 9,
+    "rawLevel5": 0,
+    "officialLevel5": 0,
+    "songCnRelease": "LISTED",
+    "cnCourse5Offered": false,
+    "historicalChartPreserved": true,
+    "resolution": "JP/global difficulty metadata retained; official zero does not offer CN Ura; TJA presence does not change release."
+  }
+]

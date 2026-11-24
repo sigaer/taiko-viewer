@@ -1,0 +1,3253 @@
+[
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/chart/availability.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "Core explicit Catalog projection / host Authority mask",
+    "versionReporting": "host report and stamped Application context",
+    "note": "Core receives Authority projections or explicit precomputed masks; None and empty remain distinct.",
+    "sourceSha256": "50153b7422a4e2880971321f6f8f4cb6f0ec7aeba0098d72ed7ebfdd45d18638",
+    "staticEvidence": [
+      {
+        "line": 41,
+        "text": "Only centrally precomputed ``cnCurrentPlayable`` is consumed. Missing"
+      },
+      {
+        "line": 49,
+        "text": "result.update((song_id, level) for level in row.get('catalog',{}).get('cnCurrentPlayable',[]) if level in (4,5))"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/chart/position.py",
+    "owner": "Lead",
+    "classification": "PROJECTED_RUNTIME_WITH_FROZEN_COMPATIBILITY",
+    "authorityPort": "Core explicit Catalog projection / host Authority mask",
+    "versionReporting": "host report and stamped Application context",
+    "note": "Catalog projection wins for active hosts. Legacy pure raw-input profiles remain for historical compatibility tests; never used as a current CN fallback.",
+    "sourceSha256": "f8f2c7fa26ff48eb2ef0176e1c0a11e58606b45517bea411abed569144d7dcc1",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/chart/progress_catalog.py",
+    "owner": "Lead",
+    "classification": "PROJECTED_RUNTIME_WITH_FROZEN_COMPATIBILITY",
+    "authorityPort": "Core explicit Catalog projection / host Authority mask",
+    "versionReporting": "host report and stamped Application context",
+    "note": "Catalog projection wins for active hosts. Legacy pure raw-input profiles remain for historical compatibility tests; never used as a current CN fallback.",
+    "sourceSha256": "d9ec34bdee0cca24840613d830dc881c80be78df6edbd5817f6f5a857f02f778",
+    "staticEvidence": [
+      {
+        "line": 16,
+        "text": "return level in authority.get('cnCurrentPlayable',[])"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/chart/visibility.py",
+    "owner": "Lead",
+    "classification": "PROJECTED_RUNTIME_WITH_FROZEN_COMPATIBILITY",
+    "authorityPort": "Core explicit Catalog projection / host Authority mask",
+    "versionReporting": "host report and stamped Application context",
+    "note": "Catalog projection wins for active hosts. Legacy pure raw-input profiles remain for historical compatibility tests; never used as a current CN fallback.",
+    "sourceSha256": "fa4b7326ede21ed350236e7ff309e8e0e3846bfa8bb71250ac2d84792a9cb84f",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/parser/tja_mapping.py",
+    "owner": "Lead",
+    "classification": "RAW_RESOURCE_ANALYSIS",
+    "authorityPort": "Core explicit Catalog projection / host Authority mask",
+    "versionReporting": "host report and stamped Application context",
+    "note": "TJA identity/resource parsing, not CN release authority; per-chart feature coverage is supplied by Builder.",
+    "sourceSha256": "a598de29148b71def656c9b311f8b45a90cb9efe2c557a62f5a0b38f81343707",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/recommendation/candidates.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "Core explicit Catalog projection / host Authority mask",
+    "versionReporting": "host report and stamped Application context",
+    "note": "Core receives Authority projections or explicit precomputed masks; None and empty remain distinct.",
+    "sourceSha256": "81f5a7c9a87a8d2c83b7616dc7c1f584fcfe7356f4fa6169f6e59b72698d29d0",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/sakura-taiko-core/core/recommendation/client_selection.py",
+    "owner": "Lead",
+    "classification": "PROJECTED_RUNTIME_WITH_FROZEN_COMPATIBILITY",
+    "authorityPort": "Core explicit Catalog projection / host Authority mask",
+    "versionReporting": "host report and stamped Application context",
+    "note": "Catalog projection wins for active hosts. Legacy pure raw-input profiles remain for historical compatibility tests; never used as a current CN fallback.",
+    "sourceSha256": "4925bdfb2068da3baf54fdbe444380bf8d95a40f4f68ebd6b9e32ead0157dcd7",
+    "staticEvidence": [
+      {
+        "line": 105,
+        "text": "current = level in song_meta['catalog'].get('cnCurrentPlayable',[]) if song_meta is not None and 'catalog' in song_meta else song_meta is None or song_meta.get('shelf_status') not in (1,'1','已下架')"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/taiko-application/src/taiko_application/commands/constant.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "injected Authority song projection / RecommendationContext",
+    "versionReporting": "catalogRevision/policyVersion in context or host report",
+    "note": "Pure old fixture shape retained; live contexts use canonical flags. No rating formula changed.",
+    "sourceSha256": "42d0290db86747da8fb2e9cb71eea11d20097ec89e71e7e1744b95fb35e2d0c0",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/taiko-application/src/taiko_application/query/constant.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "injected Authority song projection / RecommendationContext",
+    "versionReporting": "catalogRevision/policyVersion in context or host report",
+    "note": "Pure old fixture shape retained; live contexts use canonical flags. No rating formula changed.",
+    "sourceSha256": "f50df49f9528ad48a72d03f2ad7b69e60e661f78da50f52170033ef45520e863",
+    "staticEvidence": [
+      {
+        "line": 87,
+        "text": "available = level in authority.get('cnCurrentPlayable',[]) if authority is not None else is_song_on_shelf((song or {}).get('shelf_status'))"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "packages/taiko-application/src/taiko_application/query/context.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "injected Authority song projection / RecommendationContext",
+    "versionReporting": "catalogRevision/policyVersion in context or host report",
+    "note": "Pure old fixture shape retained; live contexts use canonical flags. No rating formula changed.",
+    "sourceSha256": "dbed5df99c52f0963569aa0b8c6bbc21f13f90d978910cbdae04ec757543b91d",
+    "staticEvidence": [
+      {
+        "line": 77,
+        "text": "return {'catalogRevision':self.catalog_revision,'policyVersion':self.policy_version} if self.catalog_revision else {}"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/benchmark.py",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "ab5119da0e72f74c60bae7b807d4b2f079389fc10d5501a6b98f2080a971e817",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/fixtures.py",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "db31ef6183fd30bda64f9c287386c28c7b1f8c4c537c5b55ed0222da1a17471b",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/song_query/report.py",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "98952d68f75df8c978f4026df00901d269de38b9bb9a5d415b27907e46aeafce",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/song_query/run.py",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "98afed928890dfb2fb87eb24368bff644d43dc2b76d8cf794cc15e8884c94b5f",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/performance/song_query/validate.py",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "496ff98c21edd70cb55a19174c8adc5d6eaf90a285e29787a40740d4b03f4e9b",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/readiness/check-my-don-dress.py",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "eec3a29771b3e3ed56af0d171e986302683796297aa822f9466e592062ac48b5",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/readiness/run-installed-reappearance.py",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "7f158576768279dab47382eb0fdc6733cd13e22c73302138c8a7963398fa20bc",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "scripts/upload_ourtaiko_covers.py",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "d87e2275dc5d69d79e24b73c33429adba00da174f3fe45862373d84fb2824a74",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/catalog_identity.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.catalog_identity",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "658edbaddfa3be0f44619ff109ab53e1bba35ef235e3309b7d04d372917401ba",
+    "staticEvidence": [
+      {
+        "line": 44,
+        "text": "from taiko_bot.catalog.reader import capture,CatalogUnavailable"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/cli/backfill_daily_ability.py",
+    "owner": "Lead",
+    "classification": "MAINTENANCE_NOT_EXECUTED",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Explicit archival/backfill maintenance interface retained. No backfill, DB mutation or business-data command executed.",
+    "sourceSha256": "3206d4e8b21047bc62a4af98d9c4a9a294bfc1d0fe8136d54eebe2e14a3c6241",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/cli/taiko_admin_backup.py",
+    "owner": "Lead",
+    "classification": "MAINTENANCE_NOT_EXECUTED",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Explicit archival/backfill maintenance interface retained. No backfill, DB mutation or business-data command executed.",
+    "sourceSha256": "1b7579adc17a6375f979ae4eebe555bdff0f23cd58711e432e12aaf97c4a4a64",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/annual_summary/aggregates.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.offline.annual_summary.aggregates -> taiko_bot.offline.annual_summary.eligibility -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "d9164b278c128cbfdd11c4aef4b95d3ab77288b6fd9b60c0b467b6cb4ba07745",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/annual_summary/constants.py",
+    "owner": "Lead",
+    "classification": "SOURCE_CONFIGURATION",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Legacy dataset names retained for metadata/resource transport; Catalog distribution is separate and mandatory for CN policies.",
+    "sourceSha256": "0d66754890ca75112cdd844f0739379fac237a4c1edef18fe96de92f23f9d9fe",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/annual_summary/eligibility.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.offline.annual_summary.eligibility -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "36219b7bbc7f4e6d980f9bd36629e3ae34e32d9505dae07041e7efa26c0cdefe",
+    "staticEvidence": [
+      {
+        "line": 66,
+        "text": "from taiko_bot.catalog.reader import row_policy"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/annual_summary/helpers.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.offline.annual_summary.helpers -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "3c067bb0849841756674393b26c7f5c78a9d6921999ddf47ae0fb0c348b81f2c",
+    "staticEvidence": [
+      {
+        "line": 60,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 61,
+        "text": "return project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/build_nijiiro_history_simple.py",
+    "owner": "Lead",
+    "classification": "METADATA_OR_RESOURCE_PRODUCER",
+    "authorityPort": "taiko_bot.offline.build_nijiiro_history_simple -> taiko_bot.catalog.availability",
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Maintains metadata/raw references or explicit offline artifacts. Legacy shelf fields are non-authoritative; Builder alone projects current CN state. Current eligibility path uses the Authority port.",
+    "sourceSha256": "e7c90ec2247a055477747195bed7912e29fca8a6fd281454c4190d33f6bb5b77",
+    "staticEvidence": [
+      {
+        "line": 116,
+        "text": "from taiko_bot.catalog.availability import is_current_song_id"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_constants.py",
+    "owner": "Lead",
+    "classification": "METADATA_OR_RESOURCE_PRODUCER",
+    "authorityPort": "taiko_bot.offline.catalog_constants -> taiko_bot.offline.merge_index -> taiko_bot.catalog.availability",
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Maintains metadata/raw references or explicit offline artifacts. Legacy shelf fields are non-authoritative; Builder alone projects current CN state. Current eligibility path uses the Authority port.",
+    "sourceSha256": "dc5b81d143099c7b23ffde2bdc1b99814c200a5394df12bac171e26fe151a635",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_images.py",
+    "owner": "Lead",
+    "classification": "METADATA_OR_RESOURCE_PRODUCER",
+    "authorityPort": "taiko_bot.offline.catalog_images -> taiko_bot.offline.ourtaiko_catalog -> taiko_bot.offline.catalog_reconcile -> taiko_bot.catalog_identity",
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Maintains metadata/raw references or explicit offline artifacts. Legacy shelf fields are non-authoritative; Builder alone projects current CN state. Current eligibility path uses the Authority port.",
+    "sourceSha256": "d9910f16c5a7acbf14334e1d1f7e50723299a785c18b6cd020b70a0b33e697c8",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_import.py",
+    "owner": "Lead",
+    "classification": "METADATA_OR_RESOURCE_PRODUCER",
+    "authorityPort": "taiko_bot.offline.catalog_import -> taiko_bot.offline.ourtaiko_catalog -> taiko_bot.offline.catalog_reconcile -> taiko_bot.catalog_identity",
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Maintains metadata/raw references or explicit offline artifacts. Legacy shelf fields are non-authoritative; Builder alone projects current CN state. Current eligibility path uses the Authority port.",
+    "sourceSha256": "91cc0f12830bac2f87504b10723a53b56e64da399047b65a5b8ecde017f31dcc",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_reconcile.py",
+    "owner": "Lead",
+    "classification": "METADATA_OR_RESOURCE_PRODUCER",
+    "authorityPort": "taiko_bot.offline.catalog_reconcile -> taiko_bot.catalog_identity",
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Maintains metadata/raw references or explicit offline artifacts. Legacy shelf fields are non-authoritative; Builder alone projects current CN state. Current eligibility path uses the Authority port.",
+    "sourceSha256": "2fd016002baaa672b708e5a0cf05ede2341053ed2e74f3bedf7e2f82bd1e348e",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/catalog_references.py",
+    "owner": "Lead",
+    "classification": "METADATA_OR_RESOURCE_PRODUCER",
+    "authorityPort": "taiko_bot.offline.catalog_references -> taiko_bot.catalog_identity",
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Maintains metadata/raw references or explicit offline artifacts. Legacy shelf fields are non-authoritative; Builder alone projects current CN state. Current eligibility path uses the Authority port.",
+    "sourceSha256": "5fd5bc27cb6654a7bbaaa2598ca203be2e4d6743333405f33e3d5e3c01406876",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/chart_availability.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.offline.chart_availability -> taiko_bot.catalog.availability",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "d05ff88c8f38d3cc66c2b57c50a2536610a427d78821da066e91d0990b1a00c9",
+    "staticEvidence": [
+      {
+        "line": 3,
+        "text": "from taiko_bot.catalog.availability import load_on_shelf_song_ids, load_cn_available_chart_keys, load_recommendation_chart_keys, catalog_report"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/cover_summary.py",
+    "owner": "Lead",
+    "classification": "METADATA_OR_RESOURCE_PRODUCER",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Maintains metadata/raw references or explicit offline artifacts. Legacy shelf fields are non-authoritative; Builder alone projects current CN state.",
+    "sourceSha256": "8ecefe2ccc896dc20792215bfad894afd1d458e43b07011a448d99dfe09636ba",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/dani_overview.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.offline.dani_overview -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "953a0f809b04773f3ddaff2b53eef62f913704f49b9199e64ccf2ddc726a3507",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 81,
+        "text": "payload = project_song_rows()"
+      },
+      {
+        "line": 92,
+        "text": "from taiko_bot.catalog.reader import row_policy"
+      },
+      {
+        "line": 93,
+        "text": "return row_policy(song_info,'cn_current_playable')"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/drawinfo.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.offline.drawinfo -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "c58c90912521e05c2df301e648b57b7c18441b144682d5f7cad984a0af1ead94",
+    "staticEvidence": [
+      {
+        "line": 1,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 216,
+        "text": "song_rows = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/ese_audio_sync.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.offline.ese_audio_sync -> taiko_bot.catalog.availability",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "1b5d2d9bb340045aadbb3c58bf3528ce43a904247d0eeb4f62f024011ad7ff4f",
+    "staticEvidence": [
+      {
+        "line": 817,
+        "text": "from taiko_bot.catalog.availability import is_current_song_id"
+      },
+      {
+        "line": 840,
+        "text": "from taiko_bot.catalog.availability import is_current_song_id"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/fingerprint.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.offline.fingerprint -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "e3a3115573c90ab984ac0f0265d1b0e4546f23ba1b6307086895e0126dbb498f",
+    "staticEvidence": [
+      {
+        "line": 64,
+        "text": "from taiko_bot.catalog.reader import capture"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/fumen_rename.py",
+    "owner": "Lead",
+    "classification": "METADATA_OR_RESOURCE_PRODUCER",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Maintains metadata/raw references or explicit offline artifacts. Legacy shelf fields are non-authoritative; Builder alone projects current CN state.",
+    "sourceSha256": "877bacb83378b5b14bf3566c034873292b2e2012339c003ee229b3f882ba1ed6",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/grade_dojo_extract.py",
+    "owner": "Lead",
+    "classification": "METADATA_OR_RESOURCE_PRODUCER",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Maintains metadata/raw references or explicit offline artifacts. Legacy shelf fields are non-authoritative; Builder alone projects current CN state.",
+    "sourceSha256": "5176f78cf2c5b4891ae68cf8e6fdecfeafa7fec67d14fb90454e821991e12ec8",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/merge_index.py",
+    "owner": "Lead",
+    "classification": "METADATA_OR_RESOURCE_PRODUCER",
+    "authorityPort": "taiko_bot.offline.merge_index -> taiko_bot.catalog.availability",
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Maintains metadata/raw references or explicit offline artifacts. Legacy shelf fields are non-authoritative; Builder alone projects current CN state. Current eligibility path uses the Authority port.",
+    "sourceSha256": "bf3dec19f630419c91e307f118bb3099a1d2e54c4c484860058b3712ebdae662",
+    "staticEvidence": [
+      {
+        "line": 150,
+        "text": "from taiko_bot.catalog.availability import is_current_song_id"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/merge_json.py",
+    "owner": "Lead",
+    "classification": "METADATA_OR_RESOURCE_PRODUCER",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Maintains metadata/raw references or explicit offline artifacts. Legacy shelf fields are non-authoritative; Builder alone projects current CN state.",
+    "sourceSha256": "16696bc845308e7a8735fce2a6a1a53e751e6d83dc7e77e17dba007ea4a41d34",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/ourtaiko_catalog.py",
+    "owner": "Lead",
+    "classification": "METADATA_OR_RESOURCE_PRODUCER",
+    "authorityPort": "taiko_bot.offline.ourtaiko_catalog -> taiko_bot.offline.catalog_reconcile -> taiko_bot.catalog_identity",
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Maintains metadata/raw references or explicit offline artifacts. Legacy shelf fields are non-authoritative; Builder alone projects current CN state. Current eligibility path uses the Authority port.",
+    "sourceSha256": "0b3526a3ce1c4fa0ccc148cdb37bb27fd46e4b55e0ff92f29c7c287e0bd9a007",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/progress_catalog.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.offline.progress_catalog -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "d72780f5daced112c0dd258e99b48662f6f0e4861526ae16cc3ab8587d0d1386",
+    "staticEvidence": [
+      {
+        "line": 13,
+        "text": "from taiko_bot.catalog.reader import song_index"
+      },
+      {
+        "line": 17,
+        "text": "from taiko_bot.catalog.reader import capture"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/recommendation_intelligence.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.offline.recommendation_intelligence -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "b76ac0ce7414f7f8294d9fad584477d4e3a99a5ec144c564efd5fce2dec334a6",
+    "staticEvidence": [
+      {
+        "line": 4,
+        "text": "from taiko_bot.catalog.reader import capture,with_catalog"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_calculator.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.offline.score_calculator -> taiko_bot.catalog.availability",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "307aea4066e065af241e76e45903a3c16fcf579bf0513dc32017ba1d8a470cd3",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import with_catalog"
+      },
+      {
+        "line": 3,
+        "text": "from taiko_bot.catalog.availability import load_recommendation_chart_keys"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_line.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.offline.score_line -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "16f5625c7c7cea9aa9a9f631139cae7b8192a341c285f42d79475e2930ddf9fb",
+    "staticEvidence": [
+      {
+        "line": 52,
+        "text": "from taiko_bot.catalog.reader import capture"
+      },
+      {
+        "line": 61,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 62,
+        "text": "song_rows = project_song_rows()"
+      },
+      {
+        "line": 75,
+        "text": "from taiko_bot.catalog.reader import capture,project_song_rows"
+      },
+      {
+        "line": 78,
+        "text": "json.loads(SCORE_PATH.read_text(encoding='utf-8')),project_song_rows(),"
+      },
+      {
+        "line": 86,
+        "text": "from taiko_bot.catalog.reader import catalog_scope"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/score_prediction_support.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.offline.score_prediction_support -> taiko_bot.catalog.availability",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "b3dfac92f67288c7c1961b9d5122043410c107d12e09f3fa6d110fdaf7446ba8",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.availability import load_recommendation_chart_keys"
+      },
+      {
+        "line": 62,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 63,
+        "text": "return project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_tja_mapping.py",
+    "owner": "Lead",
+    "classification": "METADATA_OR_RESOURCE_PRODUCER",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Maintains metadata/raw references or explicit offline artifacts. Legacy shelf fields are non-authoritative; Builder alone projects current CN state.",
+    "sourceSha256": "629b434570c297f69c3820427c526adfe2df99eeb914caa08ce36caf55c1a124",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/song_update_task.py",
+    "owner": "Lead",
+    "classification": "METADATA_OR_RESOURCE_PRODUCER",
+    "authorityPort": "taiko_bot.offline.song_update_task -> taiko_bot.catalog.provenance",
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Maintains metadata/raw references or explicit offline artifacts. Legacy shelf fields are non-authoritative; Builder alone projects current CN state. Current eligibility path uses the Authority port.",
+    "sourceSha256": "115eb9b3d82e69fad9a4f9f990ea0b3612946ebb486da6d335e368fb2260cf04",
+    "staticEvidence": [
+      {
+        "line": 2560,
+        "text": "logger.info('Catalog Authority ready: revision=%s policy=%s',catalog_manifest['catalogRevision'],catalog_manifest['policyVersion'])"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/target_recommend.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.offline.target_recommend -> taiko_bot.offline.score_calculator -> taiko_bot.catalog.availability",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "4f7854b5ce2824632c35e3a9b5797be2786b992e6146b752fe7e29c29db3f81f",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/title_update.py",
+    "owner": "Lead",
+    "classification": "METADATA_OR_RESOURCE_PRODUCER",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Maintains metadata/raw references or explicit offline artifacts. Legacy shelf fields are non-authoritative; Builder alone projects current CN state.",
+    "sourceSha256": "a5db5e97927083fcf2ae1d921a6163f777f1d480466ee1220df8476aba036f72",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/tja_roll_sync.py",
+    "owner": "Lead",
+    "classification": "METADATA_OR_RESOURCE_PRODUCER",
+    "authorityPort": "taiko_bot.offline.tja_roll_sync -> taiko_bot.catalog.availability",
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Maintains metadata/raw references or explicit offline artifacts. Legacy shelf fields are non-authoritative; Builder alone projects current CN state. Current eligibility path uses the Authority port.",
+    "sourceSha256": "e988d7c37c48ca8c6f3e7cda7d09b2eb8a7e64d4fad5fbbcb7dd5cfa0a5048df",
+    "staticEvidence": [
+      {
+        "line": 122,
+        "text": "from taiko_bot.catalog.availability import is_current_song_id"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/offline/viewer.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.offline.viewer -> taiko_bot.offline.score_calculator -> taiko_bot.catalog.availability",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "3918b0242b5da15f110cfb1aa24bd02d77df1124e081249ccf77ecf009ab9f7f",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/progress_visibility.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.progress_visibility -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "22ace3d5c01b5e36be5ea08b516ff96d2cc5d9e081e440d10912d584bcb5cf9a",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import row_policy"
+      },
+      {
+        "line": 5,
+        "text": "return row_policy(song, 'cn_current_playable')"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/community/center/cover.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.community.center.cover -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "17519d46000c64bdc5aef360eea671e7600ac7eb605e53d00853283a5b82d6f4",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import with_catalog"
+      },
+      {
+        "line": 3,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 166,
+        "text": "db_data = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/community/center/draw_guess.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.community.center.draw_guess -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "f9ed446de2734e1e24df1338f2f9ba96d211d7d9c0fe03accc14337a4a206806",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import with_catalog"
+      },
+      {
+        "line": 3,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 290,
+        "text": "return project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/community/client/cover.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.community.client.cover -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "442ca18ab84ce81c9638d4a0fe0a88358c409a19f4de4de041a706dec048010b",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import with_catalog"
+      },
+      {
+        "line": 3,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 78,
+        "text": "db_data = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/community/client/draw_guess.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.community.client.draw_guess -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "596c351dc8748c50fafd6ea3ee7a83950c036c87f5f642c76f366e098ba8a31e",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import with_catalog"
+      },
+      {
+        "line": 3,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 141,
+        "text": "payload = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/b30.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.b30 -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "4f353ba528f58fb28d7438e6282f42c798235876261b7a95d8f2aa35432346fd",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import with_catalog"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/b30_history.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.b30_history -> taiko_bot.runtime.player.center.b30_support.score_calculator -> taiko_bot.public_catalog_cache -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "2448c10689f95dc47b61139e2616959cea668da5f6dc3dbdfe63ba2e951a1dbe",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/b30_support/b30_render.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.b30_support.b30_render -> taiko_bot.public_catalog_cache -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "c61bfade08518aba55a44edb1799600186b2a2f42d5e2af1399131213104ba56",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/b30_support/duplicate_versions.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.b30_support.duplicate_versions -> taiko_bot.runtime.player.center.duplicate_versions -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "dc3293b168103cde94b654ed4531ae6f859f5b5374655128c9400ce5816c7f44",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/b30_support/score_calculator.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.b30_support.score_calculator -> taiko_bot.public_catalog_cache -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "0e10e71e457618a391c4748a7edb30414ca3166d1be1137742091a27e0d83134",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/bxx_capture.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.bxx_capture -> taiko_bot.public_catalog_cache -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "a5830ff51d4355e0dfec07da18071619db9b5ec3346824ddaca7c83e32fc5a45",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/custom_title.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.custom_title -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "2e45c4f088648a8fdc6a59c43629e675e7a349bd73c21e34ca67c7c478d71516",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 215,
+        "text": "payload = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/daily_ability.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.daily_ability -> taiko_bot.catalog_identity",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "73733c6d96997d94d98ace89c0487ab614661a9219686c3c86b575634bfd7a8d",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_host_support/custom_title.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.display_host_support.custom_title -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "760695611692783dc9258e6382d45cb1ad6bdd6f3ad2fc0c0950ad358eeb3a65",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 145,
+        "text": "payload = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_host_support/duplicate_versions.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.display_host_support.duplicate_versions -> taiko_bot.runtime.player.center.duplicate_versions -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "dc3293b168103cde94b654ed4531ae6f859f5b5374655128c9400ce5816c7f44",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_host_support/song_title_showcase.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.display_host_support.song_title_showcase -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "33586e8143c90c85bc1a205ad76a32204fd09e5e15d98fb1afae1e2f2ea66f8a",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 487,
+        "text": "payload = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_support/draw_dress.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.display_support.draw_dress -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "1978cb127616068b61cd821f05c9adb0834ac05775e89ed2a74a1eb5dfcb3821",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 309,
+        "text": "data = project_song_rows()"
+      },
+      {
+        "line": 325,
+        "text": "data = project_song_rows()"
+      },
+      {
+        "line": 376,
+        "text": "from taiko_bot.catalog.reader import row_policy"
+      },
+      {
+        "line": 377,
+        "text": "return row_policy(song_meta,'cn_current_playable',difficulty)"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_support/metric.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.display_support.metric -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "e510508c7947f5e227f382f966bf58c444f1fbccaaae987247dff2bbf8cd5274",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 35,
+        "text": "return project_song_rows()"
+      },
+      {
+        "line": 126,
+        "text": "if level not in song_meta.get('catalog',{}).get('cnCurrentPlayable',[]):"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/display_support/tcloud.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.display_support.tcloud -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "a42adfc3947ddf2741fffe7b0dad73282983db0390d2f5df588d42b5653e6a1c",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 36,
+        "text": "data = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/draw_dress.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.draw_dress -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "8c843a52edc14e92bf2227f8c4113512578b2e72a094cace9e30a1a5290c2f2e",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 365,
+        "text": "data = project_song_rows()"
+      },
+      {
+        "line": 381,
+        "text": "data = project_song_rows()"
+      },
+      {
+        "line": 432,
+        "text": "from taiko_bot.catalog.reader import row_policy"
+      },
+      {
+        "line": 433,
+        "text": "return row_policy(song_meta,'cn_current_playable',difficulty)"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/duplicate_versions.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.duplicate_versions -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "6d76907250cf9888d127a287c753a7726437bda48065b67bfa95eb1752e85dc2",
+    "staticEvidence": [
+      {
+        "line": 29,
+        "text": "from taiko_bot.catalog.reader import capture"
+      },
+      {
+        "line": 36,
+        "text": "from taiko_bot.catalog.reader import capture"
+      },
+      {
+        "line": 50,
+        "text": "from taiko_bot.catalog.reader import capture"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/management_cluster.py",
+    "owner": "Lead",
+    "classification": "DRAFT_METADATA_ADMIN",
+    "authorityPort": "taiko_bot.runtime.player.center.management_cluster -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "Song lookup uses Authority; alias edit/read/write is explicitly a draft-source operation, activated through Builder.",
+    "sourceSha256": "dfd2e5a0726d95cf2aaf1e2de27694bac9073c802d158405691ada7aad0d3c94",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import with_catalog"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/presentation.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.presentation -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "c8f2ddb2c57b27d5bb46cfa6d7e49ace3a50c63e9d6ea58abaeb747d4952c5d3",
+    "staticEvidence": [
+      {
+        "line": 1,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 213,
+        "text": "song_rows = project_song_rows()"
+      },
+      {
+        "line": 480,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 481,
+        "text": "db_data = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/progress_support/dani_progress.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.progress_support.dani_progress -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "4701870868ecc5d36ee732696f3b04eb3d330880cf268689956fb077d1d8d244",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 107,
+        "text": "song_catalog = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/progress_support/progress_catalog.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.progress_support.progress_catalog -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "88f7314a36a17108e1ade853c0302a25aa30227a1fce18c9dd942d0f58805ee6",
+    "staticEvidence": [
+      {
+        "line": 30,
+        "text": "from taiko_bot.catalog.reader import song_index"
+      },
+      {
+        "line": 34,
+        "text": "from taiko_bot.catalog.reader import capture"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/progress_support/render.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.progress_support.render -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "eb569d585fa579dc0925a4366562bc091a593f85fed306063250eaaa0cbe661f",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 37,
+        "text": "_song_data = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/query_cluster.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.query_cluster -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "7ee6cc8cf2900c64446f08f4a596eb3ff84275c2ea3520802799acab913346be",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import with_catalog"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/chart_availability.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.recommendation_support.chart_availability -> taiko_bot.offline.chart_availability -> taiko_bot.catalog.availability",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "4c79327cd69025a0a98601b360efc31873fce1c98371288b5fcdeac92bf5f0d4",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/duplicate_versions.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.recommendation_support.duplicate_versions -> taiko_bot.runtime.player.center.duplicate_versions -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "dc3293b168103cde94b654ed4531ae6f859f5b5374655128c9400ce5816c7f44",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/recommend_image.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.recommendation_support.recommend_image -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "a93c9b3bdf16e5f9ea9d3fed0223b1b74d76b15432f2fd53e02658eac1d82c64",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 30,
+        "text": "payload = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_calculator.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.recommendation_support.score_calculator -> taiko_bot.catalog.availability",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "6d07fac92f918680d64628f92b1c42632bebbdfccc7de5fd30b0ca7ce5a09647",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import with_catalog"
+      },
+      {
+        "line": 3,
+        "text": "from taiko_bot.catalog.availability import load_recommendation_chart_keys"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_line.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.recommendation_support.score_line -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "f4510c0d5e3eeacc998ec026ceb3263dfe4df9ab61924b2b745a389aeb86d3fd",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 27,
+        "text": "from taiko_bot.catalog.reader import capture"
+      },
+      {
+        "line": 36,
+        "text": "song_rows = project_song_rows()"
+      },
+      {
+        "line": 48,
+        "text": "from taiko_bot.catalog.reader import capture,project_song_rows"
+      },
+      {
+        "line": 51,
+        "text": "json.loads(SCORE_PATH.read_text(encoding='utf-8')),project_song_rows(),"
+      },
+      {
+        "line": 59,
+        "text": "from taiko_bot.catalog.reader import catalog_scope"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_prediction_support.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.recommendation_support.score_prediction_support -> taiko_bot.catalog.availability",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "4f725cd9da7d04b226edd5b95881ce503f056ad236a89111a8d014c3aead03eb",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.availability import load_recommendation_chart_keys"
+      },
+      {
+        "line": 39,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 40,
+        "text": "return project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/recommendation_support/target_recommend.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.recommendation_support.target_recommend -> taiko_bot.runtime.player.center.recommendation_support.score_calculator -> taiko_bot.catalog.availability",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "708e04e14d5d2732f6d328b4384330069247d797c38c566bd7c24b8bce030e26",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/score_calculator.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.score_calculator -> taiko_bot.runtime.player.center.duplicate_versions -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "9d819a8cd1efa4788a029842bc536e7380a054c24125dd7b362010ba14988dee",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/score_rating_target.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.score_rating_target -> taiko_bot.runtime.player.center.duplicate_versions -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "b8e844622b6f7adc2a413d2ed6a72884c0d35df76f3cfbb3c273d53c5fd2461f",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/song_title_query.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.song_title_query -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "6ee47452c9a43167d9a87be30527a22e32042feaf8a2915f32d6b2e54c80fcc8",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 110,
+        "text": "payload = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/song_title_showcase.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.song_title_showcase -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "d0d4831a9a0b0fb989ec1af23b11a8e84984be52f6903e9d6b236f63d696264f",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 490,
+        "text": "payload = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/summary_host.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.summary_host -> taiko_bot.runtime.player.center.summary_render -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "2cd7ac3030b4340cb3a214609fcbdc550badd8613b20c73176f3a19b9b9a64c5",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/summary_render.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.summary_render -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "6231535628be42134a8496b8afd30db01ea3ab8cc70b5d111022b560b1c027e8",
+    "staticEvidence": [
+      {
+        "line": 125,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 126,
+        "text": "return project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/trend_history.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.trend_history -> taiko_bot.runtime.player.center.b30_history -> taiko_bot.runtime.player.center.b30_support.score_calculator -> taiko_bot.public_catalog_cache -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "7a09001fdecde31cf7a9c33af1a9ed42a7d93935121ec81fc31659fa6a10a6b1",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/trend_support/score_calculator.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.trend_support.score_calculator -> taiko_bot.runtime.player.center.b30_support.score_calculator -> taiko_bot.public_catalog_cache -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "c19e353303e1089998b3486869c228e5d07bbb77cd93810fa2bec7830f784e6c",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/center/userdata_storage.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.center.userdata_storage -> taiko_bot.catalog_identity",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "972a2738fa5785146c39321fae1ee3df53d54bc4e6464c2bbb2dd319933002c2",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/b30_history.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.b30_history -> taiko_bot.public_catalog_cache -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "1a269bdc1885022c2f2997d9efe0d6a20497fc643e36fce8ab9523d7cd3d6b41",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/b30_support/b30_render.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.b30_support.b30_render -> taiko_bot.public_catalog_cache -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "6388c1c88953c7e45a2fb522841cd9de7b71e60aa8c73efd22551305202586ae",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/b30_support/b30_single.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.b30_support.b30_single -> taiko_bot.public_catalog_cache -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "5c222025053c7d5c4b2b0c6430fb4ee7fcde58d398010ffa984616701f70a8be",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/b30_support/score_calculator.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.b30_support.score_calculator -> taiko_bot.public_catalog_cache -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "0b7bc573e7cf9814bedb2551ef23c02ebd5119aad98b24cd03c77b87c54c1009",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/b30_support/song_visibility.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.b30_support.song_visibility -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "d1874fb11ba7fbc4ed23d534f00d25be18d58a857c3d701f3c5316008f841fe1",
+    "staticEvidence": [
+      {
+        "line": 3,
+        "text": "from taiko_bot.catalog.reader import song_index"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/display_support/draw_dress.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.display_support.draw_dress -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "5e7804e3b42134aac433b04c1ed9a2bd80e5bd3b33b2f32aa98f9597758aa276",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 224,
+        "text": "data = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/display_support/metric.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.display_support.metric -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "4af525998443fc8334411b3eb7c702d0cdd833d815d21ce1dce2304f06d3c31d",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 38,
+        "text": "payload = project_song_rows()"
+      },
+      {
+        "line": 136,
+        "text": "if level not in song_meta.get('catalog',{}).get('cnCurrentPlayable',[]):"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/display_support/song_visibility.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.display_support.song_visibility -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "d1874fb11ba7fbc4ed23d534f00d25be18d58a857c3d701f3c5316008f841fe1",
+    "staticEvidence": [
+      {
+        "line": 3,
+        "text": "from taiko_bot.catalog.reader import song_index"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/display_support/tcloud.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.display_support.tcloud -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "a42adfc3947ddf2741fffe7b0dad73282983db0390d2f5df588d42b5653e6a1c",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 36,
+        "text": "data = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/management_cluster.py",
+    "owner": "Lead",
+    "classification": "DRAFT_METADATA_ADMIN",
+    "authorityPort": "taiko_bot.runtime.player.client.management_cluster -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "Song lookup uses Authority; alias edit/read/write is explicitly a draft-source operation, activated through Builder.",
+    "sourceSha256": "5e503c1736b82b14fb21035aa327e7bb11dae808faea6f72a56b46ce3f0d000e",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import with_catalog"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/presentation.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.presentation -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "78d4354afef78e3022ceec7fef4aaa40afc68644a27c34e8ac51d9d968f91cb4",
+    "staticEvidence": [
+      {
+        "line": 796,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 797,
+        "text": "db_data = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/progress_support/dani_progress.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.progress_support.dani_progress -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "18e2cc3321069ad98da14beb9edf86688e7951019377a5339a2bad28cd7efa67",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 331,
+        "text": "payload = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/progress_support/progress_catalog.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.progress_support.progress_catalog -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "6a3039732b0362b98cca1e97e9ea90db6595dab758017113bbb00ff9f8c58a61",
+    "staticEvidence": [
+      {
+        "line": 26,
+        "text": "from taiko_bot.catalog.reader import song_index"
+      },
+      {
+        "line": 34,
+        "text": "from taiko_bot.catalog.reader import capture"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/progress_support/render.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.progress_support.render -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "7d78229978d7301b69336231f8f467535a96da8e63c0bb199d964468e0a6be74",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 44,
+        "text": "payload = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/provider.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.provider -> taiko_bot.runtime.player.client.b30_history -> taiko_bot.public_catalog_cache -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "aefe07cf24eee1b44454c7411c3652b2ecb07308547aa23cc368c49774f1fc67",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/query_cluster.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.query_cluster -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "d05dc28dbdca750c3c88a5ee6213ca21e02eb40a6997dba8992a59af94eca58e",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import with_catalog"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/catalog.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.recommendation_support.catalog -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "92f2adefeb3f9226806c0baf041a85e9602f4d6c548e8783764a84a6a6df0c6e",
+    "staticEvidence": [
+      {
+        "line": 15,
+        "text": "from taiko_bot.catalog.reader import capture"
+      },
+      {
+        "line": 22,
+        "text": "from taiko_bot.catalog.reader import capture"
+      },
+      {
+        "line": 38,
+        "text": "from taiko_bot.catalog.reader import capture"
+      },
+      {
+        "line": 43,
+        "text": "from taiko_bot.catalog.reader import song_index"
+      },
+      {
+        "line": 78,
+        "text": "from taiko_bot.catalog.reader import capture"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/score_calculator.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.recommendation_support.score_calculator -> taiko_bot.catalog.availability",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "6bd6f102368ebbbda9c3f7a4b1175e465637b6fc2cce3f43f3af715f926c214b",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import with_catalog"
+      },
+      {
+        "line": 3,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 4,
+        "text": "from taiko_bot.catalog.availability import load_recommendation_chart_keys"
+      },
+      {
+        "line": 49,
+        "text": "try: rows = project_song_rows()"
+      },
+      {
+        "line": 80,
+        "text": "from taiko_bot.catalog.availability import load_on_shelf_song_ids as load"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/recommendation_support/target_recommend.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.recommendation_support.target_recommend -> taiko_bot.catalog.availability",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "13de24d4e82b2ec01b4b970865dcd7682c95089fd3f67aeade3ff5833ed57d2d",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 3,
+        "text": "from taiko_bot.catalog.availability import load_recommendation_chart_keys"
+      },
+      {
+        "line": 39,
+        "text": "payload = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/score_data.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.score_data -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "cc6b775ad54c73b3eb45ad66d7440eefd12b21e327dc0644bf6fdb5b3f826a64",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 60,
+        "text": "project_song_rows())"
+      },
+      {
+        "line": 67,
+        "text": "from taiko_bot.catalog.reader import capture,catalog_scope"
+      },
+      {
+        "line": 74,
+        "text": "from taiko_bot.catalog.reader import capture,project_song_rows"
+      },
+      {
+        "line": 78,
+        "text": "json.loads(ROLL_PATH.read_text(encoding='utf-8')),project_song_rows())"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/summary_host.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.summary_host -> taiko_bot.runtime.player.client.summary_render -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "2cd7ac3030b4340cb3a214609fcbdc550badd8613b20c73176f3a19b9b9a64c5",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/summary_render.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.summary_render -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "c0c46e03bc7272378acde1778633cb0b09f2a0e4280340ee0f172dcd50dc6439",
+    "staticEvidence": [
+      {
+        "line": 126,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 127,
+        "text": "return project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/client/trend_support/score_calculator.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.client.trend_support.score_calculator -> taiko_bot.runtime.player.client.b30_support.score_calculator -> taiko_bot.public_catalog_cache -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "d15e54bedd0c035bff944eec699dbf04d2932e900fd8b813e4c68c21a5d43475",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/management_access.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.management_access -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "1ae19e6056e168620b1bdfb80dd2e90190fd3f24950961f3e1aeeabff85d5e6f",
+    "staticEvidence": [
+      {
+        "line": 10,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 11,
+        "text": "payload = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/player/prepared_rating.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.player.prepared_rating -> taiko_bot.public_catalog_cache -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "ff64ec44695661388229dec69ddd993dca22c2ef3c67e59775020ad4b28246cb",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/catalog.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.public.catalog -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "75bde9f6968ef86e1933cf340976c50698acb453ba15d3d9024305b552568eb1",
+    "staticEvidence": [
+      {
+        "line": 7,
+        "text": "from taiko_bot.catalog.reader import capture,catalog_scope"
+      },
+      {
+        "line": 19,
+        "text": "return {'catalogRevision':self.revision,'policyVersion':self.policy_version}"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/catalog_provider.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.public.catalog_provider -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "daa886c74c05c5ea44e72642eb86fe3539fc83d213cedc4da615ecf2b9160b22",
+    "staticEvidence": [
+      {
+        "line": 9,
+        "text": "from taiko_bot.catalog.reader import song_index"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/client_provider.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.public.client_provider -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "9662fb771dffb4b49987355edaff3d503eb7d70a3f73ad8ca5f31f212c366e4c",
+    "staticEvidence": [
+      {
+        "line": 16,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 17,
+        "text": "payload = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/constant_center_renderer.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_PRESENTATION_DTO",
+    "authorityPort": "catalog_provider -> Application ConstantQueryContext -> stamped projection",
+    "versionReporting": "parent pinned handler/health consumer report",
+    "note": "Pure renderer consumes centrally projected shelf grouping and never reads a catalog file or decides eligibility.",
+    "sourceSha256": "3689e6049f8cf4c15f37f48194da833a1fed1ed3547d029f78496dc80421b62f",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/constant_client_renderer.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_PRESENTATION_DTO",
+    "authorityPort": "catalog_provider -> Application ConstantQueryContext -> stamped projection",
+    "versionReporting": "parent pinned handler/health consumer report",
+    "note": "Pure renderer consumes centrally projected shelf grouping and never reads a catalog file or decides eligibility.",
+    "sourceSha256": "0238dea204da8eae779a3d07792518aceccd30015dadd518745d4c1ba3dd9731",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/runtime/public/provider.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.runtime.public.provider -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "a3b8fce49bc111980f8b1fd61c19d2f1a9277837a3d697371910817313b7ac66",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 55,
+        "text": "from taiko_bot.catalog.reader import capture"
+      },
+      {
+        "line": 65,
+        "text": "songs = project_song_rows()"
+      },
+      {
+        "line": 74,
+        "text": "from taiko_bot.catalog.reader import capture"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/services/public_api.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_bot.services.public_api -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "",
+    "sourceSha256": "33cb6d4a83d961cf0ff1cb3f6676eb5a0341b210d8c4874dc64e2fe387b436ee",
+    "staticEvidence": [
+      {
+        "line": 13,
+        "text": "from taiko_bot.catalog.reader import with_catalog, capture, source_aliases"
+      },
+      {
+        "line": 37,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 38,
+        "text": "return deepcopy(project_song_rows())"
+      },
+      {
+        "line": 377,
+        "text": "self.send_header(\"X-Catalog-Revision\",report[\"catalogRevision\"])"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_bot/settings.py",
+    "owner": "Lead",
+    "classification": "SOURCE_CONFIGURATION",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Legacy dataset names retained for metadata/resource transport; Catalog distribution is separate and mandatory for CN policies.",
+    "sourceSha256": "59742818fe3210bec36cd37b6ddb81bd5f94d37c5caef3ffd51f05b5463ebadf",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_store/merge_reference.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_store.merge_reference -> taiko_bot.catalog.reader",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "Combo metadata uses revisioned Authority cache; no Publication regeneration was executed.",
+    "sourceSha256": "fb2a17ef25a717cf087df7506c4a0806caaa1c0c9d02cfecd25dd5bd1dd88bcd",
+    "staticEvidence": [
+      {
+        "line": 12,
+        "text": "from taiko_bot.catalog.reader import capture"
+      },
+      {
+        "line": 21,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 22,
+        "text": "rows = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "bot",
+    "path": "taiko_store/reader.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "taiko_store.reader -> taiko_bot.catalog_identity",
+    "versionReporting": "pinned handler/health consumer registry; API headers or stamped projection",
+    "note": "Original Publication bytes retained; association uses catalog_identity.load_identity_map -> Authority, unavailable association leaves original IDs intact.",
+    "sourceSha256": "9103d4052d021b1d872809ea7e28c19e2834797ff4294fb756cc777d732eb7f3",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "packages/sakura-taiko-contract/sakura_taiko_contract/catalog.py",
+    "owner": "Lead",
+    "classification": "LEGACY_TRANSPORT_SERIALIZER",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Pure old Contract DTO retained; live developer-api-v1/catalog overrides availability and identity from Authority.",
+    "sourceSha256": "f4ea2e8cbcaca7e1fa1b4833182ba26df304ae2a5654e3279fc75123c2ce4fd3",
+    "staticEvidence": [
+      {
+        "line": 55,
+        "text": "songs.append(dict(songId=song_id, song_name=song_name, song_name_jp=song_name_jp, aliases=song_aliases, catalogRevision=revision, availability=availability))"
+      },
+      {
+        "line": 67,
+        "text": "charts.append(dict(songId=song_id,chartId=f'{song_id}:{difficulty}:{mode}',difficulty=difficulty,level=level,type=mode,variant=None,catalogRevision=revision,availability=availability,tjaCourse=difficulty_to_tja_course(di"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "packages/sakura-taiko-contract/src/catalog.mjs",
+    "owner": "Lead",
+    "classification": "LEGACY_TRANSPORT_SERIALIZER",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Pure old Contract DTO retained; live developer-api-v1/catalog overrides availability and identity from Authority.",
+    "sourceSha256": "e4522a2ac92993a5570ed35e7524abb3e706ea1b25ef21605658e2a59c7b710e",
+    "staticEvidence": [
+      {
+        "line": 23,
+        "text": "songs.push({songId,song_name:songName,song_name_jp:songNameJp,aliases:songAliases,catalogRevision:revision,availability});"
+      },
+      {
+        "line": 28,
+        "text": "charts.push({songId,chartId:`${songId}:${difficulty}:${type}`,difficulty,level,type,variant:null,catalogRevision:revision,availability,tjaCourse:difficultyToTjaCourse(difficulty)});"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "preview/song-detail/server/utils/entry-fixtures.ts",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "facb1b5e8d33c7283702e6edf8db329d490f32881a358142cef37eabdd3778c1",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/arbitrate-growth-identity.py",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "897f1c18cbdd279464b57f03a0d2522ec721dc78e71316e322baaaf9200d18cb",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/reproduce-source-switch.py",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "fd310d6f3dce5fc23b87842856ed4975165db5a53afb029bf43a67c2339939f1",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "scripts/readiness/run-recovered-key-gates.py",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "58c5ee41d6957e6142c3188b414a83fd918f8764476dda896e1e80d644e20766",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/components/account/AccountSongEditorDialog.vue",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "typed Authority song DTO from Viewer content endpoint",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "Presentation, metadata or historical-score use. Display grouping is not independently treated as CN permission.",
+    "sourceSha256": "522ce1ee4b30ab0e53e615a0586a9f59d0fe5cd5145205813a2bdb71d9c162e4",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/components/rework/Library.vue",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "typed Authority song DTO from Viewer content endpoint",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "Presentation, metadata or historical-score use. Display grouping is not independently treated as CN permission.",
+    "sourceSha256": "0d610aff6afbceed3867042e25f59f1c17cc6374e19555f8445b6d7c06bcd21a",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/components/rework/song/DetailHead.vue",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "typed Authority song DTO from Viewer content endpoint",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "Presentation, metadata or historical-score use. Display grouping is not independently treated as CN permission.",
+    "sourceSha256": "4c253596f47e5145e62cf1364768552b2a64c8b50edcbb98a8abedbd637ebfe5",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/loadtest/prepare-annual-candidate.py",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "ff381c8e6b64c70a17342a46dc766d49c9d51db02516b158cc160d3cd1b542e9",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/pages/admin/taiko/songs.vue",
+    "owner": "Lead",
+    "classification": "DRAFT_METADATA_ADMIN",
+    "authorityPort": "typed Authority song DTO from Viewer content endpoint",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "Editable source metadata remains separate. Current CN fields are read-only Authority overlays; publication requires a new Builder snapshot.",
+    "sourceSha256": "9375f38b7441f02abf48544e0362fa4de816b935ddddeb72482baee599858c03",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/pages/songs/[id].vue",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "typed Authority song DTO from Viewer content endpoint",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "Presentation, metadata or historical-score use. Display grouping is not independently treated as CN permission.",
+    "sourceSha256": "0158d16e49efe81cf92fc4fc04efa471db52454e485d7628802720a9a65ebd3b",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/audit_postgres_catalog.py",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "eac28bdd04762c3cb0181b6d4541d3ede9e564683721a7ec5c91010469b32a9e",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/extract_title_song_relations.py",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "446f78dbd2ddf91a667628863163785560a3d50d81fd624a7faee83b07b7500c",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/generate_v2_console_constants.py",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "7fd41c89307c877146d49a885672471ed219ffe83bf46c3b33790e1f4fade971",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/lib/ugc-catalog.mjs",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "Viewer readCatalogAuthority -> precomputed cnCurrentPlayable",
+    "versionReporting": "catalogReport and catalog.revision/policyVersion",
+    "note": "UGC import audit now reads the central immutable projection; old shelf conflict is a regression case.",
+    "sourceSha256": "4f4bb39b6541b05cb025733bb9cc1c86ce57e83449b3bede54298d5982e0cc66",
+    "staticEvidence": [
+      {
+        "line": 140,
+        "text": "const status = song.catalog?.cnCurrentPlayable?.includes(difficulty.code) === true ? \"active\" : \"inactive\";"
+      },
+      {
+        "line": 172,
+        "text": "const catalogRevision = createHash(\"sha256\").update(revisionInput).digest(\"hex\").slice(0, 32);"
+      },
+      {
+        "line": 179,
+        "text": "catalog: { revision: catalogRevision, charts },"
+      },
+      {
+        "line": 204,
+        "text": "result.catalog.revision = view.data.catalogRevision;"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/catalog-check.mjs",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "47e1d939487771b61e34f11d0f11f98c7a5e7ca6e33c3903e39e6846ca2939d0",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/catalog-scenarios.mjs",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "f27632466f1c060ea9eed09e73d0261e8430d8d3aef74dbbfa3d2cbc48ccdb47",
+    "staticEvidence": [
+      {
+        "line": 7,
+        "text": "// /api/content/songs requests are answered by serveCatalog(), a port of getSongCatalogPagePayload."
+      },
+      {
+        "line": 49,
+        "text": "// ---------- Port of server/services/content/songs.ts getSongCatalogPagePayload (stub + expectations) ----------"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/catalog-selfcheck.mjs",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "776c4c1424f0a4c4209c2766b3ad42e1a3f44a58119c226165452faa1df716db",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/detail-data.mjs",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "ca3bb85888f222593594f612bf747adadd5708cf25734795836e7b2443c46db0",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/pages-data.mjs",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "c19357a782848de06afd290c370fa4eb8df21325e025723e2086a875b552523b",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/rc-scenarios.mjs",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "dfbffb5b80e1e678e998deebc8e04dd058c5573ad7ad94b45e679037c0d6d007",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/selfcheck-runner.mjs",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "0e91cdfd64372cd15b44a7bc1d4d58f380a5294d557776b33001c150ac44c68e",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/rework/shell-check.mjs",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "b10d2c549a363ac6fd2262ac69d2ef65f5674359b40b803186df979ee8231a37",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_goal_evaluation_production_smoke.mjs",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "e7c1aa990b9eb233b5e7822b984382f036590a30d1723949d2bdfa107a12156c",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_goal_production_smoke.mjs",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "5758fb7ed41a7cf14c64c18a4bad7b02ca90b34eeb514ee75793069aa70d498e",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_experience_production_smoke.mjs",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "a9700e5c9d27510ccac9d5fd3e078131a90ebc3a8ffadb57c7e11c7ec574ff69",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_history_production_smoke.mjs",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "ed9065eac15310e04d26924349b011a533cb240a5a70c688fd02d71d8a1fde5d",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_passport_production_smoke.mjs",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "1855a3d3a118d80dee57296c4cf166d788350363e1956f094797888e8d4182b5",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/run_growth_weekly_production_smoke.mjs",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "f8bfbc471558725b34503287689dcf701214f077404a591c0535b77999bf2890",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/sync_nijiiro_2026_grade_dojo.py",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "17c7130034f761feb690cfbf977a5095785080df4773ace41dea974bfc1d227c",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/title_relation_ids.py",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "07725935f233aed1999e4c64921979681c8019d009fcba783c457955499daa26",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_goal_browser.mjs",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "6e2605f1f1a6fefc7bb62e73eeafd29d546d0f0fb81aa807cee5066187a3d141",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_goal_evaluation_browser.mjs",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "9d5d70d1cac84619ff15148e3fd9412d639e90aa5f28d4523340eea7210180af",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_home_desktop_layout.mjs",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "cf8ca55a1ac9b2aa10acc94f3ae03507d18503bbd6aeedb0b3e449972813f283",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/scripts/verify_training_loop_browser.mjs",
+    "owner": "Lead",
+    "classification": "TEST_OR_MAINTENANCE_TOOLING",
+    "authorityPort": null,
+    "versionReporting": "not-a-runtime-policy-consumer",
+    "note": "Offline preview, source audit, historical fixture, metadata generator or explicit maintenance command; not a current CN authority.",
+    "sourceSha256": "051be209ba578678f2be76000b03c7e7258176cbdecec4f7b85305c8fe087346",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/infrastructure/catalog-identity.ts",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "captureCatalogAuthority / getSongCatalog / pinned Python env",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "",
+    "sourceSha256": "0a88733b2ae079697238526734848e5692c04b961c31a25cee476b1824f4f20f",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "import { captureCatalogAuthority } from \"../services/content/catalogAuthority.ts\";"
+      },
+      {
+        "line": 6,
+        "text": "const { data } = await captureCatalogAuthority();"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/internal/account/shared.ts",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "captureCatalogAuthority / getSongCatalog / pinned Python env",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "",
+    "sourceSha256": "3e8e1a4fe5f6615cab0c1648a6a2aaf417772931bc8bb7b46c2c5172fab079e5",
+    "staticEvidence": [
+      {
+        "line": 19,
+        "text": "import { getRatingEntries, getSongCatalog as loadSongCatalog } from \"~/server/services/content\";"
+      },
+      {
+        "line": 552,
+        "text": "export const getSongCatalog = async () => {"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/account/annual-summary/runtime.ts",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "captureCatalogAuthority / getSongCatalog / pinned Python env",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "",
+    "sourceSha256": "5001e8a5953bf954203fa6ae0aef45744861082bc40f6834d515650c949cfee0",
+    "staticEvidence": [
+      {
+        "line": 1,
+        "text": "import { captureCatalogAuthority } from '../../content/catalogAuthority';"
+      },
+      {
+        "line": 3,
+        "text": "import { getCatalogPythonEnv } from \"~/server/utils/taiko-python\";"
+      },
+      {
+        "line": 188,
+        "text": "const { data: authority } = await captureCatalogAuthority();"
+      },
+      {
+        "line": 218,
+        "text": "hash.update(authority.catalogRevision).update(authority.policyVersion);"
+      },
+      {
+        "line": 283,
+        "text": "const { data: authority } = await captureCatalogAuthority();"
+      },
+      {
+        "line": 300,
+        "text": "manifestHash.update(authority.catalogRevision).update(authority.policyVersion);"
+      },
+      {
+        "line": 351,
+        "text": "env: { ...await getCatalogPythonEnv(repoRoot), TMPDIR: '/var/tmp/taiko-annual-workers', TAIKO_CONFIG_PATH: configPath, TAIKO_ANNUAL_CACHE_DIR: getAnnualCacheRoot() }"
+      },
+      {
+        "line": 568,
+        "text": "env: { ...await getCatalogPythonEnv(repoRoot), TMPDIR: '/var/tmp/taiko-annual-workers', TAIKO_CONFIG_PATH: configPath, TAIKO_ANNUAL_CACHE_DIR: getAnnualCacheRoot() }"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/account/charts.ts",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "captureCatalogAuthority / getSongCatalog / pinned Python env",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "",
+    "sourceSha256": "e3e7dcdd1b222edd2a454052231341865d60cc25ec2c571ed4adc9c3cb16675f",
+    "staticEvidence": [
+      {
+        "line": 1,
+        "text": "import { getTaikoPython, getCatalogPythonEnv } from \"~/server/utils/taiko-python\";"
+      },
+      {
+        "line": 88,
+        "text": "env: { ...await getCatalogPythonEnv(repoRoot), TAIKO_USERDATA_DIR: userdataDir },"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/account/developer-analytics.ts",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "captureCatalogAuthority / getSongCatalog / pinned Python env",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "",
+    "sourceSha256": "4e73f0c52b558ea317e853a89c8f9846a63d8711ccad5d3130eabfb748468fca",
+    "staticEvidence": [
+      {
+        "line": 10,
+        "text": "import {getTaikoPython,getCatalogPythonEnv} from '../../utils/taiko-python';"
+      },
+      {
+        "line": 45,
+        "text": "return executeWorker({python:getTaikoPython(),repoRoot,env:await getCatalogPythonEnv(repoRoot),code:kind==='rating'?ratingCode:recommendationsCode,records});"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/account/personal.ts",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "captureCatalogAuthority / getSongCatalog / pinned Python env",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "",
+    "sourceSha256": "a7bba170cd7e9aa5438f9b2a1aed5bb39c77132ccbd27a068dc53ec8953ec769",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/account/recommendation-tool.ts",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "captureCatalogAuthority / getSongCatalog / pinned Python env",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "",
+    "sourceSha256": "8dee15dfa17590bd5521ac5829a840816381a20e656028d02ec9f31738acbb3c",
+    "staticEvidence": [
+      {
+        "line": 5,
+        "text": "import { getSongCatalog } from '../content';"
+      },
+      {
+        "line": 16,
+        "text": "const [snapshot,catalog] = await Promise.all([readGoalSnapshot(binding.taiko_id,true),getSongCatalog()]);"
+      },
+      {
+        "line": 37,
+        "text": "if (inputs !== await recommendationInputRevision(await getSongCatalog())) throw createError({statusCode:409,statusMessage:'recommendation-changed'});"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/content/runtime.ts",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "captureCatalogAuthority / getSongCatalog / pinned Python env",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "Paths remain for independent model/resource inputs; song list readers use Authority.",
+    "sourceSha256": "3473f97d521cb42655098d632f40356f9c587a951a97aa30407a254966ac77dd",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/content/songTjaBundleIndex.py",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "captureCatalogAuthority / getSongCatalog / pinned Python env",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "",
+    "sourceSha256": "56d66c285c1d60fb430ddd54e54441de1cee15f97b480d9a2d54ad4376a2ed8a",
+    "staticEvidence": [
+      {
+        "line": 27,
+        "text": "from taiko_bot.catalog.reader import project_song_rows"
+      },
+      {
+        "line": 28,
+        "text": "song_data = project_song_rows()"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/content/songs.ts",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "captureCatalogAuthority / getSongCatalog / pinned Python env",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "",
+    "sourceSha256": "0a643b605cd4fc6b0e4b859c4d5679b2367827e2ccaf938a65cffb92168ceb77",
+    "staticEvidence": [
+      {
+        "line": 11,
+        "text": "import { captureCatalogAuthority } from './catalogAuthority';"
+      },
+      {
+        "line": 29,
+        "text": "export const getSongCatalog = async () => {"
+      },
+      {
+        "line": 30,
+        "text": "return (await captureCatalogAuthority()).data.songs as SongCatalogItem[];"
+      },
+      {
+        "line": 34,
+        "text": "const { data } = await captureCatalogAuthority();"
+      },
+      {
+        "line": 54,
+        "text": "export const getSongCatalogPayload = async (shelfStatus?: number): Promise<SongCatalogPayload> => {"
+      },
+      {
+        "line": 55,
+        "text": "const songs = await getSongCatalog();"
+      },
+      {
+        "line": 98,
+        "text": "export const getSongCatalogPagePayload = async (options: SongCatalogPageOptions) => {"
+      },
+      {
+        "line": 99,
+        "text": "const songs = await getSongCatalog();"
+      },
+      {
+        "line": 134,
+        "text": "getSongCatalog(),"
+      },
+      {
+        "line": 148,
+        "text": "const songs = await getSongCatalog();"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/content/v2ConstantsModel.ts",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "captureCatalogAuthority / getSongCatalog / pinned Python env",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "",
+    "sourceSha256": "4073d59393b59c395d55a53837b6045fbe3db9608622b660b365545318565482",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/developer-api-v1/catalog.ts",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "captureCatalogAuthority / getSongCatalog / pinned Python env",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "",
+    "sourceSha256": "1c01bf6e3408c377e7dc321505fc6360256dc3dcb7571a991742263ab19bbf50",
+    "staticEvidence": [
+      {
+        "line": 10,
+        "text": "import {captureCatalogAuthority} from '../content/catalogAuthority';"
+      },
+      {
+        "line": 31,
+        "text": "const {data}=await captureCatalogAuthority();"
+      },
+      {
+        "line": 32,
+        "text": "const revision=data.catalogRevision;"
+      },
+      {
+        "line": 44,
+        "text": "availability:{region:'CN',status:source.policies.cn_current_playable.eligible?'active':'unknown',releaseStatus:source.cnDifficultyEvidence}});"
+      },
+      {
+        "line": 49,
+        "text": "export const versions=(catalogRevision:string,scoreRevision:string|null=null,observationSource:string|null=null,capturedAt:string|null=null):ApiReadVersions=>({contractVersion:'1.1',schemaRevision:SCHEMA_REVISION,catalog"
+      },
+      {
+        "line": 52,
+        "text": "export const catalogVersions=(catalogRevision:string):CatalogVersions=>({contractVersion:'1.1',schemaRevision:SCHEMA_REVISION,catalogRevision});"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/goals/recommendation.ts",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "captureCatalogAuthority / getSongCatalog / pinned Python env",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "",
+    "sourceSha256": "e51633cb5ab45466d4637e94c3a86484a72acfcf0b3904d35d6fb45a8fd53a63",
+    "staticEvidence": [
+      {
+        "line": 9,
+        "text": "import { getSongCatalog } from '../content';"
+      },
+      {
+        "line": 48,
+        "text": "const [snapshot, catalog] = await Promise.all([readGoalSnapshot(binding.taiko_id, true), getSongCatalog()]);"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/growth-history/model-revision.ts",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "captureCatalogAuthority / getSongCatalog / pinned Python env",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "",
+    "sourceSha256": "771472f249e456a278a53ef19d9faa832c5eded5b2464352575b312a812bb4ad",
+    "staticEvidence": [
+      {
+        "line": 8,
+        "text": "import { getTaikoPython, getCatalogPythonEnv } from \"~/server/utils/taiko-python\";"
+      },
+      {
+        "line": 9,
+        "text": "import { captureCatalogAuthority } from '../content/catalogAuthority';"
+      },
+      {
+        "line": 19,
+        "text": "const { data } = await captureCatalogAuthority();"
+      },
+      {
+        "line": 20,
+        "text": "hash.update(data.catalogRevision).update(data.policyVersion);"
+      },
+      {
+        "line": 28,
+        "text": "timeout: 60_000, maxBuffer: 64 * 1024, encoding: \"utf8\", env: await getCatalogPythonEnv(repoRoot)"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/services/my-taiko/catalog-consistency.ts",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "captureCatalogAuthority / getSongCatalog / pinned Python env",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "Checks source hash of the same Authority song rows before Contract serialization.",
+    "sourceSha256": "5f6910c2decc1906af191714eace23463e0499c94c87403fae72c586f3b8e9df",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/utils/admin/shared.ts",
+    "owner": "Lead",
+    "classification": "DRAFT_METADATA_ADMIN",
+    "authorityPort": "captureCatalogAuthority / getSongCatalog / pinned Python env",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "Editable source metadata remains separate. Current CN fields are read-only Authority overlays; publication requires a new Builder snapshot.",
+    "sourceSha256": "da9ad16d25ccb4ffd793b4acce7460319bdfa8b3bcca0c597fde03915e5cd57f",
+    "staticEvidence": [],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/utils/admin/songs.ts",
+    "owner": "Lead",
+    "classification": "DRAFT_METADATA_ADMIN",
+    "authorityPort": "captureCatalogAuthority / getSongCatalog / pinned Python env",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "Editable source metadata remains separate. Current CN fields are read-only Authority overlays; publication requires a new Builder snapshot.",
+    "sourceSha256": "27bd873c8c1a2f4f899264f39318e1d42802dae72e2e6b84ffb2cb8e788ef17c",
+    "staticEvidence": [
+      {
+        "line": 6,
+        "text": "import { captureCatalogAuthority } from '../../services/content/catalogAuthority';"
+      },
+      {
+        "line": 115,
+        "text": "Promise.all([readSongCatalogRaw(),captureCatalogAuthority()]).then(([drafts,view]) => {"
+      },
+      {
+        "line": 292,
+        "text": "const { data } = await captureCatalogAuthority();"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/server/utils/taiko-open.ts",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "captureCatalogAuthority / getSongCatalog / pinned Python env",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "",
+    "sourceSha256": "e226f552223068f08e2fa5f082c7c90229dd09c0f1909021dc85e13a4db1871a",
+    "staticEvidence": [
+      {
+        "line": 11,
+        "text": "import { captureCatalogAuthority } from '../services/content/catalogAuthority';"
+      },
+      {
+        "line": 241,
+        "text": "const authority = await captureCatalogAuthority();"
+      },
+      {
+        "line": 250,
+        "text": "url: `${origin}/api/taiko/data/${name}?revision=${authority.data.catalogRevision}`, catalogRevision: authority.data.catalogRevision,"
+      },
+      {
+        "line": 302,
+        "text": "url: `${origin}/api/taiko/catalog?revision=${authority.data.catalogRevision}` },"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/types/content.ts",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "typed Authority song DTO from Viewer content endpoint",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "Presentation, metadata or historical-score use. Display grouping is not independently treated as CN permission.",
+    "sourceSha256": "eabbf6c0d9807190e9cf44fc7757aadf1b1bade31af3ab09099c44a10d4956b7",
+    "staticEvidence": [
+      {
+        "line": 2,
+        "text": "catalog?: { catalogRevision: string; policyVersion: string; cnRelease: string; cnCurrentPlayable: number[]; catalogDisplay: boolean; historicalScore: boolean; recommendationEligible: Record<string, number[]> };"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  },
+  {
+    "repo": "integration",
+    "path": "taiko_viewer/utils/playerGoal.ts",
+    "owner": "Lead",
+    "classification": "MIGRATED_RUNTIME_PORT",
+    "authorityPort": "typed Authority song DTO from Viewer content endpoint",
+    "versionReporting": "Viewer X-Catalog-Revision / X-Catalog-Policy-Version headers",
+    "note": "Presentation, metadata or historical-score use. Display grouping is not independently treated as CN permission.",
+    "sourceSha256": "b351b80840394d9498ec8ac955ba6460118a59597b523a63e77ed45ed13bad10",
+    "staticEvidence": [
+      {
+        "line": 29,
+        "text": "const catalog = song?.catalog as { cnCurrentPlayable?: number[] } | undefined;"
+      },
+      {
+        "line": 30,
+        "text": "return catalog?.cnCurrentPlayable?.includes(difficulty) === true;"
+      }
+    ],
+    "executionClaim": "Static review only unless listed in acceptance/consistency evidence"
+  }
+]

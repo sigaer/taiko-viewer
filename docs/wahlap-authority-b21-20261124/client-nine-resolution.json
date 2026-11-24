@@ -1,0 +1,113 @@
+{
+  "originalEvidenceSha256": "d6c1af2b91653dd9b0cc2f201f521ea1d6afb6077b93314a6631ecce13fd89ab",
+  "cases": [
+    {
+      "case": 1,
+      "basis": "rating",
+      "input": "rating",
+      "originalError": "TypeError: recommend_songs() got an unexpected keyword argument 'identity_namespace'",
+      "classification": "REAL_ARTIFACT_INTERFACE_INCOMPATIBILITY",
+      "resolution": "Unified Core retains Client identity_namespace=pair and interfaces; actual installed host tested",
+      "numericalGoldenChanged": false,
+      "result": "PASS",
+      "catalogRevision": "49d1e9642c26ba94678a679f22ccea52bee4e3a66d86a653b7fabab269397b51",
+      "policyVersion": "wahlap-cn-1"
+    },
+    {
+      "case": 2,
+      "basis": "big_song",
+      "input": "big_song",
+      "originalError": "TypeError: recommend_songs() got an unexpected keyword argument 'identity_namespace'",
+      "classification": "REAL_ARTIFACT_INTERFACE_INCOMPATIBILITY",
+      "resolution": "Unified Core retains Client identity_namespace=pair and interfaces; actual installed host tested",
+      "numericalGoldenChanged": false,
+      "result": "PASS",
+      "catalogRevision": "49d1e9642c26ba94678a679f22ccea52bee4e3a66d86a653b7fabab269397b51",
+      "policyVersion": "wahlap-cn-1"
+    },
+    {
+      "case": 3,
+      "basis": "stamina",
+      "input": "stamina",
+      "originalError": "TypeError: recommend_songs() got an unexpected keyword argument 'identity_namespace'",
+      "classification": "REAL_ARTIFACT_INTERFACE_INCOMPATIBILITY",
+      "resolution": "Unified Core retains Client identity_namespace=pair and interfaces; actual installed host tested",
+      "numericalGoldenChanged": false,
+      "result": "PASS",
+      "catalogRevision": "49d1e9642c26ba94678a679f22ccea52bee4e3a66d86a653b7fabab269397b51",
+      "policyVersion": "wahlap-cn-1"
+    },
+    {
+      "case": 4,
+      "basis": "speed",
+      "input": "speed",
+      "originalError": "TypeError: recommend_songs() got an unexpected keyword argument 'identity_namespace'",
+      "classification": "REAL_ARTIFACT_INTERFACE_INCOMPATIBILITY",
+      "resolution": "Unified Core retains Client identity_namespace=pair and interfaces; actual installed host tested",
+      "numericalGoldenChanged": false,
+      "result": "PASS",
+      "catalogRevision": "49d1e9642c26ba94678a679f22ccea52bee4e3a66d86a653b7fabab269397b51",
+      "policyVersion": "wahlap-cn-1"
+    },
+    {
+      "case": 5,
+      "basis": "accuracy_power",
+      "input": "accuracy_power",
+      "originalError": "TypeError: recommend_songs() got an unexpected keyword argument 'identity_namespace'",
+      "classification": "REAL_ARTIFACT_INTERFACE_INCOMPATIBILITY",
+      "resolution": "Unified Core retains Client identity_namespace=pair and interfaces; actual installed host tested",
+      "numericalGoldenChanged": false,
+      "result": "PASS",
+      "catalogRevision": "49d1e9642c26ba94678a679f22ccea52bee4e3a66d86a653b7fabab269397b51",
+      "policyVersion": "wahlap-cn-1"
+    },
+    {
+      "case": 6,
+      "basis": "rhythm",
+      "input": "rhythm",
+      "originalError": "TypeError: recommend_songs() got an unexpected keyword argument 'identity_namespace'",
+      "classification": "REAL_ARTIFACT_INTERFACE_INCOMPATIBILITY",
+      "resolution": "Unified Core retains Client identity_namespace=pair and interfaces; actual installed host tested",
+      "numericalGoldenChanged": false,
+      "result": "PASS",
+      "catalogRevision": "49d1e9642c26ba94678a679f22ccea52bee4e3a66d86a653b7fabab269397b51",
+      "policyVersion": "wahlap-cn-1"
+    },
+    {
+      "case": 7,
+      "basis": "complex",
+      "input": "complex",
+      "originalError": "TypeError: recommend_songs() got an unexpected keyword argument 'identity_namespace'",
+      "classification": "REAL_ARTIFACT_INTERFACE_INCOMPATIBILITY",
+      "resolution": "Unified Core retains Client identity_namespace=pair and interfaces; actual installed host tested",
+      "numericalGoldenChanged": false,
+      "result": "PASS",
+      "catalogRevision": "49d1e9642c26ba94678a679f22ccea52bee4e3a66d86a653b7fabab269397b51",
+      "policyVersion": "wahlap-cn-1"
+    },
+    {
+      "case": 8,
+      "basis": "big_song",
+      "input": "daigouryoku",
+      "originalError": "TypeError: recommend_songs() got an unexpected keyword argument 'identity_namespace'",
+      "classification": "REAL_ARTIFACT_INTERFACE_INCOMPATIBILITY",
+      "resolution": "Unified Core retains Client identity_namespace=pair and interfaces; actual installed host tested",
+      "numericalGoldenChanged": false,
+      "result": "PASS",
+      "catalogRevision": "49d1e9642c26ba94678a679f22ccea52bee4e3a66d86a653b7fabab269397b51",
+      "policyVersion": "wahlap-cn-1"
+    },
+    {
+      "case": 9,
+      "basis": "big_song",
+      "input": "大歌力",
+      "originalError": "TypeError: recommend_songs() got an unexpected keyword argument 'identity_namespace'",
+      "classification": "REAL_ARTIFACT_INTERFACE_INCOMPATIBILITY",
+      "resolution": "Unified Core retains Client identity_namespace=pair and interfaces; actual installed host tested",
+      "numericalGoldenChanged": false,
+      "result": "PASS",
+      "catalogRevision": "49d1e9642c26ba94678a679f22ccea52bee4e3a66d86a653b7fabab269397b51",
+      "policyVersion": "wahlap-cn-1"
+    }
+  ]
+}

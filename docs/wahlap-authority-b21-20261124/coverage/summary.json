@@ -1,0 +1,60 @@
+{
+  "inputFilesVerified": 3003,
+  "baselineCharts": 1387,
+  "rawUnavailable": [],
+  "featureCounts": {
+    "basicNoteSequence": {
+      "AVAILABLE": 1377,
+      "PARTIAL": 10
+    },
+    "bigNotes": {
+      "AVAILABLE": 1377,
+      "PARTIAL": 10
+    },
+    "bpm": {
+      "AVAILABLE": 844,
+      "PARTIAL": 543
+    },
+    "delay": {
+      "AVAILABLE": 1377,
+      "PARTIAL": 10
+    },
+    "measure": {
+      "AVAILABLE": 1377,
+      "PARTIAL": 10
+    },
+    "offset": {
+      "NEEDS_VALIDATION": 1387
+    },
+    "scroll": {
+      "AVAILABLE": 658,
+      "NEEDS_VALIDATION": 721,
+      "PARTIAL": 8
+    },
+    "roll": {
+      "AVAILABLE": 1373,
+      "PARTIAL": 14
+    },
+    "balloon": {
+      "NEEDS_VALIDATION": 1383,
+      "PARTIAL": 4
+    },
+    "branch": {
+      "AVAILABLE": 1287,
+      "PARTIAL": 97,
+      "NEEDS_VALIDATION": 3
+    },
+    "localDensity": {
+      "AVAILABLE": 1377,
+      "PARTIAL": 10
+    },
+    "rhythmFeatures": {
+      "PARTIAL": 1387
+    },
+    "patternFeatures": {
+      "UNAVAILABLE": 1387
+    }
+  },
+  "scope": "Static paths and chart-relative note times only. BPM/DELAY command instants, absolute OFFSET alignment, Scroll and dynamic LEVELHOLD are not fully validated. Rhythm interval histogram is partial; no pattern extractor.",
+  "sourceScanSha256": "d03e4956b126b2e6bafa3a6fef53d4e8d9df53d0441c489346b51519d3c15944"
+}

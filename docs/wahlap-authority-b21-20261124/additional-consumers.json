@@ -1,0 +1,60 @@
+{
+  "baselineReferencesRetained": 494,
+  "additionalFiles": [
+    {
+      "repo": "bot",
+      "path": "taiko_bot/song_positions.py",
+      "role": "Reference DTO and formatting; no CN source",
+      "sha256": "1159898f362e7ebe7fcb9ec4916fc066055ac4d7c0be05f2bcdc69624a9d079b",
+      "discoveredBeyondBaseline494": true,
+      "versionReporting": "enclosing captured Catalog View / handler health report",
+      "owner": "Lead"
+    },
+    {
+      "repo": "bot",
+      "path": "taiko_bot/offline/song_positions.py",
+      "role": "Metadata/reference producer only",
+      "sha256": "c7f67316fbd2a151dbad0f54939e32acf62be08d24e8f9b5aa983a58d5bae430",
+      "discoveredBeyondBaseline494": true,
+      "versionReporting": "enclosing captured Catalog View / handler health report",
+      "owner": "Lead"
+    },
+    {
+      "repo": "bot",
+      "path": "taiko_bot/catalog/positions.py",
+      "role": "Central membership projection, Wahlap only",
+      "sha256": "00d43b9e572d19b61145c908cd4c1e2e426a8d9322f13446ae65a2b49dcf3e3e",
+      "discoveredBeyondBaseline494": true,
+      "versionReporting": "enclosing captured Catalog View / handler health report",
+      "owner": "Lead"
+    },
+    {
+      "repo": "bot",
+      "path": "taiko_bot/catalog/history.py",
+      "role": "Central historical row/alias retention",
+      "sha256": "f4a92d13398ef150983ef859e60e3f061aaa5b5f8db9ae9cec27aefe37a167a8",
+      "discoveredBeyondBaseline494": true,
+      "versionReporting": "enclosing captured Catalog View / handler health report",
+      "owner": "Lead"
+    },
+    {
+      "repo": "bot",
+      "path": "taiko_bot/catalog/storage.py",
+      "role": "Verified predecessor and atomic activation",
+      "sha256": "604d944b3e93156591dd779d5aed2e655771c04d2e35bfbae8e1723e63f8c6b7",
+      "discoveredBeyondBaseline494": true,
+      "versionReporting": "enclosing captured Catalog View / handler health report",
+      "owner": "Lead"
+    },
+    {
+      "repo": "bot",
+      "path": "taiko_bot/runtime/public/public_queries.py",
+      "role": "Current-catalog position wording",
+      "sha256": "f0b602b16c598e9f985a1322bbaa4fc3ae2bc22efdfe4c0caa5a4f97cd2bc6df",
+      "discoveredBeyondBaseline494": true,
+      "versionReporting": "enclosing captured Catalog View / handler health report",
+      "owner": "Lead"
+    }
+  ],
+  "evidence": "Actual installed provider position, Center/Client constants and metrics assertions in bridge; full-snapshot Core position membership equality and Authority history/position tests."
+}

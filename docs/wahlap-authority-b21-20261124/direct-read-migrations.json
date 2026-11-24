@@ -1,0 +1,129 @@
+[
+  {
+    "path": "taiko_bot/runtime/player/center/progress_support/dani_progress.py",
+    "reads": 1,
+    "functions": [
+      "_load_inputs"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/center/display_host_support/song_title_showcase.py",
+    "reads": 1,
+    "functions": [
+      "_load_song_lookup"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/center/display_host_support/custom_title.py",
+    "reads": 1,
+    "functions": [
+      "_load_song_title_map"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/center/recommendation_support/recommend_image.py",
+    "reads": 1,
+    "functions": [
+      "_load_song_star_map"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/center/recommendation_support/score_line.py",
+    "reads": 1,
+    "functions": [
+      "rebuild_scoreline_dataset"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/center/display_support/draw_dress.py",
+    "reads": 2,
+    "functions": [
+      "_load_song_display_map",
+      "_load_song_title_map"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/center/display_support/metric.py",
+    "reads": 1,
+    "functions": [
+      "load_song_data"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/center/display_support/tcloud.py",
+    "reads": 1,
+    "functions": [
+      "_load_song_name_map"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/client/score_data.py",
+    "reads": 1,
+    "functions": [
+      "rebuild_scoreline_dataset"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/client/progress_support/render.py",
+    "reads": 1,
+    "functions": [
+      "_load_song_data"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/client/progress_support/dani_progress.py",
+    "reads": 1,
+    "functions": [
+      "_load_song_note_map"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/client/recommendation_support/score_calculator.py",
+    "reads": 1,
+    "functions": [
+      "build_duplicate_song_groups"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/client/recommendation_support/target_recommend.py",
+    "reads": 1,
+    "functions": [
+      "_load_song_rows"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/client/display_support/draw_dress.py",
+    "reads": 1,
+    "functions": [
+      "_load_song_title_map"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/client/display_support/metric.py",
+    "reads": 1,
+    "functions": [
+      "load_song_data"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/client/display_support/tcloud.py",
+    "reads": 1,
+    "functions": [
+      "_load_song_name_map"
+    ]
+  },
+  {
+    "path": "taiko_bot/offline/drawinfo.py",
+    "reads": 1,
+    "functions": [
+      "_load_note_count_map"
+    ]
+  },
+  {
+    "path": "taiko_bot/offline/dani_overview.py",
+    "reads": 1,
+    "functions": [
+      "_load_song_index"
+    ]
+  }
+]

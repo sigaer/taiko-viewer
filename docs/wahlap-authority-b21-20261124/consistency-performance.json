@@ -1,0 +1,38 @@
+{
+  "qaRun": "qa-4af565e13fc7",
+  "execution": "installed Bot/Core plus actual Node adapter and UGC loader; no production HTTP or business-data writes",
+  "catalogRevision": "891a2a0aa47dff10f576e1ec273721a26ebfcb8bcd3f41521139f4ecc769c52f",
+  "policyVersion": "wahlap-cn-1",
+  "cnOniUra": 1387,
+  "crossConsumerConsistency": "PASS",
+  "consumers": [
+    "Python Reader",
+    "Core availability",
+    "Core progress active IDs",
+    "Bot availability masks",
+    "Node Reader",
+    "UGC actual loader"
+  ],
+  "python": {
+    "coldMs": 1212.2345864772797,
+    "warm": {
+      "medianMs": 0.058280304074287415,
+      "maxMs": 0.12406706809997559,
+      "samples": 30
+    }
+  },
+  "node": {
+    "coldMs": 568.995265,
+    "warm": {
+      "medianMs": 0.33054200000003675,
+      "maxMs": 0.5087399999999889,
+      "samples": 30
+    }
+  },
+  "activationMs": 1630.96396997571,
+  "rollbackMs": 1314.5480304956436,
+  "failedFetchPreservesPointer": true,
+  "olderRevisionsRetained": true,
+  "snapshotLinkCount": 1,
+  "limits": "One synthetic second revision in an owned root, not production rollback/load testing. Single writer required. No global cross-machine transaction claim."
+}

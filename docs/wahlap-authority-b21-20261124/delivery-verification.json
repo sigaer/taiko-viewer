@@ -1,0 +1,37 @@
+{
+  "qaRun": "qa-92ed73116a50",
+  "candidateTechnicalChecks": "PASS",
+  "catalogRevision": "891a2a0aa47dff10f576e1ec273721a26ebfcb8bcd3f41521139f4ecc769c52f",
+  "policyVersion": "wahlap-cn-1",
+  "baselineReferences": 494,
+  "additionalAuditedFiles": 6,
+  "cnFeatureCharts": 1387,
+  "parserSourceHashesUnchanged": [
+    "vendor/tja/TJARenderer/src/tja-parser.ts",
+    "vendor/tja/TJARenderer/src/primitives.ts",
+    "vendor/tja/TJAAnalyzer/src/utils/bar-timeline.ts"
+  ],
+  "retainedBaselines": {
+    "batch2-viewer": "6af2a292fc20d6f65b1d02f25785b6aac96a4957",
+    "batch2-bot": "cda0a857697119d30bd291cf275900ddf89aab85",
+    "batch2-core": "52909eca0749080a4f8921c4374b2b0375eb3c47",
+    "correctness-viewer": "2693074043c6dc60d17d83e595e3fa383340cab6",
+    "correctness-bot": "62c4d3e22965cef78eaf79794689b6614895433c"
+  },
+  "frontendMatchesAcceptedBuildCommit": "79d07cfc",
+  "positionAuthority": {
+    "catalogRevision": "891a2a0aa47dff10f576e1ec273721a26ebfcb8bcd3f41521139f4ecc769c52f",
+    "policyVersion": "wahlap-cn-1",
+    "membershipSource": "Wahlap Song API",
+    "referenceStatus": "REFERENCE_ONLY",
+    "referenceUpdatedAt": "2026-11-24T09:42:01+08:00",
+    "uniqueOfficialSongs": 1128,
+    "membershipRows": 1323,
+    "orderedMemberships": 1307,
+    "pendingMemberships": 16,
+    "semantics": "Reference order only; unmatched current official members remain pending."
+  },
+  "reportLinks": "PASS",
+  "productionDeployed": false,
+  "publicationRecoveryOrMeasurementBackfill": false
+}

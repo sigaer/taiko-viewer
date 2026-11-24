@@ -1,15 +1,15 @@
 """Acceptance against installed wheels. Source checkouts supply tests only."""
 import hashlib,importlib,importlib.metadata as md,json,os,runpy,subprocess,sys,unittest
 from pathlib import Path
-BASE=Path('/var/tmp/taiko-batch21-20261124');BOT=BASE/'bot';OUT=BASE/'release-candidate-rc5'
+BASE=Path('/var/tmp/taiko-batch21-20261124');BOT=BASE/'bot';OUT=BASE/'release-candidate-rc9'
 os.environ.update(TAIKO_COMPUTE_ONLY='1',TAIKO_CATALOG_ROOT=str(BASE/'catalog'))
 import sakura_taiko_core,sakura_taiko_contract,taiko_application,taiko_bot,taiko_store
 modules=[sakura_taiko_core,sakura_taiko_contract,taiko_application,taiko_bot,taiko_store]
 imports={module.__name__:module.__file__ for module in modules}
 for path in imports.values():assert Path(path).is_relative_to(Path(sys.prefix)/'lib'),path
-assert md.version('sakura-taiko-core')=='0.1.4rc1'
-assert md.version('taiko-application')=='0.10.0rc1'
-assert md.version('taiko-bot')=='0.27.0rc5'
+assert md.version('sakura-taiko-core')=='0.1.4rc2'
+assert md.version('taiko-application')=='0.10.0rc2'
+assert md.version('taiko-bot')=='0.27.0rc9'
 for source,module in [(BASE/'core/core',sakura_taiko_core),(BOT/'taiko_bot',taiko_bot),(BOT/'taiko_store',taiko_store),(BOT/'packages/taiko-application/src/taiko_application',taiko_application)]:
  for path in source.rglob('*.py'):
   target=Path(module.__file__).parent/path.relative_to(source)
@@ -40,7 +40,7 @@ elif mode=='bridge':
  for name in ['TAIKO_OFFLINE_ROOT','TAIKO_CENTER_ROOT','TAIKO_RUNTIME_ROOT','TAIKO_BOT_ROOT']:os.environ[name]=str(root)
  os.environ['TAIKO_CONFIG_PATH']=str(root/'absent-config.json');os.environ['TAIKO_USERDATA_DIR']=str(root/'userdata')
  os.environ['TAIKO_CATALOG_ROOT']=str(root/'catalog');os.environ.pop('TAIKO_CATALOG_REVISION',None)
- metadata=[dict(id=i,song_name=f'Chart {i}',song_name_jp=f'Chart {i}',shelf_status=0,
+ metadata=[dict(id=i,song_name=f'Chart {i}',song_name_jp=f'Chart {i}',type='南梦宫原创音乐',shelf_status=0,
    **{f'level_{d}':9 if d==4 else 0 for d in range(1,6)}) for i in range(1,24)]
  authority={'manifest':{'complete':True,'source':'https://wl-taiko.wahlap.net/api/user/all/songs','fetchedAt':'2026-11-24T00:00:00Z'},
    'sourceRevision':'synthetic-bridge','byId':{row['id']:row for row in metadata[:-1]}}
@@ -57,6 +57,22 @@ elif mode=='bridge':
   if hasattr(module,'load_song_index'):assert len(module.load_song_index())==23
  from taiko_bot.public_catalog_cache import revision
  assert revision(root/'songs/song_data.json')[1]==snapshot['catalogRevision']
+ from taiko_bot.runtime.public.provider import position
+ assert len(position(1).categories)==1
+ assert not position(23).categories
+
+ from unittest.mock import patch
+ from taiko_bot.runtime.public import catalog_provider
+ model=[dict(id=i,level=4,score=8,combo=100) for i in (1,23)]
+ for profile in ['center','client']:
+  with patch.object(catalog_provider,'_load_rating_entries',return_value=model),patch.object(catalog_provider,'profile',return_value=profile):
+   assert {row.song_id for row in catalog_provider.query_charts_by_const(8)}=={1}
+   assert {row.song_id for row in catalog_provider.query_charts_by_const(8,include_shelf_status=True)}=={1,23}
+ records=[dict(song_no=i,level=4,ok_cnt=1,ng_cnt=0,dondaful_combo_cnt=0,full_combo_cnt=0) for i in (1,23)]
+ for name in ['taiko_bot.runtime.player.center.display_support.metric','taiko_bot.runtime.player.client.display_support.metric']:
+  module=importlib.import_module(name)
+  assert {row['song_no'] for row in module._collect_song_metric_matches(records,'ok',1)}=={1}
+
 
  for module in hosts:assert Path(module.__file__).is_relative_to(Path(sys.prefix)/'lib')
  tokens=[*ORDINARY_BASES,'daigouryoku','大歌力']

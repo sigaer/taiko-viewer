@@ -1,0 +1,170 @@
+{
+  "source": {
+    "page": 1,
+    "pageSize": 500,
+    "sort": 1
+  },
+  "httpStatus": [
+    201
+  ],
+  "rowCount": 1323,
+  "uniqueIds": 1128,
+  "pages": [
+    {
+      "query": {
+        "page": 1,
+        "pageSize": 500,
+        "sort": 1
+      },
+      "count": 500,
+      "total": 1323,
+      "fetchedAt": "2026-11-24T03:37:46.168769+00:00",
+      "sha256": "273a64fc0fd982d134a5a9fc374669cf23b6f4881be710c2e44b99f2d26fb454",
+      "bytes": 121480
+    },
+    {
+      "query": {
+        "page": 2,
+        "pageSize": 500,
+        "sort": 1
+      },
+      "count": 500,
+      "total": 1323,
+      "fetchedAt": "2026-11-24T03:37:48.580725+00:00",
+      "sha256": "783c70982a0958809bf1ba316ecd5866f90f019f12fef6dd2c82cf14f107e787",
+      "bytes": 127453
+    },
+    {
+      "query": {
+        "page": 3,
+        "pageSize": 500,
+        "sort": 1
+      },
+      "count": 323,
+      "total": 1323,
+      "fetchedAt": "2026-11-24T03:37:50.880627+00:00",
+      "sha256": "fe22ad6ebe91f43f541a6e234fada33af8a8fce0e080ae16b6166732c8af5e3e",
+      "bytes": 78388
+    },
+    {
+      "query": {
+        "page": 4,
+        "pageSize": 500,
+        "sort": 1
+      },
+      "count": 0,
+      "total": 1323,
+      "fetchedAt": "2026-11-24T03:37:53.030540+00:00",
+      "sha256": "5faa24372c49d7f0f85db00b81a1088413b6dfab96b17d08bcf3293f942d40e4",
+      "bytes": 123
+    }
+  ],
+  "fields": {
+    "family": {
+      "observedTypes": {
+        "str": 127
+      },
+      "missingRows": 1196,
+      "nullRows": 0
+    },
+    "id": {
+      "observedTypes": {
+        "int": 1323
+      },
+      "missingRows": 0,
+      "nullRows": 0
+    },
+    "isPlayed": {
+      "observedTypes": {
+        "bool": 1323
+      },
+      "missingRows": 0,
+      "nullRows": 0
+    },
+    "level_1": {
+      "observedTypes": {
+        "int": 1323
+      },
+      "missingRows": 0,
+      "nullRows": 0
+    },
+    "level_2": {
+      "observedTypes": {
+        "int": 1323
+      },
+      "missingRows": 0,
+      "nullRows": 0
+    },
+    "level_3": {
+      "observedTypes": {
+        "int": 1323
+      },
+      "missingRows": 0,
+      "nullRows": 0
+    },
+    "level_4": {
+      "observedTypes": {
+        "int": 1323
+      },
+      "missingRows": 0,
+      "nullRows": 0
+    },
+    "level_5": {
+      "observedTypes": {
+        "int": 1323
+      },
+      "missingRows": 0,
+      "nullRows": 0
+    },
+    "open_day": {
+      "observedTypes": {
+        "str": 1323
+      },
+      "missingRows": 0,
+      "nullRows": 0
+    },
+    "song_name": {
+      "observedTypes": {
+        "str": 1323
+      },
+      "missingRows": 0,
+      "nullRows": 0
+    },
+    "song_name_jp": {
+      "observedTypes": {
+        "str": 1323
+      },
+      "missingRows": 0,
+      "nullRows": 0
+    },
+    "sort": {
+      "observedTypes": {
+        "int": 1323
+      },
+      "missingRows": 0,
+      "nullRows": 0
+    },
+    "subtitle": {
+      "observedTypes": {
+        "str": 864
+      },
+      "missingRows": 459,
+      "nullRows": 0
+    },
+    "tag": {
+      "observedTypes": {
+        "str": 42
+      },
+      "missingRows": 1281,
+      "nullRows": 0
+    },
+    "type": {
+      "observedTypes": {
+        "str": 1323
+      },
+      "missingRows": 0,
+      "nullRows": 0
+    }
+  },
+  "semantics": "Observed types, not invented official guarantees; no chart release/update-time field observed. isPlayed private and omitted from public projection."
+}

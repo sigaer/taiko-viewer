@@ -19,3 +19,5 @@
 实现方资料：[OpenTaiko changelog](https://github.com/0auBSQ/OpenTaiko/blob/main/CHANGELOG.md) 是模拟器实现的一手记录，包含compatibility modes和OFFSET/LEVELHOLD相关修正；它不构成Bandai官方TJA标准。本系统固定的vendored parser/hash与全量语料见 [Batch2 Timeline](../../catalog-release-batch2-20261124/timeline/README.md)。后续引用这些资料时保存页面/commit版本，不能以可变main链接代替构建溯源。
 
 知识新增模板：`claimId / 陈述 / 分级 / 适用平台-地区-版本 / sourceURL或源码commit+行 / 证据日期 / 反例 / 验证状态 / golden关联 / reviewer`。未有专家签字的曲例只能是候选案例；未有人类标注的模型维度不能被称作客观能力真值。
+
+B2.1 项目约定：国行当前目录唯一来源为完整成功的 Wahlap 官方 Song API，其他曲库只提供身份/元数据/资源/分析输入；候选中央 Snapshot 与五项策略见 [Source Contract](../../wahlap-authority-b21-20261124/wahlap-source-contract.md)。这是本系统权威边界，不是 Bandai 对 TJA 或评分规则的通用标准。

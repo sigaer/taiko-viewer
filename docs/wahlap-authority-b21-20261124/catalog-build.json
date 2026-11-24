@@ -1,0 +1,22 @@
+{
+  "manifest": {
+    "catalogRevision": "891a2a0aa47dff10f576e1ec273721a26ebfcb8bcd3f41521139f4ecc769c52f",
+    "policyVersion": "wahlap-cn-1",
+    "schemaVersion": 1,
+    "sha256": "d93cf2a4030c4e8744b28bf07aa34f501492d487be905fedcfa186b18aac9357",
+    "bytes": 36435443
+  },
+  "songs": 2993,
+  "chartSlots": 14965,
+  "knownCharts": 12052,
+  "officialSongs": 1128,
+  "cnOniUra": 1387,
+  "recommendationCounts": {
+    "ordinary": 1346,
+    "target": 1343
+  },
+  "identityConflicts": [],
+  "buildSeconds": 2.3594753332436085,
+  "activationRoot": "/var/tmp/taiko-batch21-20261124/catalog",
+  "productionActivated": false
+}

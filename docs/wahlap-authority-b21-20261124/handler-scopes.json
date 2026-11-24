@@ -1,0 +1,267 @@
+[
+  {
+    "path": "taiko_bot/runtime/community/center/compat.py",
+    "handlers": [
+      "qq_official_unsupported_gate_handle",
+      "qq_official_ping_handle",
+      "_"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/community/center/cover.py",
+    "handlers": [
+      "handle_cover"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/community/center/draw_guess.py",
+    "handlers": [
+      "_",
+      "_",
+      "_",
+      "_",
+      "_",
+      "_",
+      "_",
+      "_",
+      "_",
+      "_",
+      "_"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/community/center/annual.py",
+    "handlers": [
+      "annual_2025_report_handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/community/client/compat.py",
+    "handlers": [
+      "qq_official_unsupported_gate_handle",
+      "qq_official_ping_handle",
+      "_",
+      "_"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/community/client/cover.py",
+    "handlers": [
+      "handle_cover"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/community/client/draw_guess.py",
+    "handlers": [
+      "_",
+      "_",
+      "_",
+      "_",
+      "_",
+      "_",
+      "_",
+      "_",
+      "_",
+      "_",
+      "_"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/public/catalog_commands.py",
+    "handlers": [
+      "const_query_handle",
+      "music_info_handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/public/__init__.py",
+    "handlers": [
+      "handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/public/fanmade_commands.py",
+    "handlers": [
+      "fanmade_handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/public/event_commands.py",
+    "handlers": [
+      "aoharu_handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/public/public_commands.py",
+    "handlers": [
+      "note_count_handle",
+      "_",
+      "song_where_handle",
+      "song_position_phrase_handle",
+      "song_pos_by_id_handle",
+      "_"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/personal.py",
+    "handlers": [
+      "my_don_handle",
+      "song_metric_query_handle",
+      "tcloud_handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/recommendation.py",
+    "handlers": [
+      "taikorec_handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/b30.py",
+    "handlers": [
+      "taikob_handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/entry.py",
+    "handlers": [
+      "music_info_handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/progress.py",
+    "handlers": [
+      "progress_handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/trend.py",
+    "handlers": [
+      "trend_handle",
+      "playtrend_handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/scoring.py",
+    "handlers": [
+      "handle_estimate"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/center/update_cluster.py",
+    "handlers": [
+      "update_handle",
+      "update_typo_handle",
+      "public_score_token_handle",
+      "developer_userdata_handle",
+      "game_login_qr_handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/center/query_cluster.py",
+    "handlers": [
+      "song_rank_handle",
+      "summary_handle",
+      "city_arcade_query_handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/center/manual_cluster.py",
+    "handlers": [
+      "manual_create_handle",
+      "manual_rename_handle",
+      "manual_claim_code_handle",
+      "manual_claim_handle",
+      "manual_detach_handle",
+      "manual_delete_handle",
+      "manual_delete_confirm_handle",
+      "manual_score_upsert_handle",
+      "manual_score_get_handle",
+      "manual_score_delete_handle",
+      "manual_score_delete_confirm_handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/center/identity_cluster.py",
+    "handlers": [
+      "qq_migration_code_handle",
+      "bind_qq_handle",
+      "bind_qq_prompt_handle",
+      "bind_handle",
+      "bind_confirm_handle",
+      "bind_switch_handle",
+      "bind_hiroba_handle",
+      "hiroba_update_handle",
+      "bind_remove_handle",
+      "bind_remove_confirm_handle",
+      "show_bind_handle",
+      "unshow_bind_handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/center/management_cluster.py",
+    "handlers": [
+      "tsearch_switch_handle",
+      "song_title_query_handle",
+      "custom_title_add_handle",
+      "tset_alias_handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/client/update_cluster.py",
+    "handlers": [
+      "update_handle",
+      "update_typo_handle",
+      "public_score_token_handle",
+      "developer_userdata_handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/client/query_cluster.py",
+    "handlers": [
+      "song_rank_handle",
+      "summary_handle",
+      "city_arcade_query_handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/client/manual_cluster.py",
+    "handlers": [
+      "manual_create_handle",
+      "manual_rename_handle",
+      "manual_claim_code_handle",
+      "manual_claim_handle",
+      "manual_detach_handle",
+      "manual_delete_handle",
+      "manual_delete_confirm_handle",
+      "manual_score_upsert_handle",
+      "manual_score_get_handle",
+      "manual_score_delete_handle",
+      "manual_score_delete_confirm_handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/client/identity_cluster.py",
+    "handlers": [
+      "qq_migration_code_handle",
+      "bind_qq_handle",
+      "bind_qq_prompt_handle",
+      "bind_handle",
+      "bind_confirm_handle",
+      "bind_switch_handle",
+      "bind_hiroba_handle",
+      "hiroba_update_handle",
+      "bind_remove_handle",
+      "bind_remove_confirm_handle",
+      "show_bind_handle",
+      "unshow_bind_handle"
+    ]
+  },
+  {
+    "path": "taiko_bot/runtime/player/client/management_cluster.py",
+    "handlers": [
+      "tsearch_switch_handle",
+      "tset_alias_handle"
+    ]
+  }
+]

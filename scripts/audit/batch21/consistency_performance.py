@@ -7,6 +7,7 @@ from taiko_bot.catalog.storage import install,activate,rollback,mark_failed
 from taiko_bot.catalog.wahlap import canonical_bytes
 from sakura_taiko_core.chart.availability import cn_available_chart_keys,on_shelf_song_ids
 from sakura_taiko_core.chart.progress_catalog import active_song_ids_from_index
+from sakura_taiko_core.chart.position import build_song_catalog,get_song_position_by_id
 from taiko_bot.catalog.availability import load_cn_available_chart_keys,load_recommendation_chart_keys
 os.environ['TAIKO_CATALOG_ROOT']=str(BASE/'catalog')
 start=time.perf_counter();view=capture();cold=(time.perf_counter()-start)*1000
@@ -15,6 +16,12 @@ for _ in range(30):
     start=time.perf_counter();assert capture().revision==view.revision;warm.append((time.perf_counter()-start)*1000)
 expected={(c['sourceSongId'],c['difficulty']) for c in data['charts'].values() if c['difficulty'] in (4,5) and c['policies']['cn_current_playable']['eligible']}
 assert len(expected)==1387
+position_ids={sid for category in data['positions']['index']['categories'].values() for key in ['ordered','pending'] for sid in category[key]}
+assert position_ids==view.song_ids()
+for profile in ['position-center-20261010','position-client-20261010']:
+    catalog=build_song_catalog(data['songs'],profile=profile)
+    assert {row['id'] for row in data['songs'] if get_song_position_by_id(row['id'],catalog=catalog,profile=profile).is_on_shelf}==view.song_ids()
+
 assert cn_available_chart_keys(data['songs'],[{'id':999999,'shelf_status':0,'level_4':10}])==expected
 assert load_cn_available_chart_keys()==expected
 assert on_shelf_song_ids(data['songs'])==active_song_ids_from_index({r['id']:r for r in data['songs']})==view.song_ids()
