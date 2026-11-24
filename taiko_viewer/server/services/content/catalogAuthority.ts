@@ -9,33 +9,35 @@ export type AuthoritySnapshot = {
   schemaVersion: number; catalogRevision: string; policyVersion: string;
   songs: any[]; charts: Record<string, any>; aliases: Record<string, number>; searchAliases: any[]; sourceManifest: any[];
 };
-type Captured = { data: AuthoritySnapshot; report: CatalogReport; root: string };
+type Captured = { data: AuthoritySnapshot; body: Buffer; report: CatalogReport; root: string };
 type RequestState = { captured?: Promise<Captured>; report?: (report: CatalogReport) => void };
 export const catalogRequest = new AsyncLocalStorage<RequestState>();
 export function withCatalogRequest<T>(task: () => T, report?: RequestState['report']): T {
   return catalogRequest.run({ report }, task);
 }
-const cache = new Map<string, AuthoritySnapshot>();
+const cache = new Map<string, { data: AuthoritySnapshot; body: Buffer }>();
 
 export async function readCatalogAuthority(root: string): Promise<Captured> {
   const pointer = JSON.parse(await readFile(resolve(root, 'active.json'), 'utf8'));
   const revision = pointer.catalogRevision;
   if (!/^[0-9a-f]{64}$/.test(revision)) throw new Error('CATALOG_INVALID_REVISION');
   const key = `${root}:${revision}:${pointer.sha256}`;
-  let data = cache.get(key);
-  if (!data) {
+  let cached = cache.get(key);
+  if (!cached) {
     const bytes = await readFile(resolve(root, 'revisions', revision, 'catalog.json'));
     if (createHash('sha256').update(bytes).digest('hex') !== pointer.sha256 || bytes.length !== pointer.bytes) throw new Error('CATALOG_HASH_MISMATCH');
-    data = JSON.parse(bytes.toString('utf8')) as AuthoritySnapshot;
+    const data = JSON.parse(bytes.toString('utf8')) as AuthoritySnapshot;
     if (data.schemaVersion !== 1 || data.policyVersion !== 'wahlap-cn-1' || data.catalogRevision !== revision) throw new Error('CATALOG_UNSUPPORTED_OR_MIXED_REVISION');
-    cache.set(key, data);
+    cached = { data, body: bytes };
+    cache.set(key, cached);
     while (cache.size > 3) cache.delete(cache.keys().next().value!);
   }
   let health: Record<string, unknown>;
   try { health = JSON.parse(await readFile(resolve(root, 'fetch-status.json'), 'utf8')); }
   catch { health = { state: 'stale', reason: 'FETCH_HEALTH_MISSING' }; }
   if (health.catalogRevision && health.catalogRevision !== revision) health = { state: 'stale', reason: 'FETCH_HEALTH_REVISION_MISMATCH' };
-  return { root, data, report: { ...health, catalogRevision: revision, policyVersion: data.policyVersion, state: String(health.state || 'stale') } };
+  const { data, body } = cached;
+  return { root, data, body, report: { ...health, catalogRevision: revision, policyVersion: data.policyVersion, state: String(health.state || 'stale') } };
 }
 
 export async function captureCatalogAuthority(root?: string) {

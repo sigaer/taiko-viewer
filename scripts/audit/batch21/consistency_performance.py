@@ -53,22 +53,44 @@ ugc=(BASE/'viewer/taiko_viewer/scripts/lib/ugc-catalog.mjs').as_uri()
 (scratch/'rating.json').write_text('{"songs":{}}');(scratch/'notes.json').write_text('{}')
 script.write_text(f'''import {{readCatalogAuthority}} from {json.dumps(adapter)};
 import {{loadUgcCatalogAudit}} from {json.dumps(ugc)};
-import {{performance}} from 'node:perf_hooks';import {{writeFile}} from 'node:fs/promises';
+import {{performance}} from 'node:perf_hooks';import {{writeFile}} from 'node:fs/promises';import {{createHash}} from 'node:crypto';
 const root={json.dumps(str(BASE/'catalog'))};let start=performance.now();const view=await readCatalogAuthority(root);const cold=performance.now()-start;
 const warm=[];for(let i=0;i<30;i++){{start=performance.now();await readCatalogAuthority(root);warm.push(performance.now()-start);}}
+await writeFile({json.dumps(str(scratch/'downloaded-catalog.json'))},view.body);
+const bodySha256=createHash('sha256').update(view.body).digest('hex');
 const charts=Object.values(view.data.charts);const keys=charts.filter(c=>[4,5].includes(c.difficulty)&&c.policies.cn_current_playable.eligible).map(c=>`${{c.sourceSongId}}:${{c.difficulty}}`).sort();
 const audit=await loadUgcCatalogAudit({{catalogRoot:root,ratingPath:{json.dumps(str(scratch/'rating.json'))},noteCountPath:{json.dumps(str(scratch/'notes.json'))}}});
 const ugcKeys=audit.catalog.charts.filter(c=>c.status==='active').map(c=>`${{c.songId}}:${{c.difficultyCode}}`).sort();
-await writeFile({json.dumps(str(node_result))},JSON.stringify({{catalogRevision:view.data.catalogRevision,policyVersion:view.data.policyVersion,keys,ugcKeys,ugcRevision:audit.catalog.revision,coldMs:cold,warmMs:warm}}));
+await writeFile({json.dumps(str(node_result))},JSON.stringify({{catalogRevision:view.data.catalogRevision,policyVersion:view.data.policyVersion,bodySha256,bodyBytes:view.body.length,keys,ugcKeys,ugcRevision:audit.catalog.revision,coldMs:cold,warmMs:warm}}));
 ''')
 subprocess.run(['/opt/taiko-viewer-runtime/node-v24.22.1-linux-x64/bin/node','--experimental-strip-types',str(script)],check=True,timeout=60)
 node=json.loads(node_result.read_bytes());assert node['catalogRevision']==node['ugcRevision']==view.revision
+assert node['bodySha256']==first['sha256'] and node['bodyBytes']==first['bytes']
+from taiko_bot.catalog.distribution import sync_catalog
+class Response:
+    def __enter__(self):return self
+    def __exit__(self,*args):pass
+    def raise_for_status(self):pass
+    def iter_bytes(self,size):
+        with (scratch/'downloaded-catalog.json').open('rb') as stream:
+            while chunk:=stream.read(size):yield chunk
+class Client:
+    def stream(self,*args,**kwargs):return Response()
+spec={'url':'synthetic://catalog','sha256':node['bodySha256'],'bytes':node['bodyBytes'],'catalogRevision':view.revision,'policyVersion':view.policy_version,'state':'fresh'}
+remote=sync_catalog(Client(),spec,scratch/'remote-catalog')
+assert remote['sha256']==first['sha256'] and remote['bytes']==first['bytes']
+pointer=(scratch/'remote-catalog/active.json').read_bytes()
+try:sync_catalog(Client(),{**spec,'sha256':'0'*64},scratch/'remote-catalog')
+except ValueError:pass
+else:raise AssertionError('Corrupt transport accepted')
+assert (scratch/'remote-catalog/active.json').read_bytes()==pointer
+
 assert set(node['keys'])=={f'{sid}:{d}' for sid,d in expected}
 assert set(node['ugcKeys'])=={f"{c['sourceSongId']}:{c['difficulty']}" for c in data['charts'].values() if c['policies']['cn_current_playable']['eligible']}
 def timings(values):return {'medianMs':statistics.median(values),'maxMs':max(values),'samples':len(values)}
 result={'qaRun':os.environ['QA_RUN_ID'],'execution':'installed Bot/Core plus actual Node adapter and UGC loader; no production HTTP or business-data writes',
  'catalogRevision':view.revision,'policyVersion':view.policy_version,'cnOniUra':len(expected),
- 'crossConsumerConsistency':'PASS','consumers':['Python Reader','Core availability','Core progress active IDs','Bot availability masks','Node Reader','UGC actual loader'],
+ 'crossConsumerConsistency':'PASS','rawSnapshotTransportAndRemoteStorageSha256':remote['sha256'],'remoteHashFailurePreservesLkg':True,'consumers':['Python Reader','Core availability','Core progress active IDs','Bot availability masks','Node Reader','UGC actual loader','Remote distribution actual install/activation'],
  'python':{'coldMs':cold,'warm':timings(warm)},'node':{'coldMs':node['coldMs'],'warm':timings(node['warmMs'])},
  'activationMs':activation,'rollbackMs':rollback_ms,'failedFetchPreservesPointer':True,'olderRevisionsRetained':True,'snapshotLinkCount':1,
  'limits':'One synthetic second revision in an owned root, not production rollback/load testing. Single writer required. No global cross-machine transaction claim.'}

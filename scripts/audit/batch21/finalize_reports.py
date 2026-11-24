@@ -14,7 +14,7 @@ for mode,count in [('contract',12),('python',76),('core-original',31),('authorit
     checks[mode]={'passed':count,'skipped':4 if mode=='python' else 0,'qaRun':report['qaRun'],'logSha256':sha(path),'installedPrefix':report['prefix']}
 bridge=read(RELEASE/'bridge-cases.json');assert len(bridge['cases'])==27 and all(row['result']=='PASS' for row in bridge['cases'])
 checks['bridge']={'passed':27,'qaRun':bridge['qaRun'],'actualInstalledHostFunctions':bridge['actualInstalledHostFunctions'],'casesSha256':sha(RELEASE/'bridge-cases.json')}
-for mode,count in [('installed',310),('additional',10)]:
+for mode,count in [('installed',310),('additional',11)]:
     path=BASE/f'evidence/node-rc9-{mode}.log';text=path.read_text();qa=re.search(r'# qaRun (qa-[0-9a-f]+)',text).group(1);assert f'# pass {count}\n' in text and '# fail 0\n' in text
     checks['node-'+mode]={'passed':count,'qaRun':qa,'logSha256':sha(path)}
 build_log=Path(sys.argv[1]);text=build_log.read_text();entry=VIEWER/'taiko_viewer/.output/server/index.mjs'

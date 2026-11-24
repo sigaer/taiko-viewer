@@ -239,7 +239,7 @@ export const resolveTaikoAssetBundleFile = async () => {
 export const buildTaikoOpenManifest = async (event: H3Event) => {
   const origin = buildViewerOrigin(event);
   const authority = await captureCatalogAuthority();
-  const catalogBytes = Buffer.from(JSON.stringify(authority.data));
+  const catalogBytes = authority.body;
   const datasets: Record<string, Record<string, string | number>> = {};
   for (const [name, resolver] of Object.entries(DATASET_PATH_RESOLVERS)) {
     if (name === 'song_data' || name === 'song_data_with_roll' || name === 'song_alias') {
