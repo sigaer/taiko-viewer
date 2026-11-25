@@ -15,12 +15,14 @@ import statistics
 
 
 OBSERVED_BEST_SCORE_THRESHOLD = 950_000.0
-RATING_BOUNDS = (5_000.0, 10_000.0, 15_000.0, 20_000.0)
+RATING_BOUNDS = (5.0, 8.0, 11.0, 14.0)
 
 
-def _fold(value, folds, namespace):
-    digest = hashlib.sha256(f"b43/{namespace}/{value}".encode()).digest()
-    return int.from_bytes(digest[:8], "big") % folds
+def _assign_folds(values, folds, namespace):
+    """Balance unique groups by hash order, independently of labels or row count."""
+    def order(value):
+        return hashlib.sha256(f"b43/{namespace}/{value}".encode()).digest(), str(value)
+    return {value: index % folds for index, value in enumerate(sorted(set(values), key=order))}
 
 
 def _identity(row):
@@ -55,6 +57,9 @@ def deduplicate(rows):
 def make_split(rows, kind, fold, folds=3):
     """Build reproducible, label-blind splits after latest-snapshot deduplication.
 
+    Unique users and families are each sorted by a namespaced SHA256 digest and
+    assigned round-robin, so three families produce three nonempty family folds.
+    The group universe is frozen with the fixture revision, shared by all models.
     All protocols rotate held-out user folds. chart-family holds out family fold
     ``fold``; combined holds out family fold ``(fold + 1) % folds``. The explicit
     family permutation makes their test panels distinct while preserving the
@@ -69,11 +74,12 @@ def make_split(rows, kind, fold, folds=3):
     if folds < 2 or fold not in range(folds):
         raise ValueError("invalid fold")
     rows = deduplicate(rows)
-    users = {row["user"] for row in rows if _fold(row["user"], folds, "user") == fold}
+    user_assignments = _assign_folds((row["user"] for row in rows), folds, "user")
+    family_assignments = _assign_folds((row["family"] for row in rows), folds, "family")
+    users = {user for user, assigned in user_assignments.items() if assigned == fold}
     family_fold = (fold + 1) % folds if kind == "combined" else fold
     held_families = {
-        row["family"] for row in rows
-        if _fold(row["family"], folds, "family") == family_fold
+        family for family, assigned in family_assignments.items() if assigned == family_fold
     }
     test = [row for row in rows if row["user"] in users and (
         kind == "cross-user" or row["family"] in held_families

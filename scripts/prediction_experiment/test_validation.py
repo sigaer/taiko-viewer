@@ -1,6 +1,7 @@
 """Targeted validation checks; no Bot data, network or external packages."""
 
 import copy
+import hashlib
 import json
 import math
 import unittest
@@ -12,7 +13,7 @@ def row(user="fixture-user-a", chart="fixture-chart-a", family="family-a", **upd
     result = {
         "user": user, "chart": chart, "family": family, "snapshot": 1,
         "asOf": "2026-10-01T12:00:00Z", "visibleAt": "2026-10-01T11:00:00Z",
-        "profileCharts": ["other-chart"], "rating": 12000., "six": [0.] * 6,
+        "profileCharts": ["other-chart"], "rating": 12., "six": [0.] * 6,
         "structure": [0.] * 3, "historyCount": 8, "y": 960000., "m0": 950000.,
         "catalogRevision": "catalog-fixture-1", "chartRevision": "chart-fixture-1",
         "point": 950000., "q25": 940000., "q50": 950000., "q75": 960000., "covered": True,
@@ -63,6 +64,27 @@ class SplitTests(unittest.TestCase):
             train, test = make_split(self.rows + extra, "cross-user", fold)
             self.assertTrue(all(value["snapshot"] == 2 for value in train + test))
             self.assertEqual(len(train) + len(test), len(self.rows))
+
+    def test_three_families_are_balanced_with_exact_preregistered_mapping(self):
+        rows = [row(f"fixture-user-{user}", f"chart-{family}", f"family-{family}")
+                for user in range(12) for family in range(3)]
+        expected_users = sorted(
+            {value["user"] for value in rows},
+            key=lambda value: hashlib.sha256(f"b43/user/{value}".encode()).digest())
+        expected_families = sorted(
+            {value["family"] for value in rows},
+            key=lambda value: hashlib.sha256(f"b43/family/{value}".encode()).digest())
+        for kind in ("cross-user", "chart-family", "combined"):
+            for fold in range(3):
+                train, test = make_split(rows, kind, fold)
+                self.assertTrue(train and test)
+                self.assertEqual({value["user"] for value in test}, set(expected_users[fold::3]))
+                if kind != "cross-user":
+                    family_fold = (fold + 1) % 3 if kind == "combined" else fold
+                    self.assertEqual({value["family"] for value in test}, {expected_families[family_fold]})
+                    self.assertEqual(len(test), 4)
+                    self.assertEqual(len(train), 16)
+                self.assertEqual(make_split(list(reversed(rows)), kind, fold), (train, test))
 
     def test_audit_rejects_each_leakage_and_revision_condition(self):
         cases = [
@@ -127,6 +149,13 @@ class MetricTests(unittest.TestCase):
         self.assertEqual(singleton["strata"]["history"]["cold"]["insufficient"], "singleton-user")
         self.assertEqual(singleton["strata"]["history"]["sparse"]["insufficient"], "empty")
         self.assertIsNone(singleton["strata"]["cohortCoverage"]["uncovered"]["userMacro"])
+
+    def test_rating_strata_use_preregistered_core_rating_scale(self):
+        values = [row(user=f"rating-user-{index}", rating=rating)
+                  for index, rating in enumerate((4.9, 5., 7.9, 8., 10.9, 11., 13.9, 14., 15.5))]
+        result = metrics(values)["strata"]["rating"]
+        self.assertEqual(list(result), ["-inf..5", "5..8", "8..11", "11..14", "14..inf"])
+        self.assertEqual([value["records"] for value in result.values()], [1, 2, 2, 2, 2])
 
     def test_cluster_bootstrap_reproducible_and_no_identifiers(self):
         result = metrics(self.rows, seed=123)
