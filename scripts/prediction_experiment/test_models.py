@@ -114,6 +114,15 @@ class ModelTests(unittest.TestCase):
         output = predict(future, self.test, 'M4')[0]
         self.assertEqual(output['point'], output['m0'])
         self.assertEqual(output['distinctPlayerCount'], 0)
+        self.assertFalse(output['calibration']['available'])
+        self.assertEqual([output['q25'], output['q50'], output['q75']], [None, None, None])
+
+    def test_no_training_calibration_is_unavailable_for_every_model(self):
+        for model in MODELS:
+            output = predict([], self.test, model)[0]
+            self.assertEqual(output['point'], output['m0'])
+            self.assertEqual([output['q25'], output['q50'], output['q75']], [None, None, None])
+            self.assertFalse(output['calibration']['available'])
 
 
 if __name__ == '__main__':

@@ -195,8 +195,11 @@ def predict(train, test, model, matching='rating', budget='top24'):
         if row.get('m0') is None:
             continue  # identical baseline-evaluable set for every model
         point, metadata = fit.point(row, model)
-        output = dict(row, point=point, q25=point + offsets[0], q50=point + offsets[1], q75=point + offsets[2], **metadata)
+        output = dict(row, point=point,
+                      q25=point + offsets[0] if count else None,
+                      q50=point + offsets[1] if count else None,
+                      q75=point + offsets[2] if count else None, **metadata)
         output['calibration'] = {'method': 'train-user-oof-residual-quantiles/1', 'records': count, 'users': users,
-                                 'heldoutLabelsUsed': False, 'personalPointUnmodified': model == 'M0'}
+                                 'available': count > 0, 'heldoutLabelsUsed': False, 'personalPointUnmodified': model == 'M0'}
         result.append(output)
     return result
