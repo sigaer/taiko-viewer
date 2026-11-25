@@ -15,6 +15,8 @@ MODELS = ('M0', 'M1', 'M2', 'M3', 'M4')
 CALIBRATION_USERS = 24  # fixed before inspecting experiment outcomes
 MIN_DISTINCT_PLAYERS = 5
 MIN_EFFECTIVE_SAMPLE_SIZE = 5.0
+LAMBDA_GRID = (0.0, 0.25, 0.5, 0.75, 1.0)
+INNER_CV_FOLDS = 3
 
 
 def quantile(values, probability):
@@ -118,17 +120,20 @@ class _Fit:
         self._neighbor_cache[neighbor_key] = result
         return result
 
-    def point(self, query, model):
+    def point(self, query, model, coefficient=1.0):
         baseline = float(query['m0'])
         target = self._neighbors(query, 'chart', model != 'M1')
         metadata = {'covered': _supported(target), 'distinctPlayerCount': target['count'] if target else 0,
                     'effectiveSampleSize': target['ess'] if target else 0.0,
-                    'fallback': None, 'residualShrinkage': 0.0, 'hierarchy': 'chart' if _supported(target) else 'none'}
+                    'fallback': None, 'residualShrinkage': 0.0, 'hierarchy': 'chart' if _supported(target) else 'none',
+                    'cohort_unavailable': False, 'cohort_unavailable_reason': None}
         if model == 'M0':
             return baseline, metadata
         if model in ('M1', 'M2'):
             if not _supported(target):
                 metadata['fallback'] = 'personal:insufficient-target-cohort'
+                metadata['cohort_unavailable'] = True
+                metadata['cohort_unavailable_reason'] = 'insufficient-target-cohort'
                 return baseline, metadata
             return target['score'], metadata
         family = self._neighbors(query, 'family', True)
@@ -138,6 +143,8 @@ class _Fit:
         global_pool = global_pool if _supported(global_pool) else None
         if target is None and family is None:
             metadata['fallback'] = 'personal:insufficient-chart-and-family-cohort'
+            metadata['cohort_unavailable'] = True
+            metadata['cohort_unavailable_reason'] = 'insufficient-chart-and-family-cohort'
             return baseline, metadata
         # Hierarchy is train-only: global -> family -> chart. ESS controls
         # precision, while 12 equivalent users is a preregistered weak prior.
@@ -160,7 +167,59 @@ class _Fit:
         standard_error_squared = local['variance'] / max(local['ess'], 1.0)
         shrinkage = local['ess'] / (local['ess'] + 12.0) * self.noise ** 2 / (self.noise ** 2 + standard_error_squared)
         metadata['residualShrinkage'] = shrinkage
-        return baseline + shrinkage * estimate, metadata
+        metadata['conditionalResidual'] = shrinkage * estimate
+        return baseline + coefficient * shrinkage * estimate, metadata
+
+
+def _inner_user_folds(rows):
+    """Outcome-independent balanced groups; every chart/snapshot of a user stays together."""
+    users = sorted({row['user'] for row in rows},
+                   key=lambda user: (hashlib.sha256(str(user).encode()).hexdigest(), str(user)))
+    return {user: index % INNER_CV_FOLDS for index, user in enumerate(users)}
+
+
+def select_lambda(train, matching='rating', budget='top24'):
+    """Fit the global fusion coefficient using training users only, without recursive CV.
+
+    Conditional residual fitting and ESS/uncertainty shrinkage happen inside
+    each inner-training fold. Scores give each validation user equal weight.
+    Returned provenance contains counts and aggregate scores, never user IDs.
+    """
+    rows = _latest(train)
+    assignments = _inner_user_folds(rows)
+    errors = {coefficient: {} for coefficient in LAMBDA_GRID}
+    scopes = []
+    supported_records = 0
+    validation_records = 0
+    for fold in range(INNER_CV_FOLDS):
+        validation = [row for row in rows if assignments[row['user']] == fold and row.get('m0') is not None]
+        cutoff = min((row['asOf'] for row in validation), default='')
+        fitting = [row for row in rows if assignments[row['user']] != fold and row['visibleAt'] <= cutoff]
+        fit = _Fit(fitting, matching, budget)
+        fold_supported = 0
+        for row in validation:
+            raw_point, metadata = fit.point(row, 'M4', coefficient=1.0)
+            available = metadata['fallback'] is None
+            fold_supported += available
+            residual = raw_point - row['m0'] if available else 0.0
+            for coefficient in LAMBDA_GRID:
+                errors[coefficient].setdefault(row['user'], []).append(abs(row['y'] - (row['m0'] + coefficient * residual)))
+        scopes.append({'fold': fold, 'fittingUsers': len({row['user'] for row in fitting}),
+                       'validationUsers': len({row['user'] for row in validation}),
+                       'validationRecords': len(validation), 'supportedResidualRecords': fold_supported,
+                       'userOverlap': 0})
+        supported_records += fold_supported
+        validation_records += len(validation)
+    scores = [{'lambda': coefficient, 'userMacroMAE': statistics.mean(statistics.mean(values) for values in errors[coefficient].values())
+               if errors[coefficient] else None} for coefficient in LAMBDA_GRID]
+    available = supported_records > 0
+    selected = min(scores, key=lambda item: (item['userMacroMAE'], item['lambda']))['lambda'] if available else 0.0
+    return {'method': 'train-only-inner-user-cv/1', 'grid': list(LAMBDA_GRID), 'folds': INNER_CV_FOLDS,
+            'selectedLambda': selected, 'available': available,
+            'trainingUsers': len(assignments), 'validationUsers': len(errors[0.0]),
+            'validationRecords': validation_records, 'supportedResidualRecords': supported_records,
+            'foldScopes': scopes, 'scores': scores, 'selectionMetric': 'user-macro-MAE',
+            'tieBreak': 'lower-lambda', 'heldoutLabelsUsed': False}
 
 
 def _calibration(train, matching, budget, model):
@@ -169,10 +228,12 @@ def _calibration(train, matching, budget, model):
     for user in users:
         # Refit ALL statistics without the calibration user: conditional residuals,
         # feature scales, uncertainty and hierarchy have genuine user OOF provenance.
-        fit = _Fit([row for row in train if row['user'] != user], matching, budget)
+        fitting = [row for row in train if row['user'] != user]
+        fit = _Fit(fitting, matching, budget)
+        selection = select_lambda(fitting, matching, budget) if model == 'M4' else None
         records = _latest([row for row in train if row['user'] == user and row.get('m0') is not None])
         for row in records:
-            point, _ = fit.point(row, model)
+            point, _ = fit.point(row, model, coefficient=selection['selectedLambda'] if selection else 1.0)
             errors.append(row['y'] - point)
     return [quantile(errors, probability) for probability in (.25, .5, .75)], len(errors), len(users)
 
@@ -189,13 +250,26 @@ def predict(train, test, model, matching='rating', budget='top24'):
     cutoff = min((row['asOf'] for row in test), default='')
     eligible_train = [row for row in train if row['visibleAt'] <= cutoff]
     fit = _Fit(eligible_train, matching, budget)
+    selection = select_lambda(eligible_train, matching, budget) if model == 'M4' else None
     offsets, count, users = _calibration(eligible_train, matching, budget, model)
     personal_calibration = None
     result = []
     for row in _latest(test):
         if row.get('m0') is None:
             continue  # identical baseline-evaluable set for every model
-        point, metadata = fit.point(row, model)
+        point, metadata = fit.point(row, model, coefficient=selection['selectedLambda'] if selection else 1.0)
+        if selection:
+            metadata['lambdaSelection'] = selection
+            metadata['selectedLambda'] = selection['selectedLambda']
+            if not selection['available']:
+                point = float(row['m0'])
+                metadata['fallback'] = 'personal:cohort_unavailable-inner-cv'
+                metadata['cohort_unavailable'] = True
+                metadata['cohort_unavailable_reason'] = 'insufficient-inner-cv-cohort'
+            elif metadata['fallback'] is not None:
+                metadata['selectedLambda'] = 0.0
+            elif selection['selectedLambda'] == 0.0:
+                metadata['fallback'] = 'personal:zero-cv-lambda'
         fallback = metadata['fallback'] is not None
         if fallback and personal_calibration is None:
             personal_calibration = _calibration(eligible_train, 'rating', 'top24', 'M0')
@@ -208,5 +282,9 @@ def predict(train, test, model, matching='rating', budget='top24'):
                                  'records': row_count, 'users': row_users, 'sourceModel': 'M0' if fallback else model,
                                  'available': row_count > 0, 'heldoutLabelsUsed': False,
                                  'personalPointUnmodified': model == 'M0' or fallback}
+        if model == 'M4':
+            output['calibration']['lambdaSelectionProvenance'] = {
+                'method': 'train-only-inner-user-cv/1', 'refitPerHeldoutUser': True,
+                'folds': INNER_CV_FOLDS, 'maximumFittingUsers': max(len({row['user'] for row in eligible_train}) - 1, 0)}
         result.append(output)
     return result

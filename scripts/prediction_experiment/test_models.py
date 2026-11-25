@@ -1,8 +1,11 @@
 """Focused new model isolation tests. Lead runs through the shared QA wrapper."""
 import copy
+import json
 import unittest
+from unittest.mock import patch
 
-from models import BUDGETS, MATCHINGS, MODELS, _Fit, _features, predict
+from models import (BUDGETS, INNER_CV_FOLDS, LAMBDA_GRID, MATCHINGS, MODELS,
+                    _Fit, _calibration, _features, _inner_user_folds, predict, select_lambda)
 
 
 def row(user, chart='chart-a', family='family-a', y=980000, m0=950000, rating=10000, snapshot=1):
@@ -29,7 +32,9 @@ class ModelTests(unittest.TestCase):
         changed[0]['y'] = -99999999
         for model in MODELS:
             before, after = predict(self.train, self.test, model)[0], predict(self.train, changed, model)[0]
-            for field in ('point', 'q25', 'q50', 'q75', 'calibration', 'residualShrinkage'):
+            for field in ('point', 'q25', 'q50', 'q75', 'calibration', 'residualShrinkage', 'lambdaSelection', 'selectedLambda'):
+                if field not in before:
+                    continue
                 self.assertEqual(before[field], after[field], (model, field))
 
     def test_user_embargo_is_enforced(self):
@@ -133,6 +138,60 @@ class ModelTests(unittest.TestCase):
             self.assertEqual(output['point'], output['m0'])
             self.assertEqual([output['q25'], output['q50'], output['q75']], [None, None, None])
             self.assertFalse(output['calibration']['available'])
+
+    def test_lambda_cv_fixed_grid_and_positive_signal(self):
+        train = [row(f'positive-{index}', y=980000) for index in range(18)]
+        selected = select_lambda(train)
+        self.assertEqual(tuple(selected['grid']), LAMBDA_GRID)
+        self.assertEqual(selected['folds'], INNER_CV_FOLDS)
+        self.assertEqual(selected['selectedLambda'], 1.0)
+        self.assertTrue(selected['available'])
+        self.assertTrue(all(scope['userOverlap'] == 0 for scope in selected['foldScopes']))
+        for item in train:
+            self.assertNotIn(item['user'], json.dumps(selected))
+
+    def test_lambda_cv_can_select_zero_and_breaks_ties_at_zero(self):
+        train = [row(f'contrary-{index}') for index in range(18)]
+        assignments = _inner_user_folds(train)
+        for item in train:
+            item['y'] = item['m0'] + (-60000 if assignments[item['user']] == 2 else 30000)
+        selected = select_lambda(train)
+        self.assertTrue(selected['available'])
+        self.assertEqual(selected['selectedLambda'], 0.0)
+        tied = [dict(item, y=item['m0']) for item in train]
+        self.assertEqual(select_lambda(tied)['selectedLambda'], 0.0)
+
+    def test_inner_groups_keep_every_chart_and_snapshot_of_user_together(self):
+        train = [row(f'group-{index}') for index in range(13)]
+        repeated = train + [dict(item, chart='second-chart', snapshot=2, y=-999999) for item in train]
+        first, second = _inner_user_folds(train), _inner_user_folds(repeated)
+        self.assertEqual(first, second)
+        sizes = [list(second.values()).count(fold) for fold in range(INNER_CV_FOLDS)]
+        self.assertLessEqual(max(sizes) - min(sizes), 1)
+        self.assertEqual(second, _inner_user_folds(list(reversed(repeated))))
+
+    def test_calibration_refits_lambda_without_heldout_user_labels(self):
+        train = [row(f'calibration-{index}') for index in range(12)]
+        with patch('models.select_lambda', wraps=select_lambda) as selection:
+            _calibration(train, 'rating', 'top24', 'M4')
+        original_users = {item['user'] for item in train}
+        self.assertEqual(selection.call_count, len(original_users))
+        omitted = []
+        for call in selection.call_args_list:
+            fitting_users = {item['user'] for item in call.args[0]}
+            self.assertEqual(len(fitting_users), len(original_users) - 1)
+            omitted.extend(original_users - fitting_users)
+        self.assertEqual(set(omitted), original_users)
+
+    def test_lambda_insufficiency_is_explicit_and_preserves_m0_distribution(self):
+        for train in ([], self.train[:4]):
+            personal = predict(train, self.test, 'M0')[0]
+            output = predict(train, self.test, 'M4')[0]
+            self.assertEqual(output['selectedLambda'], 0.0)
+            self.assertTrue(output['cohort_unavailable'])
+            self.assertIsNotNone(output['cohort_unavailable_reason'])
+            for field in ('point', 'q25', 'q50', 'q75'):
+                self.assertEqual(output[field], personal[field])
 
 
 if __name__ == '__main__':
