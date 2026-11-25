@@ -2,7 +2,7 @@
 
 候选分支：`candidate/viewer-type-specific-evaluators-b4-3-20261125`。基线 `bd63d0a82dae6f8c15c49542eca8aa62a233e2a3`。Viewer版本 `1.22.0-rc.1`。
 
-验收状态：候选实现与合成实验已完成；Nuxt构建受资源准入阻塞，不能标记整体构建PASS。
+验收状态：候选实现、合成实验、定向验证与Nuxt候选构建均已完成。真实数据中的Hybrid采用门槛未通过，保留M0。
 
 范围：统一证据契约、匿名 Artifact Adapter、固定 Bot M0 的合成对照实验、候选 Goal 对照组件。**数据科学结论：不建议采用 Hybrid，保留 M0；真实独立信息尚未得到验证。**
 
@@ -46,9 +46,13 @@ bash scripts/memory/run_qa.sh /absolute/node taiko_viewer/scripts/verify_predict
 | Contract/Artifact/身份修订 | PASS | 同一scope，19项Node测试 |
 | 严格TypeScript | PASS | 同一scope，prediction模块与直接边界 |
 | HTTP+Vue | PASS | 同一scope，404gate/400query/no-store、390/768/1440px、中文/日语、状态/失败重试、无横向溢出 |
-| 候选Nuxt构建 | BLOCKED_RESOURCE | 构建wrapper准入要求12.65GiB，首次及重试均低于门槛（约10.54–10.66GiB）；未绕过 |
+| 候选Nuxt构建 | PASS | 用户明确授权跳过本次可用内存准入；保留共享锁、压力检查及5GiB cgroup限额。完整构建exit=0，155.5秒 |
 
-构建准入日志：`/var/tmp/taiko-b43-20261125/candidate-build.log` 与 `candidate-build-retry.log`。两次均在编译前拒绝准入，未执行替代构建、调整门槛或终止其他服务。
+构建先按默认可用内存准入被拒绝两次。用户随后明确指示“跳过门槛”；仅在 `/var/tmp/taiko-b43-20261125/run-build-authorized.sh` 这份临时wrapper副本中移除本次 MemAvailable 断言，保留所有其他锁、压力/年度worker检查、cgroup限制、超时与清理；仓库内存脚本未修改。没有终止其他服务。
+
+首个实际构建因独立worktree缺少共享Annual Schema退出；从固定Bot源提交 `38a47d882a48883cda91ca27f778adfd8ddb2ef9` 导出契约到临时 `schemas/` 后，标准 `npm run build` 全部通过。没有修改年度代码、生成类型或业务数据。构建日志保留现有分块大小/BigInt target警告，无编译错误；末段日志RSS为3851MiB（非精确峰值）。
+
+成功构建日志：`/var/tmp/taiko-b43-20261125/candidate-build-authorized-2.log`，SHA256 `7b9577cade8e34d6034b336462c88ac65f7d75ad1e3ec98c0fdbfa5a35597a83`。生成物仅在候选worktree的 `.output`，未复制到生产、启动服务或部署。
 
 QA证据根 `/home/sigaer/taiko/qa-vault/runs/<run>/evidence`。浏览器截图在 qa-6ad589d0c16a/evidence。所有临时监听器、浏览器及子进程在finally/cgroup清理；保留合成聚合报告和源码工作区。没有把停止或失败的scope标为PASS。
 
