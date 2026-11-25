@@ -16,6 +16,7 @@ PROTOCOL = {
     'version': 'b43-preregistered-synthetic/1',
     'primary': {'matching': 'rating', 'budget': 'top24'},
     'models': list(MODELS), 'matching': list(MATCHINGS), 'budgets': list(BUDGETS),
+    'matchingDefinitions': {'rating': 'Rating only', 'six': 'Rating + six dimensions', 'structure': 'Rating + six dimensions + score structure'},
     'splits': list(SPLITS), 'folds': 3, 'calibrationMaximumUsers': CALIBRATION_USERS,
     'calibration': 'train-user-oof-residual-quantiles/1',
     'hierarchyPriorEquivalentUsers': 12,
@@ -43,6 +44,13 @@ def _summary(predictions):
     }
 
 
+def _training_revision(rows):
+    # Digest the entire synthetic training input, never expose individual IDs or
+    # per-user hashes. Ordering independent of caller iteration order.
+    canonical = sorted(rows, key=lambda row: (str(row['user']), row['chart'], row['snapshot']))
+    return 'sha256:' + hashlib.sha256(json.dumps(canonical, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
+
+
 def experiment(rows, manifest, *, progress=None):
     """No row, prediction, user identity or per-user metric leaves this function."""
     unique = deduplicate(rows)
@@ -63,7 +71,8 @@ def experiment(rows, manifest, *, progress=None):
         for fold in range(3):
             train, test = make_split(unique, split, fold, folds=3)
             audit = audit_split(train, test)
-            report['splitAudits'].append({'split': split, 'fold': fold, **audit})
+            report['splitAudits'].append({'split': split, 'fold': fold, 'trainingRevision': _training_revision(train),
+                                         'calibrationProvenance': 'entire-user exclusion; source m0 has no fitted cross-user parameters', **audit})
             baseline = predict(train, test, 'M0')
             expected = {(row['user'], row['chart'], row['snapshot']) for row in baseline}
             for matching in MATCHINGS:

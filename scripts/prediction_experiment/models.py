@@ -27,7 +27,8 @@ def quantile(values, probability):
 
 def _features(row, matching):
     # Six/structure augment Rating; they never replace the shared Rating axis.
-    return [float(row['rating'])] + ([] if matching == 'rating' else list(row[matching]))
+    return ([float(row['rating'])] + (list(row['six']) if matching in ('six', 'structure') else [])
+            + (list(row['structure']) if matching == 'structure' else []))
 
 
 def _latest(rows):
@@ -52,6 +53,8 @@ class _Fit:
     def __init__(self, train, matching, budget):
         self.rows = _latest([row for row in train if row.get('m0') is not None])
         self.matching, self.budget = matching, budget
+        self._group_cache = {}
+        self._neighbor_cache = {}
         columns = list(zip(*[_features(row, matching) for row in self.rows]))
         self.scales = [max(statistics.pstdev(column), 1e-6) for column in columns]
         residuals = [row['y'] - row['m0'] for row in self.rows]
@@ -59,23 +62,33 @@ class _Fit:
         self.noise = max((quantile(residuals, .75) - quantile(residuals, .25)) / 1.349, 1000.0)
 
     def _neighbors(self, query, scope, kernel):
-        groups = {}
         query_features = _features(query, self.matching)
-        for row in self.rows:
-            if row['user'] == query['user'] or row['visibleAt'] > query['asOf']:
-                continue
-            if scope == 'chart' and row['chart'] != query['chart']:
-                continue
-            if scope == 'family' and row['family'] != query['family']:
-                continue
-            # User is the sampling unit at every hierarchy level. Multiple charts
-            # do not buy a high-frequency player extra selection weight.
-            groups.setdefault(row['user'], []).append(row)
+        group_key = (scope, query['chart'] if scope == 'chart' else query['family'] if scope == 'family' else None, query['asOf'])
+        neighbor_key = (group_key, query['user'], tuple(query_features), kernel)
+        if neighbor_key in self._neighbor_cache:
+            return self._neighbor_cache[neighbor_key]
+        if group_key not in self._group_cache:
+            groups = {}
+            for row in self.rows:
+                if row['visibleAt'] > query['asOf']:
+                    continue
+                if scope == 'chart' and row['chart'] != query['chart']:
+                    continue
+                if scope == 'family' and row['family'] != query['family']:
+                    continue
+                # User is the sampling unit at every hierarchy level. Multiple
+                # charts do not buy a high-frequency player extra weight.
+                groups.setdefault(row['user'], []).append(row)
+            self._group_cache[group_key] = [
+                (user, [statistics.mean(column) for column in zip(*[_features(row, self.matching) for row in records])],
+                 statistics.mean(row['y'] for row in records), statistics.mean(row['y'] - row['m0'] for row in records))
+                for user, records in groups.items()]
         peers = []
-        for records in groups.values():
-            features = [statistics.mean(column) for column in zip(*[_features(row, self.matching) for row in records])]
+        for user, features, score, residual in self._group_cache[group_key]:
+            if user == query['user']:
+                continue
             distance = math.sqrt(sum(((left - right) / scale) ** 2 for left, right, scale in zip(query_features, features, self.scales)) / max(len(query_features), 1))
-            peers.append((distance, str(records[0]['user']), statistics.mean(row['y'] for row in records), statistics.mean(row['y'] - row['m0'] for row in records)))
+            peers.append((distance, str(user), score, residual))
         peers.sort(key=lambda item: (item[0], item[1]))
         limit = min(60, len(peers)) if self.budget == 'adaptive' else int(self.budget[3:])
         chosen = peers[:limit]
@@ -93,9 +106,11 @@ class _Fit:
                     break
         scores, residuals = [item[2] for item in chosen], [item[3] for item in chosen]
         mean_residual = _mean(residuals, weights)
-        return {'score': _mean(scores, weights), 'residual': mean_residual,
-                'variance': _mean([(value - mean_residual) ** 2 for value in residuals], weights),
-                'count': len(chosen), 'ess': _ess(weights)}
+        result = {'score': _mean(scores, weights), 'residual': mean_residual,
+                  'variance': _mean([(value - mean_residual) ** 2 for value in residuals], weights),
+                  'count': len(chosen), 'ess': _ess(weights)}
+        self._neighbor_cache[neighbor_key] = result
+        return result
 
     def point(self, query, model):
         baseline = float(query['m0'])

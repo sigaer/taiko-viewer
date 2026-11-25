@@ -2,7 +2,7 @@
 import copy
 import unittest
 
-from models import BUDGETS, MATCHINGS, MODELS, _Fit, predict
+from models import BUDGETS, MATCHINGS, MODELS, _Fit, _features, predict
 
 
 def row(user, chart='chart-a', family='family-a', y=980000, m0=950000, rating=10000, snapshot=1):
@@ -79,6 +79,7 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(output['q75'] - output['point'], 25000)
 
     def test_train_only_scales_and_all_budget_variants(self):
+        self.assertEqual(_features(self.test[0], 'structure'), [10000., 1, 2, 3, 4, 5, 6, 2, 3, 4])
         fit = _Fit(self.train, 'rating', 'top24')
         expected = fit.scales[:]
         self.test[0]['rating'] = 1000000
