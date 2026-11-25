@@ -9,17 +9,18 @@ import os
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
-from models import BUDGETS, CALIBRATION_USERS, MATCHINGS, MIN_DISTINCT_PLAYERS, MIN_EFFECTIVE_SAMPLE_SIZE, MODELS, predict
+from models import BUDGETS, CALIBRATION_USERS, MATCHINGS, MIN_DISTINCT_PLAYERS, MIN_EFFECTIVE_SAMPLE_SIZE, MODELS, LAMBDA_GRID, INNER_CV_FOLDS, predict
 from validation import audit_split, deduplicate, make_split, metrics, paired_gain
 
 SPLITS = ('cross-user', 'chart-family', 'combined')
 PROTOCOL = {
-    'version': 'b43-preregistered-synthetic/1',
+    'version': 'b43-preregistered-synthetic/2',
     'primary': {'matching': 'rating', 'budget': 'top24'},
     'models': list(MODELS), 'matching': list(MATCHINGS), 'budgets': list(BUDGETS),
     'matchingDefinitions': {'rating': 'Rating only', 'six': 'Rating + six dimensions', 'structure': 'Rating + six dimensions + score structure'},
     'splits': list(SPLITS), 'folds': 3, 'calibrationMaximumUsers': CALIBRATION_USERS,
     'calibration': 'train-user-oof-residual-quantiles/1',
+    'lambdaSelection': {'method': 'train-only-inner-user-cv/1', 'grid': list(LAMBDA_GRID), 'folds': INNER_CV_FOLDS, 'metric': 'user-macro-MAE', 'tieBreak': 'lower-lambda'},
     'hierarchyPriorEquivalentUsers': 12,
     'minimumCohortEvidence': {'distinctPlayers': MIN_DISTINCT_PLAYERS, 'effectiveSampleSize': MIN_EFFECTIVE_SAMPLE_SIZE},
     'kernelBandwidth': 'max(standardized distance to 24th selected neighbor,1)',
@@ -95,6 +96,7 @@ def experiment(rows, manifest, *, progress=None, workers=1):
         raise ValueError('workers must be bounded to 1 or 2')
     protocol_hash = hashlib.sha256(json.dumps(PROTOCOL, sort_keys=True).encode()).hexdigest()
     report = {'schemaVersion': 'prediction-experiment-report/1', 'population': 'synthetic-only',
+              'status': 'SYNTHETIC_SMOKE_ONLY', 'actualExperimentStatus': 'WAITING_FOR_EXTERNAL_ARTIFACT',
               'protocol': PROTOCOL, 'protocolHash': protocol_hash, 'sourceFingerprints': _source_fingerprints(),
               'execution': {'workers': workers}, 'manifest': manifest,
               'input': {'rows': len(rows), 'deduplicatedRows': len(unique), 'duplicateSnapshotsRemoved': len(rows) - len(unique),
@@ -134,14 +136,35 @@ def experiment(rows, manifest, *, progress=None, workers=1):
     return report
 
 
+def waiting_report():
+    """No formal artifact transfer exists yet; do not infer real-world metrics."""
+    return {'schemaVersion': 'prediction-experiment-report/1',
+            'status': 'WAITING_FOR_EXTERNAL_ARTIFACT', 'population': 'external-not-transferred',
+            'reason': 'formal-cohort-artifact-and-independent-evaluation-evidence-not-transferred',
+            'requiredArtifact': 'cohort-prior-v1', 'protocol': PROTOCOL,
+            'protocolHash': hashlib.sha256(json.dumps(PROTOCOL, sort_keys=True).encode()).hexdigest(),
+            'sourceFingerprints': _source_fingerprints(),
+            'results': [], 'primary': [], 'splitAudits': [],
+            'decision': {'selectedModel': 'M0', 'hybridRecommended': False,
+                         'reason': 'Real predictive value is unknown pending external evidence; no negative or positive result is asserted.'},
+            'limitations': ['Viewer accepts only aggregate evidence; no raw user imports.',
+                            'A cohort CDF alone cannot prove user/family holdout or supply paired M0-M4 evaluation labels.']}
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--core-source', type=Path, required=True, help='Lead-exported pinned Bot core source; no runtime data')
+    parser.add_argument('--core-source', type=Path, help='Lead-exported pinned Bot core source; no runtime data')
+    parser.add_argument('--mode', choices=('external', 'synthetic-smoke'), default='external')
     parser.add_argument('--seed', type=int, default=4301)
     parser.add_argument('--workers', type=int, choices=(1, 2), default=2)
     arguments = parser.parse_args()
-    if not arguments.core_source.is_dir():
+    if arguments.mode == 'external':
+        arguments.output.parent.mkdir(parents=True, exist_ok=True)
+        arguments.output.write_text(json.dumps(waiting_report(), ensure_ascii=False, indent=2, allow_nan=False) + '\n')
+        print('WAITING_FOR_EXTERNAL_ARTIFACT: no real model comparisons were executed', flush=True)
+        return
+    if arguments.core_source is None or not arguments.core_source.is_dir():
         parser.error('--core-source must be the explicit frozen source directory')
     os.environ['B43_CORE_SOURCE'] = str(arguments.core_source.resolve())
     from personal_fixture import generate

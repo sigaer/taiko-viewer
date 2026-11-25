@@ -1,63 +1,58 @@
-# B4-3.0 / B4-3.1 验收
+# B4-3.0 / B4-3.1 候选验收
 
-候选分支：`candidate/viewer-type-specific-evaluators-b4-3-20261125`。基线 `bd63d0a82dae6f8c15c49542eca8aa62a233e2a3`。Viewer版本 `1.22.0-rc.1`。
+真实模型对照状态：**WAITING_FOR_EXTERNAL_ARTIFACT**。
 
-验收状态：候选实现、合成实验、定向验证与Nuxt候选构建均已完成。真实数据中的Hybrid采用门槛未通过，保留M0。
+候选分支：`candidate/viewer-type-specific-evaluators-b4-3-20261125`。B4-2基线：`bd63d0a82dae6f8c15c49542eca8aa62a233e2a3`。本次修订沿用既有候选，不重启历史审计；Viewer版本 `1.22.0-rc.2`。
 
-范围：统一证据契约、匿名 Artifact Adapter、固定 Bot M0 的合成对照实验、候选 Goal 对照组件。**数据科学结论：不建议采用 Hybrid，保留 M0；真实独立信息尚未得到验证。**
+核心问题“真实相近Rating群体能否提供独立增益”尚未获得真实数据答案。正式外部Artifact尚未转移，真实MAE/Pinball/排序/配对Bootstrap没有执行，不标为PASS，也不将合成改善称为真实结果或真实负结果。当前保留M0，Hybrid不可用。
 
-## 交付
+## 实现交付
 
-- [证据契约](prediction-evidence-contract.md)：五类证据、全身份/修订绑定、有符号残差语义、未知分布、不可变 Baseline。
-- [Artifact v1](cohort-prior-artifact-v1.md)：聚合节点、严格字段白名单、distinct/ESS、时效与排除范围、显式 unavailable。
-- [实验协议](experiment-protocol.md)：M0–M4、3种匹配、5种预算、3种留出各3折；M5明确未运行。
-- [Personal vs Cohort](personal-vs-cohort-results.md) / [Hybrid 决策](hybrid-fusion-results.md)。
-- [泄漏与验证](data-leakage-and-validation.md) / [限制与负结果](limitations-and-negative-results.md)。
-- [完整聚合结果](aggregate-results.json)：225行，无成员/逐用户回测；SHA256 `4228a50ebcaf74fb1713dc37487020e635ba1bc86b2bb56a10688e5639f9ef89`。
+- [Prediction Evidence](prediction-evidence-contract.md)：五种证据角色、完整scope/修订、原始Stable/PB、分位数未知、有符号残差、reasonCodes，不修改Goal Baseline。
+- [Cohort Artifact](cohort-prior-artifact-v1.md)：匿名查询节点、scoreMean/scoreMedian/Q25/Q50/Q75、distinct/ESS、观察率分母、Rating定义、身份/修订/时效及artifactHash校验。内容Hash不冒充来源认证。
+- [协议v2](experiment-protocol.md)：M0冻结；M1–M4、3种累计匹配、5种预算、3种留出；M5可选未运行。λ由训练内部完整用户CV选择，校准用户也从λ选择中排除。
+- [真实对照状态](personal-vs-cohort-results.md)和[融合状态](hybrid-fusion-results.md)：均为WAITING_FOR_EXTERNAL_ARTIFACT。
+- [泄漏与验证](data-leakage-and-validation.md)和[限制](limitations-and-negative-results.md)。
 
-协议 SHA256：`1babceef2e7f9d5bf8387179f3e8cbe3fba581f0d2a9373e17d26995db6fe333`。报告中 sourceFingerprints 绑定 models、validation、personal_fixture、run 的实际内容。M0 核心 SHA256 `b2f46ea056c8b20691a41c17dc7253c6c1b9483bd82bd8536fc6da1897929ae0`，Bot源提交 `38a47d882a48883cda91ca27f778adfd8ddb2ef9`。
+[external-experiment-status.json](external-experiment-status.json)是当前实际入口结果，results/primary/splitAudits为空；包含当前协议Hash与源码指纹。默认命令无需Bot源码或任何玩家文件：
 
-## 使用候选对照
+```bash
+bash scripts/memory/run_qa.sh /usr/bin/python3 scripts/prediction_experiment/run.py \
+  --output /var/tmp/b43-external-status.json
+```
 
-两个运行时开关均默认关闭；仅在隔离候选环境设置：
+旧[aggregate-results.json](aggregate-results.json)仅保留为**历史合成流程验证**，明确SYNTHETIC_SMOKE_ONLY、绑定源码提交 `0c261b0bec3cb0642cd603b198acb243da4c2c40` 和协议v1。其225行模拟数据不是当前内层CV模型的评测，也不是现实增益结论。本修订只运行必要合成定向测试，未为了获得更好模拟结果重跑或优化全矩阵。
+
+M0继续使用未修改的本机Bot纯核心，源提交 `38a47d882a48883cda91ca27f778adfd8ddb2ef9`，核心SHA256 `b2f46ea056c8b20691a41c17dc7253c6c1b9483bd82bd8536fc6da1897929ae0`。没有复制/重实现另一套Bot预测公式。
+
+## 候选展示
+
+候选环境两个运行时开关均默认关闭：
 
 ```text
 NUXT_PREDICTION_COMPARISON_CANDIDATE=true
 NUXT_PUBLIC_PREDICTION_COMPARISON_CANDIDATE=true
 ```
 
-已有 Goal Portfolio 面板出现“打开对照 · 预测对照”。这是明确标注的合成画像，不是当前登录玩家的预测；不依赖该玩家成绩构造群体。可切换样本充足/缺失/不足/版本不匹配，显示个人Stable/PB、群体Q25/Q50/Q75、人数/ESS、证据修订和未知Hybrid。没有写入操作。
+现有Goal Preview对话框复用对照组件；Goal Portfolio保留已有候选入口。明确标记合成画像，显示Personal/Cohort/Hybrid、分位数、人数/ESS、各模型版本、证据修订、缺失证据和限制，并显示“等待外部群体数据”。Hybrid维持未知；没有接受推荐、写入成绩或改写Baseline的动作。组件使用独立ARIA ID，支持两入口共存。
 
-API：`GET /api/candidate/prediction-preview?state=available|missing|sparse|revision`。默认404；开启后只提供合成数据，拒绝额外身份参数，private/no-store/noindex。独立 HTTP+Vue harness 不需要生产账号或DB：
+API `GET /api/candidate/prediction-preview?state=available|missing|sparse|revision`，默认404，开启也只读合成fixture，拒绝额外身份参数，private/no-store/noindex。没有真实数据producer、账号导入、跨设备调用或真实预测服务接入。单份匿名群体CDF也不能自动产生合规的独立留出评估标签；真实链路仍等待外部数据与排除/评估证明。
 
-```bash
-bash scripts/memory/run_qa.sh /absolute/node taiko_viewer/scripts/verify_prediction_preview.mjs
-```
-
-没有新增真实个人预测服务或真实 Cohort producer。真实个人接入保留严格 `adaptPersonalEstimate` seam，只有完整的可信估计快照才能包装；不能把合成 fixture 当线上结果。当前最小产品闭环是候选合成对照，而非生产预测功能。
-
-## 验证证据
+## 本次定向验证
 
 | 范围 | 状态 | 证据 |
 | --- | --- | --- |
-| 固定M0/模型/泄漏/统计 | PASS | qa-904a43b10f5a，31项独立定向Python测试，wrapperExitCode=0 |
-| 完整实验 | PASS | qa-8d08f9914a92：225行/9折完整，wrapperExitCode=0，childrenStopped=true |
-| 跨模块聚合校验 | PASS | qa-6ad589d0c16a：源哈希/目标/相同集合/完整回退/匿名输出 |
-| Contract/Artifact/身份修订 | PASS | 同一scope，19项Node测试 |
-| 严格TypeScript | PASS | 同一scope，prediction模块与直接边界 |
-| HTTP+Vue | PASS | 同一scope，404gate/400query/no-store、390/768/1440px、中文/日语、状态/失败重试、无横向溢出 |
-| 候选Nuxt构建 | PASS | 用户明确授权跳过本次可用内存准入；保留共享锁、压力检查及5GiB cgroup限额。完整构建exit=0，155.5秒 |
+| M0/λ内层CV/模型/泄漏/统计/入口 | PASS | qa-916c91db3539，39项Python定向测试 |
+| Artifact Hash/均值/中位数/隐私/身份/分母 | PASS | qa-069795ea851a，21项Node定向测试（含Evidence集成） |
+| 默认WAITING与历史源码指纹 | PASS | qa-f415ca811133，真实结果为空、历史记录匹配其旧提交 |
+| Prediction严格TypeScript | PASS | qa-f415ca811133 |
+| HTTP与Vue、现有Goal Preview | PASS | qa-f711ea799d36（最终文案复核）；qa-d6c533fe943f：候选gate/query/no-store、390/768/1440px、中文/日语、状态/失败重试、模型/缺失/限制、真实组件嵌入 |
+| 最终跨模块验证 | PASS | qa-3198879721d4，等待状态/历史指纹/严格TS/21项契约/HTTP+Vue+Goal Preview |
+| rc.2候选Nuxt构建 | 待完成 | 使用既有隔离限额，既有内存准入覆盖授权沿用 |
+| 真实M0–M4对照 | WAITING_FOR_EXTERNAL_ARTIFACT | 未转移正式Artifact与匿名独立评估证据 |
 
-构建先按默认可用内存准入被拒绝两次。用户随后明确指示“跳过门槛”；仅在 `/var/tmp/taiko-b43-20261125/run-build-authorized.sh` 这份临时wrapper副本中移除本次 MemAvailable 断言，保留所有其他锁、压力/年度worker检查、cgroup限制、超时与清理；仓库内存脚本未修改。没有终止其他服务。
+浏览器测试工具首次在已生成Nuxt配置下遇到CJS动态require失败，scope未标PASS。已修正为本地模块、明确Node require桥接及限长错误输出，定向重跑通过。没有据此改动产品算法或降低断言。
 
-首个实际构建因独立worktree缺少共享Annual Schema退出；从固定Bot源提交 `38a47d882a48883cda91ca27f778adfd8ddb2ef9` 导出契约到临时 `schemas/` 后，标准 `npm run build` 全部通过。没有修改年度代码、生成类型或业务数据。构建日志保留现有分块大小/BigInt target警告，无编译错误；末段日志RSS为3851MiB（非精确峰值）。
+QA证据根 `/home/sigaer/taiko/qa-vault/runs/<run>/evidence`。所有QA/build经既有wrapper；源码中的内存脚本不修改。用户此前明确“跳过门槛”的本候选构建授权仅用于可用内存准入，仍保留共享锁、PSI/年度worker检查、5GiB cgroup硬限额、超时和清理。构建不执行部署脚本。
 
-成功构建日志：`/var/tmp/taiko-b43-20261125/candidate-build-authorized-2.log`，SHA256 `7b9577cade8e34d6034b336462c88ac65f7d75ad1e3ec98c0fdbfa5a35597a83`。生成物仅在候选worktree的 `.output`，未复制到生产、启动服务或部署。
-
-QA证据根 `/home/sigaer/taiko/qa-vault/runs/<run>/evidence`。浏览器截图在 qa-6ad589d0c16a/evidence。所有临时监听器、浏览器及子进程在finally/cgroup清理；保留合成聚合报告和源码工作区。没有把停止或失败的scope标为PASS。
-
-## 决策与边界
-
-Cross-user 主配置 M4 用户宏MAE改善32,256.46分，95%用户簇CI [30,905.79,33,384.32]；Combined因目标群体覆盖0而完整回退，改善0、CI[0,0]。真实数据证据缺失，且必要联合留出未显示增益，因此不采用Hybrid。零增益不是对所有跨家族残差方法的反证。
-
-未修改Bot生产代码或Rating算法，未接入Taiko Agent，未导入真实玩家账号/成绩，未上传逐用户回测，未改写Goal Baseline，未连接生产DB或迁移，未修改生产推荐、main、部署状态或Release。候选仅提交/推送独立Viewer分支，等待验收。
+未重复B3 Golden、B4-1/B4-2全量回归、Catalog历史审计或数据库迁移。没有访问、clone或修改另一台设备的Taiko Agent；没有导入逐用户原始数据、修改Bot生产代码/Rating/真实成绩/生产推荐/Goal Baseline；不迁移生产DB、不合并main、不部署、不发布Release。完成候选提交与推送后等待验收。

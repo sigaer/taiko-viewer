@@ -44,13 +44,14 @@ test('canonical evidence hashes ignore object key ordering and bind all revision
  assert.notEqual(first.predictionId,adaptPersonalEstimate(nextScope,next,identity,now).predictionId);
 });
 test('candidate comparison integrates M0 and aggregate artifact with honest unavailable hybrid',()=>{
- const r=syntheticPredictionPreview('available');assert.equal(r.personal.point,896000);assert.equal(r.cohort.availability,'available');
+ const r=syntheticPredictionPreview('available');assert.equal(r.experimentStatus,'WAITING_FOR_EXTERNAL_ARTIFACT');assert.equal(r.personal.point,896000);assert.equal(r.cohort.availability,'available');
  assert.equal(r.cohortSample?.distinctPlayerCount,24);assert.equal(r.cohortSample?.effectiveSampleSize,24);
  assert.equal(r.hybrid.point,null);assert.equal(r.hybrid.availability,'unavailable');assert.equal(r.decision,'retain-personal');
  for(const value of [r.personal,r.cohort,r.hybrid])validateEvidence(value);
 });
 test('candidate missing, sparse and incompatible revisions never fabricate cohort evidence',()=>{
  assert.equal(syntheticPredictionPreview('missing').cohort.availability,'unavailable');
+ assert.ok(syntheticPredictionPreview('missing').cohort.reasonCodes.includes('cohort_unavailable'));
  assert.equal(syntheticPredictionPreview('revision').cohort.availability,'unavailable');
  const r=syntheticPredictionPreview('sparse');assert.equal(r.cohort.availability,'insufficient');assert.equal(r.cohortSample?.effectiveSampleSize,2.5);
  assert.equal(r.cohort.point,null);assert.equal(r.hybrid.point,null);

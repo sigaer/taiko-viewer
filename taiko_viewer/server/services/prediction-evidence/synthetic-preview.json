@@ -15,7 +15,7 @@
     "schemaVersion": "cohort-prior-v1",
     "artifactId": "synthetic-cohort/b43-v1",
     "sourceRepository": "https://github.com/sigaer/taiko-viewer",
-    "sourceCommit": "2d5d1cccb43d6115d5610414da2f896f648e4c4a",
+    "sourceCommit": "ea7bcb718e7ffead66b7171bc68d60bcd0e561de",
     "dataSnapshotRevision": "synthetic-cohort/1",
     "catalogRevision": "synthetic-catalog/b43-v1",
     "region": "SYNTHETIC",
@@ -46,6 +46,8 @@
             "weight": 6
           }
         ],
+        "scoreMean": 917500.0,
+        "scoreMedian": 910000,
         "scoreQ25": 900000,
         "scoreQ50": 910000,
         "scoreQ75": 920000,
@@ -74,6 +76,7 @@
       "kind": "synthetic",
       "exclusion": "disjoint-evaluation-population",
       "scopeRevision": "synthetic-disjoint/1"
-    }
+    },
+    "artifactHash": "sha256:a06ca9e06498386f2a17c44c1ce24df62a9fc9b247abc4388eb5e6793ce76cf7"
   }
 }

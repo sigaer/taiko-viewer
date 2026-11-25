@@ -81784,7 +81784,7 @@
   "decision": {
     "selectedModel": "M0",
     "hybridRecommended": false,
-    "reason": "Synthetic fixtures test plumbing and leakage controls; they cannot establish real-player predictive gain."
+    "reason": "Historical synthetic harness verification only; not real data, not the current CV-lambda model evaluation. Real experiment is waiting for external artifact."
   },
   "limitations": [
     "No real account data or next-attempt labels.",
@@ -81792,5 +81792,9 @@
     "FC/DF/Clear next-play probabilities are not estimated.",
     "Chart-family and combined folds apply complete user embargo; unseen-family cohort is unavailable.",
     "No result is an authorization to deploy, replace production recommendations or import players."
-  ]
+  ],
+  "status": "SYNTHETIC_SMOKE_ONLY",
+  "actualExperimentStatus": "WAITING_FOR_EXTERNAL_ARTIFACT",
+  "resultKind": "historical-synthetic-smoke",
+  "sourceRevision": "0c261b0bec3cb0642cd603b198acb243da4c2c40"
 }

@@ -6,6 +6,7 @@ const props = defineProps<{token:string;songId:number;difficultyType:number}>();
 const {t,locale} = useI18n(), localePath = useLocalePath(), apiFetch = useViewerApiFetch();
 const account = useState<{id:number}|null>('account-user',()=>null), bindingGeneration = useState('account-binding-generation',()=>0);
 const homeGeneration = useState('account-home-generation',()=>0);
+const predictionComparisonEnabled = useRuntimeConfig().public.predictionComparisonCandidate === true;
 const dialog = ref<HTMLDialogElement|null>(null), preview = ref<RecommendationGoalPreview|null>(null), selected = ref<GoalType|null>(null);
 const busy = ref(false), failed = ref(false), stale = ref(false), saved = ref(false), invalid = ref(false);
 let generation=0, controller:AbortController|null=null, focus:HTMLElement|null=null;
@@ -47,6 +48,7 @@ async function confirm(){
       <template v-if="preview">
         <h2>{{ t(same?'home.goal.selected':preview.activeGoal?'home.goal.replaceConfirm':'home.goal.question') }}</h2>
         <strong>{{ preview.title }}</strong><p>{{ t(difficultyLabelKey(preview.difficultyType)) }} · {{ preview.starLevel }}★</p>
+        <GoalsPredictionComparison v-if="predictionComparisonEnabled" />
         <template v-if="same"><p>{{ t(`home.goal.types.${preview.activeGoal!.goalType}`) }}</p><NuxtLink :to="localePath('/my/growth')">{{ copy.view }}</NuxtLink></template>
         <template v-else>
           <p v-if="preview.activeGoal">{{ preview.activeGoal.title }} · {{ t(`home.goal.types.${preview.activeGoal.goalType}`) }}</p>

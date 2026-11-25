@@ -1,0 +1,93 @@
+{
+  "schemaVersion": "prediction-experiment-report/1",
+  "status": "WAITING_FOR_EXTERNAL_ARTIFACT",
+  "population": "external-not-transferred",
+  "reason": "formal-cohort-artifact-and-independent-evaluation-evidence-not-transferred",
+  "requiredArtifact": "cohort-prior-v1",
+  "protocol": {
+    "version": "b43-preregistered-synthetic/2",
+    "primary": {
+      "matching": "rating",
+      "budget": "top24"
+    },
+    "models": [
+      "M0",
+      "M1",
+      "M2",
+      "M3",
+      "M4"
+    ],
+    "matching": [
+      "rating",
+      "six",
+      "structure"
+    ],
+    "budgets": [
+      "top10",
+      "top24",
+      "top40",
+      "top60",
+      "adaptive"
+    ],
+    "matchingDefinitions": {
+      "rating": "Rating only",
+      "six": "Rating + six dimensions",
+      "structure": "Rating + six dimensions + score structure"
+    },
+    "splits": [
+      "cross-user",
+      "chart-family",
+      "combined"
+    ],
+    "folds": 3,
+    "calibrationMaximumUsers": 24,
+    "calibration": "train-user-oof-residual-quantiles/1",
+    "lambdaSelection": {
+      "method": "train-only-inner-user-cv/1",
+      "grid": [
+        0.0,
+        0.25,
+        0.5,
+        0.75,
+        1.0
+      ],
+      "folds": 3,
+      "metric": "user-macro-MAE",
+      "tieBreak": "lower-lambda"
+    },
+    "hierarchyPriorEquivalentUsers": 12,
+    "minimumCohortEvidence": {
+      "distinctPlayers": 5,
+      "effectiveSampleSize": 5.0
+    },
+    "kernelBandwidth": "max(standardized distance to 24th selected neighbor,1)",
+    "adaptiveBudget": "first prefix >=10 reaching ESS24, cap60 distinct users",
+    "bootstrapPrimary": 200,
+    "bootstrapExploratory": 50,
+    "rankingThreshold": 950000,
+    "rankingK": 3,
+    "temporal": "unavailable:no-real-historical-snapshots",
+    "target": "best-score-snapshot/1",
+    "m5": "not-run:optional-chart-feature-model-out-of-scope",
+    "decisionRule": "synthetic-only always retain M0; real adoption needs stable cross-user and combined M4 gain"
+  },
+  "protocolHash": "20ef08987de1449463cff83a31310a8a0dc779d8f2e7a6e6f413c4af22b513ab",
+  "sourceFingerprints": {
+    "models.py": "sha256:2bc19140493ddd1b7043bcfebb241b1e998651d12577da1cadc5297d593b94cb",
+    "validation.py": "sha256:2d0190dcb60e7158658b52379b85f76dd6e81251a73e1de02bf32eea495e402b",
+    "personal_fixture.py": "sha256:a07fd34f0421a05a7ea719a4f0e2b51f33d56aa6566bba97dca55737e6ffb688",
+    "run.py": "sha256:221af1b0f988cef7ddb2a15205fbfe037805eb9d1805405c67241d9a6186f29f"
+  },
+  "results": [],
+  "primary": [],
+  "splitAudits": [],
+  "decision": {
+    "selectedModel": "M0",
+    "hybridRecommended": false,
+    "reason": "Real predictive value is unknown pending external evidence; no negative or positive result is asserted."
+  },
+  "limitations": [
+    "Viewer accepts only aggregate evidence; no raw user imports.",
+    "A cohort CDF alone cannot prove user/family holdout or supply paired M0-M4 evaluation labels."
+  ]
+}

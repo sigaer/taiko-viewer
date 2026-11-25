@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { useId } from 'vue';
 import type { Comparison, PredictionEvidenceEnvelope } from '~/utils/prediction-evidence/types';
 const { locale } = useI18n();
 const copy = computed(() => locale.value === 'ja' ? {
@@ -6,14 +7,15 @@ const copy = computed(() => locale.value === 'ja' ? {
   personal:'個人予測', cohort:'コホート参照', hybrid:'融合予測', unknown:'不明', insufficient:'証拠不足', loading:'読み込み中…', error:'読み込めませんでした',
   stable:'安定スコア', pb:'PB 推定', point:'スコア', quantiles:'Q25 / Q50 / Q75', players:'プレイヤー数', ess:'有効サンプル数（ESS）', evidence:'証拠の版',
   notice:'合成プロフィールの比較です。あなたの成績予測ではありません。', retained:'個人予測を維持', withheld:'実際の留出検証が完了するまで融合予測は利用できません。',
-  uncalibrated:'分位点は未校正', snapshot:'ベストスコアのスナップショット', retry:'再試行'
+  waiting:'外部コホートのデータ待ち', calibrationMissing:'分位点の校正証拠', model:'モデル版', missingEvidence:'不足する証拠', limitations:'制約', noMissing:'なし', cohortMissing:'対象譜面の有効なコホート資料', personalMissing:'対象プロフィールの個人推定', hybridMissing:'実データの独立留出検証', limitationSnapshot:'ベストスコアの観測値です。次回の結果を保証しません。', limitationRates:'FC/DFの比率は観測済みプレイヤーの達成割合です。', limitationSynthetic:'合成データから実プレイヤーへの予測効果は判断できません。', uncalibrated:'分位点は未校正', snapshot:'ベストスコアのスナップショット', retry:'再試行'
 } : {
   title:'预测对照', sample:'合成数据', open:'打开对照', close:'关闭', state:'证据状态', available:'群体样本充足', missing:'缺少群体数据', sparse:'群体样本不足', revision:'版本不匹配',
   personal:'个人预测', cohort:'群体参考', hybrid:'融合预测', unknown:'未知', insufficient:'证据不足', loading:'加载中…', error:'暂时无法加载',
   stable:'稳定分数', pb:'PB 估计', point:'分数', quantiles:'Q25 / Q50 / Q75', players:'独立玩家数', ess:'有效样本量（ESS）', evidence:'证据版本',
   notice:'此处使用合成画像，不代表你的成绩预测。', retained:'保留个人预测', withheld:'融合预测需通过真实留出验证后才可使用。',
-  uncalibrated:'分位数尚未校准', snapshot:'最佳成绩快照', retry:'重试'
+  waiting:'等待外部群体数据', calibrationMissing:'分位校准证据', model:'模型版本', missingEvidence:'缺失证据', limitations:'限制', noMissing:'无', cohortMissing:'目标谱面的有效群体资料', personalMissing:'当前画像的个人估计', hybridMissing:'真实数据的独立留出验证', limitationSnapshot:'最佳成绩快照不代表下一次演奏结果。', limitationRates:'FC/DF 比例仅描述已观测玩家的达成比例。', limitationSynthetic:'合成数据无法验证真实玩家的预测增益。', uncalibrated:'分位数尚未校准', snapshot:'最佳成绩快照', retry:'重试'
 });
+const contentId = `prediction-${useId()}`;
 const expanded = ref(false), state = ref('available'), data = ref<Comparison|null>(null), pending = ref(false), failed = ref(false);
 let generation = 0, controller: AbortController|null = null;
 const cards = computed(() => data.value ? [
@@ -35,14 +37,15 @@ onBeforeUnmount(() => {generation++;controller?.abort();});
 </script>
 <template>
  <section class="prediction-comparison" :aria-label="copy.title">
-  <button type="button" class="rw-btn" :aria-expanded="expanded" aria-controls="prediction-comparison-content" @click="toggle">{{ expanded ? copy.close : copy.open }} · {{ copy.title }}</button>
-  <div v-if="expanded" id="prediction-comparison-content" class="prediction-content" :aria-busy="pending">
+  <button type="button" class="rw-btn" :aria-expanded="expanded" :aria-controls="contentId" @click="toggle">{{ expanded ? copy.close : copy.open }} · {{ copy.title }}</button>
+  <div v-if="expanded" :id="contentId" class="prediction-content" :aria-busy="pending">
    <h3>{{ copy.title }} <span class="prediction-badge">{{ copy.sample }}</span></h3>
    <p>{{ copy.notice }}</p>
    <label>{{ copy.state }}<select v-model="state" @change="load"><option v-for="key in ['available','missing','sparse','revision']" :key="key" :value="key">{{ copy[key as 'available'|'missing'|'sparse'|'revision'] }}</option></select></label>
    <p v-if="pending" role="status">{{ copy.loading }}</p>
    <p v-if="failed" role="alert">{{ copy.error }} <button type="button" class="rw-btn" @click="load">{{ copy.retry }}</button></p>
    <template v-if="data">
+    <p role="status">{{ copy.waiting }}</p>
     <p class="prediction-decision">{{ copy.retained }} · {{ copy.snapshot }}</p>
     <div class="prediction-cards">
      <article v-for="card in cards" :key="card.value.predictionType" :data-prediction-type="card.value.predictionType">
@@ -51,8 +54,10 @@ onBeforeUnmount(() => {generation++;controller?.abort();});
       <p>{{ copy.quantiles }}</p><p>{{ card.value.distribution.kind === 'quantiles' ? [card.value.distribution.q25,card.value.distribution.q50,card.value.distribution.q75].map(number).join(' / ') : copy.unknown }}</p>
       <p v-if="card.value.predictionType==='personal'">{{ copy.uncalibrated }}</p>
       <p v-if="card.value.predictionType==='hybrid'">{{ copy.withheld }}</p>
+      <details><summary>{{ copy.evidence }}</summary><dl><dt>{{ copy.model }}</dt><dd>{{ card.value.modelVersion }}</dd><dt>{{ copy.evidence }}</dt><dd>{{ card.value.cohortRevision || card.value.scoreRevision }}</dd><dt>{{ copy.missingEvidence }}</dt><dd>{{ card.value.availability === 'available' ? card.value.distribution.kind === 'unavailable' ? copy.calibrationMissing : copy.noMissing : card.value.predictionType === 'hybrid' ? copy.hybridMissing : card.value.predictionType === 'personal' ? copy.personalMissing : copy.cohortMissing }}</dd></dl></details>
      </article>
     </div>
+    <details class="prediction-limitations"><summary>{{ copy.limitations }}</summary><ul><li>{{ copy.limitationSnapshot }}</li><li>{{ copy.limitationRates }}</li><li>{{ copy.limitationSynthetic }}</li></ul></details>
     <dl><dt>{{ copy.players }}</dt><dd>{{ number(data.cohortSample?.distinctPlayerCount) }}</dd><dt>{{ copy.ess }}</dt><dd>{{ number(data.cohortSample?.effectiveSampleSize) }}</dd></dl>
     <details><summary>{{ copy.evidence }}</summary><dl><dt>Score</dt><dd>{{ data.scope.scoreRevision }}</dd><dt>Profile</dt><dd>{{ data.scope.playerProfileRevision }}</dd><dt>Catalog</dt><dd>{{ data.scope.catalogRevision }}</dd><dt>Chart</dt><dd>{{ data.scope.chartRevision }}</dd><dt>Cohort</dt><dd>{{ data.cohort.cohortRevision || copy.unknown }}</dd><dt>Model</dt><dd>{{ data.personal.modelVersion }}</dd></dl></details>
    </template>

@@ -1,6 +1,6 @@
-# 冻结实验协议
+# 冻结实验协议 v2
 
-本轮只使用合成数据。协议在查看指标前冻结于 `scripts/prediction_experiment/run.py::PROTOCOL`，报告保存 protocolHash 和四个源文件 SHA256。不按结果调整目标、权重、分折或阈值。
+真实对照状态：`WAITING_FOR_EXTERNAL_ARTIFACT`。默认入口不生成合成玩家、不调用预测器、不输出真实对比指标。本轮只使用合成数据做定向验证。协议在查看指标前冻结于 `scripts/prediction_experiment/run.py::PROTOCOL`，报告保存 protocolHash 和四个源文件 SHA256。不按结果调整目标、权重、分折或阈值。
 
 ## 数据与基线
 
@@ -27,7 +27,9 @@ M0 直接调用本机 Bot Git 提交 `38a47d882a48883cda91ca27f778adfd8ddb2ef9` 
 
 所有可用池要求 distinct≥5、ESS≥5；缺少同谱面时 M1/M2 回退M0，M3/M4尝试家族；家族也不可用时回退M0，包括其完整训练校准分布。全局池仅作为有可用谱面/家族证据时的 prior，不凭空声明新家族可预测。
 
-M4 的 residual 与 normalizer/noise 全部来自外层 train。M0 是无跨用户学习的固定推理，每个训练用户的目标都不在其画像中，因此其预测也是用户 OOF 合法基线。融合校准进一步按完整用户留出重拟合。收缩为 ESS/(ESS+12) × noise²/(noise²+conditionalVariance/ESS)，并非固定50/50。
+M4 的 residual 与 normalizer/noise 全部来自外层 train。M0 是无跨用户学习的固定推理，每个训练用户的目标都不在其画像中，因此其预测也是用户 OOF 合法基线。融合校准进一步按完整用户留出重拟合。先把条件残差按 ESS/(ESS+12) × noise²/(noise²+conditionalVariance/ESS) 收缩，得到 CohortResidual。最终 Hybrid=M0+λ×CohortResidual。λ通过外层train内部3折完整用户分组CV选择，固定候选0/0.25/0.5/0.75/1，以用户等权MAE最小为准，同分选较小λ。候选网格在运行当前版本测试前固定，不通过测试集选权重；每个内层fold重新拟合尺度/群体/噪声。
+
+分位校准的每个留出用户，其全部记录也从λ选择中排除，再做内层CV。因此融合和分位校准没有共享校准用户标签。λ选择无可用群体时为0，并输出 cohort_unavailable、完整回退M0；有足够证据但CV选择0时不伪称缺少证据，只表明训练CV拒绝融合。
 
 分布统一使用最多24个预先按哈希选中的训练用户做完整用户 OOF 残差分位校准。M0 的点不变；校准后的 Q50 可以与原始点不同。无校准样本时三个分位数都为 null，点指标和分布可评估人数分开报告。群体不足时使用 M0 的 OOF 分布，不沿用有群体时拟合的误差偏移。Stable/PB 从不直接标为所需分位数。
 
@@ -35,17 +37,27 @@ M4 的 residual 与 normalizer/noise 全部来自外层 train。M0 是无跨用�
 
 三种协议各3折：cross-user、chart-family、combined。用户和家族先按稳定哈希排序再均衡分折，与标签无关。家族协议同时执行全部测试用户 embargo；combined 使用预先固定的家族折置换。精确定义和限制见 data-leakage-and-validation.md。
 
-主配置固定 Rating/top24，其余14组匹配/预算组合是探索项，不用于选择“最佳测试权重”。每协议合计75行聚合结果，共225行。M0 在各探索配置复用同一预测与指标，其 cohort 元数据始终是主配置辅助参考，不表示 M0 使用了群体或对应探索预算。MAE/MedianAE/RMSE、三分位 pinball、50%区间覆盖/宽度、Precision/Recall/NDCG@3；排序相关标签固定 score≥950000。报告用户等权与记录加权、Rating 5/8/11/14分层、冷/稀疏画像、群体覆盖。MAE CI 与配对 M4−M0 增益用用户簇 bootstrap；主项200次，探索项50次。它们是描述性区间，不是多重比较校正后的显著性结论。
+主配置固定 Rating/top24，其余14组匹配/预算组合是探索项，不用于选择“最佳测试权重”。显式synthetic-smoke模式可生成每协议75行聚合结果、共225行。当前改版没有为追求模拟收益重跑昂贵全矩阵；使用针对λ/CV和矩阵入口的合成定向测试。旧225行结果仅保留为协议v1的历史流程验证，绑定旧源码提交，不代表当前v2或真实对比。M0 在各探索配置复用同一预测与指标，其 cohort 元数据始终是主配置辅助参考，不表示 M0 使用了群体或对应探索预算。MAE/MedianAE/RMSE、三分位 pinball、50%区间覆盖/宽度、Precision/Recall/NDCG@3；排序相关标签固定 score≥950000。报告用户等权与记录加权、Rating 5/8/11/14分层、冷/稀疏画像、群体覆盖。MAE CI 与配对 M4−M0 增益用用户簇 bootstrap；主项200次，探索项50次。它们是描述性区间，不是多重比较校正后的显著性结论。
 
 只有真实独立用户和必要 combined 留出显示稳定 M4 增益才可建议采用。合成实验无论正负都不能授权采用。缺少真实历史快照，Temporal Holdout unavailable；更新时间没有被解释为游玩时间。
 
-## 重放
+## 入口与重放
 
-先将上述 Bot commit 的 `packages/sakura-taiko-core/core` 导出到独立目录（不 clone 其他设备），然后在候选仓库中运行：
+实际对照默认入口（不需要Bot源码、不读取任何玩家或Artifact目录）：
 
 ```bash
 bash scripts/memory/run_qa.sh /usr/bin/python3 scripts/prediction_experiment/run.py \
-  --core-source /absolute/frozen-core --workers 2 --output /var/tmp/b43-aggregate.json
+  --output /var/tmp/b43-external-status.json
 ```
 
-无源码校验通过不得运行；不提供生产路径默认值。最多两个进程、共享15分钟/3GiB QA scope；不与 build 同时运行。输出只有聚合结果，没有逐用户回测文件。
+正式Artifact未转移，结果只能为WAITING_FOR_EXTERNAL_ARTIFACT，results/primary/splitAudits为空。不会用合成结果填充它们。正式群体CDF本身也不足以证明独立留出增益，还需与M0一致的匿名评估证据、排除与修订证明；本轮未假装已具备该真实数据链路。
+
+只有显式指定合成模式才执行模拟矩阵：
+
+```bash
+bash scripts/memory/run_qa.sh /usr/bin/python3 scripts/prediction_experiment/run.py \
+  --mode synthetic-smoke --core-source /absolute/frozen-core \
+  --workers 2 --output /var/tmp/b43-synthetic-smoke.json
+```
+
+报告status=SYNTHETIC_SMOKE_ONLY，actualExperimentStatus仍为WAITING_FOR_EXTERNAL_ARTIFACT。固定Bot commit的纯核心源码必须先导出并通过SHA256检查。无生产路径默认值、无原始数据导入。最多两个进程，与QA共享15分钟/3GiB预算，不为合成极端场景扩大预算。

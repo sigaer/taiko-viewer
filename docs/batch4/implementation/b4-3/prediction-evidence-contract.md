@@ -12,6 +12,7 @@
 | profileId / playerProfileRevision | Viewer profile 及本次画像修订；不是 Cohort 成员身份 |
 | scoreRevision / catalogRevision / cohortRevision | 当前证据的成绩、曲库、群体修订；个人证据 cohortRevision=null |
 | target | 共享目标 kind/unit/definitionVersion；各模型使用相同观测标签 |
+| reasonCodes | 包含明确 cohort_unavailable / waiting_for_external_artifact 等机器状态 |
 | availability / point | available、insufficient、unavailable；后两者 point=null |
 | distribution | 有校准身份的 Q25/Q50/Q75；或显式 unavailable+reason |
 | uncertainty | evidence-quality；不是成功概率 |
@@ -29,4 +30,4 @@
 
 比较函数只接受同一 scope 的 personal 和 cohort-observation。它没有 Goal、Baseline、DB 或写服务依赖。历史 Goal Baseline 继续保留创建时的 sourceRevision、成绩及身份；新 Score/Cohort 修订只产生新证据。此轮不新增 Goal 迁移或写入路径。
 
-当前候选决策固定为 retain-personal。真实留出验证缺失时 Hybrid 显式 unavailable；不把 M0 复制成“融合预测”。
+当前真实实验状态为 `WAITING_FOR_EXTERNAL_ARTIFACT`，同时由 Comparison.experimentStatus 传递到候选展示。当前候选决策固定为 retain-personal。真实留出验证缺失时 Hybrid 显式 unavailable；不把 M0 复制成“融合预测”。
