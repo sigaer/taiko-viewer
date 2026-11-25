@@ -73,7 +73,7 @@ function quantile(points: Array<{ score: number; weight: number }>, q: number): 
 }
 function node(value: unknown): value is CohortNode {
   if (!object(value, ['rating', 'distinctPlayerCount', 'effectiveSampleSize', 'scoreDistribution',
-    'scoreQ25', 'scoreQ50', 'scoreQ75', 'observed', 'uncertainty', 'selectionCoverage'])
+    'scoreMean', 'scoreMedian', 'scoreQ25', 'scoreQ50', 'scoreQ75', 'observed', 'uncertainty', 'selectionCoverage'])
     || !finite(value.rating, 0, 100_000) || !count(value.distinctPlayerCount) || value.distinctPlayerCount < 1
     || !finite(value.effectiveSampleSize, 1, value.distinctPlayerCount)
     || !array(value.scoreDistribution, 256) || value.scoreDistribution.length < 1
@@ -97,16 +97,19 @@ function node(value: unknown): value is CohortNode {
     points.push({ score: point.score, weight: point.weight });
   }
   const rates = value.observed;
-  return total > 0 && ['fc', 'df', 'clear'].every(key => observed(rates[key], value.distinctPlayerCount as number))
+  const mean = points.reduce((sum, point) => sum + point.score * point.weight, 0) / total;
+  return total > 0 && finite(value.scoreMean, 0, MAX_SCORE) && Math.abs(value.scoreMean - mean) <= 1e-6
+    && value.scoreMedian === value.scoreQ50 && ['fc', 'df', 'clear'].every(key => observed(rates[key], value.distinctPlayerCount as number))
     && value.scoreQ25 === quantile(points, 0.25) && value.scoreQ50 === quantile(points, 0.5)
     && value.scoreQ75 === quantile(points, 0.75);
 }
 function artifact(value: unknown): value is CohortPriorArtifact {
-  if (!object(value, ['schemaVersion', 'artifactId', 'sourceRepository', 'sourceCommit', 'dataSnapshotRevision',
+  if (!object(value, ['schemaVersion', 'artifactHash', 'artifactId', 'sourceRepository', 'sourceCommit', 'dataSnapshotRevision',
     'catalogRevision', 'region', 'ruleset', 'canonicalChartId', 'chartRevision', 'ratingDefinition', 'ratingGrid',
     'modelVersion', 'calibrationVersion', 'generatedAt', 'population']) || value.schemaVersion !== 'cohort-prior-v1'
     || !['artifactId', 'dataSnapshotRevision', 'catalogRevision', 'region', 'ruleset', 'canonicalChartId',
       'chartRevision', 'ratingDefinition', 'modelVersion', 'calibrationVersion'].every(key => label(value[key]))
+    || typeof value.artifactHash !== 'string' || !/^sha256:[a-f0-9]{64}$/u.test(value.artifactHash)
     || typeof value.sourceCommit !== 'string' || !/^(?:[a-f0-9]{40}|[a-f0-9]{64})$/u.test(value.sourceCommit)
     || !label(value.sourceRepository, 240) || !timestamp(value.generatedAt)
     || !object(value.population, ['kind', 'exclusion', 'scopeRevision'])
@@ -126,12 +129,17 @@ function artifact(value: unknown): value is CohortPriorArtifact {
   });
 }
 export function validateArtifact(value: unknown): value is CohortPriorArtifact {
-  try { return artifact(value); } catch { return false; }
+  try { return artifact(value) && value.artifactHash === cohortArtifactHash(value); } catch { return false; }
 }
 function digest(value: unknown): string {
   const canonical = (item: unknown): unknown => Array.isArray(item) ? item.map(canonical)
-    : item && typeof item === 'object' ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a.localeCompare(b)).map(([key, child]) => [key, canonical(child)])) : item;
+    : item && typeof item === 'object' ? Object.fromEntries(Object.entries(item).sort(([a], [b]) => a < b ? -1 : a > b ? 1 : 0).map(([key, child]) => [key, canonical(child)])) : item;
   return createHash('sha256').update(JSON.stringify(canonical(value))).digest('hex');
+}
+
+export function cohortArtifactHash(value: Omit<CohortPriorArtifact, 'artifactHash'> | CohortPriorArtifact): string {
+  const { artifactHash: _ignored, ...payload } = value as CohortPriorArtifact;
+  return `sha256:${digest(payload)}`;
 }
 
 /** Server-side, aggregate-only adapter. Never return unvalidated artifact data or a partial result. */
@@ -143,10 +151,10 @@ export function adaptCohortArtifact(input: unknown, scope: EvidenceScope, query:
     target: snapshotTarget, availability: 'unavailable', point: null,
     distribution: { kind: 'unavailable', reason: 'cohort-artifact-unavailable' },
     uncertainty: { kind: 'evidence-quality', value: null, method: 'effective-sample-size/24' },
-    evidenceRefs: [], limitations: [...limitations], createdAt: query.asOf,
+    evidenceRefs: [], reasonCodes: ['cohort_unavailable'], limitations: [...limitations], createdAt: query.asOf,
   };
   const unavailable = (reason: string): AdaptedCohort => ({
-    evidence: { ...base, distribution: { kind: 'unavailable', reason } }, sample: null,
+    evidence: { ...base, reasonCodes: ['cohort_unavailable', reason], distribution: { kind: 'unavailable', reason } }, sample: null,
   });
   if (input === null || input === undefined) return unavailable('cohort-artifact-unavailable');
   // Accessors, hostile prototypes, malformed nesting, and overlarge arrays fail closed.
@@ -170,13 +178,14 @@ export function adaptCohortArtifact(input: unknown, scope: EvidenceScope, query:
       sample,
       evidence: {
         ...base, predictionId: `cohort:${digest([scope, query, input])}`, modelVersion: input.modelVersion,
+        reasonCodes: sufficient ? [] : ['cohort_unavailable', 'cohort-sample-insufficient'],
         cohortRevision: input.dataSnapshotRevision, availability: sufficient ? 'available' : 'insufficient',
         point: sufficient ? selected.scoreQ50 : null,
         distribution: sufficient ? { kind: 'quantiles', q25: selected.scoreQ25, q50: selected.scoreQ50,
           q75: selected.scoreQ75, calibrationRevision: input.calibrationVersion }
           : { kind: 'unavailable', reason: 'cohort-sample-insufficient' },
         uncertainty: { kind: 'evidence-quality', value: Math.min(1, sample.effectiveSampleSize / 24), method: 'effective-sample-size/24' },
-        evidenceRefs: [`artifact:${input.artifactId}`, `source-commit:${input.sourceCommit}`,
+        evidenceRefs: [`artifact:${input.artifactId}`, input.artifactHash, `source-commit:${input.sourceCommit}`,
           `population-scope:${input.population.scopeRevision}`, `rating-node:${selected.rating}`,
           `uncertainty-method:${selected.uncertainty.method}`],
         limitations: [...limitations, ...selected.selectionCoverage.limitations,

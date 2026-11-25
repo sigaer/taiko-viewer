@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { adaptCohortArtifact, validateArtifact } from '../utils/prediction-evidence/artifact.ts';
+import { adaptCohortArtifact, validateArtifact, cohortArtifactHash } from '../utils/prediction-evidence/artifact.ts';
 import type { CohortPriorArtifact, EvidenceScope } from '../utils/prediction-evidence/types.ts';
 
 const scope: EvidenceScope = {
@@ -12,17 +12,19 @@ const query = { rating: 12, ratingDefinition: 'fixture-rating/1', region: 'fixtu
 function fixture(): CohortPriorArtifact {
   const node = { rating: 10, distinctPlayerCount: 24, effectiveSampleSize: 20,
     scoreDistribution: [{ score: 700_000, weight: 1 }, { score: 800_000, weight: 2 }, { score: 900_000, weight: 1 }],
-    scoreQ25: 700_000, scoreQ50: 800_000, scoreQ75: 800_000,
+    scoreMean: 800_000, scoreMedian: 800_000, scoreQ25: 700_000, scoreQ50: 800_000, scoreQ75: 800_000,
     observed: { fc: { numerator: 2, denominator: 24, semantics: 'observed-best-snapshot-rate' as const }, df: null, clear: null },
     uncertainty: { method: 'fixture-bootstrap/1', standardError: 10_000 },
     selectionCoverage: { eligiblePlayers: 60, observedPlayers: 40, limitations: ['Best-record selection only.'] } };
-  return { schemaVersion: 'cohort-prior-v1', artifactId: 'fixture-prior-r1', sourceRepository: 'https://example.invalid/fixture/cohort',
+  const result: CohortPriorArtifact = { schemaVersion: 'cohort-prior-v1', artifactHash: '', artifactId: 'fixture-prior-r1', sourceRepository: 'https://example.invalid/fixture/cohort',
     sourceCommit: 'a'.repeat(40), dataSnapshotRevision: 'snapshot-r1', catalogRevision: 'catalog-r1',
     region: 'fixture', ruleset: 'fixture/1', canonicalChartId: 'catalog-chart-a', chartRevision: 'chart-r1',
     ratingDefinition: 'fixture-rating/1', ratingGrid: [node, { ...structuredClone(node), rating: 20, effectiveSampleSize: 12 }],
     modelVersion: 'fixture-cohort/1', calibrationVersion: 'fixture-cdf/1', generatedAt: '2026-11-24T00:00:00Z',
     population: { kind: 'synthetic', exclusion: 'disjoint-evaluation-population', scopeRevision: 'disjoint-r1' } };
+  seal(result); return result;
 }
+function seal(artifact: CohortPriorArtifact) { artifact.artifactHash = cohortArtifactHash(artifact); }
 function unavailable(input: unknown, reason = 'cohort-artifact-invalid') {
   const result = adaptCohortArtifact(input, scope, query);
   assert.equal(result.evidence.availability, 'unavailable');
@@ -106,15 +108,15 @@ test('schema, provenance, size, accessors and repository credentials fail closed
 
 test('every identity and cohort query revision must match', () => {
   for (const key of ['catalogRevision', 'canonicalChartId', 'chartRevision', 'ratingDefinition', 'region', 'ruleset'] as const) {
-    const artifact = fixture(); artifact[key] = 'different'; unavailable(artifact, 'cohort-scope-mismatch');
+    const artifact = fixture(); artifact[key] = 'different'; seal(artifact); unavailable(artifact, 'cohort-scope-mismatch');
   }
-  const artifact = fixture(); artifact.population.scopeRevision = 'other-population';
+  const artifact = fixture(); artifact.population.scopeRevision = 'other-population'; seal(artifact);
   unavailable(artifact, 'cohort-scope-mismatch');
 });
 
 test('freshness uses prediction asOf; future, stale and impossible dates are rejected', () => {
   for (const generatedAt of ['2026-11-26T00:00:00Z', '2026-10-24T00:00:00Z']) {
-    const artifact = fixture(); artifact.generatedAt = generatedAt; unavailable(artifact, 'cohort-artifact-stale');
+    const artifact = fixture(); artifact.generatedAt = generatedAt; seal(artifact); unavailable(artifact, 'cohort-artifact-stale');
   }
   const artifact = fixture(); artifact.generatedAt = '2026-02-30T00:00:00Z'; unavailable(artifact);
   const invalidQuery = adaptCohortArtifact(fixture(), scope, { ...query, rating: NaN });
@@ -124,16 +126,30 @@ test('freshness uses prediction asOf; future, stale and impossible dates are rej
 test('synthetic input requires an explicit gate and aggregate population attests disjoint scope', () => {
   const disabled = adaptCohortArtifact(fixture(), scope, { ...query, allowSynthetic: false });
   assert.deepEqual(disabled.evidence.distribution, { kind: 'unavailable', reason: 'synthetic-artifact-disabled' });
-  const artifact = fixture(); artifact.population.kind = 'anonymous-aggregate';
+  const artifact = fixture(); artifact.population.kind = 'anonymous-aggregate'; seal(artifact);
   assert.equal(adaptCohortArtifact(artifact, scope, { ...query, allowSynthetic: false }).evidence.availability, 'available');
   (artifact.population as any).exclusion = 'self-included'; unavailable(artifact);
 });
 
 test('sparse cohort reports sample information without a point estimate', () => {
-  const artifact = fixture(); artifact.ratingGrid[0]!.effectiveSampleSize = 4;
+  const artifact = fixture(); artifact.ratingGrid[0]!.effectiveSampleSize = 4; seal(artifact);
   const result = adaptCohortArtifact(artifact, scope, query);
   assert.equal(result.evidence.availability, 'insufficient');
   assert.equal(result.evidence.point, null);
   assert.deepEqual(result.evidence.distribution, { kind: 'unavailable', reason: 'cohort-sample-insufficient' });
   assert.deepEqual(result.sample, { distinctPlayerCount: 24, effectiveSampleSize: 4 });
+});
+
+test('content hash binds statistics and every revision; missing or tampered hashes reject', () => {
+ const a=fixture();assert.equal(a.artifactHash,cohortArtifactHash(a));
+ a.ratingGrid[0]!.uncertainty.standardError=20000;unavailable(a);
+ seal(a);assert.ok(validateArtifact(a));
+ a.artifactHash='sha256:'+'0'.repeat(64);unavailable(a);
+ const missing:any=fixture();delete missing.artifactHash;unavailable(missing);
+});
+test('published mean and median agree with the weighted discrete distribution', () => {
+ for(const key of ['scoreMean','scoreMedian'] as const){
+  const a=fixture();a.ratingGrid[0]![key]=1;seal(a);unavailable(a);
+ }
+ const a=fixture();a.ratingGrid[0]!.scoreMean=NaN;unavailable(a);
 });

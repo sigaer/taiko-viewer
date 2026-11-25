@@ -1,5 +1,6 @@
 """Publish one synthetic M0 example and aggregated cohort fixture, never member rows."""
 import json
+import hashlib
 from pathlib import Path
 from personal_fixture import generate
 
@@ -30,12 +31,17 @@ def publish(destination, source_commit):
         'region': 'SYNTHETIC', 'ruleset': 'synthetic-score/1', 'canonicalChartId': example['chart'],
         'chartRevision': manifest['chartRevision'], 'ratingDefinition': manifest['ratingDefinition'],
         'ratingGrid': [{'rating': example['rating'], 'distinctPlayerCount': 24, 'effectiveSampleSize': 24,
-            'scoreDistribution': bins, 'scoreQ25': quantile(.25), 'scoreQ50': quantile(.5), 'scoreQ75': quantile(.75),
+            'scoreDistribution': bins, 'scoreMean': sum(b['score']*b['weight'] for b in bins)/24, 'scoreMedian': quantile(.5), 'scoreQ25': quantile(.25), 'scoreQ50': quantile(.5), 'scoreQ75': quantile(.75),
             'observed': {'fc': None, 'df': None, 'clear': None}, 'uncertainty': {'method': 'synthetic-grouped-histogram', 'standardError': None},
             'selectionCoverage': {'eligiblePlayers': 59, 'observedPlayers': 59,
                 'limitations': ['Synthetic only; coarse grouped bins; no attempt outcomes.']}}],
         'modelVersion': 'cohort-prior/1', 'calibrationVersion': 'synthetic-empirical-cdf/1', 'generatedAt': manifest['clock'],
         'population': {'kind': 'synthetic', 'exclusion': 'disjoint-evaluation-population', 'scopeRevision': 'synthetic-disjoint/1'}}
+    def normalize(value):
+        if isinstance(value, dict): return {k: normalize(v) for k,v in value.items()}
+        if isinstance(value, list): return [normalize(v) for v in value]
+        return int(value) if isinstance(value,float) and value.is_integer() else value
+    artifact['artifactHash']='sha256:'+hashlib.sha256(json.dumps(normalize(artifact),sort_keys=True,ensure_ascii=False,separators=(',',':'),allow_nan=False).encode()).hexdigest()
     output = {key: manifest[key] for key in ['sourceCommit', 'sourceSha256', 'coreTree', 'coreVersion', 'clock', 'ratingDefinition']}
     output.update(example)
     output['artifact'] = artifact

@@ -14,26 +14,27 @@ export type PredictionEvidenceEnvelope = EvidenceScope & {
   personalScores?: { stable: number | null; pb: number | null; reliability: number; dataSufficiency: string };
   distribution: Distribution;
   uncertainty: { kind: 'evidence-quality'; value: number | null; method: string };
-  evidenceRefs: string[]; limitations: string[]; createdAt: string;
+  evidenceRefs: string[]; limitations: string[]; reasonCodes: string[]; createdAt: string;
 };
 export type ObservedRate = { numerator: number; denominator: number; semantics: 'observed-best-snapshot-rate' };
 export type CohortNode = {
   rating: number; distinctPlayerCount: number; effectiveSampleSize: number;
   scoreDistribution: Array<{ score: number; weight: number }>;
+  scoreMean: number; scoreMedian: number;
   scoreQ25: number; scoreQ50: number; scoreQ75: number;
   observed: { fc: ObservedRate | null; df: ObservedRate | null; clear: ObservedRate | null };
   uncertainty: { method: string; standardError: number | null };
   selectionCoverage: { eligiblePlayers: number; observedPlayers: number; limitations: string[] };
 };
 export type CohortPriorArtifact = {
-  schemaVersion: 'cohort-prior-v1'; artifactId: string; sourceRepository: string; sourceCommit: string;
+  schemaVersion: 'cohort-prior-v1'; artifactHash: string; artifactId: string; sourceRepository: string; sourceCommit: string;
   dataSnapshotRevision: string; catalogRevision: string; region: string; ruleset: string;
   canonicalChartId: string; chartRevision: string; ratingDefinition: string; ratingGrid: CohortNode[];
   modelVersion: string; calibrationVersion: string; generatedAt: string;
   population: { kind: 'synthetic' | 'anonymous-aggregate'; exclusion: 'disjoint-evaluation-population'; scopeRevision: string };
 };
 export type Comparison = {
-  schemaVersion: 'prediction-comparison-v1'; scope: EvidenceScope; personal: PredictionEvidenceEnvelope;
+  schemaVersion: 'prediction-comparison-v1'; experimentStatus: 'WAITING_FOR_EXTERNAL_ARTIFACT'; scope: EvidenceScope; personal: PredictionEvidenceEnvelope;
   cohort: PredictionEvidenceEnvelope; hybrid: PredictionEvidenceEnvelope;
   cohortSample: { distinctPlayerCount: number; effectiveSampleSize: number } | null;
   decision: 'retain-personal';

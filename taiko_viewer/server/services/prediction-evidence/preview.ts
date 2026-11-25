@@ -1,5 +1,5 @@
 import type { CohortPriorArtifact, Comparison, EvidenceScope } from '../../../utils/prediction-evidence/types.ts';
-import { adaptCohortArtifact } from '../../../utils/prediction-evidence/artifact.ts';
+import { adaptCohortArtifact, cohortArtifactHash } from '../../../utils/prediction-evidence/artifact.ts';
 import { adaptPersonalEstimate, compareEvidence } from '../../../utils/prediction-evidence/personal.ts';
 import fixture from './synthetic-preview.json' with { type: 'json' };
 
@@ -26,6 +26,7 @@ export function syntheticPredictionPreview(state: PreviewState): Comparison {
     artifact.ratingGrid[0]!.effectiveSampleSize = 2.5;
     artifact.ratingGrid[0]!.observed = { fc: null, df: null, clear: null };
   }
+  if (artifact) artifact.artifactHash = cohortArtifactHash(artifact);
   const cohort = adaptCohortArtifact(artifact, scope, { rating: fixture.rating,
     ratingDefinition: fixture.ratingDefinition, region: 'SYNTHETIC', ruleset: 'synthetic-score/1',
     asOf: fixture.clock, populationScopeRevision: 'synthetic-disjoint/1', allowSynthetic: true });

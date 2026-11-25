@@ -26,8 +26,8 @@ export function validateEvidence(value: PredictionEvidenceEnvelope): void {
     if (![d.q25, d.q50, d.q75].every(numeric) || d.q25 > d.q50 || d.q50 > d.q75 || !d.calibrationRevision) throw new Error('invalid-distribution');
   } else if (value.distribution.kind !== 'unavailable' || !value.distribution.reason) throw new Error('invalid-distribution');
   if (value.uncertainty.kind !== 'evidence-quality' || (value.uncertainty.value !== null && (!Number.isFinite(value.uncertainty.value) || value.uncertainty.value < 0 || value.uncertainty.value > 1)) || !value.uncertainty.method) throw new Error('invalid-uncertainty');
-  if (!Array.isArray(value.evidenceRefs) || (value.availability === 'available' && !value.evidenceRefs.length) || !Array.isArray(value.limitations)
-    || [...value.evidenceRefs, ...value.limitations].some(v => typeof v !== 'string' || v.length > 512)) throw new Error('invalid-provenance');
+  if (!Array.isArray(value.evidenceRefs) || (value.availability === 'available' && !value.evidenceRefs.length) || !Array.isArray(value.reasonCodes) || !Array.isArray(value.limitations)
+    || [...value.evidenceRefs, ...value.limitations, ...value.reasonCodes].some(v => typeof v !== 'string' || v.length > 512)) throw new Error('invalid-provenance');
   if (value.personalScores) {
     const p = value.personalScores;
     if (value.predictionType !== 'personal' || [p.stable, p.pb].some(s => s !== null && !score(s)) || !Number.isFinite(p.reliability) || p.reliability < 0 || p.reliability > 100 || !p.dataSufficiency) throw new Error('invalid-personal-scores');
@@ -65,6 +65,7 @@ export function adaptPersonalEstimate(scope: EvidenceScope, snapshot: PersonalEs
     distribution: { kind: 'unavailable', reason: 'personal-stable-pb-are-not-calibrated-quantiles' },
     uncertainty: { kind: 'evidence-quality', value: estimate ? estimate.reliability / 100 : null, method: 'bot-reliability-not-probability' },
     evidenceRefs: valid ? [snapshot!.sourceHash, ...snapshot!.evidenceRefs] : ['personal-evidence-unavailable'],
+    reasonCodes: estimate?.stable ? [] : ['personal_evidence_missing'],
     limitations: ['BEST_SNAPSHOT_NOT_NEXT_ATTEMPT', 'STABLE_POINT_PROXY_FOR_SNAPSHOT', 'STABLE_PB_NOT_QUANTILES', ...(valid ? [] : ['MISSING_OR_MISMATCHED_PERSONAL_EVIDENCE'])], createdAt: asOf
   };
   validateEvidence(value);
@@ -82,8 +83,9 @@ export function compareEvidence(scope: EvidenceScope, personal: PredictionEviden
     predictionType: 'hybrid', modelId: 'personal-cohort-residual', modelVersion: 'residual/1', cohortRevision: cohort.cohortRevision,
     availability: 'unavailable', point: null, distribution: { kind: 'unavailable', reason: 'real-heldout-validation-required' },
     uncertainty: { kind: 'evidence-quality', value: null, method: 'not-adopted' }, evidenceRefs: [personal.predictionId, cohort.predictionId],
+    reasonCodes: ['waiting_for_external_artifact'],
     limitations: ['SYNTHETIC_EVIDENCE_DOES_NOT_AUTHORIZE_HYBRID'] };
   delete hybrid.personalScores;
   validateEvidence(hybrid);
-  return { schemaVersion: 'prediction-comparison-v1', scope: { ...scope }, personal, cohort, hybrid, cohortSample: sample, decision: 'retain-personal' };
+  return { schemaVersion: 'prediction-comparison-v1', experimentStatus: 'WAITING_FOR_EXTERNAL_ARTIFACT', scope: { ...scope }, personal, cohort, hybrid, cohortSample: sample, decision: 'retain-personal' };
 }
