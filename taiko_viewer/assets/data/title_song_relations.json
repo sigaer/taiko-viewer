@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-11-21T01:55:05.113280+00:00",
+  "generated_at": "2026-11-25T02:18:19.504835+00:00",
   "stats": {
     "rows_total": 866,
     "api_relations_total": 662,
@@ -18887,21 +18887,6 @@
           1304
         ],
         "title_ids": [
-          1171
-        ],
-        "song_match": "matched",
-        "song_match_method": "exact",
-        "title_name": "I am who I am.",
-        "requirement_type": "full_combo",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "在《who are you? who are you?》的“魔王（隐藏）”难度下达成全连吧",
-        "source_row_index": 714
-      },
-      {
-        "song_ids": [
-          1304
-        ],
-        "title_ids": [
           1170
         ],
         "song_match": "matched",
@@ -18911,6 +18896,21 @@
         "difficulty_scope": "oni",
         "condition_text": "在《who are you? who are you?》的“魔王”难度下达成全连吧",
         "source_row_index": 713
+      },
+      {
+        "song_ids": [
+          1304
+        ],
+        "title_ids": [
+          1171
+        ],
+        "song_match": "matched",
+        "song_match_method": "exact",
+        "title_name": "I am who I am.",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《who are you? who are you?》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 714
       }
     ],
     "wonderful ROUTINE": [
@@ -44124,22 +44124,6 @@
     "1304": [
       {
         "song_name": "who are you? who are you?",
-        "title_name": "I am who I am.",
-        "requirement_type": "full_combo",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "在《who are you? who are you?》的“魔王（隐藏）”难度下达成全连吧",
-        "source_row_index": 714,
-        "song_ids": [
-          1304
-        ],
-        "song_match": "matched",
-        "song_match_method": "exact",
-        "title_ids": [
-          1171
-        ]
-      },
-      {
-        "song_name": "who are you? who are you?",
         "title_name": "who are you ?",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
@@ -44152,6 +44136,22 @@
         "song_match_method": "exact",
         "title_ids": [
           1170
+        ]
+      },
+      {
+        "song_name": "who are you? who are you?",
+        "title_name": "I am who I am.",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《who are you? who are you?》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 714,
+        "song_ids": [
+          1304
+        ],
+        "song_match": "matched",
+        "song_match_method": "exact",
+        "title_ids": [
+          1171
         ]
       }
     ],

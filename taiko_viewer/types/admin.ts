@@ -15,7 +15,12 @@ export type AdminMetricSummary = {
   taikoBindings: number;
   wahlapBindings: number;
   hirobaBindings: number;
+  /** Viewer and Bot identities, deduplicated only by verified identity links. */
   totalUsers: number;
+  botUsers: number;
+  viewerOnlyUsers: number;
+  botOnlyUsers: number;
+  linkedUsers: number;
   totalUploads: number;
   uploads24h: number;
   pagePv24h: number;

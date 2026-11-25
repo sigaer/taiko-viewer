@@ -7,6 +7,7 @@ import { listAdminActionLogs } from "./audit";
 import { listAdminBackups } from "./backup";
 import { getAdminManagedPaths } from "./shared";
 import { getViewerTrafficStore } from "./traffic-runtime";
+import { readAdminUserCounts } from "./user-counts";
 
 import { dashboardDayKey as formatDayKey, dashboardRollupTime } from "./dashboard-time";
 import { shiftDayKey } from "~/server/services/user-activity/daily-activity";
@@ -212,11 +213,9 @@ const buildDashboardPayload = async () => {
 
   const db = getAccountDb();
   const [
-    viewerCountRows,
+    userCounts,
     bindRows,
     hirobaRows,
-    webBindingRows,
-    unboundViewerRows,
     newUserRows,
     newBindingRows,
     botHourly,
@@ -229,16 +228,9 @@ const buildDashboardPayload = async () => {
     taikoCommandStatsSince,
     activity
   ] = await Promise.all([
-    db.execute<DbRow<{ total: number }>[]>("SELECT COUNT(*) AS total FROM web_user_accounts"),
+    readAdminUserCounts(db),
     db.execute<DbRow<{ id: string }>[]>("SELECT DISTINCT id FROM bind WHERE is_current = 1"),
     db.execute<DbRow<{ taiko_no: string }>[]>("SELECT DISTINCT taiko_no FROM web_hiroba_credentials"),
-    db.execute<DbRow<{ taiko_id: string }>[]>("SELECT DISTINCT taiko_id FROM web_taiko_bindings WHERE is_current = 1"),
-    db.execute<DbRow<{ id: number }>[]>(
-      `SELECT a.id
-       FROM web_user_accounts a
-       LEFT JOIN web_taiko_bindings b ON b.user_id = a.id AND b.is_current = 1
-       WHERE b.user_id IS NULL`
-    ),
     db.execute<DbRow<{ day_key: string; total: number }>[]>(
       `SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS day_key, COUNT(*) AS total
        FROM web_user_accounts
@@ -273,7 +265,6 @@ const buildDashboardPayload = async () => {
     readDailyActivityStats(getAccountDb())
   ]);
 
-  const viewerUsers = Number(viewerCountRows[0][0]?.total || 0);
   const wahlapSet = new Set<string>();
   for (const row of bindRows[0]) wahlapSet.add(String(row.id || "").trim());
   const hirobaSet = new Set<string>();
@@ -283,13 +274,6 @@ const buildDashboardPayload = async () => {
   wahlapSet.delete("");
   hirobaSet.delete("");
   bindingSet.delete("");
-
-  const totalUserSet = new Set<string>(bindingSet);
-  for (const row of webBindingRows[0]) {
-    totalUserSet.add(String(row.taiko_id || "").trim());
-  }
-  totalUserSet.delete("");
-  const totalUsers = totalUserSet.size + unboundViewerRows[0].length;
 
   const dailyKeyList = Array.from(
     new Set([
@@ -344,11 +328,10 @@ const buildDashboardPayload = async () => {
 
   return {
     summary: {
-      viewerUsers,
+      ...userCounts,
       taikoBindings: bindingSet.size,
       wahlapBindings: wahlapSet.size,
       hirobaBindings: hirobaSet.size,
-      totalUsers,
       totalUploads: uploadStats.totalUploads,
       uploads24h: uploadStats.uploads24h,
       pagePv24h,

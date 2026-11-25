@@ -157,11 +157,10 @@ const activeTile = computed(() => {
 const users = computed(() => {
   const summary = dashboard.value?.summary;
   if (!summary) return null;
-  const unbound = Math.max(0, summary.totalUsers - summary.taikoBindings);
   const segments = [
-    { key: "wahlap", label: "国服", value: summary.wahlapBindings, color: palette.primary },
-    { key: "hiroba", label: "国际服", value: summary.hirobaBindings, color: palette.amber },
-    { key: "unbound", label: "未绑定", value: unbound, color: "#cfd8d8" }
+    { key: "viewer", label: "仅网站", value: summary.viewerOnlyUsers, color: palette.primary },
+    { key: "linked", label: "网站与 Bot", value: summary.linkedUsers, color: palette.amber },
+    { key: "bot", label: "仅 Bot", value: summary.botOnlyUsers, color: "#cfd8d8" }
   ];
   const total = segments.reduce((sum, item) => sum + item.value, 0);
   return {
@@ -541,6 +540,8 @@ const systemStatus = computed(() => {
             <strong class="dash-users__total-value">{{ formatCount(users.summary.totalUsers) }}</strong>
           </div>
 
+          <p class="dash-users__note">按已验证身份关联去重，未关联的跨端身份分别计数。</p>
+
           <div class="dash-users__bar" role="img" :aria-label="users.segments.map((s) => `${s.label} ${formatCount(s.value)}`).join('，')">
             <span
               v-for="segment in users.segments"
@@ -557,26 +558,23 @@ const systemStatus = computed(() => {
 
           <dl class="dash-stats">
             <div>
-              <dt>网站账号</dt>
+              <dt>网站用户</dt>
               <dd>{{ formatCount(users.summary.viewerUsers) }}</dd>
             </div>
             <div>
-              <dt>
-                已绑定游戏
-                <small>国服 {{ formatCount(users.summary.wahlapBindings) }} · 国际服 {{ formatCount(users.summary.hirobaBindings) }}</small>
-              </dt>
-              <dd>{{ formatCount(users.summary.taikoBindings) }}</dd>
+              <dt>Bot 用户</dt>
+              <dd>{{ formatCount(users.summary.botUsers) }}</dd>
             </div>
             <div>
-              <dt>近 7 天活跃</dt>
+              <dt>近 7 天网站活跃</dt>
               <dd>{{ users.summary.wau7d === null || users.summary.wau7d === undefined ? "—" : formatCount(users.summary.wau7d) }}</dd>
             </div>
             <div>
-              <dt>近 30 天活跃</dt>
+              <dt>近 30 天网站活跃</dt>
               <dd>{{ users.summary.mau30d === null || users.summary.mau30d === undefined ? "—" : formatCount(users.summary.mau30d) }}</dd>
             </div>
             <div>
-              <dt>近 7 天新增</dt>
+              <dt>近 7 天网站新增</dt>
               <dd>{{ formatCount(users.summary.recentNewUsers) }}</dd>
             </div>
             <div>
@@ -914,6 +912,12 @@ const systemStatus = computed(() => {
 }
 
 /* users */
+.dash-users__note {
+  margin: 0 0 16px;
+  color: var(--admin-ink-secondary, #5d6b6e);
+  font-size: 12px;
+  line-height: 1.5;
+}
 .dash-users__total {
   display: grid;
   gap: 2px;
