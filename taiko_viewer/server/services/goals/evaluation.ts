@@ -1,3 +1,4 @@
+import { rejectLegacyGoalWrite } from './portfolio-schema';
 import { createError } from 'h3';
 import { getCurrentBindingRow } from '../../internal/account/shared';
 import { getAccountDb } from '../../utils/account-db';
@@ -8,6 +9,7 @@ import { hasNewSyncObservation, type SyncObservation } from './sync-observation'
 import { evaluateStoredGoal } from './evaluation-store';
 import { withDomainScoreRead } from '../taiko-domain/publication.ts';
 export async function evaluateActiveGoalForBinding(userId: number, body: Record<string,unknown>, syncBefore?: SyncObservation | null) {
+  await rejectLegacyGoalWrite(getAccountDb());
   if (!body || typeof body !== 'object' || Object.keys(body).some(k=>!['profileId','expectedActiveGoalId'].includes(k)) || typeof body.profileId !== 'string' || !/^\d+$/.test(body.profileId) || typeof body.expectedActiveGoalId !== 'string' || !/^\d+$/.test(body.expectedActiveGoalId)) throw createError({statusCode:400,statusMessage:'invalid-evaluation-request'});
   const binding = await getCurrentBindingRow(userId);
   if (!binding || String(binding.id) !== body.profileId || binding.source === 'manual') throw createError({statusCode:409,statusMessage:'profile-changed'});
@@ -24,6 +26,7 @@ export async function evaluateActiveGoalForBinding(userId: number, body: Record<
 // Resolve the active ID without invoking the composite Growth/Python reader.
 // The evaluator rechecks current ownership and the selected Goal under locks.
 export async function evaluateCurrentGoalForBinding(userId: number, body: Record<string, unknown>, syncBefore?: SyncObservation | null) {
+  await rejectLegacyGoalWrite(getAccountDb());
   if (!body || typeof body !== 'object' || Object.keys(body).some(k => k !== 'profileId') || typeof body.profileId !== 'string' || !/^\d+$/.test(body.profileId)) throw createError({ statusCode: 400, statusMessage: 'invalid-evaluation-request' });
   const binding = await getCurrentBindingRow(userId);
   if (!binding || String(binding.id) !== body.profileId || binding.source === 'manual') throw createError({ statusCode: 409, statusMessage: 'profile-changed' });

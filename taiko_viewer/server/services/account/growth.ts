@@ -1,3 +1,4 @@
+import { getGoalSchemaVersion } from '../goals/portfolio-schema';
 import { assertBindingIdentity, captureBindingIdentity } from "../../internal/account/binding-identity";
 import { withDomainScoreRead } from "../taiko-domain/publication.ts";
 import { readRecentCompletedGoal } from '../goals/evaluation-store';
@@ -102,11 +103,12 @@ export const getPlayerGrowthOverview = async (userId: number, options: { loadSco
       dataMode: mode,
       recommendationFallback: usedFallback
     });
-    const activeGoal = await readActiveGoal(getAccountDb(), userId, binding.id);
+    const goalPortfolioVersion=await getGoalSchemaVersion(getAccountDb());
+    const activeGoal = goalPortfolioVersion===2?null:await readActiveGoal(getAccountDb(), userId, binding.id);
     if (activeGoal) activeGoal.unavailable = !goalChartAvailable(catalog.find(s => Number(s.id) === activeGoal.songId), activeGoal.difficultyType);
-    const recentCompletedGoal = activeGoal ? null : await readRecentCompletedGoal(getAccountDb(),userId,Number(binding.id));
+    const recentCompletedGoal = goalPortfolioVersion===2 || activeGoal ? null : await readRecentCompletedGoal(getAccountDb(),userId,Number(binding.id));
     assertBindingIdentity(expected, await getCurrentBindingRow(userId));
-    return { recentCompletedGoal, profileId: String(binding.id), scoreRevision: snapshot.revision, sourceGeneratedAt: snapshot.capturedAt, activeGoal, playerState, todayPlan: { targetDimension: playerState.dataSufficiency === "ready" ? playerState.priorityDimension : null, items, usedFallback }, dailyProgress, dataStatus: { mode, timezone: TIMEZONE } };
+    return { goalPortfolioVersion, recentCompletedGoal, profileId: String(binding.id), scoreRevision: snapshot.revision, sourceGeneratedAt: snapshot.capturedAt, activeGoal, playerState, todayPlan: { targetDimension: playerState.dataSufficiency === "ready" ? playerState.priorityDimension : null, items, usedFallback }, dailyProgress, dataStatus: { mode, timezone: TIMEZONE } };
   });
 
 };

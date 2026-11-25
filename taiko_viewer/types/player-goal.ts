@@ -11,6 +11,7 @@ export type GoalBaseline = {
   sourceCompleteness: 'complete' | 'partial' | 'unknown';
 };
 export type PlayerGoal = {
+  legacyProjection?: true;
   id: string; profileId: string; songId: number; difficultyType: number; title: string; starLevel: number | null;
   goalType: GoalType; baselineVersion: 1; baseline: GoalBaseline;
   source: 'today-plan' | 'ordinary-recommendation'; sourceBasis: string | null; sourceMode: 'dimension' | 'general-fallback' | 'ordinary';

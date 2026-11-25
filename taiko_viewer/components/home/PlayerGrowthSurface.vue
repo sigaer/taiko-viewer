@@ -59,6 +59,7 @@ const goalSupportText = (fact: GrowthEventFact) => fact.type === 'score-pb' ? t(
 // The highlighted dimension on the radar: the priority dimension once the data is ready and not all six are tied.
 const profileFocus = computed(() => !balanced.value && props.overview.playerState.dataSufficiency === 'ready' ? props.overview.playerState.priorityDimension : null);
 
+const portfolioPanel=ref<{openCreate:(songId?:number,difficultyType?:number)=>void}|null>(null);
 const apiFetch = useViewerApiFetch();
 const homeGeneration = useState("account-home-generation", () => 0);
 const activeGoal = ref<PlayerGoal | null>(null);
@@ -91,6 +92,7 @@ watch(() => props.overview, overview => {
 }, { immediate: true });
 onBeforeUnmount(() => { identityGeneration++; mutationGeneration++; });
 const openGoal = (item: GrowthPlanItem) => {
+  if(props.overview.goalPortfolioVersion===2){portfolioPanel.value?.openCreate(item.songId,item.difficultyType);return;}
   if (choicesDisabled.value || !item.goalOptions?.length) return;
   if (!selector.value?.open) returnFocus = document.activeElement as HTMLElement;
   selected.value = item; selectedType.value = null; goalError.value = '';
@@ -193,7 +195,10 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
       <template v-else #profile>
         <ReworkTodayProfile :rating="overview.playerState.overallRating" :skills="overview.playerState.skills" :focus="profileFocus" :observation="t(recommendationCopy.observation.key)" />
       </template>
-      <template v-if="!pending && !failed && (activeGoal || recentCompletedGoal)" #goal>
+      <template v-if="!pending && !failed && overview.goalPortfolioVersion===2 && overview.profileId" #goal>
+        <GoalsPortfolio ref="portfolioPanel" :key="`${identity}:${homeGeneration}`" :profile-id="overview.profileId" :identity="identity" @completed="refreshAfterEvaluation(identity)" />
+      </template>
+      <template v-else-if="!pending && !failed && (activeGoal || recentCompletedGoal)" #goal>
         <ReworkTodayGoal
           v-if="activeGoal"
           :goal="activeGoal"

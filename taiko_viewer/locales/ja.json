@@ -3462,5 +3462,71 @@
       "exited": "練習を終了しました。",
       "ready": "プレイヤー内で開始してください。"
     }
+  },
+  "portfolio": {
+    "title": "マイ目標",
+    "create": "目標を作成",
+    "loading": "読み込み中…",
+    "loadError": "目標を読み込めませんでした。再試行してください。",
+    "unavailable": "目標サービスを利用できません。しばらくしてから再試行してください。",
+    "actionError": "操作を確認できませんでした。再試行してください。",
+    "conflict": "目標が更新されました。最新の内容を確認してから操作してください。",
+    "retry": "再試行",
+    "sourceUnavailable": "現在の成績ソースでは目標の作成・評価はできません。",
+    "songId": "楽曲番号",
+    "difficulty": "難易度",
+    "chooseTarget": "目標を選択",
+    "close": "閉じる",
+    "noOptions": "この譜面には作成できる目標がありません。",
+    "optionsError": "目標を取得できませんでした。楽曲番号を確認するか成績を更新してください。",
+    "targetUnknown": "目標情報が不足しています",
+    "score": "スコア",
+    "rank": "成績ランク",
+    "empty": "進行中の目標はありません。",
+    "evaluation": "最新の評価",
+    "priority": "優先度",
+    "created": "作成",
+    "updated": "更新",
+    "pause": "一時停止",
+    "resume": "再開",
+    "cancel": "目標を取り消す",
+    "evaluate": "評価",
+    "moveUp": "上へ",
+    "moveDown": "下へ",
+    "moveUpGoal": "{title} の目標を上へ",
+    "moveDownGoal": "{title} の目標を下へ",
+    "history": "過去の目標",
+    "historyEmpty": "過去の目標はありません。",
+    "more": "さらに読み込む",
+    "status": {
+      "active": "進行中",
+      "paused": "一時停止中",
+      "completed": "達成済み",
+      "cancelled": "取り消し済み"
+    },
+    "availability": {
+      "available": "譜面あり",
+      "unavailable": "譜面利用不可",
+      "unknown": "譜面の状態不明"
+    },
+    "outcomes": {
+      "none": "未評価",
+      "active": "未達成",
+      "completed": "達成",
+      "inconclusive": "証拠不足",
+      "unsupported": "評価対象外"
+    },
+    "difficulties": {
+      "1": "かんたん",
+      "2": "ふつう",
+      "3": "むずかしい",
+      "4": "おに",
+      "5": "裏"
+    },
+    "crowns": {
+      "clear": "クリア",
+      "full_combo": "フルコンボ",
+      "dondaful_combo": "ドンダフルコンボ"
+    }
   }
 }

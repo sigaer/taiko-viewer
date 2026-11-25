@@ -54,3 +54,10 @@ export function catalogRowPolicy(song: any, policy: 'catalog_display' | 'histori
   if (policy === 'historical_score') return catalog?.historicalScore !== false;
   return difficulty === undefined ? catalog?.cnRelease === 'LISTED' : catalog?.cnCurrentPlayable?.includes(difficulty) === true;
 }
+
+/** Lightweight current pointer recheck; bypass request snapshot caching before a CAS commit. */
+export async function readCatalogPointerRevision(root: string): Promise<string> {
+  const pointer=JSON.parse(await readFile(resolve(root,'active.json'),'utf8'));
+  if(!/^[a-f0-9]{64}$/.test(pointer.catalogRevision)) throw new Error('CATALOG_INVALID_REVISION');
+  return pointer.catalogRevision;
+}

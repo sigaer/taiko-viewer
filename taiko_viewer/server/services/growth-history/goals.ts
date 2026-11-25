@@ -1,3 +1,4 @@
+import { evaluatorGoal } from '../goals/portfolio-domain';
 import type { Pool, RowDataPacket } from "mysql2/promise";
 import type { PlayerGoal } from "~/types/player-goal";
 import type { GrowthFact } from "~/types/player-growth";
@@ -12,7 +13,7 @@ export async function loadGoalFacts(db: Pick<Pool, "execute">, userId: number, b
     WHERE g.user_id=? AND g.binding_id=? AND g.status='completed' AND g.completed_at>=? AND g.completed_at<?
     ORDER BY g.completed_at,g.id`, [userId, bindingId, sqlTime(fromUtc), sqlTime(toExclusiveUtc)]);
   return rows.map(row => {
-    try { return projectGoalFact(userId, bindingId, { ...JSON.parse(String(row.goal_data)), id: String(row.id) } as PlayerGoal); }
+    try { const value=JSON.parse(String(row.goal_data)); return projectGoalFact(userId,bindingId,value.lifecycleStatus?evaluatorGoal({...value,id:String(row.id)}):{...value,id:String(row.id)} as PlayerGoal); }
     catch { return null; }
   }).filter((fact): fact is GrowthFact => Boolean(fact));
 }

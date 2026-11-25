@@ -1,0 +1,17 @@
+import {createServer} from 'node:http';
+import {once} from 'node:events';
+import {readFile} from 'node:fs/promises';
+import {createApp,toNodeListener,createError,getCookie,defineEventHandler,eventHandler,createRouter} from 'h3';
+import ts from 'typescript';
+export async function portfolioHttp({getPortfolio,commandPortfolio,evaluatePortfolio,getManualGoalOptions,db,rejectLegacyGoalWrite,negotiatePortfolioRead}){
+ globalThis.__portfolioHttp={getPortfolio,commandPortfolio,evaluatePortfolio,getManualGoalOptions,getAccountDb:()=>db,rejectLegacyGoalWrite,negotiatePortfolioRead,getPlayerGrowthOverview:async()=>({profileId:'11',goalPortfolioVersion:2,activeGoal:null,recentCompletedGoal:null}),requireAccountUser:async event=>{if(getCookie(event,'portfolio_test')!=='session')throw createError({statusCode:401});return{id:1};}};
+ globalThis.defineEventHandler=defineEventHandler;const app=createApp(),router=createRouter(),data=s=>`data:text/javascript;base64,${Buffer.from(s).toString('base64')}`;
+ const routes=[['GET','/api/account/growth/overview','overview.get.ts'],['GET','/api/account/growth/goal-portfolio','goal-portfolio.get.ts'],['POST','/api/account/growth/goal-portfolio/commands','goal-portfolio/commands.post.ts'],['POST','/api/account/growth/goal-portfolio/evaluate','goal-portfolio/evaluate.post.ts'],['GET','/api/account/growth/goal-portfolio/options','goal-portfolio/options.get.ts'],['POST','/api/account/growth/goal','goal.post.ts'],['DELETE','/api/account/growth/goal','goal.delete.ts'],['POST','/api/account/growth/goal/preview','goal/preview.post.ts'],['POST','/api/account/growth/goal/evaluate','goal/evaluate.post.ts'],['POST','/api/account/growth/goal/evaluate-current','goal/evaluate-current.post.ts']];
+ for(const [method,path,file]of routes){let source=ts.transpileModule(await readFile(new URL('../../server/api/account/growth/'+file,import.meta.url),'utf8'),{compilerOptions:{module:ts.ModuleKind.ESNext,target:ts.ScriptTarget.ES2022}}).outputText;
+ source=source.replace(/from ['"]([^'"]+)['"]/g,(_,name)=>{if(name==='h3')return `from ${JSON.stringify(import.meta.resolve('h3'))}`;let keys;if(name.endsWith('/portfolio-read-negotiation'))keys=['negotiatePortfolioRead'];else if(name.endsWith('/account/growth'))keys=['getPlayerGrowthOverview'];else if(name.endsWith('/account'))keys=['requireAccountUser'];else if(name.endsWith('/account-db'))keys=['getAccountDb'];else if(name.endsWith('/portfolio-schema'))keys=['rejectLegacyGoalWrite'];else if(name.endsWith('/portfolio-service'))keys=['getPortfolio','commandPortfolio','getManualGoalOptions'];else if(name.endsWith('/portfolio-evaluation'))keys=['evaluatePortfolio'];else keys=[];const code=keys.map(k=>`export const ${k}=globalThis.__portfolioHttp.${k};`).join('\n')+['writePlayerGoal','evaluateActiveGoalForBinding','evaluateCurrentGoalForBinding','previewRecommendationGoal'].map(k=>`export const ${k}=()=>{throw Error('Legacy writer reached in V2')};`).join('\n');return `from ${JSON.stringify(data(code))}`;});
+ const handler=(await import(data(source))).default;
+ router[method.toLowerCase()](path,handler);
+ }
+ app.use(router);
+ const server=createServer(toNodeListener(app));server.listen(0,'127.0.0.1');await once(server,'listening');return{app,server,base:`http://127.0.0.1:${server.address().port}`,close:async()=>{server.closeAllConnections();await new Promise(r=>server.close(r));delete globalThis.__portfolioHttp;delete globalThis.defineEventHandler;}};
+}

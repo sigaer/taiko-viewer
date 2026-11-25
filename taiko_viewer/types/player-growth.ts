@@ -56,6 +56,7 @@ export type GrowthDailyProgress = {
 };
 
 export type PlayerGrowthOverview = {
+  goalPortfolioVersion?: 1 | 2;
   profileId?: string;
   scoreRevision?: string;
   sourceGeneratedAt?: string;

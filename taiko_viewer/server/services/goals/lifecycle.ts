@@ -3,11 +3,21 @@ import { deleteMeasurementsForBinding, deleteMeasurementsForUser } from '../grow
 import { deleteRecentCursorsForBinding, deleteRecentCursorsForUser } from '../growth-recent/store.ts';
 type ConnectionLike = PoolConnection | Connection;
 
+// Privacy cleanup also works during an interrupted migration; no marker activation needed.
+async function deletePortfolioRecords(connection: ConnectionLike, column: 'binding_id'|'user_id', id: number) {
+  const [tables]=await connection.query<RowDataPacket[]>("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=DATABASE() AND TABLE_NAME IN ('web_goal_portfolio_events','web_goal_portfolio_commands','web_goal_portfolios')");
+  for(const table of ['web_goal_portfolio_events','web_goal_portfolio_commands','web_goal_portfolios']) if(tables.some(t=>t.TABLE_NAME===table)) {
+    if(column==='user_id') await connection.execute(`DELETE p FROM ${table} p LEFT JOIN web_taiko_bindings b ON b.id=p.binding_id WHERE p.user_id=? OR b.user_id=?`,[id,id]);
+    else await connection.execute(`DELETE FROM ${table} WHERE binding_id=?`,[id]);
+  }
+}
 // Call within the owner's transaction, after locking its user/bindings.
 export async function deleteGoalsForBinding(connection: ConnectionLike, bindingId: number) {
+  await deletePortfolioRecords(connection,'binding_id',bindingId);
   await connection.execute('DELETE FROM web_player_goals WHERE binding_id=?', [bindingId]);
 }
 export async function deleteGoalsForUser(connection: ConnectionLike, userId: number) {
+  await deletePortfolioRecords(connection,'user_id',userId);
   // Include inconsistent ownership rows tied to this user's bindings, for privacy cleanup.
   await connection.execute('DELETE g FROM web_player_goals g LEFT JOIN web_taiko_bindings b ON b.id=g.binding_id WHERE g.user_id=? OR b.user_id=?', [userId, userId]);
 }

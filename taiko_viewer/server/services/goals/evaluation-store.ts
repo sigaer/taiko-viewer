@@ -1,13 +1,17 @@
+import { rejectLegacyGoalWrite, getGoalSchemaVersion } from './portfolio-schema.ts';
+import { legacyPortfolioProjection } from './portfolio-legacy.ts';
 import type { Pool, PoolConnection, RowDataPacket } from 'mysql2/promise';
 import type { PlayerGoal } from '../../../types/player-goal.ts';
 import { evaluateGoal, type GoalObservation } from '../../../utils/goalEvaluation.ts';
 import { GoalConflict } from './store.ts';
 import type { GoalBindingIdentity } from './store.ts';
 export async function readRecentCompletedGoal(db: Pick<Pool,'execute'>, userId: number, bindingId: number): Promise<PlayerGoal | null> {
+  if(await getGoalSchemaVersion(db as Pool)===2)return legacyPortfolioProjection(db,userId,String(bindingId),true);
   const [rows] = await db.execute<RowDataPacket[]>('SELECT g.id,g.status,g.goal_data FROM web_player_goals g JOIN web_taiko_bindings b ON b.id=g.binding_id AND b.user_id=g.user_id JOIN web_user_accounts u ON u.id=g.user_id WHERE g.user_id=? AND g.binding_id=? ORDER BY g.id DESC LIMIT 1',[userId,bindingId]);
   return rows[0]?.status === 'completed' ? {...JSON.parse(rows[0].goal_data),id:String(rows[0].id)} : null;
 }
 export async function evaluateStoredGoal(db: Pool, userId: number, profileId: string, expectedId: string, observe: (goal: PlayerGoal, connection: PoolConnection) => Promise<GoalObservation>, sourceIdentity?: GoalBindingIdentity) {
+  await rejectLegacyGoalWrite(db);
   const connection = await db.getConnection(); const started = performance.now();
   try {
     await connection.beginTransaction();

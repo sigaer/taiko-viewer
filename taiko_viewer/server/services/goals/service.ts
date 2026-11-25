@@ -1,4 +1,5 @@
 import { createError } from 'h3';
+import { rejectLegacyGoalWrite } from './portfolio-schema';
 import { getCurrentBindingRow } from '../../internal/account/shared';
 import { getAccountDb } from '../../utils/account-db';
 import { getPlayerGrowthOverview } from '../account/growth';
@@ -11,6 +12,7 @@ import type { GoalType } from '../../../types/player-goal';
 import { getGrowthModelRevision } from '../growth-history/model-revision';
 
 export async function writePlayerGoal(userId: number, body: Record<string, unknown>, cancel = false) {
+  await rejectLegacyGoalWrite(getAccountDb());
   const started = performance.now();
   const allowed = cancel ? ['profileId', 'expectedActiveGoalId'] : ['profileId', 'expectedActiveGoalId', 'songId', 'difficultyType', 'goalType', 'scoreRevision', 'source', 'recommendationToken'];
   if (!body || typeof body !== 'object' || Object.keys(body).some(k => !allowed.includes(k)) || typeof body.profileId !== 'string' || !/^\d+$/.test(body.profileId) || !(body.expectedActiveGoalId === null || (typeof body.expectedActiveGoalId === 'string' && /^\d+$/.test(body.expectedActiveGoalId)))) throw createError({ statusCode: 400, statusMessage: 'invalid-goal-request' });

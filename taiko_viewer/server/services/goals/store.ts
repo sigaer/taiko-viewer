@@ -1,14 +1,18 @@
+import { rejectLegacyGoalWrite, getGoalSchemaVersion } from './portfolio-schema.ts';
+import { legacyPortfolioProjection } from './portfolio-legacy.ts';
 import type { Pool, PoolConnection, RowDataPacket, ResultSetHeader } from 'mysql2/promise';
 import type { PlayerGoal } from '../../../types/player-goal.ts';
 export class GoalConflict extends Error {}
 export type GoalBindingIdentity = { taikoId: string; source: string };
 export async function readActiveGoal(db: Pick<Pool, 'execute'> | PoolConnection, userId: number, bindingId: number): Promise<PlayerGoal | null> {
+  if (await getGoalSchemaVersion(db as Pool)===2) return legacyPortfolioProjection(db,userId,String(bindingId));
   const [rows] = await db.execute<RowDataPacket[]>('SELECT g.id, g.goal_data FROM web_player_goals g JOIN web_taiko_bindings b ON b.id=g.binding_id AND b.user_id=g.user_id JOIN web_user_accounts u ON u.id=g.user_id WHERE g.user_id=? AND g.binding_id=? AND g.status=\'active\' LIMIT 1', [userId, bindingId]);
   return rows[0] ? { ...JSON.parse(rows[0].goal_data), id: String(rows[0].id) } : null;
 }
 // The binding lock serializes writes and conflicts with switch/unbind updates.
 // No Python computation runs while this transaction holds a lock.
 export async function mutateGoal(db: Pool, userId: number, profileId: string, expectedId: string | null, prepare: null | ((active: PlayerGoal | null, connection: PoolConnection) => Promise<Omit<PlayerGoal, 'id'>>), sourceIdentity?: GoalBindingIdentity): Promise<PlayerGoal | null> {
+  await rejectLegacyGoalWrite(db);
   const connection = await db.getConnection();
   try {
     await connection.beginTransaction();

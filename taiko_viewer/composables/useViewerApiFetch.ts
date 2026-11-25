@@ -16,9 +16,11 @@ export const useViewerApiFetch = () => {
   const bindingGeneration = useState("account-binding-generation", () => 0);
   const homeGeneration = useState("account-home-generation", () => 0);
   return async <T>(request: Parameters<typeof $fetch<T>>[0], options: ViewerApiFetchOptions = {}) => {
+    const headers=createLocaleHeaders(options.headers || requestHeaders, locale.value);
+    if(typeof request==='string' && /^\/api\/account\/growth\/(overview|passport)(?:\?|$)/.test(request)) headers.set('X-Goal-Portfolio-Schema','2');
     const result = await $fetch<T>(request, {
       ...options,
-      headers: createLocaleHeaders(options.headers || requestHeaders, locale.value)
+      headers
     });
     if (options.method && String(options.method).toUpperCase() !== "GET" && typeof request === "string" && /^\/api\/account\/(bindings|manual|qq)(?:\/|$)/.test(request)) {
       homeResolvedUserId.value = null;

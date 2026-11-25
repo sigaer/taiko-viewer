@@ -1,5 +1,6 @@
 // Explicit deployment migration. Ordinary account requests never create this table.
 import mysql from 'mysql2/promise';
+import { getGoalSchemaVersion } from '../server/services/goals/portfolio-schema.ts';
 import { writeFile } from 'node:fs/promises';
 import { GOAL_TABLE_SQL } from '../server/services/goals/schema.ts';
 import { inspectGoalSchema, auditGoalOrphans } from '../server/services/goals/audit.ts';
@@ -16,6 +17,7 @@ try {
     if (!identity.name?.endsWith('_test')) throw Error('Actual isolated _test database required');
     if (apply && process.env.TAIKO_ALLOW_TEST_DB_MUTATION !== '1') throw Error('Explicit test mutation opt-in required');
   }
+  if(await getGoalSchemaVersion(db)===2) throw Error('V2 schema: use versioned portfolio migration; legacy constraint must not be restored');
   const before = await inspectGoalSchema(db);
   if (before.errors.length) throw Error(`Existing Goal schema incompatible: ${before.errors.join(',')}`);
   if (apply) await db.execute(GOAL_TABLE_SQL);

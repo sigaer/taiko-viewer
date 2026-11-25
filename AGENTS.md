@@ -119,3 +119,7 @@ forum, tools, annual recap, developer, settings, mobile, and desktop screens.
 ## Memory isolation — Phase 2
 
 New validation/dev/release-build tasks use `scripts/memory/run_qa.sh`, `run_dev.sh`, or `run_build.sh`; the build wrapper still invokes the standard Viewer deploy script. They share a maintenance lock and use child cgroups under `development.slice`. Do not move existing editor processes into a new cgroup while active. Annual generators and renderers must use their common persistent admission gate and isolated worker launchers; no direct Python/Chromium fallback if systemd admission fails. See `docs/memory-engineering-guidelines.md` for budgets and pressure guards.
+
+## Viewer Development Principles
+
+All Viewer developers and Codex Agents must follow [Viewer Development Principles](docs/viewer-development-principles.md): reuse accepted contracts, audit only changed dependencies, run targeted tests first, deliver usable API/storage/UI flows, protect real data, and use isolated worktrees with explicit file ownership for parallel work. Agents without execution tools provide design review only. Candidate development never authorizes production database migration, release, deployment, or merging main; those require their own explicit authorization. Preserve all existing Annual Poster, safety, memory isolation, QA and release rules above.

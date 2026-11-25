@@ -1,0 +1,4 @@
+{
+ "compilerOptions":{"target":"ES2022","lib":["ES2023","DOM"],"module":"ESNext","moduleResolution":"Bundler","allowImportingTsExtensions":true,"noEmit":true,"strict":true,"skipLibCheck":true,"types":["node"]},
+ "include":["../../types/goal-portfolio.ts","../../server/services/goals/portfolio-domain.ts","../../server/services/goals/portfolio-store.ts","../../server/services/goals/portfolio-schema.ts","../../server/services/goals/portfolio-legacy.ts","../../server/services/goals/migrations/portfolio-v2.ts"]
+}

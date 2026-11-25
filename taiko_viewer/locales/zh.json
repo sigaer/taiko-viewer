@@ -3516,5 +3516,71 @@
       "exited": "已退出练习。",
       "ready": "请在播放器中点击开始。"
     }
+  },
+  "portfolio": {
+    "title": "我的目标",
+    "create": "创建目标",
+    "loading": "加载中…",
+    "loadError": "目标加载失败，请重试。",
+    "unavailable": "目标服务暂不可用，请稍后重试。",
+    "actionError": "操作未确认，请重试。",
+    "conflict": "目标已更新，已重新读取。请检查后再操作。",
+    "retry": "重试",
+    "sourceUnavailable": "当前成绩来源无法创建或评估目标。",
+    "songId": "歌曲编号",
+    "difficulty": "难度",
+    "chooseTarget": "选择目标",
+    "close": "关闭",
+    "noOptions": "当前谱面没有可创建的目标。",
+    "optionsError": "无法获取目标选项，请检查歌曲编号或更新成绩后重试。",
+    "targetUnknown": "目标信息不足",
+    "score": "分数",
+    "rank": "成绩等级",
+    "empty": "还没有进行中的目标。",
+    "evaluation": "最近评估",
+    "priority": "优先级",
+    "created": "创建",
+    "updated": "更新",
+    "pause": "暂停",
+    "resume": "恢复",
+    "cancel": "取消目标",
+    "evaluate": "评估",
+    "moveUp": "上移",
+    "moveDown": "下移",
+    "moveUpGoal": "上移 {title} 的目标",
+    "moveDownGoal": "下移 {title} 的目标",
+    "history": "历史目标",
+    "historyEmpty": "暂无历史目标。",
+    "more": "加载更多",
+    "status": {
+      "active": "进行中",
+      "paused": "已暂停",
+      "completed": "已完成",
+      "cancelled": "已取消"
+    },
+    "availability": {
+      "available": "谱面可用",
+      "unavailable": "谱面不可用",
+      "unknown": "谱面状态未知"
+    },
+    "outcomes": {
+      "none": "尚未评估",
+      "active": "尚未达成",
+      "completed": "已达成",
+      "inconclusive": "证据不足",
+      "unsupported": "暂不支持评估"
+    },
+    "difficulties": {
+      "1": "简单",
+      "2": "普通",
+      "3": "困难",
+      "4": "魔王",
+      "5": "里谱"
+    },
+    "crowns": {
+      "clear": "通关",
+      "full_combo": "全连",
+      "dondaful_combo": "全良"
+    }
   }
 }

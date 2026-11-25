@@ -184,6 +184,7 @@ const milestoneDate = (milestone: SkillPassportMilestone) => milestone.day ? for
       </div>
 
       <aside class="gp-side">
+        <GoalsPortfolio v-if="passport.profileId" :profile-id="passport.profileId" :identity="`${accountUser?.id}:${passport.profileId}`" @completed="retry" />
         <ReworkGrowthNow :current="passport.current" :start="radarStart" :focus="radarFocus" :observation="t(passportCopy.observation.key)" :day-label="formatDay" />
         <ReworkGrowthNext
           v-if="passport.activeGoal || passport.recentCompletedGoal || passport.currentNextAction"

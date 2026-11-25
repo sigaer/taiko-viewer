@@ -2,6 +2,7 @@ import type { Pool, RowDataPacket } from "mysql2/promise";
 import { createError } from "h3";
 import { CREATE_TABLES } from "./account-schema-definition";
 import { BETA_TABLES } from "../services/annual-beta/schema";
+import { getGoalSchemaVersion, validateGoalPortfolioSchema } from "../services/goals/portfolio-schema";
 import { GOAL_TABLE_SQL } from "../services/goals/schema";
 import { GROWTH_MEASUREMENT_TABLE_SQL } from "../services/growth-history/schema";
 import { GROWTH_RECENT_CURSOR_TABLE_SQL } from "../services/growth-recent/schema";
@@ -102,4 +103,9 @@ export async function validateSchemaTables(db: Pick<Pool, "query">, required: Ta
   try { await promise; } catch (error) { cache.delete(scope); throw error; }
 }
 
-export const validateAccountSchema = (db: Pick<Pool, "query">, scope: AccountSchemaScope = "legacy") => validateSchemaTables(db, accountSchemaRequirements(scope), scope);
+export const validateAccountSchema = async (db: Pick<Pool, "query">, scope: AccountSchemaScope = "legacy") => {
+  const version = await getGoalSchemaVersion(db);
+  const required = accountSchemaRequirements(scope).map(t => version===2 && t.name==='web_player_goals' ? {...t,columns:t.columns.filter(c=>c.name!=='active_binding_id'),unique:t.unique.filter(k=>!k.includes('active_binding_id'))} : t);
+  await validateSchemaTables(db,required,`${scope}:goal-v${version}`);
+  if(version===2)await validateGoalPortfolioSchema(db);
+};

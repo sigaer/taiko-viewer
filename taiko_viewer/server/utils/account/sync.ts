@@ -26,7 +26,7 @@ import { withViewerCurrentSource } from "../../services/account/current-source.t
 import { canManageExternalScoreToken, readViewerScoreTokenStatus } from "../../services/account/score-token-authority.ts";
 
 import { readGoalSnapshot } from '../../services/goals/snapshot';
-import { evaluateCurrentGoalForBinding } from '../../services/goals/evaluation';
+import { evaluateGoalsAfterSync } from '../../services/goals/sync-portfolio';
 import { withDomainScoreRead } from '../../services/taiko-domain/publication';
 import { requiresBindingReverification } from '../../internal/account/legacy-binding.ts';
 
@@ -99,7 +99,7 @@ export const submitAccountSync = async (event: H3Event, payload: Record<string, 
   // The owned worker receipt proves acquisition preceded downstream dispatch;
   // even partial/failed delivery can have published local scores. Check the
   // actual observation under the evaluator's SH lease, never log.status/mtime.
-  const goalEvaluation = await evaluateCurrentGoalForBinding(userId, { profileId: String(currentBinding.id) }, before)
+  const goalEvaluation = await evaluateGoalsAfterSync(userId,String(currentBinding.id),before)
     .catch(() => ({ profileId: String(currentBinding.id), outcome: 'evaluation-error' as const, activeGoal: null, recentCompletedGoal: null }));
   return {
     ok: true,

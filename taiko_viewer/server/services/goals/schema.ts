@@ -1,3 +1,4 @@
+import { PORTFOLIO_COLUMNS } from './portfolio-schema.ts';
 // Account-schema convention; no schema side effects on import.
 export const GOAL_TABLE_SQL = `CREATE TABLE IF NOT EXISTS web_player_goals (
  id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -23,3 +24,9 @@ export const GOAL_TABLE_SQL = `CREATE TABLE IF NOT EXISTS web_player_goals (
  UNIQUE KEY uniq_goal_active_binding (active_binding_id),
  KEY idx_goal_owner_profile (user_id, binding_id, status)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`;
+
+// Administrative V2 bootstrap shares the legacy history columns and explicit expansion definitions.
+export const GOAL_V2_TABLE_SQL = GOAL_TABLE_SQL
+ .replace(/^ active_binding_id.*\n/m, '')
+ .replace(/^ UNIQUE KEY uniq_goal_active_binding.*\n/m, '')
+ .replace(' baseline_version INT', Object.entries(PORTFOLIO_COLUMNS).map(([name,type])=>` ${name} ${type},`).join('\n')+'\n baseline_version INT');
