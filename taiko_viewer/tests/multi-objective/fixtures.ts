@@ -22,7 +22,7 @@ export function fixture(count = 1): Fixture {
   }
   const options: ComposeOptions = { capacities: { A: 5, B: 5, C: 5, D: 5 }, maxTotal: 20, typePreferences: {}, history: { completeFrom: '2026-11-01T00:00:00.000Z', through: NOW, items: [] }, primaryActionByChart: {} };
   const evidence: EvidenceRecord[] = [], candidates: MultiObjectiveCandidate[] = [];
-  const context: ValidationContext = { schemaVersion: B4_SCHEMA, decisionId: '', ownerId: 'owner-synthetic', profileId: 'player-synthetic', region: 'CN', catalogRevision: revision, scoreRevision: 'scores/1', portfolioRevision: null, policyVersion: POLICY_VERSION, asOf: NOW, generatedAt: NOW, catalog, evidence, portfolio: null, excludedChartIds: [], decisionInputsHash: hash(options) };
+  const context: ValidationContext = { schemaVersion: B4_SCHEMA, decisionId: '', ownerId: 'owner-synthetic', profileId: 'player-synthetic', region: 'CN', catalogRevision: revision, scoreRevision: 'scores/1', portfolioRevision: null, policyVersion: POLICY_VERSION, asOf: NOW, generatedAt: NOW, catalog, evidence, goalBaselineBindings: [], portfolio: null, excludedChartIds: [], decisionInputsHash: hash(options) };
   const ratingSamples = { ratingRef: 'rating', scoreRevision: 'scores/1', modelVersion: 'rating/1', sampleCount: 200, unit: 'rating_result_rows' as const, aggregation: 'per-dimension-top20' as const, topN: 20 as const, duplicateHandling: 'preserve' as const };
   evidence.push(record('rating', 'rating', 'rating-projection', null, revision, { type: 'rating', samples: structuredClone(ratingSamples), dimensions: { big_song: 8, stamina: 9, speed: 8, accuracy_power: 9, rhythm: 10, complex: 7 } }, 'rating/1'));
   const authority = prepareAuthority(catalog);
@@ -45,6 +45,12 @@ export function fixture(count = 1): Fixture {
 export function seal(f: Fixture): Fixture {
   f.context.evidence = f.evidence;
   for (const r of f.evidence) r.ref.contentHash = hash(r.payload);
+  // Synthetic resolver captures each baseline once; subsequent seals never rebind it.
+  f.context.goalBaselineBindings = [...f.context.goalBaselineBindings];
+  for (const r of f.evidence) if (r.payload.type === 'goal_baseline' && !f.context.goalBaselineBindings.some(b => b.baselineRef === r.ref.id)) {
+    f.context.goalBaselineBindings = [...f.context.goalBaselineBindings, { schemaVersion: 'goal-baseline-binding/1', baselineRef: r.ref.id,
+      ownerId: f.context.ownerId, profileId: r.ref.profileId!, chartId: r.ref.chartId!, sourceRevision: r.ref.sourceRevision, evidenceHash: hash(r) }];
+  }
   f.context.decisionInputsHash = createComposeInputsHash(f.options);
   f.context.decisionId = createDecisionId(f.context);
   const index = prepareEvidence(f.evidence).index;

@@ -23,3 +23,5 @@
 [Phase 0 接口冻结](shared-interfaces.md)先于代理实施；新增公共导出位于 [index.ts](../../../taiko_viewer/utils/multi-objective/index.ts)。
 
 B4-1 Review Fix：基于 `f53601362b62469eb4b1d07db94421dd35a9c6d9` 修复证据范围与基线绑定，验收入口见 [修复对照与验收报告](review-fix-acceptance.md)。原实现报告与原性能测量作为历史证据保留。
+
+B4-1 Final Review Fix（基线 `35ff18c4568e32719b14678a5f5ee0288fa32340`）：[不可变 Goal Baseline revision 修复与验收](immutable-baseline-review.md)。

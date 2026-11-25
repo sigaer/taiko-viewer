@@ -1,0 +1,4 @@
+taiko_viewer/tests/multi-objective/immutable-baseline.test.ts(53,68): error TS2339: Property 'threshold' does not exist on type 'Target'.
+  Property 'threshold' does not exist on type '{ horizon: "near_term" | "long_term"; definitionVersion: string; } & { kind: "crown"; crown: "clear" | "full_combo" | "dondaful_combo"; }'.
+taiko_viewer/tests/multi-objective/immutable-baseline.test.ts(99,81): error TS2339: Property 'baselineRef' does not exist on type 'Target'.
+  Property 'baselineRef' does not exist on type '{ horizon: "near_term" | "long_term"; definitionVersion: string; } & { kind: "rank"; threshold: number; comparison: "gte"; requirementRef: string | null; }'.

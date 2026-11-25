@@ -2,7 +2,7 @@
 
 `validateActionabilityEvaluation` 验证已注册输出的版本、scope、目标/时间、置信度语义、refs、理由及各类型必要条件。它没有训练或执行 Score/FC/DF 预测模型，也不调用 Goal completion。
 
-Score：Rating≥20 与真实目标预测诊断独立通过；stable>0、reliability≥.6、30天 cutoff、合法当前 PB/计分上界；ready target≤stable；stretch stable<target≤PB 且差距≤2%。score_pb 只能合法 baseline+1。baselineRef=null 使用同范围 score_estimate 的当前成绩；非空引用只能绑定 goal_baseline/score-pb，必须通过 profile/chart/catalog/scoreRevision 和 highScore 检查，解析失败直接拒绝。PB-only 或预测邻居缺失不能提级。
+Score：Rating≥20 与真实目标预测诊断独立通过；stable>0、reliability≥.6、30天 cutoff、合法当前 PB/计分上界；ready target≤stable；stretch stable<target≤PB 且差距≤2%。score_pb 只能合法 baseline+1。baselineRef=null 使用同范围 score_estimate 的当前成绩；非空引用只能绑定 goal_baseline/score-pb，必须通过 owner/profile/chart/catalog、冻结 baseline sourceRevision/证据摘要和 highScore 检查；baseline revision 与当前 score/prediction revision 独立，解析失败直接拒绝。PB-only 或预测邻居缺失不能提级。
 
 皇冠：权威当前状态、完整同次 semantics、最近窗口覆盖证明、distinct attemptId、模式和时间；ready 最近三次且跨两个 UTC 日历日，stretch 至少两次且最近一次达 subtype 边界。Clear gauge、FC NG、DF OK+NG、NG 可比总数/基准独立检查。UTC 是当前 offline/1 日界；不能暗称采用玩家本地日界。四种 Crown 均要求 current snapshot/window/所有 attempt 的 mode/platform 已知且一致，attempt 时间位于声明窗口内；NG 额外绑定同范围 baseline。TARGET_ALREADY_MET 也须通过这套范围检查，跨范围或未知不能宣称皇冠/NG 已达标。aggregate combo、pred_ng、score 高分均不能替代 attempt。near 是已批准启发式的输入契约检查，不是新皇冠成功预测。
 

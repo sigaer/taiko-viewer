@@ -104,10 +104,14 @@ export type ValidationResult<T> = { ok: true; value: T; issues: [] } | { ok: fal
 /** Evidence resolver transport: frozen outputs of producers, not new predictors.
  * Detailed payload contracts are validated in evidence.ts; unknown fields fail closed. */
 export type EvidenceRecord = { schemaVersion: 'b4-evidence/1'; ref: EvidenceRef; payload: Record<string, unknown> };
+/** B4 offline/1 addition: immutable resolver commitment captured with a Goal baseline.
+ * No baseline values are duplicated. Never rebuild these commitments from current evidence. */
+export type GoalBaselineBinding = { schemaVersion: 'goal-baseline-binding/1'; baselineRef: string;
+  ownerId: string; profileId: string; chartId: string; sourceRevision: string; evidenceHash: string };
 export type ValidationContext = { schemaVersion: typeof B4_SCHEMA; decisionId: string; ownerId: string; profileId: string;
   region: 'CN' | 'JP'; catalogRevision: string; scoreRevision: string | null; portfolioRevision: string | null;
   policyVersion: typeof POLICY_VERSION; asOf: string; generatedAt: string; catalog: CatalogAuthoritySnapshot;
-  evidence: readonly EvidenceRecord[]; portfolio: GoalPortfolioSnapshot | null; excludedChartIds: readonly string[];
+  evidence: readonly EvidenceRecord[]; goalBaselineBindings: readonly GoalBaselineBinding[]; portfolio: GoalPortfolioSnapshot | null; excludedChartIds: readonly string[];
   /** B4 offline transport: hash of frozen ComposeOptions, including preference and exposure history. */
   decisionInputsHash: string };
 export type ExposureHistory = { completeFrom: string | null; through: string | null;

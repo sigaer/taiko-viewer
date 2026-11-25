@@ -1,0 +1,97 @@
+{
+  "schemaVersion": "b4-immutable-baseline-review/1",
+  "baseCommit": "35ff18c4568e32719b14678a5f5ee0288fa32340",
+  "b4Tests": 299,
+  "newTests": 29,
+  "b3NodeTests": 92,
+  "strictTypeScript": "PASS",
+  "crownActionabilityByteIdentical": true,
+  "originalB3ReportSha256": {
+    "existing-baseline.json": "ed6ed2b0f0bfce8ef197536a0e81f32a9115d133b235f5dd69d8e3b02b53f36f",
+    "offline-benchmark.json": "acf208e6efb5a62b44e9b4a33f526c52e7cab03574c02400d114b90337e57bbc"
+  },
+  "protectedPathChanges": [],
+  "coreReplay": {
+    "status": "BLOCKED_MISSING_ORIGINAL_DEPENDENCY",
+    "requiredVersion": "0.1.4rc2",
+    "missingPaths": [
+      "/var/tmp/taiko-batch21-20261124/installed-rc9/bin/python",
+      "/var/tmp/taiko-batch21-20261124/core/tests"
+    ],
+    "availableCoreCommit": "0b7319d94b041daafb0a0d32e3ccc95e50da8810",
+    "availableCoreVersion": "0.1.2",
+    "substitutionUsed": false,
+    "goldenFixtureSha256": "e9ef77baf564e599f167f639c8a7805c8f79f6fccf95a16c6494e26b064690a9",
+    "targetFixtureSha256": "6db08d5cefd25311c564d18e40d76e7ccba48f4fbf1188409d24f793289eed79",
+    "sourceFilesDifferFromOriginal": [
+      "chart/availability.py",
+      "chart/position.py",
+      "chart/progress_catalog.py",
+      "chart/visibility.py",
+      "parser/chart_analysis.py",
+      "parser/tja.py",
+      "recommendation/candidates.py",
+      "recommendation/catalog_inputs.py",
+      "recommendation/client_selection.py",
+      "recommendation/support.py"
+    ],
+    "sourceFilesMissing": [
+      "score/time.py"
+    ]
+  },
+  "kernelFileHashes": {
+    "taiko_viewer/utils/multi-objective/actionability.ts": "f07715dfb84de8809dff4298d5e83bb1f2bf1240c47376a0bd48ccafecf2d110",
+    "taiko_viewer/utils/multi-objective/candidate.ts": "d42c055dae50b7fd2148f09cef4a4a1884dc7aa57bf7c91a83afe9ea416105e0",
+    "taiko_viewer/utils/multi-objective/common.ts": "5e4fadfb0b53cf2f2857e9eff8f3081b3397ebffc1f712c4c73883841c8e8c7b",
+    "taiko_viewer/utils/multi-objective/composer.ts": "01776576947d6b2b71b3ed1d73f8f5ffee4acd82d85ab773e74ca6a8a6f1fb6e",
+    "taiko_viewer/utils/multi-objective/context.ts": "ab05722c0afd5aa144bf06f7300a3f3d200cb2ade0f0a1afb3f3bd0b76c8ed85",
+    "taiko_viewer/utils/multi-objective/contracts.ts": "55f21a9cf817c074053849ac19bca8285e8f816a20dcf53fbf9e1b1e522d94cb",
+    "taiko_viewer/utils/multi-objective/evidence-bindings.ts": "c7097d40d0ec49341b58e9f333aa32ddc460d98d71a79481103c8f3dcdb4b568",
+    "taiko_viewer/utils/multi-objective/evidence.ts": "a5d333ab77ca4a19a434262ff02cce31c7b73b212e8e81c4551f20cf8064372d",
+    "taiko_viewer/utils/multi-objective/goals.ts": "85956cd9cff466e0f90db4b9440d7677fce6cee2643c7b748b990771a3e34340",
+    "taiko_viewer/utils/multi-objective/identity.ts": "1d0cf75776c2a34126eee49d9004698efd23eb52babec9546f5a766a4dc85bbe",
+    "taiko_viewer/utils/multi-objective/index.ts": "e9eccee8bd9b5579c52d59f6741fd2ebf4e244a19427d4b4cde8c15c0cee9feb",
+    "taiko_viewer/utils/multi-objective/priority.ts": "581e991d109306fbc692ab4b56b051eb772e880288cea30507c31428726a1b25",
+    "taiko_viewer/utils/multi-objective/registries.ts": "297c3b3dc7be02efdf13aebd10f73c1957a3f13309dc8991a21caef6bb6d94c9",
+    "taiko_viewer/utils/multi-objective/schemas.ts": "0985695dc83df43bb98fdcaa82b8b63bbcbad1a53c94b63981cb7ef0022ba360",
+    "taiko_viewer/utils/multi-objective/shape.ts": "692c9c3a77fac9651946afb843e776c606d74ff8190d60c167a4368cadd6108c"
+  },
+  "runs": [
+    {
+      "runId": "qa-04669f4930b9",
+      "purpose": "Original 270 B4 tests and strict TS",
+      "exitCode": 0,
+      "childrenStopped": true,
+      "outputSha256": "1f0e2b2324d5615eb2043d4488d3059eb2b4f5faa793cb800e16a2cb4d0056af"
+    },
+    {
+      "runId": "qa-bd5ee7aee3cb",
+      "purpose": "New test narrowing errors, subsequently corrected",
+      "exitCode": 2,
+      "childrenStopped": true,
+      "outputSha256": "259ddf7111d21c1cd64ebdafd1c6dffbf0c7a20b8692506eb74777848eb061be"
+    },
+    {
+      "runId": "qa-3e51de7198a1",
+      "purpose": "New negative fixture produced target mismatch; corrected to test wrong evidence under same target",
+      "exitCode": 1,
+      "childrenStopped": true,
+      "outputSha256": "5c19a0b81096ec76d0055423cb5485d251349bfd45f7e8fa15e2db39e02bb2fa"
+    },
+    {
+      "runId": "qa-c6449d449829",
+      "purpose": "299 B4 tests including 29 new regressions; strict TS",
+      "exitCode": 0,
+      "childrenStopped": true,
+      "outputSha256": "fc893354af58341a5168a4eb14998e555cd1bb777410b6be44c072d871954b0e"
+    },
+    {
+      "runId": "qa-b31d9d2a8f5f",
+      "purpose": "Final 299 B4 + 92 B3 Node, both strict TS checks and original B3 report hashes",
+      "exitCode": 0,
+      "childrenStopped": true,
+      "outputSha256": "0987d4dcab1201ef1381b59b3997ef2361bfd09d3d55594c7b08890f8148cf7a"
+    }
+  ],
+  "validLinks": 36
+}

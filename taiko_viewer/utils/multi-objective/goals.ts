@@ -4,7 +4,7 @@ import type { PreparedContext } from './context.ts';
 import { prepareValidationContext } from './context.ts';
 import { getGoalTypeCapability } from './registries.ts';
 import { hash, same, unique, compare } from './common.ts';
-import { referencedEvidence, validateEvidenceScope } from './evidence.ts';
+import { referencedEvidence, validateEvidenceScope, validateSampleEvidence } from './evidence.ts';
 import { validateActionabilityEvaluation } from './actionability.ts';
 export function goalToLink(g: PortfolioGoalSnapshot): GoalLink {
   return structuredClone({ goalId: g.id, goalRevision: g.goalRevision, baselineRef: g.baselineRef, targetHash: g.targetHash!, lifecycleStatus: g.lifecycleStatus, availability: g.availability, userPriority: g.userPriority, userOrder: g.userOrder, actionability: g.actionability, evaluationRef: g.evaluationRef });
@@ -23,7 +23,7 @@ function linkProblems(c: MultiObjectiveCandidate, g: PortfolioGoalSnapshot, prep
   if (g.goalType === 'ng-reduced' && (c.target.kind !== 'ng_reduction' || c.target.baselineRef !== g.baselineRef)) return ['GOAL_BASELINE_UNVERIFIED'];
   const linked = { ...c, actionability: g.actionability, readiness: g.actionability.readiness, goalIds: [g.id], goalLinks: [goalToLink(g)], diagnostics: { ...c.diagnostics, reasonCodes: g.actionability.reasonCodes, missingEvidence: g.actionability.missingEvidence, limitations: g.actionability.limitations } };
   linked.evidenceRefs = referencedEvidence(linked, evidence);
-  return unique([...validateActionabilityEvaluation(linked, ctx, evidence), ...validateEvidenceScope(linked, ctx, evidence)].map(i => i.code));
+  return unique([...validateActionabilityEvaluation(linked, ctx, evidence), ...validateEvidenceScope(linked, ctx, evidence), ...validateSampleEvidence(linked, ctx, evidence)].map(i => i.code));
 }
 export function validateGoalLinks(c: MultiObjectiveCandidate, prepared: PreparedContext): ValidationIssue[] {
   const issues: ValidationIssue[] = [], portfolio = prepared.context.portfolio;

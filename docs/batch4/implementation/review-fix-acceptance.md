@@ -1,5 +1,7 @@
 # B4-1 Review Fix — Evidence Scope & Baseline Integrity
 
+历史报告说明：本页记录 35ff18c4 的上一轮验收；其中“显式 baseline.sourceRevision 必须匹配当前 scoreRevision”的结论已由 [Final Review Fix](immutable-baseline-review.md) 修正。旧测试输出和性能数据仍保留原字节。
+
 候选分支：`candidate/viewer-multi-objective-b4-1-20261124`。修复基线：`f53601362b62469eb4b1d07db94421dd35a9c6d9`。本报告只覆盖本轮验收问题；提交完整 SHA 由交付消息提供。本轮由 Lead 实际执行文件修改、终端测试与审查，没有将子代理设计意见计作测试。
 
 ## 修复对照

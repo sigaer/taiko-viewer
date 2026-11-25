@@ -9,3 +9,5 @@
 旧 Goal 缺 canonical mapping/target 时只报 `LEGACY_GOAL_IDENTITY_OR_TARGET_UNKNOWN`，保留原 snapshot；不按旧数字或标题猜测，不补 baseline，不新建 Goal。不同 GoalType/target 分别形成候选，之后只在卡片层聚合。
 
 G01 验证 score-pb 与 DF 同时 active、两 baseline/两 evaluation；G05 **仅纯函数子场景**验证相同输入关联幂等、同 ID 冲突和篡改 revision 拒绝；G09 验证终态/暂停/不可用状态不被改写、建议不落 Goal。输入哈希前后相同。真实 CAS、nonce/token 并发、事务 rollback、旧数据库迁移均未实现或测试。
+
+Final Review Fix：score-pb 的原 baseline+1 绑定不随成绩同步重置。Goal 关联复用同一 baseline 绑定验证，并验证当前 Rating/Prediction sample provenance；S1 Goal baseline 与 S2 当前成绩/预测可同时有效。Baseline revision 只与受信 resolver 在创建时冻结的来源绑定比较，不与 S2 比较。见 [不可变基线修复报告](immutable-baseline-review.md)。

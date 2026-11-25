@@ -1,0 +1,2 @@
+# Preserve verbatim Node failure output, including its whitespace-only lines.
+qa-3e51de7198a1.output.txt -whitespace

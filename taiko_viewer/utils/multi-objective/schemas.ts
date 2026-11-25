@@ -17,3 +17,8 @@ export const candidateShape = s.object({ schemaVersion: s.one('candidate/1'), ca
 });
 export const portfolioShape = s.object({ schemaVersion: s.one('goal-portfolio/2'), ownerId: s.str, profileId: s.str, portfolioRevision: s.str, updatedAt: s.time,
   goals: s.array(s.object({ id: s.str, profileId: s.str, chartId: s.nullable(s.str), identityMappingRef: s.nullable(s.hex), goalType: s.str, goalRevision: s.str, baselineRef: s.str, target: s.nullable(targetShape), targetHash: s.nullable(s.hex), lifecycleStatus: s.one('active', 'paused', 'completed', 'cancelled'), availability: s.one('available', 'unavailable', 'unknown'), userPriority: s.integer(0, 3), userOrder: s.integer(), actionability: actionabilityShape, evaluationRef: s.nullable(s.str) }), 5000) });
+
+// Frozen resolver authority, independent of the current observation/prediction revision.
+export const goalBaselineBindingShape = s.object({ schemaVersion: s.one('goal-baseline-binding/1'), baselineRef: s.str,
+  ownerId: s.str, profileId: s.str, chartId: s.str, sourceRevision: s.str, evidenceHash: s.hex });
+export const goalBaselineBindingsShape = s.array(goalBaselineBindingShape, 5000);

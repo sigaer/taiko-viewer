@@ -86,11 +86,11 @@ test('Scope: attempt outside declared window cannot establish TARGET_ALREADY_MET
   assert.ok(codes(f).includes('CROWN_ATTEMPT_SCOPE_INVALID')); assert.ok(!codes(f).includes('TARGET_ALREADY_MET'));
 });
 
-function pb(explicit = true): Fixture {
+function pb(explicit = true, highScore = 900000): Fixture {
   const f = fixture(), c = f.candidates[0]!;
-  c.subtype = 'score_pb'; c.target = { kind: 'score', threshold: 900001, comparison: 'gte', baselineRef: explicit ? 'baseline-score' : null, definitionVersion: 'target/1', horizon: 'near_term' };
+  c.subtype = 'score_pb'; c.target = { kind: 'score', threshold: highScore + 1, comparison: 'gte', baselineRef: explicit ? 'baseline-score' : null, definitionVersion: 'target/1', horizon: 'near_term' };
   if (explicit) f.evidence.push(record('baseline-score', 'goal_baseline', 'goal-portfolio', c.chartId, c.catalogRevision,
-    { type: 'goal_baseline', goalType: 'score-pb', highScore: 900000, total: null, ng: null, mode: null, platform: null }));
+    { type: 'goal_baseline', goalType: 'score-pb', highScore, total: null, ng: null, mode: null, platform: null }));
   return seal(f);
 }
 test('Baseline: valid score-pb Goal Baseline and existing portfolio fixture pass', () => {
@@ -101,7 +101,7 @@ test('Baseline: null baselineRef uses trusted current score and retains +1', () 
   assert.equal(f.candidates[0]!.target.kind === 'score' && f.candidates[0]!.target.baselineRef, null);
 });
 test('Baseline: explicit Goal Baseline differs from current score and remains independently bound', () => {
-  const f = pb(); payload(f, 'baseline-score').highScore = 920000;
+  const f = pb(true, 920000); // Capture this different baseline at creation, never rewrite a frozen one.
   if (f.candidates[0]!.target.kind === 'score') f.candidates[0]!.target.threshold = 920001;
   seal(f); assert.deepEqual(result(f).issues, []);
 });
@@ -114,7 +114,7 @@ for (const id of ['estimate-1', 'snapshot-1', 'catalog-1']) test(`Baseline: expl
   assert.ok(codes(f).includes('SCORE_BASELINE_TYPE_UNSUPPORTED'));
 });
 for (const [field, value] of [['profileId', 'other-profile'], ['chartId', 'other-chart'], ['sourceRevision', 'scores/older'], ['catalogRevision', hash('other-catalog')]] as const) {
-  test(`Baseline: explicit ${field} must match candidate and context`, () => {
+  test(`Baseline: explicit ${field} must match identity or its frozen source binding`, () => {
     const f = pb(); f.evidence.find(r => r.ref.id === 'baseline-score')!.ref[field] = value; seal(f);
     assert.ok(codes(f).includes('SCORE_BASELINE_SCOPE_MISMATCH'));
   });
