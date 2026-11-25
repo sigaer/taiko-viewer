@@ -74,6 +74,16 @@ class ModelTests(unittest.TestCase):
             self.assertEqual(point, query['m0'])
             self.assertIsNotNone(metadata['fallback'])
 
+    def test_fallback_reuses_complete_personal_distribution(self):
+        unseen = [dict(self.test[0], chart='unseen', family='unseen-family')]
+        personal = predict(self.train, unseen, 'M0')[0]
+        for model in ('M1', 'M2', 'M3', 'M4'):
+            output = predict(self.train, unseen, model)[0]
+            for field in ('point', 'q25', 'q50', 'q75'):
+                self.assertEqual(output[field], personal[field], (model, field))
+            self.assertEqual(output['calibration']['sourceModel'], 'M0')
+            self.assertTrue(output['calibration']['method'].startswith('personal-fallback/'))
+
     def test_cold_personal_unavailable_has_shared_evaluable_set(self):
         test = self.test + [row('cold-user', m0=None)]
         for model in MODELS:

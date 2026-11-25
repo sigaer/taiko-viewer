@@ -190,16 +190,23 @@ def predict(train, test, model, matching='rating', budget='top24'):
     eligible_train = [row for row in train if row['visibleAt'] <= cutoff]
     fit = _Fit(eligible_train, matching, budget)
     offsets, count, users = _calibration(eligible_train, matching, budget, model)
+    personal_calibration = None
     result = []
     for row in _latest(test):
         if row.get('m0') is None:
             continue  # identical baseline-evaluable set for every model
         point, metadata = fit.point(row, model)
+        fallback = metadata['fallback'] is not None
+        if fallback and personal_calibration is None:
+            personal_calibration = _calibration(eligible_train, 'rating', 'top24', 'M0')
+        row_offsets, row_count, row_users = personal_calibration if fallback else (offsets, count, users)
         output = dict(row, point=point,
-                      q25=point + offsets[0] if count else None,
-                      q50=point + offsets[1] if count else None,
-                      q75=point + offsets[2] if count else None, **metadata)
-        output['calibration'] = {'method': 'train-user-oof-residual-quantiles/1', 'records': count, 'users': users,
-                                 'available': count > 0, 'heldoutLabelsUsed': False, 'personalPointUnmodified': model == 'M0'}
+                      q25=point + row_offsets[0] if row_count else None,
+                      q50=point + row_offsets[1] if row_count else None,
+                      q75=point + row_offsets[2] if row_count else None, **metadata)
+        output['calibration'] = {'method': ('personal-fallback/' if fallback else '') + 'train-user-oof-residual-quantiles/1',
+                                 'records': row_count, 'users': row_users, 'sourceModel': 'M0' if fallback else model,
+                                 'available': row_count > 0, 'heldoutLabelsUsed': False,
+                                 'personalPointUnmodified': model == 'M0' or fallback}
         result.append(output)
     return result
