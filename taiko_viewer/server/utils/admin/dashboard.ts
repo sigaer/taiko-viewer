@@ -214,8 +214,6 @@ const buildDashboardPayload = async () => {
   const db = getAccountDb();
   const [
     userCounts,
-    bindRows,
-    hirobaRows,
     newUserRows,
     newBindingRows,
     botHourly,
@@ -229,8 +227,6 @@ const buildDashboardPayload = async () => {
     activity
   ] = await Promise.all([
     readAdminUserCounts(db),
-    db.execute<DbRow<{ id: string }>[]>("SELECT DISTINCT id FROM bind WHERE is_current = 1"),
-    db.execute<DbRow<{ taiko_no: string }>[]>("SELECT DISTINCT taiko_no FROM web_hiroba_credentials"),
     db.execute<DbRow<{ day_key: string; total: number }>[]>(
       `SELECT DATE_FORMAT(created_at, '%Y-%m-%d') AS day_key, COUNT(*) AS total
        FROM web_user_accounts
@@ -264,16 +260,6 @@ const buildDashboardPayload = async () => {
     getTaikoCommandMeta(),
     readDailyActivityStats(getAccountDb())
   ]);
-
-  const wahlapSet = new Set<string>();
-  for (const row of bindRows[0]) wahlapSet.add(String(row.id || "").trim());
-  const hirobaSet = new Set<string>();
-  for (const row of hirobaRows[0]) hirobaSet.add(String(row.taiko_no || "").trim());
-  const bindingSet = new Set<string>(wahlapSet);
-  for (const value of hirobaSet) bindingSet.add(value);
-  wahlapSet.delete("");
-  hirobaSet.delete("");
-  bindingSet.delete("");
 
   const dailyKeyList = Array.from(
     new Set([
@@ -329,9 +315,6 @@ const buildDashboardPayload = async () => {
   return {
     summary: {
       ...userCounts,
-      taikoBindings: bindingSet.size,
-      wahlapBindings: wahlapSet.size,
-      hirobaBindings: hirobaSet.size,
       totalUploads: uploadStats.totalUploads,
       uploads24h: uploadStats.uploads24h,
       pagePv24h,

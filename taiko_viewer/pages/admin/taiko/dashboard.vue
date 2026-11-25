@@ -158,8 +158,8 @@ const users = computed(() => {
   const summary = dashboard.value?.summary;
   if (!summary) return null;
   const segments = [
-    { key: "viewer", label: "仅网站", value: summary.viewerOnlyUsers, color: palette.primary },
-    { key: "linked", label: "网站与 Bot", value: summary.linkedUsers, color: palette.amber },
+    { key: "viewer", label: "仅 Viewer", value: summary.viewerOnlyUsers, color: palette.primary },
+    { key: "linked", label: "网站＋Bot", value: summary.linkedUsers, color: palette.amber },
     { key: "bot", label: "仅 Bot", value: summary.botOnlyUsers, color: "#cfd8d8" }
   ];
   const total = segments.reduce((sum, item) => sum + item.value, 0);
@@ -540,7 +540,7 @@ const systemStatus = computed(() => {
             <strong class="dash-users__total-value">{{ formatCount(users.summary.totalUsers) }}</strong>
           </div>
 
-          <p class="dash-users__note">按已验证身份关联去重，未关联的跨端身份分别计数。</p>
+          <p class="dash-users__note">按 ID 去重，含历史及手动记录；无有效绑定的 Viewer 用户另计。</p>
 
           <div class="dash-users__bar" role="img" :aria-label="users.segments.map((s) => `${s.label} ${formatCount(s.value)}`).join('，')">
             <span
@@ -558,12 +558,48 @@ const systemStatus = computed(() => {
 
           <dl class="dash-stats">
             <div>
-              <dt>网站用户</dt>
-              <dd>{{ formatCount(users.summary.viewerUsers) }}</dd>
+              <dt>仅 Viewer · 有绑定 ID<small>国服 {{ formatCount(users.summary.viewerOnlyCnUsers) }} · 历史海外 {{ formatCount(users.summary.viewerOnlyOverseasUsers) }} · 手动 {{ formatCount(users.summary.viewerOnlyManualUsers) }}</small></dt>
+              <dd>{{ formatCount(users.summary.viewerOnlyBoundUsers) }}</dd>
             </div>
             <div>
-              <dt>Bot 用户</dt>
-              <dd>{{ formatCount(users.summary.botUsers) }}</dd>
+              <dt>仅 Viewer · 无有效绑定 ID</dt>
+              <dd>{{ formatCount(users.summary.viewerOnlyUnboundUsers) }}</dd>
+            </div>
+            <div>
+              <dt>仅 Bot · 国服</dt>
+              <dd>{{ formatCount(users.summary.botOnlyCnUsers) }}</dd>
+            </div>
+            <div>
+              <dt>仅 Bot · 海外</dt>
+              <dd>{{ formatCount(users.summary.botOnlyOverseasUsers) }}</dd>
+            </div>
+            <div>
+              <dt>仅 Bot · 手动</dt>
+              <dd>{{ formatCount(users.summary.botOnlyManualUsers) }}</dd>
+            </div>
+            <div>
+              <dt>国服用户<small>Viewer 与 Bot 去重，含无绑定 Viewer</small></dt>
+              <dd>{{ formatCount(users.summary.cnUsers) }}</dd>
+            </div>
+            <div>
+              <dt>海外用户<small>仅统计 Bot 记录</small></dt>
+              <dd>{{ formatCount(users.summary.overseasUsers) }}</dd>
+            </div>
+            <div>
+              <dt>历史 Viewer 海外 ID<small>仅 Viewer {{ formatCount(users.summary.viewerOnlyOverseasUsers) }}，与 Bot 重叠部分只计一次</small></dt>
+              <dd>{{ formatCount(users.summary.viewerOverseasUsers) }}</dd>
+            </div>
+            <div>
+              <dt>手动账号<small>Viewer {{ formatCount(users.summary.viewerManualUsers) }} · Bot {{ formatCount(users.summary.botManualUsers) }}，合计去重</small></dt>
+              <dd>{{ formatCount(users.summary.manualUsers) }}</dd>
+            </div>
+            <div>
+              <dt>官方 Bot<small>按 ID 去重，与 QQ 记录可重叠</small></dt>
+              <dd>{{ formatCount(users.summary.officialBotUsers) }}</dd>
+            </div>
+            <div>
+              <dt>QQ 记录<small>按 ID 去重</small></dt>
+              <dd>{{ formatCount(users.summary.qqBotUsers) }}</dd>
             </div>
             <div>
               <dt>近 7 天网站活跃</dt>

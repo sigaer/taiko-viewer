@@ -15,12 +15,30 @@ export type AdminMetricSummary = {
   taikoBindings: number;
   wahlapBindings: number;
   hirobaBindings: number;
-  /** Viewer and Bot identities, deduplicated only by verified identity links. */
+  /** Distinct retained IDs (including historical/manual) plus unbound Viewer accounts. */
   totalUsers: number;
   botUsers: number;
   viewerOnlyUsers: number;
   botOnlyUsers: number;
   linkedUsers: number;
+  viewerOnlyBoundUsers: number;
+  viewerOnlyUnboundUsers: number;
+  viewerOnlyCnUsers: number;
+  viewerOnlyOverseasUsers: number;
+  viewerOnlyManualUsers: number;
+  botOnlyCnUsers: number;
+  botOnlyOverseasUsers: number;
+  botOnlyManualUsers: number;
+  viewerOverseasUsers: number;
+  viewerManualUsers: number;
+  botManualUsers: number;
+  manualUsers: number;
+  /** Includes Viewer accounts without any bound ID. */
+  cnUsers: number;
+  overseasUsers: number;
+  /** Channel counts each deduplicate game IDs and may overlap. */
+  officialBotUsers: number;
+  qqBotUsers: number;
   totalUploads: number;
   uploads24h: number;
   pagePv24h: number;
