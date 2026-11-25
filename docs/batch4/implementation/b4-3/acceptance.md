@@ -48,7 +48,7 @@ API `GET /api/candidate/prediction-preview?state=available|missing|sparse|revisi
 | Prediction严格TypeScript | PASS | qa-f415ca811133 |
 | HTTP与Vue、现有Goal Preview | PASS | qa-f711ea799d36（最终文案复核）；qa-d6c533fe943f：候选gate/query/no-store、390/768/1440px、中文/日语、状态/失败重试、模型/缺失/限制、真实组件嵌入 |
 | 最终跨模块验证 | PASS | qa-3198879721d4，等待状态/历史指纹/严格TS/21项契约/HTTP+Vue+Goal Preview |
-| rc.2候选Nuxt构建 | 待完成 | 使用既有隔离限额，既有内存准入覆盖授权沿用 |
+| rc.2候选Nuxt构建 | PASS | 完整npm run build退出0，161.3秒；5GiB cgroup限额保留 |
 | 真实M0–M4对照 | WAITING_FOR_EXTERNAL_ARTIFACT | 未转移正式Artifact与匿名独立评估证据 |
 
 浏览器测试工具首次在已生成Nuxt配置下遇到CJS动态require失败，scope未标PASS。已修正为本地模块、明确Node require桥接及限长错误输出，定向重跑通过。没有据此改动产品算法或降低断言。
@@ -56,3 +56,9 @@ API `GET /api/candidate/prediction-preview?state=available|missing|sparse|revisi
 QA证据根 `/home/sigaer/taiko/qa-vault/runs/<run>/evidence`。所有QA/build经既有wrapper；源码中的内存脚本不修改。用户此前明确“跳过门槛”的本候选构建授权仅用于可用内存准入，仍保留共享锁、PSI/年度worker检查、5GiB cgroup硬限额、超时和清理。构建不执行部署脚本。
 
 未重复B3 Golden、B4-1/B4-2全量回归、Catalog历史审计或数据库迁移。没有访问、clone或修改另一台设备的Taiko Agent；没有导入逐用户原始数据、修改Bot生产代码/Rating/真实成绩/生产推荐/Goal Baseline；不迁移生产DB、不合并main、不部署、不发布Release。完成候选提交与推送后等待验收。
+
+最终rc.2构建日志：`/var/tmp/taiko-b43-20261125/candidate-build-rc2-final.log`，SHA256 `9bdeee0dfd2fdff5cdd92ef252170a82f4dbf5156c6a19ba1f3c878f9f0d652b`。末段日志RSS=3966MiB（不是精确峰值），现有分块/BigInt target警告未升级为错误。移动端复核补正“个人点可用但分位校准缺失”的状态文案后重新构建；此前停止的中间构建不计PASS。`.output`仅留在候选worktree，未启动服务或复制到生产。
+
+`external-experiment-status.json` SHA256：`fbfce26eca941d8b35b07b7d3e0fe68ab49a21e936b51b4f4fe42c0f695bea51`。
+
+`aggregate-results.json` SHA256：`8f4a8c93b925a5f462e23e04f479baa359f92fb42d000b60119937ffe71e04cc`。
