@@ -184,21 +184,27 @@ def _record_metrics(rows):
     if not rows:
         return None
     absolute = [abs(row["point"] - row["y"]) for row in rows]
+    distributions = [row for row in rows if row.get("q25") is not None]
     return {
         "mae": statistics.fmean(absolute),
         "medianAE": statistics.median(absolute),
         "rmse": math.sqrt(statistics.fmean((row["point"] - row["y"]) ** 2 for row in rows)),
-        "pinballQ25": statistics.fmean(_pinball(row["y"], row["q25"], .25) for row in rows),
-        "pinballQ50": statistics.fmean(_pinball(row["y"], row["q50"], .50) for row in rows),
-        "pinballQ75": statistics.fmean(_pinball(row["y"], row["q75"], .75) for row in rows),
-        "intervalCoverage": statistics.fmean(row["q25"] <= row["y"] <= row["q75"] for row in rows),
-        "intervalWidth": statistics.fmean(row["q75"] - row["q25"] for row in rows),
+        "pinballQ25": _mean(_pinball(row["y"], row["q25"], .25) for row in distributions),
+        "pinballQ50": _mean(_pinball(row["y"], row["q50"], .50) for row in distributions),
+        "pinballQ75": _mean(_pinball(row["y"], row["q75"], .75) for row in distributions),
+        "intervalCoverage": _mean(row["q25"] <= row["y"] <= row["q75"] for row in distributions),
+        "intervalWidth": _mean(row["q75"] - row["q25"] for row in distributions),
     }
 
 
 def _summarize(rows, k):
+    distributions = [row for row in rows if row.get("q25") is not None]
+    counts = {
+        "distributionRecords": len(distributions),
+        "distributionDistinctPlayers": len({row["user"] for row in distributions}),
+    }
     if not rows:
-        return {"recordWeighted": None, "userMacro": None}
+        return {**counts, "recordWeighted": None, "userMacro": None}
     users = defaultdict(list)
     for row in rows:
         users[row["user"]].append(row)
@@ -208,7 +214,7 @@ def _summarize(rows, k):
     for key in ("precisionAtK", "recallAtK", "ndcgAtK"):
         eligible = [(user[key], len(group)) for user, group in zip(per_user, users.values()) if user[key] is not None]
         weighted[key] = sum(value * count for value, count in eligible) / sum(count for _, count in eligible) if eligible else None
-    return {"recordWeighted": weighted, "userMacro": macro}
+    return {**counts, "recordWeighted": weighted, "userMacro": macro}
 
 
 def _interval(values):
@@ -235,6 +241,8 @@ def _stratum(rows, k, bootstrap, seed):
     count = len({row["user"] for row in rows})
     return {
         "records": len(rows), "distinctPlayers": count,
+        "distributionRecords": sum(row.get("q25") is not None for row in rows),
+        "distributionDistinctPlayers": len({row["user"] for row in rows if row.get("q25") is not None}),
         **(_summarize(rows, k) if count >= 2 else {"recordWeighted": None, "userMacro": None}),
         "mae95CI": _bootstrap(rows, bootstrap, seed),
         "insufficient": None if count >= 2 else "empty" if not count else "singleton-user",
@@ -247,8 +255,15 @@ def _validate_predictions(rows):
         raise ValueError("predictions must contain one snapshot per user/chart")
     for row in rows:
         if any(not isinstance(row.get(key), (int, float)) or not math.isfinite(row[key])
-               for key in ("y", "point", "q25", "q50", "q75", "rating")):
+               for key in ("y", "point", "rating")):
             raise ValueError("predictions require finite numeric values")
+        quantiles = [row.get(key) for key in ("q25", "q50", "q75")]
+        if all(value is None for value in quantiles):
+            continue
+        if any(value is None for value in quantiles):
+            raise ValueError("prediction quantiles must be all available or all null")
+        if any(not isinstance(value, (int, float)) or not math.isfinite(value) for value in quantiles):
+            raise ValueError("prediction quantiles require finite numeric values")
         if not row["q25"] <= row["q50"] <= row["q75"]:
             raise ValueError("prediction quantiles are not ordered")
 
@@ -261,7 +276,10 @@ def metrics(predictions, k=3, bootstrap=200, seed=4301):
     median and RMSE); recordWeighted computes record-level error metrics, with
     user ranking metrics weighted by that user's record count. Users without a
     relevant chart have null recall/NDCG and do not enter those means. Intervals
-    are nominal 50% Q25..Q75. Bootstrap samples whole user clusters 200 times.
+    are nominal 50% Q25..Q75. Unavailable calibration is represented by three
+    null quantiles: point/ranking metrics still use those rows, distribution
+    metrics only use available distributions, and their record/user denominators
+    are reported separately. Bootstrap samples whole user clusters 200 times.
     """
     if k < 1 or bootstrap < 0:
         raise ValueError("invalid metric settings")

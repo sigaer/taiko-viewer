@@ -167,9 +167,28 @@ class MetricTests(unittest.TestCase):
         self.assertEqual(result["mae95CI"]["userMacro"], {"lower": 3., "upper": 8.})
 
     def test_invalid_quantiles_duplicate_targets_and_nonfinite_rejected(self):
-        for values in ([row(q25=970000.)], [row(), row()], [row(point=float("nan"))]):
+        for values in ([row(q25=970000.)], [row(), row()], [row(point=float("nan"))],
+                       [row(q25=None)], [row(q25=None, q50=None)], [row(q25=float("nan"))]):
             with self.assertRaises(ValueError):
                 metrics(values)
+
+    def test_unavailable_distribution_preserves_point_metrics_and_explicit_counts(self):
+        no_distribution = [dict(value, q25=None, q50=None, q75=None) for value in self.rows]
+        result = metrics(no_distribution)
+        self.assertEqual(result["distributionRecords"], 0)
+        self.assertEqual(result["distributionDistinctPlayers"], 0)
+        self.assertAlmostEqual(result["recordWeighted"]["mae"], 14 / 3)
+        self.assertAlmostEqual(result["userMacro"]["mae"], 5.5)
+        for summary in ("recordWeighted", "userMacro"):
+            for metric in ("pinballQ25", "pinballQ50", "pinballQ75", "intervalCoverage", "intervalWidth"):
+                self.assertIsNone(result[summary][metric])
+        mixed = metrics(no_distribution[:1] + self.rows[1:])
+        self.assertEqual(mixed["distributionRecords"], 2)
+        self.assertEqual(mixed["distributionDistinctPlayers"], 2)
+        self.assertAlmostEqual(mixed["recordWeighted"]["mae"], 14 / 3)
+        self.assertAlmostEqual(mixed["recordWeighted"]["pinballQ25"], 2.5)
+        self.assertAlmostEqual(mixed["recordWeighted"]["intervalCoverage"], 1.)
+        self.assertEqual(mixed["strata"]["history"]["established"]["distributionRecords"], 2)
 
     def test_paired_gain_same_users_resampled_and_immutable_targets(self):
         hybrid = [dict(value, point=value["y"]) for value in self.rows]
