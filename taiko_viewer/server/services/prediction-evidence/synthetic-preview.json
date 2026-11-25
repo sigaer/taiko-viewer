@@ -1,0 +1,79 @@
+{
+  "sourceCommit": "38a47d882a48883cda91ca27f778adfd8ddb2ef9",
+  "sourceSha256": "b2f46ea056c8b20691a41c17dc7253c6c1b9483bd82bd8536fc6da1897929ae0",
+  "coreTree": "49efcd37beb3b9f1a31c76b13c96490ab52e153c",
+  "coreVersion": "0.1.2",
+  "clock": "2026-11-25T00:00:00Z",
+  "ratingDefinition": "bot-core-v1-top20/synthetic-const-table-v1",
+  "chart": "synthetic-chart-1",
+  "rating": 6.620776762164194,
+  "stable": 896000,
+  "pb": 906000,
+  "reliability": 87.76,
+  "dataSufficiency": "ok",
+  "artifact": {
+    "schemaVersion": "cohort-prior-v1",
+    "artifactId": "synthetic-cohort/b43-v1",
+    "sourceRepository": "https://github.com/sigaer/taiko-viewer",
+    "sourceCommit": "2d5d1cccb43d6115d5610414da2f896f648e4c4a",
+    "dataSnapshotRevision": "synthetic-cohort/1",
+    "catalogRevision": "synthetic-catalog/b43-v1",
+    "region": "SYNTHETIC",
+    "ruleset": "synthetic-score/1",
+    "canonicalChartId": "synthetic-chart-1",
+    "chartRevision": "synthetic-chart/1",
+    "ratingDefinition": "bot-core-v1-top20/synthetic-const-table-v1",
+    "ratingGrid": [
+      {
+        "rating": 6.620776762164194,
+        "distinctPlayerCount": 24,
+        "effectiveSampleSize": 24,
+        "scoreDistribution": [
+          {
+            "score": 900000,
+            "weight": 6
+          },
+          {
+            "score": 910000,
+            "weight": 6
+          },
+          {
+            "score": 920000,
+            "weight": 6
+          },
+          {
+            "score": 940000,
+            "weight": 6
+          }
+        ],
+        "scoreQ25": 900000,
+        "scoreQ50": 910000,
+        "scoreQ75": 920000,
+        "observed": {
+          "fc": null,
+          "df": null,
+          "clear": null
+        },
+        "uncertainty": {
+          "method": "synthetic-grouped-histogram",
+          "standardError": null
+        },
+        "selectionCoverage": {
+          "eligiblePlayers": 59,
+          "observedPlayers": 59,
+          "limitations": [
+            "Synthetic only; coarse grouped bins; no attempt outcomes."
+          ]
+        }
+      }
+    ],
+    "modelVersion": "cohort-prior/1",
+    "calibrationVersion": "synthetic-empirical-cdf/1",
+    "generatedAt": "2026-11-25T00:00:00Z",
+    "population": {
+      "kind": "synthetic",
+      "exclusion": "disjoint-evaluation-population",
+      "scopeRevision": "synthetic-disjoint/1"
+    }
+  }
+}

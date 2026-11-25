@@ -13,6 +13,7 @@ const { t, locale } = useI18n(), localePath = useLocalePath(), api = useViewerAp
 const { data, loading, busy, error, unavailable, legacy, refresh, command, evaluate, retryWrite } = useGoalPortfolio(() => props.identity, () => props.profileId);
 const ongoing = computed(() => data.value?.goals.filter(g => ['active', 'paused'].includes(g.lifecycleStatus)).sort((a, b) => a.userOrder - b.userOrder) || []);
 const history = computed(() => data.value?.goals.filter(g => ['completed', 'cancelled'].includes(g.lifecycleStatus)) || []);
+const predictionComparisonEnabled = useRuntimeConfig().public.predictionComparisonCandidate === true;
 const creating = ref(false), songId = ref<number | null>(null), difficulty = ref(4), options = ref<Array<{
     goalType: CreatableGoalType;
     target: Target;
@@ -105,6 +106,7 @@ defineExpose({ openCreate });
     <p v-if="createError" role="alert">{{ t(`portfolio.${createError}`) }}</p>
     <fieldset v-if="options.length"><legend>{{ optionTitle }}</legend><label v-for="option in options" :key="option.goalType"><input v-model="selected" type="radio" :value="option.goalType" :disabled="busy">{{ t(`home.goal.types.${option.goalType}`) }} · {{ targetText(option.target) }}</label><button type="button" class="rw-btn" :disabled="!selected || busy" @click="create">{{ t('portfolio.create') }}</button></fieldset>
    </form>
+   <GoalsPredictionComparison v-if="predictionComparisonEnabled" />
    <p v-if="!ongoing.length" class="rw-note">{{ t('portfolio.empty') }}</p>
    <ol v-else class="portfolio-list">
     <li v-for="(goal,index) in ongoing" :key="goal.id" class="portfolio-goal" :data-goal-id="goal.id">
