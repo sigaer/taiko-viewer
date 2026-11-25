@@ -57,7 +57,10 @@ def experiment(rows, manifest, *, progress=None):
     protocol_hash = hashlib.sha256(json.dumps(PROTOCOL, sort_keys=True).encode()).hexdigest()
     report = {'schemaVersion': 'prediction-experiment-report/1', 'population': 'synthetic-only',
               'protocol': PROTOCOL, 'protocolHash': protocol_hash, 'manifest': manifest,
-              'input': {'rows': len(rows), 'deduplicatedRows': len(unique), 'duplicateSnapshotsRemoved': len(rows) - len(unique)},
+              'input': {'rows': len(rows), 'deduplicatedRows': len(unique), 'duplicateSnapshotsRemoved': len(rows) - len(unique),
+                        'personalAvailableRows': sum(row.get('m0') is not None for row in unique),
+                        'personalInsufficientRows': sum(row.get('m0') is None for row in unique),
+                        'zeroHistoryRows': sum(row['historyCount'] == 0 for row in unique)},
               'splitAudits': [], 'results': [], 'primary': [],
               'decision': {'selectedModel': 'M0', 'hybridRecommended': False,
                            'reason': 'Synthetic fixtures test plumbing and leakage controls; they cannot establish real-player predictive gain.'},
@@ -72,7 +75,9 @@ def experiment(rows, manifest, *, progress=None):
             train, test = make_split(unique, split, fold, folds=3)
             audit = audit_split(train, test)
             report['splitAudits'].append({'split': split, 'fold': fold, 'trainingRevision': _training_revision(train),
-                                         'calibrationProvenance': 'entire-user exclusion; source m0 has no fitted cross-user parameters', **audit})
+                                         'calibrationProvenance': 'entire-user exclusion; source m0 has no fitted cross-user parameters',
+                                         'testPersonalAvailableRows': sum(row.get('m0') is not None for row in test),
+                                         'testPersonalInsufficientRows': sum(row.get('m0') is None for row in test), **audit})
             baseline = predict(train, test, 'M0')
             expected = {(row['user'], row['chart'], row['snapshot']) for row in baseline}
             for matching in MATCHINGS:
