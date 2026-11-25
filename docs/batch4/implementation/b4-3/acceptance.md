@@ -46,7 +46,9 @@ bash scripts/memory/run_qa.sh /absolute/node taiko_viewer/scripts/verify_predict
 | Contract/Artifact/身份修订 | PASS | 同一scope，19项Node测试 |
 | 严格TypeScript | PASS | 同一scope，prediction模块与直接边界 |
 | HTTP+Vue | PASS | 同一scope，404gate/400query/no-store、390/768/1440px、中文/日语、状态/失败重试、无横向溢出 |
-| 候选Nuxt构建 | BLOCKED_RESOURCE | 构建wrapper准入要求12.65GiB，首次检查仅10.54GiB；未绕过 |
+| 候选Nuxt构建 | BLOCKED_RESOURCE | 构建wrapper准入要求12.65GiB，首次及重试均低于门槛（约10.54–10.66GiB）；未绕过 |
+
+构建准入日志：`/var/tmp/taiko-b43-20261125/candidate-build.log` 与 `candidate-build-retry.log`。两次均在编译前拒绝准入，未执行替代构建、调整门槛或终止其他服务。
 
 QA证据根 `/home/sigaer/taiko/qa-vault/runs/<run>/evidence`。浏览器截图在 qa-6ad589d0c16a/evidence。所有临时监听器、浏览器及子进程在finally/cgroup清理；保留合成聚合报告和源码工作区。没有把停止或失败的scope标为PASS。
 
