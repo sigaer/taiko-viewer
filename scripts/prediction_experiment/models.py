@@ -13,6 +13,8 @@ MATCHINGS = ('rating', 'six', 'structure')
 BUDGETS = ('top10', 'top24', 'top40', 'top60', 'adaptive')
 MODELS = ('M0', 'M1', 'M2', 'M3', 'M4')
 CALIBRATION_USERS = 24  # fixed before inspecting experiment outcomes
+MIN_DISTINCT_PLAYERS = 5
+MIN_EFFECTIVE_SAMPLE_SIZE = 5.0
 
 
 def quantile(values, probability):
@@ -47,6 +49,10 @@ def _mean(values, weights):
 
 def _ess(weights):
     return sum(weights) ** 2 / sum(weight ** 2 for weight in weights) if weights else 0.0
+
+
+def _supported(pool):
+    return pool is not None and pool['count'] >= MIN_DISTINCT_PLAYERS and pool['ess'] >= MIN_EFFECTIVE_SAMPLE_SIZE
 
 
 class _Fit:
@@ -115,27 +121,32 @@ class _Fit:
     def point(self, query, model):
         baseline = float(query['m0'])
         target = self._neighbors(query, 'chart', model != 'M1')
-        metadata = {'covered': target is not None, 'distinctPlayerCount': target['count'] if target else 0,
+        metadata = {'covered': _supported(target), 'distinctPlayerCount': target['count'] if target else 0,
                     'effectiveSampleSize': target['ess'] if target else 0.0,
-                    'fallback': None, 'residualShrinkage': 0.0, 'hierarchy': 'chart' if target else 'none'}
+                    'fallback': None, 'residualShrinkage': 0.0, 'hierarchy': 'chart' if _supported(target) else 'none'}
         if model == 'M0':
             return baseline, metadata
         if model in ('M1', 'M2'):
-            if target is None:
-                metadata['fallback'] = 'personal:no-target-cohort'
+            if not _supported(target):
+                metadata['fallback'] = 'personal:insufficient-target-cohort'
                 return baseline, metadata
             return target['score'], metadata
         family = self._neighbors(query, 'family', True)
         global_pool = self._neighbors(query, 'global', True)
-        if family is None:
-            metadata['fallback'] = 'personal:no-family-cohort'
+        target = target if _supported(target) else None
+        family = family if _supported(family) else None
+        global_pool = global_pool if _supported(global_pool) else None
+        if target is None and family is None:
+            metadata['fallback'] = 'personal:insufficient-chart-and-family-cohort'
             return baseline, metadata
         # Hierarchy is train-only: global -> family -> chart. ESS controls
         # precision, while 12 equivalent users is a preregistered weak prior.
         value_key = 'residual' if model == 'M4' else 'score'
-        prior = global_pool[value_key] if global_pool else family[value_key]
-        family_weight = family['ess'] / (family['ess'] + 12.0)
-        estimate = family_weight * family[value_key] + (1 - family_weight) * prior
+        prior = global_pool[value_key] if global_pool else (family or target)[value_key]
+        estimate = prior
+        if family:
+            family_weight = family['ess'] / (family['ess'] + 12.0)
+            estimate = family_weight * family[value_key] + (1 - family_weight) * prior
         local = target or family
         if target:
             chart_weight = target['ess'] / (target['ess'] + 12.0)

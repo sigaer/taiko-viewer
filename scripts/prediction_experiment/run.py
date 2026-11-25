@@ -6,9 +6,10 @@ import argparse
 import hashlib
 import json
 import os
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
-from models import BUDGETS, CALIBRATION_USERS, MATCHINGS, MODELS, predict
+from models import BUDGETS, CALIBRATION_USERS, MATCHINGS, MIN_DISTINCT_PLAYERS, MIN_EFFECTIVE_SAMPLE_SIZE, MODELS, predict
 from validation import audit_split, deduplicate, make_split, metrics, paired_gain
 
 SPLITS = ('cross-user', 'chart-family', 'combined')
@@ -20,6 +21,7 @@ PROTOCOL = {
     'splits': list(SPLITS), 'folds': 3, 'calibrationMaximumUsers': CALIBRATION_USERS,
     'calibration': 'train-user-oof-residual-quantiles/1',
     'hierarchyPriorEquivalentUsers': 12,
+    'minimumCohortEvidence': {'distinctPlayers': MIN_DISTINCT_PLAYERS, 'effectiveSampleSize': MIN_EFFECTIVE_SAMPLE_SIZE},
     'kernelBandwidth': 'max(standardized distance to 24th selected neighbor,1)',
     'adaptiveBudget': 'first prefix >=10 reaching ESS24, cap60 distinct users',
     'bootstrapPrimary': 200, 'bootstrapExploratory': 50,
@@ -51,12 +53,50 @@ def _training_revision(rows):
     return 'sha256:' + hashlib.sha256(json.dumps(canonical, sort_keys=True, separators=(',', ':')).encode()).hexdigest()
 
 
-def experiment(rows, manifest, *, progress=None):
+def _source_fingerprints():
+    directory = Path(__file__).resolve().parent
+    return {name: 'sha256:' + hashlib.sha256((directory / name).read_bytes()).hexdigest()
+            for name in ('models.py', 'validation.py', 'personal_fixture.py', 'run.py')}
+
+
+def _fold_predictions(job):
+    rows, split, fold = job
+    train, test = make_split(rows, split, fold, folds=3)
+    audit = {'split': split, 'fold': fold, 'trainingRevision': _training_revision(train),
+             'calibrationProvenance': 'entire-user exclusion; source m0 has no fitted cross-user parameters',
+             'testPersonalAvailableRows': sum(row.get('m0') is not None for row in test),
+             'testPersonalInsufficientRows': sum(row.get('m0') is None for row in test), **audit_split(train, test)}
+    baseline = predict(train, test, 'M0')
+    expected = {(row['user'], row['chart'], row['snapshot']) for row in baseline}
+    outputs = {}
+    for matching in MATCHINGS:
+        for budget in BUDGETS:
+            for model in MODELS:
+                output = baseline if model == 'M0' else predict(train, test, model, matching, budget)
+                if {(row['user'], row['chart'], row['snapshot']) for row in output} != expected:
+                    raise AssertionError('model evaluable testcase set changed')
+                outputs[(matching, budget, model)] = output
+    return fold, audit, outputs
+
+
+def _folds(rows, split, workers):
+    jobs = [(rows, split, fold) for fold in range(3)]
+    if workers == 1:
+        yield from map(_fold_predictions, jobs)
+    else:
+        with ProcessPoolExecutor(max_workers=workers) as executor:
+            yield from executor.map(_fold_predictions, jobs)
+
+
+def experiment(rows, manifest, *, progress=None, workers=1):
     """No row, prediction, user identity or per-user metric leaves this function."""
     unique = deduplicate(rows)
+    if workers not in (1, 2):
+        raise ValueError('workers must be bounded to 1 or 2')
     protocol_hash = hashlib.sha256(json.dumps(PROTOCOL, sort_keys=True).encode()).hexdigest()
     report = {'schemaVersion': 'prediction-experiment-report/1', 'population': 'synthetic-only',
-              'protocol': PROTOCOL, 'protocolHash': protocol_hash, 'manifest': manifest,
+              'protocol': PROTOCOL, 'protocolHash': protocol_hash, 'sourceFingerprints': _source_fingerprints(),
+              'execution': {'workers': workers}, 'manifest': manifest,
               'input': {'rows': len(rows), 'deduplicatedRows': len(unique), 'duplicateSnapshotsRemoved': len(rows) - len(unique),
                         'personalAvailableRows': sum(row.get('m0') is not None for row in unique),
                         'personalInsufficientRows': sum(row.get('m0') is None for row in unique),
@@ -71,22 +111,10 @@ def experiment(rows, manifest, *, progress=None):
                               'No result is an authorization to deploy, replace production recommendations or import players.']}
     for split in SPLITS:
         accumulated = {(matching, budget, model): [] for matching in MATCHINGS for budget in BUDGETS for model in MODELS}
-        for fold in range(3):
-            train, test = make_split(unique, split, fold, folds=3)
-            audit = audit_split(train, test)
-            report['splitAudits'].append({'split': split, 'fold': fold, 'trainingRevision': _training_revision(train),
-                                         'calibrationProvenance': 'entire-user exclusion; source m0 has no fitted cross-user parameters',
-                                         'testPersonalAvailableRows': sum(row.get('m0') is not None for row in test),
-                                         'testPersonalInsufficientRows': sum(row.get('m0') is None for row in test), **audit})
-            baseline = predict(train, test, 'M0')
-            expected = {(row['user'], row['chart'], row['snapshot']) for row in baseline}
-            for matching in MATCHINGS:
-                for budget in BUDGETS:
-                    for model in MODELS:
-                        output = baseline if model == 'M0' else predict(train, test, model, matching, budget)
-                        if {(row['user'], row['chart'], row['snapshot']) for row in output} != expected:
-                            raise AssertionError('model evaluable testcase set changed')
-                        accumulated[(matching, budget, model)].extend(output)
+        for fold, audit, outputs in _folds(unique, split, workers):
+            report['splitAudits'].append(audit)
+            for key, output in outputs.items():
+                accumulated[key].extend(output)
             if progress:
                 progress(f'{split} fold {fold + 1}/3 complete')
         for matching in MATCHINGS:
@@ -111,13 +139,14 @@ def main():
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--core-source', type=Path, required=True, help='Lead-exported pinned Bot core source; no runtime data')
     parser.add_argument('--seed', type=int, default=4301)
+    parser.add_argument('--workers', type=int, choices=(1, 2), default=2)
     arguments = parser.parse_args()
     if not arguments.core_source.is_dir():
         parser.error('--core-source must be the explicit frozen source directory')
     os.environ['B43_CORE_SOURCE'] = str(arguments.core_source.resolve())
     from personal_fixture import generate
     rows, manifest = generate(seed=arguments.seed)
-    report = experiment(rows, manifest, progress=lambda message: print(message, flush=True))
+    report = experiment(rows, manifest, progress=lambda message: print(message, flush=True), workers=arguments.workers)
     arguments.output.parent.mkdir(parents=True, exist_ok=True)
     arguments.output.write_text(json.dumps(report, ensure_ascii=False, indent=2, allow_nan=False) + '\n')
     print(f'Aggregate synthetic report written: {arguments.output}', flush=True)

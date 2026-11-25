@@ -56,6 +56,24 @@ class ModelTests(unittest.TestCase):
         self.assertEqual(output['hierarchy'], 'family')
         self.assertFalse(output['covered'])
 
+    def test_tiny_cohort_falls_back_instead_of_implying_sufficient_evidence(self):
+        for count in (1, 4):
+            for model in ('M1', 'M2', 'M3', 'M4'):
+                output = predict(self.train[:count], self.test, model)[0]
+                self.assertEqual(output['point'], output['m0'], (count, model))
+                self.assertEqual(output['distinctPlayerCount'], count)
+                self.assertFalse(output['covered'])
+                self.assertIsNotNone(output['fallback'])
+        # Five observations can still have insufficient effective sample size.
+        fit = _Fit(self.train[:5], 'rating', 'top24')
+        query = self.test[0]
+        fit._neighbors = lambda query, scope, kernel: {'score': 1000000, 'residual': 50000,
+                                                      'variance': 1000000, 'count': 5, 'ess': 4.99}
+        for model in ('M1', 'M2', 'M3', 'M4'):
+            point, metadata = fit.point(query, model)
+            self.assertEqual(point, query['m0'])
+            self.assertIsNotNone(metadata['fallback'])
+
     def test_cold_personal_unavailable_has_shared_evaluable_set(self):
         test = self.test + [row('cold-user', m0=None)]
         for model in MODELS:
