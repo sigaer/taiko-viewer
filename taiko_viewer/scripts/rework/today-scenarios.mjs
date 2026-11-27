@@ -278,7 +278,7 @@ export async function runTodayScenarios({ browser, base, out, web = webRoot, lab
         assert.equal(login.pathname, `${prefix(lang)}/account/login`);
         assert.equal(login.searchParams.get("redirect"), `${prefix(lang)}${path}`, "back to this page after sign-in");
         assert.equal((await page.locator("h1").first().textContent()).trim(), msg(m, path === "/my/growth" ? "passport.title" : "weekly.title"));
-        assert.equal(await page.locator(`.desktop-tabs a[aria-current="page"]`).getAttribute("href"), `${prefix(lang)}${path}`);
+        assert.equal(await page.locator(`.mobile-tabs a[aria-current="page"]`).getAttribute("href"), `${prefix(lang)}${path}`);
         if (lang === "zh") await shot(page, `ssr-signed-out-${path.split("/").pop()}-zh-1440-light`);
       }
       await page.goto(`${base}${prefix(lang)}/`, { waitUntil: "networkidle" });
@@ -320,7 +320,7 @@ export async function runTodayScenarios({ browser, base, out, web = webRoot, lab
       const viewport = width < 500 ? 844 : 900;
       if (width < 768) assert.ok(firstSong < viewport, `first latest song on the first screen (${Math.round(firstSong)} < ${viewport})`);
       assert.ok(await noOverflow(page), "no horizontal overflow");
-      assert.equal(await page.locator(".desktop-tabs a, .mobile-tabs a").count(), 0, "今日 has no section tabs");
+      assert.equal(await page.locator(".mobile-tabs a").count(), 0, "今日 has no section tabs");
       const key = `${lang}-${width}-${theme}`;
       if (shots.has(key)) await shot(page, `guest-${key}`, width >= 1440);
       return { firstSongTop: Math.round(firstSong) };
@@ -682,7 +682,7 @@ export async function runTodayScenarios({ browser, base, out, web = webRoot, lab
       assert.equal((await page.locator("h1").first().textContent()).trim(), msg(m, "passport.title"));
       h1Left.growth = Math.round(await page.locator("h1").first().evaluate((el) => el.getBoundingClientRect().left));
       assert.ok(await noOverflow(page), "growth: no horizontal overflow");
-      const sel = width < 768 ? ".mobile-tabs" : ".desktop-tabs";
+      const sel = ".mobile-tabs";
       assert.deepEqual(await page.$$eval(`${sel} a`, (as) => as.map((a) => [a.getAttribute("href"), a.textContent.trim()])), [[`${prefix(lang)}/my/growth`, msg(m, "passport.title")], [`${prefix(lang)}/my/weekly`, msg(m, "weekly.title")]]);
       const key = `${lang}-${width}-${theme}`;
       if (shots.has(key)) await shot(page, `growth-intercepted-${key}`, true);

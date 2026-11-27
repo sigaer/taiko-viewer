@@ -21,30 +21,51 @@ const ROOT = resolve(here, "..", "..");
 export const TOKEN_FILE = join(ROOT, "assets", "css", "ds", "tokens.css");
 export const SNAPSHOT = join(here, "spec", "tokens-v1.3-cplus.json");
 /**
- * Slice G colour tuning (viewer-ds.md §实施调色（2026-11-18）): the only deliberate differences from the frozen
- * prototype. The snapshot is the prototype cascade with this overlay applied; with --prototype the production file
- * must equal prototype + overlay, and production with the overlay reverted must equal the prototype and docs/04.
+ * Deliberate differences from the frozen prototype, applied in order: the slice G colour tuning
+ * (viewer-ds.md §实施调色（2026-11-18）) and the redesign palette (viewer-ds.md §改版调色（2026-11-27）).
+ * The snapshot is the prototype cascade with these overlays applied; with --prototype the production file must equal
+ * prototype + overlays, and production with the overlays reverted must equal the prototype and docs/04.
+ * Overlay shape: changed.{both,light,dark,stage}[name] = { prototype, tuned } (prototype null = the token itself was
+ * added by an earlier overlay), added.{both,light,dark,stage}[name] = value; `both` is the light and dark theme alike.
  */
-export const TUNING_FILE = join(here, "spec", "tuning-2026-11-18.json");
-export const TUNING = JSON.parse(readFileSync(TUNING_FILE, "utf8"));
+export const TUNING_FILES = ["tuning-2026-11-18.json", "tuning-2026-11-27.json"].map((f) => join(here, "spec", f));
+export const TUNINGS = TUNING_FILES.map((f) => JSON.parse(readFileSync(f, "utf8")));
+export const TUNING_FILE = TUNING_FILES[0];
+export const TUNING = TUNINGS[0];
 const decls = (map) => Object.entries(map).map(([k, v]) => `${k}: ${v};`).join(" ");
-/** CSS that applies the tuning on top of the prototype cascade (C+ teal selectors). */
-export function prototypeTuningCss(t = TUNING) {
-  const light = { ...Object.fromEntries(Object.entries(t.changed.light).map(([k, v]) => [k, v.tuned])), ...t.added.light };
-  const dark = { ...Object.fromEntries(Object.entries(t.changed.dark).map(([k, v]) => [k, v.tuned])), ...t.added.dark };
-  return `:root[data-brand='teal']:not([data-theme='dark']) { ${decls(light)} }
-:root[data-brand='teal'][data-theme='dark'] { ${decls(dark)} }
-:root[data-brand='teal'] .stage { ${decls(t.added.stage)} }
-`;
+const part = (t, kind, key) => t[kind]?.[key] || {};
+const tuned = (t, key) => Object.fromEntries(Object.entries(part(t, "changed", key)).map(([k, v]) => [k, v.tuned]));
+const themed = (t, theme) => ({ ...tuned(t, "both"), ...tuned(t, theme), ...part(t, "added", "both"), ...part(t, "added", theme) });
+/** CSS that applies the overlays on top of the prototype cascade (C+ teal selectors). */
+export function prototypeTuningCss(ts = TUNINGS) {
+  return ts
+    .map(
+      (t) => `:root[data-brand='teal']:not([data-theme='dark']) { ${decls(themed(t, "light"))} }
+:root[data-brand='teal'][data-theme='dark'] { ${decls(themed(t, "dark"))} }
+:root[data-brand='teal'] .stage { ${decls({ ...tuned(t, "stage"), ...part(t, "added", "stage") })} }
+`
+    )
+    .join("");
 }
 /** CSS that puts the prototype values back over the production file (production selectors). */
-export function productionRevertCss(t = TUNING) {
-  const back = (theme) => decls(Object.fromEntries(Object.entries(t.changed[theme]).map(([k, v]) => [k, v.prototype])));
-  return `html.ds-preview:not([data-theme="dark"]) { ${back("light")} }
-html.ds-preview[data-theme="dark"] { ${back("dark")} }
-`;
+export function productionRevertCss(ts = TUNINGS) {
+  const back = (t, keys) =>
+    decls(Object.fromEntries(keys.flatMap((key) => Object.entries(part(t, "changed", key))).filter(([, v]) => v.prototype != null).map(([k, v]) => [k, v.prototype])));
+  return ts
+    .map(
+      (t) => `html.ds-preview:not([data-theme="dark"]) { ${back(t, ["both", "light"])} }
+html.ds-preview[data-theme="dark"] { ${back(t, ["both", "dark"])} }
+html.ds-preview .stage { ${back(t, ["stage"])} }
+`
+    )
+    .join("");
 }
-export const TUNING_ADDED = Object.fromEntries([...Object.keys(TUNING.added.light), ...Object.keys(TUNING.added.dark), ...Object.keys(TUNING.added.stage)].map((k) => [k, "added by the slice G tuning"]));
+const addedBy = (t) => [
+  ...["both", "light", "dark", "stage"].flatMap((key) => Object.keys(part(t, "added", key))),
+  ...["both", "light", "dark", "stage"].flatMap((key) => Object.entries(part(t, "changed", key)).filter(([, v]) => v.prototype == null).map(([k]) => k))
+];
+export const TUNING_ADDED = Object.fromEntries(TUNINGS.flatMap(addedBy).map((k) => [k, "added by a colour tuning overlay"]));
+const tuningCount = (key) => TUNINGS.reduce((s, t) => s + ["both", "light", "dark", "stage"].reduce((n, k) => n + Object.keys(part(t, key, k)).length, 0), 0);
 
 /** Prototype-only tokens that intentionally do not exist in production (name -> reason). */
 export const PROTOTYPE_ONLY = {
@@ -344,7 +365,7 @@ if (isMain) {
     const pure = strip(resolveContexts(prototypeFiles(protoDir), PROTO_CONTEXTS));
     const reverted = resolveContexts([...productionFiles(), { name: "tuning revert", css: productionRevertCss() }], PROD_CONTEXTS);
     problems.push(...diffResolved(pure, reverted, "prototype (tuning reverted)", TUNING_ADDED));
-    console.log(`tuning: ${Object.keys(TUNING.changed.light).length + Object.keys(TUNING.changed.dark).length} changed and ${Object.keys(TUNING_ADDED).length} added tokens (${TUNING_FILE.split(/[\/]/).pop()})`);
+    console.log(`tuning: ${tuningCount("changed")} changed and ${tuningCount("added")} added declarations (${TUNING_FILES.map((f) => f.split(/[\\/]/).pop()).join(" + ")})`);
     const docPath = join(protoDir, "docs", "04-design-system.md");
     if (existsSync(docPath)) {
       const doc = checkDoc(readFileSync(docPath, "utf8"), reverted);
@@ -355,8 +376,10 @@ if (isMain) {
     if (args.includes("--write-snapshot")) {
       let commit = null;
       try {
-        commit = execFileSync("git", ["rev-parse", "--short", "HEAD"], { cwd: protoDir, encoding: "utf8" }).trim();
+        commit = execFileSync("git", ["rev-parse", "--short", "HEAD"], { cwd: protoDir, encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }).trim();
       } catch {}
+      // a prototype extracted outside git (git archive) keeps the commit recorded in the current snapshot
+      if (!commit && existsSync(SNAPSHOT)) commit = JSON.parse(readFileSync(SNAPSHOT, "utf8")).commit;
       mkdirSync(dirname(SNAPSHOT), { recursive: true });
       writeFileSync(
         SNAPSHOT,

@@ -6,7 +6,7 @@ Input for stage 1 (aliasing `--viewer-*` to V1.3 tokens and switching Element Pl
 
 ## --viewer-* (63)
 
-alias keeps the look: 6 · alias changes the look: 38 · no equivalent: 19
+alias keeps the look: 3 · alias changes the look: 41 · no equivalent: 19
 
 | old | new | light old → new | dark old → new | light | dark | readers | verdict |
 |---|---|---|---|---|---|---|---|
@@ -14,33 +14,33 @@ alias keeps the look: 6 · alias changes the look: 38 · no equivalent: 19
 | `--viewer-font-ja` | `--font-cjk-jp` | -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, 'Noto Sans CJK JP', 'Noto Sans JP', sans-serif → 'Noto Sans JP Variable', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif | -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, 'Noto Sans CJK JP', 'Noto Sans JP', sans-serif → 'Noto Sans JP Variable', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif | differs | differs | 1 | alias changes the look |
 | `--viewer-font-family` | `--font-ui` | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Barlow', 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Barlow', 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | differs | differs | 24 | alias changes the look |
 | `--viewer-display-font` | `--font-ui` | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Barlow', 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Barlow', 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | differs | differs | 31 | alias changes the look |
-| `--viewer-bg` | `--bg` | #eaf6f5 → #f0f4f4 | #10282b → #0c2023 | differs | differs | 2 | alias changes the look |
-| `--viewer-surface` | `--surface` | #f9fdfc → #ffffff | #193338 → #1a383d | differs | differs | 5 | alias changes the look |
-| `--viewer-surface-subtle` | `--bg-sunk` | #def0ee → #e4eaea | #234247 → #081619 | differs | differs | 6 | alias changes the look |
-| `--viewer-surface-hover` | `--surface-2` | #d2e9e6 → #f7f9f9 | #2b5054 → #234a50 | differs | differs | 2 | alias changes the look |
-| `--viewer-text` | `--ink` | #203f43 → #203f43 | #e4f4f1 → #e4f4f1 | same | same | 5 | alias keeps the look |
-| `--viewer-text-muted` | `--ink-3` | #4d696c → #4d696c | #accbca → #a3c0c0 | same | differs | 7 | alias changes the look |
-| `--viewer-text-disabled` | `--ink-3` | #72888b → #4d696c | #829fa1 → #a3c0c0 | differs | differs | 1 | alias changes the look |
-| `--viewer-border` | `--line` | #ccdfdc → #d3dcdc | #35575a → #2f5257 | differs | differs | 5 | alias changes the look |
-| `--viewer-control-border` | `--ctl-border` | #6e8c8e → #6e8c8e | #719b9d → #779fa1 | same | differs | 1 | alias changes the look |
-| `--viewer-primary` | `--action-bg` | #bd352f → #006c76 | #ff9a8e → #45aeb5 | differs | differs | 1 | alias changes the look |
-| `--viewer-primary-hover` | `--action-bg-hover` | #ac302b → #005860 | #ffa99f → #5cbcc2 | differs | differs | 1 | alias changes the look |
-| `--viewer-on-primary` | `--action-ink` | #ffffff → #ffffff | #193438 → #0b2a2d | same | differs | 1 | alias changes the look |
-| `--viewer-link` | `--link` | #006c76 → #006c76 | #86d9dc → #86d9dc | same | same | 2 | alias keeps the look |
-| `--viewer-selected` | `--selected-bg` | #d7ece9 → #d7ece9 | #244b4e → #2a565a | same | differs | 1 | alias changes the look |
-| `--viewer-primary-surface` | `--selected-bg` | #fbece9 → #d7ece9 | #493638 → #2a565a | differs | differs | 0 | alias changes the look |
-| `--viewer-success` | `--ok` | #26724e → #26724e | #86d3a8 → #4ccb8a | same | differs | 1 | alias changes the look |
-| `--viewer-success-surface` | `--ok-wash` | #edf6f0 → #e4f3ea | #233c31 → #153527 | differs | differs | 0 | alias changes the look |
+| `--viewer-bg` | `--bg` | #eaf6f5 → #f4f5f8 | #10282b → #0f1120 | differs | differs | 2 | alias changes the look |
+| `--viewer-surface` | `--surface` | #f9fdfc → #ffffff | #193338 → #191c30 | differs | differs | 5 | alias changes the look |
+| `--viewer-surface-subtle` | `--bg-sunk` | #def0ee → #eceef3 | #234247 → #0a0c18 | differs | differs | 6 | alias changes the look |
+| `--viewer-surface-hover` | `--surface-2` | #d2e9e6 → #f8f9fb | #2b5054 → #22263e | differs | differs | 2 | alias changes the look |
+| `--viewer-text` | `--ink` | #203f43 → #15182a | #e4f4f1 → #eef0f7 | differs | differs | 5 | alias changes the look |
+| `--viewer-text-muted` | `--ink-3` | #4d696c → #636982 | #accbca → #9399b4 | differs | differs | 7 | alias changes the look |
+| `--viewer-text-disabled` | `--ink-3` | #72888b → #636982 | #829fa1 → #9399b4 | differs | differs | 1 | alias changes the look |
+| `--viewer-border` | `--line` | #ccdfdc → #e2e5ec | #35575a → #2c3150 | differs | differs | 5 | alias changes the look |
+| `--viewer-control-border` | `--ctl-border` | #6e8c8e → #858ba3 | #719b9d → #7c83a3 | differs | differs | 1 | alias changes the look |
+| `--viewer-primary` | `--action-bg` | #bd352f → #d8391f | #ff9a8e → #d8391f | differs | differs | 1 | alias changes the look |
+| `--viewer-primary-hover` | `--action-bg-hover` | #ac302b → #be2f17 | #ffa99f → #c8321a | differs | differs | 1 | alias changes the look |
+| `--viewer-on-primary` | `--action-ink` | #ffffff → #ffffff | #193438 → #ffffff | same | differs | 1 | alias changes the look |
+| `--viewer-link` | `--link` | #006c76 → #1770a8 | #86d9dc → #7cc4f0 | differs | differs | 2 | alias changes the look |
+| `--viewer-selected` | `--selected-bg` | #d7ece9 → #fdebe6 | #244b4e → #3a2026 | differs | differs | 1 | alias changes the look |
+| `--viewer-primary-surface` | `--selected-bg` | #fbece9 → #fdebe6 | #493638 → #3a2026 | differs | differs | 0 | alias changes the look |
+| `--viewer-success` | `--ok` | #26724e → #1e7a4f | #86d3a8 → #4ccb8a | differs | differs | 1 | alias changes the look |
+| `--viewer-success-surface` | `--ok-wash` | #edf6f0 → #e2f4ea | #233c31 → #153527 | differs | differs | 0 | alias changes the look |
 | `--viewer-warning` | `--warn` | #8b5c16 → #906200 | #edc57e → #ffd568 | differs | differs | 1 | alias changes the look |
 | `--viewer-warning-surface` | `--warn-wash` | #fbf4e4 → #fdf0c8 | #3b3526 → #38301a | differs | differs | 1 | alias changes the look |
 | `--viewer-error` | `--danger` | #b22d40 → #c42b13 | #ff9eac → #ff8266 | differs | differs | 2 | alias changes the look |
 | `--viewer-error-surface` | `--danger-wash` | #fceef1 → #fde4de | #422b34 → #3b1f24 | differs | differs | 1 | alias changes the look |
-| `--viewer-info` | `--ink-2` | #426785 → #3d5a5e | #a4c8e3 → #accbca | differs | differs | 0 | alias changes the look |
-| `--viewer-info-surface` | `--bg-sunk` | #edf3f8 → #e4eaea | #273b4b → #081619 | differs | differs | 0 | alias changes the look |
-| `--viewer-overlay` | `--scrim` | #0f1b21/42% → #0f1b21/46% | #00080d/65% → #050e10/62% | differs | differs | 3 | alias changes the look |
+| `--viewer-info` | `--ink-2` | #426785 → #454b64 | #a4c8e3 → #b5bad0 | differs | differs | 0 | alias changes the look |
+| `--viewer-info-surface` | `--bg-sunk` | #edf3f8 → #eceef3 | #273b4b → #0a0c18 | differs | differs | 0 | alias changes the look |
+| `--viewer-overlay` | `--scrim` | #0f1b21/42% → #15182a/46% | #00080d/65% → #05060e/62% | differs | differs | 3 | alias changes the look |
 | `--viewer-shadow` | — | #162b30/6% → — | #00080d/22% → — | — | — | 1 | no equivalent |
-| `--viewer-tooltip-bg` | `--overlay-bg` | #24494d → #ffffff | #31565b → #265056 | differs | differs | 1 | alias changes the look |
-| `--viewer-tooltip-text` | `--ink` | #f1fbf9 → #203f43 | #f1fbf9 → #e4f4f1 | differs | differs | 1 | alias changes the look |
+| `--viewer-tooltip-bg` | `--overlay-bg` | #24494d → #ffffff | #31565b → #22263e | differs | differs | 1 | alias changes the look |
+| `--viewer-tooltip-text` | `--ink` | #f1fbf9 → #15182a | #f1fbf9 → #eef0f7 | differs | differs | 1 | alias changes the look |
 | `--viewer-media-overlay` | — | #091b1f/90% → — | #091b1f/90% → — | — | — | 1 | no equivalent |
 | `--viewer-media-text` | — | #f1fbf9 → — | #f1fbf9 → — | — | — | 1 | no equivalent |
 | `--viewer-pattern` | — | #006c76/12% → — | #86d9dc/12% → — | — | — | 0 | no equivalent |
@@ -68,85 +68,85 @@ alias keeps the look: 6 · alias changes the look: 38 · no equivalent: 19
 | `--viewer-content-wide` | — | 1180px → — | 1180px → — | — | — | 1 | no equivalent |
 | `--viewer-content-reading` | — | 800px → — | 800px → — | — | — | 1 | no equivalent |
 | `--viewer-page-gutter` | `--gutter` | clamp(24px, 3vw, 48px) → 28px | clamp(24px, 3vw, 48px) → 28px | differs | differs | 1 | alias changes the look |
-| `--viewer-bg-top` | `--bg` | #eaf6f5 → #f0f4f4 | #10282b → #0c2023 | differs | differs | 0 | alias changes the look |
-| `--viewer-bg-mid` | `--bg` | #eaf6f5 → #f0f4f4 | #10282b → #0c2023 | differs | differs | 0 | alias changes the look |
-| `--viewer-bg-bottom` | `--bg` | #eaf6f5 → #f0f4f4 | #10282b → #0c2023 | differs | differs | 0 | alias changes the look |
-| `--viewer-accent` | `--action-bg` | #bd352f → #006c76 | #ff9a8e → #45aeb5 | differs | differs | 0 | alias changes the look |
-| `--viewer-accent-strong` | `--link` | #006c76 → #006c76 | #86d9dc → #86d9dc | same | same | 2 | alias keeps the look |
+| `--viewer-bg-top` | `--bg` | #eaf6f5 → #f4f5f8 | #10282b → #0f1120 | differs | differs | 0 | alias changes the look |
+| `--viewer-bg-mid` | `--bg` | #eaf6f5 → #f4f5f8 | #10282b → #0f1120 | differs | differs | 0 | alias changes the look |
+| `--viewer-bg-bottom` | `--bg` | #eaf6f5 → #f4f5f8 | #10282b → #0f1120 | differs | differs | 0 | alias changes the look |
+| `--viewer-accent` | `--action-bg` | #bd352f → #d8391f | #ff9a8e → #d8391f | differs | differs | 0 | alias changes the look |
+| `--viewer-accent-strong` | `--link` | #006c76 → #1770a8 | #86d9dc → #7cc4f0 | differs | differs | 2 | alias changes the look |
 
 ## --el-* (68): production mapping → V1.3 mapping (as on the sample pages)
 
-alias keeps the look: 6 · alias changes the look: 62 · no equivalent: 0
+alias keeps the look: 4 · alias changes the look: 64 · no equivalent: 0
 
 | variable | light old → new | dark old → new | light | dark | readers | verdict |
 |---|---|---|---|---|---|---|
-| `--el-color-primary` | #bd352f → #006c76 | #ff9a8e → #45aeb5 | differs | differs | 2 | alias changes the look |
-| `--el-color-primary-dark-2` | #ac302b → #005860 | #ffa99f → #5cbcc2 | differs | differs | 0 | alias changes the look |
-| `--el-color-primary-light-3` | #cf716d → #4d989f | #ba7b74 → #388b91 | differs | differs | 0 | alias changes the look |
-| `--el-color-primary-light-5` | #db9996 → #80b6bb | #8c6763 → #307379 | differs | differs | 0 | alias changes the look |
-| `--el-color-primary-light-7` | #eacbc9 → #bfdadd | #534d4e → #25565b | differs | differs | 0 | alias changes the look |
-| `--el-color-primary-light-8` | #f0dfdd → #d9e9ea | #3c4245 → #204a4f | differs | differs | 0 | alias changes the look |
-| `--el-color-primary-light-9` | #fbece9 → #d7ece9 | #493638 → #2a565a | differs | differs | 0 | alias changes the look |
-| `--el-color-success` | #26724e → #26724e | #86d3a8 → #4ccb8a | same | differs | 0 | alias changes the look |
-| `--el-color-success-light-3` | #659c82 → #679c83 | #65a386 → #3d9f73 | differs | differs | 0 | alias changes the look |
-| `--el-color-success-light-5` | #90b8a5 → #93b9a7 | #508370 → #338264 | differs | differs | 0 | alias changes the look |
-| `--el-color-success-light-7` | #c4dad1 → #c9dcd3 | #345b54 → #275d50 | differs | differs | 0 | alias changes the look |
-| `--el-color-success-light-8` | #d9e8e2 → #deeae4 | #294b49 → #224e49 | differs | differs | 0 | alias changes the look |
-| `--el-color-success-light-9` | #edf6f0 → #e4f3ea | #233c31 → #153527 | differs | differs | 0 | alias changes the look |
+| `--el-color-primary` | #bd352f → #d8391f | #ff9a8e → #d8391f | differs | differs | 2 | alias changes the look |
+| `--el-color-primary-dark-2` | #ac302b → #be2f17 | #ffa99f → #c8321a | differs | differs | 0 | alias changes the look |
+| `--el-color-primary-light-3` | #cf716d → #e47462 | #ba7b74 → #9f3024 | differs | differs | 0 | alias changes the look |
+| `--el-color-primary-light-5` | #db9996 → #ec9c8f | #8c6763 → #792b28 | differs | differs | 0 | alias changes the look |
+| `--el-color-primary-light-7` | #eacbc9 → #f5cec7 | #534d4e → #49232c | differs | differs | 0 | alias changes the look |
+| `--el-color-primary-light-8` | #f0dfdd → #f9e1dd | #3c4245 → #36202d | differs | differs | 0 | alias changes the look |
+| `--el-color-primary-light-9` | #fbece9 → #fdebe6 | #493638 → #3a2026 | differs | differs | 0 | alias changes the look |
+| `--el-color-success` | #26724e → #1e7a4f | #86d3a8 → #4ccb8a | differs | differs | 0 | alias changes the look |
+| `--el-color-success-light-3` | #659c82 → #62a284 | #65a386 → #3d976f | differs | differs | 0 | alias changes the look |
+| `--el-color-success-light-5` | #90b8a5 → #8fbda7 | #508370 → #33745d | differs | differs | 0 | alias changes the look |
+| `--el-color-success-light-7` | #c4dad1 → #c7ded3 | #345b54 → #264847 | differs | differs | 0 | alias changes the look |
+| `--el-color-success-light-8` | #d9e8e2 → #ddebe5 | #294b49 → #21363e | differs | differs | 0 | alias changes the look |
+| `--el-color-success-light-9` | #edf6f0 → #e2f4ea | #233c31 → #153527 | differs | differs | 0 | alias changes the look |
 | `--el-color-warning` | #8b5c16 → #906200 | #edc57e → #ffd568 | differs | differs | 0 | alias changes the look |
-| `--el-color-warning-light-3` | #ac8c5b → #b1914d | #ad9969 → #baa65b | differs | differs | 0 | alias changes the look |
-| `--el-color-warning-light-5` | #c2ad89 → #c8b180 | #837c5b → #8d8753 | differs | differs | 0 | alias changes the look |
-| `--el-color-warning-light-7` | #ded5c3 → #e3d8bf | #4e584a → #535f48 | differs | differs | 0 | alias changes the look |
-| `--el-color-warning-light-8` | #e9e5da → #eee7d9 | #394943 → #3c5043 | differs | differs | 0 | alias changes the look |
+| `--el-color-warning-light-3` | #ac8c5b → #b1914d | #ad9969 → #ba9e57 | differs | differs | 0 | alias changes the look |
+| `--el-color-warning-light-5` | #c2ad89 → #c8b180 | #837c5b → #8c794c | differs | differs | 0 | alias changes the look |
+| `--el-color-warning-light-7` | #ded5c3 → #e3d8bf | #4e584a → #534a3e | differs | differs | 0 | alias changes the look |
+| `--el-color-warning-light-8` | #e9e5da → #eee7d9 | #394943 → #3c3838 | differs | differs | 0 | alias changes the look |
 | `--el-color-warning-light-9` | #fbf4e4 → #fdf0c8 | #3b3526 → #38301a | differs | differs | 0 | alias changes the look |
-| `--el-color-danger` | #b22d40 → #c42b13 | #ff9eac → #ff8266 | differs | differs | 2 | alias changes the look |
-| `--el-color-danger-light-3` | #c76b78 → #d66b5a | #ba7e89 → #ba6c5a | differs | differs | 0 | alias changes the look |
-| `--el-color-danger-light-5` | #d6959e → #e29589 | #8c6972 → #8d5d52 | differs | differs | 0 | alias changes the look |
-| `--el-color-danger-light-7` | #e7c9cd → #f0cac4 | #534e55 → #534b47 | differs | differs | 0 | alias changes the look |
-| `--el-color-danger-light-8` | #eedee0 → #f6dfdc | #3c4349 → #3c4343 | differs | differs | 0 | alias changes the look |
+| `--el-color-danger` | #b22d40 → #c42b13 | #ff9eac → #ff8266 | differs | differs | 3 | alias changes the look |
+| `--el-color-danger-light-3` | #c76b78 → #d66b5a | #ba7e89 → #ba6356 | differs | differs | 0 | alias changes the look |
+| `--el-color-danger-light-5` | #d6959e → #e29589 | #8c6972 → #8c4f4b | differs | differs | 0 | alias changes the look |
+| `--el-color-danger-light-7` | #e7c9cd → #f0cac4 | #534e55 → #53363e | differs | differs | 0 | alias changes the look |
+| `--el-color-danger-light-8` | #eedee0 → #f6dfdc | #3c4349 → #3c2b38 | differs | differs | 0 | alias changes the look |
 | `--el-color-danger-light-9` | #fceef1 → #fde4de | #422b34 → #3b1f24 | differs | differs | 1 | alias changes the look |
 | `--el-color-error` | #b22d40 → #c42b13 | #ff9eac → #ff8266 | differs | differs | 0 | alias changes the look |
-| `--el-color-error-light-3` | #c76b78 → #d66b5a | #ba7e89 → #ba6c5a | differs | differs | 0 | alias changes the look |
-| `--el-color-error-light-5` | #d6959e → #e29589 | #8c6972 → #8d5d52 | differs | differs | 0 | alias changes the look |
-| `--el-color-error-light-7` | #e7c9cd → #f0cac4 | #534e55 → #534b47 | differs | differs | 0 | alias changes the look |
-| `--el-color-error-light-8` | #eedee0 → #f6dfdc | #3c4349 → #3c4343 | differs | differs | 0 | alias changes the look |
+| `--el-color-error-light-3` | #c76b78 → #d66b5a | #ba7e89 → #ba6356 | differs | differs | 0 | alias changes the look |
+| `--el-color-error-light-5` | #d6959e → #e29589 | #8c6972 → #8c4f4b | differs | differs | 0 | alias changes the look |
+| `--el-color-error-light-7` | #e7c9cd → #f0cac4 | #534e55 → #53363e | differs | differs | 0 | alias changes the look |
+| `--el-color-error-light-8` | #eedee0 → #f6dfdc | #3c4349 → #3c2b38 | differs | differs | 0 | alias changes the look |
 | `--el-color-error-light-9` | #fceef1 → #fde4de | #422b34 → #3b1f24 | differs | differs | 0 | alias changes the look |
-| `--el-color-info` | #426785 → #3d5a5e | #a4c8e3 → #accbca | differs | differs | 0 | alias changes the look |
-| `--el-color-info-light-3` | #7994a9 → #778c8e | #7a9bb0 → #809fa0 | differs | differs | 0 | alias changes the look |
-| `--el-color-info-light-5` | #9eb2c1 → #9eadaf | #5f7e8e → #638284 | differs | differs | 0 | alias changes the look |
-| `--el-color-info-light-7` | #cbd8de → #cfd6d7 | #3c5863 → #3f5d60 | differs | differs | 0 | alias changes the look |
-| `--el-color-info-light-8` | #dee6ea → #e2e6e7 | #2e4952 → #304e52 | differs | differs | 0 | alias changes the look |
-| `--el-color-info-light-9` | #edf3f8 → #e4eaea | #273b4b → #081619 | differs | differs | 0 | alias changes the look |
-| `--el-color-white` | #ffffff → #ffffff | #193438 → #0b2a2d | same | differs | 0 | alias changes the look |
-| `--el-color-black` | #24494d → #203f43 | #31565b → #e4f4f1 | differs | differs | 0 | alias changes the look |
-| `--el-bg-color` | #f9fdfc → #ffffff | #193338 → #1a383d | differs | differs | 4 | alias changes the look |
-| `--el-bg-color-page` | #eaf6f5 → #f0f4f4 | #10282b → #0c2023 | differs | differs | 0 | alias changes the look |
-| `--el-bg-color-overlay` | #f9fdfc → #ffffff | #193338 → #265056 | differs | differs | 0 | alias changes the look |
-| `--el-fill-color-blank` | #f9fdfc → #ffffff | #193338 → #1a383d | differs | differs | 0 | alias changes the look |
-| `--el-fill-color` | #def0ee → #e4eaea | #234247 → #081619 | differs | differs | 0 | alias changes the look |
-| `--el-fill-color-light` | #def0ee → #f7f9f9 | #234247 → #234a50 | differs | differs | 1 | alias changes the look |
-| `--el-fill-color-lighter` | #def0ee → #f7f9f9 | #234247 → #234a50 | differs | differs | 0 | alias changes the look |
-| `--el-fill-color-dark` | #d2e9e6 → #e4eaea | #2b5054 → #081619 | differs | differs | 0 | alias changes the look |
-| `--el-text-color-primary` | #203f43 → #203f43 | #e4f4f1 → #e4f4f1 | same | same | 3 | alias keeps the look |
-| `--el-text-color-regular` | #203f43 → #203f43 | #e4f4f1 → #e4f4f1 | same | same | 2 | alias keeps the look |
-| `--el-text-color-secondary` | #4d696c → #3d5a5e | #accbca → #accbca | differs | same | 2 | alias changes the look |
-| `--el-text-color-placeholder` | #4d696c → #4d696c | #accbca → #a3c0c0 | same | differs | 0 | alias changes the look |
-| `--el-text-color-disabled` | #72888b → #4d696c | #829fa1 → #a3c0c0 | differs | differs | 0 | alias changes the look |
-| `--el-disabled-text-color` | #72888b → #4d696c | #829fa1 → #a3c0c0 | differs | differs | 0 | alias changes the look |
-| `--el-disabled-bg-color` | #def0ee → #e4eaea | #234247 → #081619 | differs | differs | 0 | alias changes the look |
-| `--el-disabled-border-color` | #ccdfdc → #d3dcdc | #35575a → #2f5257 | differs | differs | 0 | alias changes the look |
-| `--el-border-color` | #6e8c8e → #6e8c8e | #719b9d → #779fa1 | same | differs | 3 | alias changes the look |
-| `--el-border-color-light` | #ccdfdc → #d3dcdc | #35575a → #2f5257 | differs | differs | 0 | alias changes the look |
-| `--el-border-color-lighter` | #ccdfdc → #d3dcdc | #35575a → #2f5257 | differs | differs | 1 | alias changes the look |
-| `--el-border-color-extra-light` | #ccdfdc → #d3dcdc | #35575a → #2f5257 | differs | differs | 0 | alias changes the look |
+| `--el-color-info` | #426785 → #454b64 | #a4c8e3 → #b5bad0 | differs | differs | 0 | alias changes the look |
+| `--el-color-info-light-3` | #7994a9 → #7d8193 | #7a9bb0 → #868ba0 | differs | differs | 0 | alias changes the look |
+| `--el-color-info-light-5` | #9eb2c1 → #a2a5b2 | #5f7e8e → #676b80 | differs | differs | 0 | alias changes the look |
+| `--el-color-info-light-7` | #cbd8de → #d1d2d8 | #3c5863 → #404458 | differs | differs | 0 | alias changes the look |
+| `--el-color-info-light-8` | #dee6ea → #e3e4e8 | #2e4952 → #303448 | differs | differs | 0 | alias changes the look |
+| `--el-color-info-light-9` | #edf3f8 → #eceef3 | #273b4b → #0a0c18 | differs | differs | 0 | alias changes the look |
+| `--el-color-white` | #ffffff → #ffffff | #193438 → #ffffff | same | differs | 0 | alias changes the look |
+| `--el-color-black` | #24494d → #15182a | #31565b → #eef0f7 | differs | differs | 0 | alias changes the look |
+| `--el-bg-color` | #f9fdfc → #ffffff | #193338 → #191c30 | differs | differs | 3 | alias changes the look |
+| `--el-bg-color-page` | #eaf6f5 → #f4f5f8 | #10282b → #0f1120 | differs | differs | 0 | alias changes the look |
+| `--el-bg-color-overlay` | #f9fdfc → #ffffff | #193338 → #22263e | differs | differs | 0 | alias changes the look |
+| `--el-fill-color-blank` | #f9fdfc → #ffffff | #193338 → #191c30 | differs | differs | 0 | alias changes the look |
+| `--el-fill-color` | #def0ee → #eceef3 | #234247 → #0a0c18 | differs | differs | 0 | alias changes the look |
+| `--el-fill-color-light` | #def0ee → #f8f9fb | #234247 → #22263e | differs | differs | 1 | alias changes the look |
+| `--el-fill-color-lighter` | #def0ee → #f8f9fb | #234247 → #22263e | differs | differs | 0 | alias changes the look |
+| `--el-fill-color-dark` | #d2e9e6 → #eceef3 | #2b5054 → #0a0c18 | differs | differs | 0 | alias changes the look |
+| `--el-text-color-primary` | #203f43 → #15182a | #e4f4f1 → #eef0f7 | differs | differs | 3 | alias changes the look |
+| `--el-text-color-regular` | #203f43 → #15182a | #e4f4f1 → #eef0f7 | differs | differs | 1 | alias changes the look |
+| `--el-text-color-secondary` | #4d696c → #454b64 | #accbca → #b5bad0 | differs | differs | 2 | alias changes the look |
+| `--el-text-color-placeholder` | #4d696c → #636982 | #accbca → #9399b4 | differs | differs | 0 | alias changes the look |
+| `--el-text-color-disabled` | #72888b → #636982 | #829fa1 → #9399b4 | differs | differs | 0 | alias changes the look |
+| `--el-disabled-text-color` | #72888b → #636982 | #829fa1 → #9399b4 | differs | differs | 0 | alias changes the look |
+| `--el-disabled-bg-color` | #def0ee → #eceef3 | #234247 → #0a0c18 | differs | differs | 0 | alias changes the look |
+| `--el-disabled-border-color` | #ccdfdc → #e2e5ec | #35575a → #2c3150 | differs | differs | 0 | alias changes the look |
+| `--el-border-color` | #6e8c8e → #858ba3 | #719b9d → #7c83a3 | differs | differs | 3 | alias changes the look |
+| `--el-border-color-light` | #ccdfdc → #e2e5ec | #35575a → #2c3150 | differs | differs | 0 | alias changes the look |
+| `--el-border-color-lighter` | #ccdfdc → #e2e5ec | #35575a → #2c3150 | differs | differs | 1 | alias changes the look |
+| `--el-border-color-extra-light` | #ccdfdc → #e2e5ec | #35575a → #2c3150 | differs | differs | 0 | alias changes the look |
 | `--el-border-radius-base` | 8px → 8px | 8px → 8px | same | same | 0 | alias keeps the look |
 | `--el-border-radius-small` | 6px → 6px | 6px → 6px | same | same | 0 | alias keeps the look |
-| `--el-box-shadow-light` | 0 6px 24px rgb(22 43 48 / .06) → 0 18px 50px -12px rgb(22 43 48 / 0.28), 0 2px 6px rgb(22 43 48 / 0.08) | 0 6px 24px rgb(0 8 13 / .22) → 0 24px 60px -12px rgb(0 0 0 / 0.6), 0 0 0 1px #3d6165 | differs | differs | 0 | alias changes the look |
-| `--el-box-shadow` | 0 10px 36px rgb(22 43 48 / .06) → 0 18px 50px -12px rgb(22 43 48 / 0.28), 0 2px 6px rgb(22 43 48 / 0.08) | 0 10px 36px rgb(0 8 13 / .22) → 0 24px 60px -12px rgb(0 0 0 / 0.6), 0 0 0 1px #3d6165 | differs | differs | 0 | alias changes the look |
-| `--el-mask-color` | #0f1b21/42% → #0f1b21/46% | #00080d/65% → #050e10/62% | differs | differs | 0 | alias changes the look |
-| `--el-mask-color-extra-light` | #f9fdfc → #ffffff | #193338 → #1a383d | differs | differs | 0 | alias changes the look |
+| `--el-box-shadow-light` | 0 6px 24px rgb(22 43 48 / .06) → 0 18px 50px -12px rgb(21 24 42 / 0.28), 0 2px 6px rgb(21 24 42 / 0.08) | 0 6px 24px rgb(0 8 13 / .22) → 0 24px 60px -12px rgb(0 0 0 / 0.6), 0 0 0 1px #3a3f62 | differs | differs | 0 | alias changes the look |
+| `--el-box-shadow` | 0 10px 36px rgb(22 43 48 / .06) → 0 18px 50px -12px rgb(21 24 42 / 0.28), 0 2px 6px rgb(21 24 42 / 0.08) | 0 10px 36px rgb(0 8 13 / .22) → 0 24px 60px -12px rgb(0 0 0 / 0.6), 0 0 0 1px #3a3f62 | differs | differs | 0 | alias changes the look |
+| `--el-mask-color` | #0f1b21/42% → #15182a/46% | #00080d/65% → #05060e/62% | differs | differs | 0 | alias changes the look |
+| `--el-mask-color-extra-light` | #f9fdfc → #ffffff | #193338 → #191c30 | differs | differs | 0 | alias changes the look |
 | `--el-menu-item-height` | 44px → 44px | 44px → 44px | same | same | 0 | alias keeps the look |
 | `--el-menu-sub-item-height` | 44px → 44px | 44px → 44px | same | same | 0 | alias keeps the look |
 | `--el-font-size-base` | 15px → 0.875rem | 15px → 0.875rem | differs | differs | 0 | alias changes the look |
 
-Known visible changes once aliased (02.1 / 02.2 of the stage-0 task list): the primary colour (vermilion → Viewer Teal), the dark-theme lightness ladder, difficulty colours, info (blue-grey → neutral) and tooltips (dark chip → overlay surface).
+Known visible changes once aliased (02.1 / 02.2 of the stage-0 task list): the primary colour (production vermilion → the redesign vermilion; the dark theme fills with the same vermilion), links and focus (teal → blue), the neutrals (teal-grey → indigo-ink), the dark-theme lightness ladder, difficulty colours, info (blue-grey → neutral) and tooltips (dark chip → overlay surface).

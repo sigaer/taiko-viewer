@@ -132,7 +132,8 @@ test("contrast: all pairs pass; a broken value fails", () => {
   const rows = contrastRun(tokensCss);
   assert.ok(rows.length > 300);
   assert.deepEqual(rows.filter((r) => !r.pass).map((r) => `${r.theme} ${r.fg}/${r.bg}`), []);
-  const broken = tokensCss.replace("--ink-3: #4d696c;", "--ink-3: #b0c4c6;");
+  const broken = tokensCss.replace("--ink-3: #636982;", "--ink-3: #b0b4c4;");
+  assert.notEqual(broken, tokensCss, "the light --ink-3 declaration was found");
   assert.ok(contrastRun(broken).some((r) => !r.pass && r.fg === "--ink-3"));
 });
 

@@ -4,22 +4,25 @@ import "~/assets/css/ds/fonts.css";
 import "~/assets/css/ds/element-plus.css";
 import "~/assets/css/ds/rework.css";
 import {
-  desktopDestinations,
-  mobileDestinations,
+  MAIN_NAV,
+  MOBILE_TABS,
+  ALL_FEATURES,
+  FOOTER_LINKS,
+  SONGS_TABS,
+  SCORES_TABS,
+  TOOLS_TABS,
   activeDestination,
+  mobileTab,
   withoutLocale,
   alternateLocale,
-  SONGS_TABS,
-  TOOLS_TABS,
   tabCurrent,
   isLegacyPage,
+  type NavGroupKey,
 } from "~/utils/rework/navigation";
 import { searchShortcut } from "~/utils/rework/search";
-import { PLAY_TABS } from "~/utils/rework/scores";
-import { GROWTH_TABS } from "~/utils/rework/today";
 import { COMMUNITY_TABS } from "~/utils/rework/community";
 import { SYNC_INDICATOR_KEY, syncIndicatorMark, type SyncIndicatorState } from "~/utils/rework/sync";
-const props = defineProps<{
+defineProps<{
   title: string;
   contentLayout: string;
   showMobileNav: boolean;
@@ -38,9 +41,9 @@ const { accountUser, fetchCurrentUser } = useAccountState();
 // Unread forum notifications on the bell: the existing poll (phones and tablets, 30 s; the old mobile tab bar used
 // it) and every count the notification pages confirm (useForumUnreadCount).
 const { unreadCount } = useForumNotificationPolling();
-// The sync control shows what /account/sync last read for this account and binding (slice E2): a dot when the next
-// step is the player's or the last sync failed, a turning icon while the page's request runs. It never reads the sync
-// API itself (no polling); before the sync page has been opened it is the plain link, as before.
+// The sync control (同步成绩 in the sidebar) shows what /account/sync last read for this account and binding (slice
+// E2): a dot when the next step is the player's or the last sync failed, a turning icon while the page's request runs.
+// It never reads the sync API itself (no polling); before the sync page has been opened it is the plain link.
 const bindingGeneration = useState("account-binding-generation", () => 0);
 const syncIndicator = useState<SyncIndicatorState | null>(SYNC_INDICATOR_KEY, () => null);
 const syncKind = computed(() => {
@@ -49,8 +52,9 @@ const syncKind = computed(() => {
   return s && user && s.userId === user.id && s.generation === bindingGeneration.value ? s.kind : null;
 });
 const syncMark = computed(() => syncIndicatorMark(syncKind.value));
+const syncState = computed(() => (syncKind.value ? t(`rework.account.sync.indicator.${syncKind.value}`) : ""));
 const syncLabel = computed(() =>
-  syncKind.value ? t("rework.account.sync.indicator.label", { state: t(`rework.account.sync.indicator.${syncKind.value}`) }) : t("rework.sync"),
+  syncKind.value ? t("rework.shell.syncScoresState", { state: syncState.value }) : t("rework.shell.syncScores"),
 );
 // Account menu (slice G): the avatar in the top bar opens profile, sync, settings and sign out. A menu button: Enter /
 // Space / ArrowDown open it on the first item, ArrowUp on the last; arrows, Home and End move inside; Escape closes and
@@ -113,17 +117,33 @@ let trigger: HTMLElement | null = null;
 const legacyPage = computed(() => isLegacyPage(route.path));
 useHead(() => ({ htmlAttrs: { class: legacyPage.value ? "viewer-rework" : "viewer-rework rework-ep" } }));
 const active = computed(() => activeDestination(route.path));
-const moduleTitle = computed(() =>
-  active.value ? t(`rework.${active.value}`) : props.title,
-);
 const path = computed(() => withoutLocale(route.path));
-// Secondary tabs per destination. `labelKey` (slice F) labels a tab with its page's own title; otherwise rework.<key>.
+const currentTab = computed(() => mobileTab(route.path));
+// Sidebar groups (曲库, 我的成绩, 工具) are disclosures, collapsed by default. The group holding the current page is
+// open; what the player toggles is kept for the session in useState (never browser storage), so the server and the
+// client render the same first paint from the route alone.
+const currentGroup = computed<NavGroupKey | null>(() =>
+  active.value === "songs" || active.value === "scores" || active.value === "tools" ? active.value : null,
+);
+const groupToggles = useState<Partial<Record<NavGroupKey, boolean>>>("rework-nav-groups", () => ({}));
+const groupOpen = (key: NavGroupKey) => groupToggles.value[key] ?? currentGroup.value === key;
+function toggleGroup(key: NavGroupKey) {
+  groupToggles.value = { ...groupToggles.value, [key]: !groupOpen(key) };
+}
+// Arriving in a group the player had closed opens it again (the current page is always visible in the sidebar).
+watch(currentGroup, (key) => {
+  if (key && groupToggles.value[key] === false) {
+    const next = { ...groupToggles.value };
+    delete next[key];
+    groupToggles.value = next;
+  }
+});
+// Section tabs below 1100 px (sibling pages of the current group; the sidebar replaces them on wide screens).
 // `prefix` tabs stay current on their sub-pages (the dan courses, the guide star pages).
-const secondary: Record<string, { key: string; to: string; labelKey?: string; prefix?: boolean }[]> = {
+const secondary: Record<string, readonly { key: string; to: string; labelKey: string; prefix?: boolean }[]> = {
   songs: [...SONGS_TABS],
-  play: [...PLAY_TABS],
-  growth: [...GROWTH_TABS],
-  community: [...COMMUNITY_TABS],
+  scores: [...SCORES_TABS],
+  community: COMMUNITY_TABS.map((tab) => ({ ...tab, labelKey: `rework.${tab.key}` })),
   tools: [...TOOLS_TABS],
 };
 const tabs = computed(() =>
@@ -133,20 +153,61 @@ const tabs = computed(() =>
     : secondary[active.value || ""] || [],
 );
 const tabBox = ref<HTMLElement>();
-const desktopTabBox = ref<HTMLElement>();
 function revealTab() {
-  for (const box of [tabBox.value, desktopTabBox.value]) {
-    const item = box?.querySelector<HTMLElement>('[aria-current="page"]');
-    if (box && item && box.clientWidth) {
-      if (item.offsetLeft < box.scrollLeft) box.scrollLeft = item.offsetLeft;
-      else if (
-        item.offsetLeft + item.offsetWidth >
-        box.scrollLeft + box.clientWidth
-      )
-        box.scrollLeft = item.offsetLeft + item.offsetWidth - box.clientWidth;
-    }
+  const box = tabBox.value;
+  const item = box?.querySelector<HTMLElement>('[aria-current="page"]');
+  if (box && item && box.clientWidth) {
+    if (item.offsetLeft < box.scrollLeft) box.scrollLeft = item.offsetLeft;
+    else if (item.offsetLeft + item.offsetWidth > box.scrollLeft + box.clientWidth)
+      box.scrollLeft = item.offsetLeft + item.offsetWidth - box.clientWidth;
   }
 }
+// Drawer (768–1099 px): the sidebar as a modal. Focus moves to its close button, Tab stays inside, Escape and the
+// scrim close it and focus returns to the menu button; navigation and leaving the tablet range close it too.
+const drawerOpen = ref(false);
+const side = ref<HTMLElement>();
+const sideClose = ref<HTMLButtonElement>();
+const drawerButton = ref<HTMLButtonElement>();
+let drawerRange: MediaQueryList | null = null;
+async function openDrawer() {
+  drawerOpen.value = true;
+  await nextTick();
+  sideClose.value?.focus();
+}
+function closeDrawer(returnFocus = false) {
+  if (!drawerOpen.value) return;
+  drawerOpen.value = false;
+  if (returnFocus) nextTick(() => drawerButton.value?.focus());
+}
+function drawerKey(event: KeyboardEvent) {
+  if (event.key === "Escape") {
+    event.preventDefault();
+    closeDrawer(true);
+    return;
+  }
+  if (event.key !== "Tab" || !side.value) return;
+  const items = [...side.value.querySelectorAll<HTMLElement>("a[href], button:not([disabled])")].filter(
+    (el) => el.getClientRects().length > 0,
+  );
+  if (!items.length) return;
+  const first = items[0];
+  const last = items[items.length - 1];
+  const inside = side.value.contains(document.activeElement);
+  if (!inside || (event.shiftKey && document.activeElement === first)) {
+    event.preventDefault();
+    (event.shiftKey ? last : first).focus();
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault();
+    first.focus();
+  }
+}
+function drawerRangeChange(event: MediaQueryListEvent) {
+  if (!event.matches) closeDrawer();
+}
+watch(drawerOpen, (open) => {
+  if (open) document.addEventListener("keydown", drawerKey);
+  else document.removeEventListener("keydown", drawerKey);
+});
 function openSearch() {
   trigger =
     document.activeElement instanceof HTMLElement
@@ -184,11 +245,14 @@ watch(
   () => {
     searchOpen.value = false;
     menuOpen.value = false;
+    drawerOpen.value = false;
     nextTick(revealTab);
   },
 );
 onMounted(() => {
   window.addEventListener("keydown", shortcut);
+  drawerRange = window.matchMedia("(min-width: 768px) and (max-width: 1099px)");
+  drawerRange.addEventListener("change", drawerRangeChange);
   revealTab();
   // Static payloads contain the build-time guest, never the current session.
   if (nuxtApp.payload.prerenderedAt) void fetchCurrentUser(true);
@@ -196,47 +260,146 @@ onMounted(() => {
 onBeforeUnmount(() => {
   window.removeEventListener("keydown", shortcut);
   document.removeEventListener("pointerdown", outsidePointer, true);
+  document.removeEventListener("keydown", drawerKey);
+  drawerRange?.removeEventListener("change", drawerRangeChange);
 });
 await fetchCurrentUser();
 </script>
 <template>
   <div
     class="rework-shell"
-    :class="{ 'has-tabs': tabs.length, 'has-bottom-nav': showMobileNav, 'is-legacy': legacyPage }"
+    :class="{ 'has-tabs': tabs.length, 'has-bottom-nav': showMobileNav, 'is-legacy': legacyPage, 'drawer-open': drawerOpen }"
   >
     <a href="#viewer-main" class="skip-link" @click.prevent="main?.focus()">{{
       t("rework.skip")
     }}</a>
-    <nav class="rework-rail" :aria-label="t('rework.mainNav')">
-      <NuxtLink :to="localePath('/')" class="brand" aria-label="Taiko Viewer"
-        ><ReworkBrand
-      /></NuxtLink>
-      <NuxtLink
-        v-for="item in desktopDestinations"
-        :key="item.key"
-        :to="localePath(item.to)"
-        class="rail-item"
-        :aria-current="active === item.key ? 'page' : undefined"
-        ><span class="rail-pill"><ReworkIcon :name="item.key" /></span
-        ><span>{{ t(`rework.${item.key}`) }}</span></NuxtLink
-      >
-      <div class="rail-footer">
-        <NuxtLink
-          class="icon-button"
-          :to="switchLocalePath(alternateLocale(locale)) || localePath('/')"
-          :aria-label="t('rework.language')"
-          >{{ t("rework.nextLanguage") }}</NuxtLink
-        ><button
-          class="icon-button"
-          type="button"
-          :aria-label="t('rework.theme')"
-          @click="setTheme(theme === 'dark' ? 'light' : 'dark')"
-        >
-          <ReworkIcon name="theme" />
-        </button>
+    <div v-if="drawerOpen" class="side-scrim" aria-hidden="true" @click="closeDrawer(true)" />
+    <aside
+      id="rework-side"
+      ref="side"
+      class="rework-side"
+      :class="{ 'is-open': drawerOpen }"
+      :role="drawerOpen ? 'dialog' : undefined"
+      :aria-modal="drawerOpen ? 'true' : undefined"
+      :aria-label="drawerOpen ? t('rework.mainNav') : undefined"
+    >
+      <div class="side-head">
+        <div class="side-brand-row">
+          <NuxtLink :to="localePath('/')" class="side-brand" aria-label="Taiko Viewer"
+            ><img src="/optimized/logo-168.webp" alt="" width="40" height="40" decoding="async" /><span
+              class="side-word"
+              aria-hidden="true"
+              >Taiko Viewer</span
+            ></NuxtLink
+          ><button
+            ref="sideClose"
+            type="button"
+            class="side-close"
+            :aria-label="t('rework.shell.closeMenu')"
+            @click="closeDrawer(true)"
+          >
+            <ReworkIcon name="close" />
+          </button>
+        </div>
+        <div class="side-sync">
+          <template v-if="accountUser"
+            ><NuxtLink
+              class="side-sync__btn sync-control"
+              :class="syncKind ? `is-${syncKind}` : undefined"
+              :to="localePath('/account/sync')"
+              :aria-label="syncLabel"
+              :aria-current="path === '/account/sync' ? 'page' : undefined"
+              data-sync-control
+              :data-sync-state="syncKind || undefined"
+              ><ReworkIcon name="sync" /><span>{{ t("rework.shell.syncScores") }}</span
+              ><span v-if="syncMark" class="sync-dot" :class="`is-${syncMark}`" aria-hidden="true" /></NuxtLink
+            ><span v-if="syncKind" class="side-sync__state" aria-hidden="true">{{ syncState }}</span></template
+          ><NuxtLink v-else class="side-sync__btn" :to="localePath('/account')">{{ t("rework.login") }}</NuxtLink>
+        </div>
       </div>
-    </nav>
+      <div class="side-scroll">
+        <nav class="side-nav" :aria-label="t('rework.mainNav')">
+          <ul class="side-list">
+            <li v-for="entry in MAIN_NAV" :key="entry.key">
+              <NuxtLink
+                v-if="entry.kind === 'link'"
+                class="side-link"
+                :to="localePath(entry.to)"
+                :aria-current="tabCurrent(entry, path) ? 'page' : undefined"
+                ><ReworkIcon :name="entry.icon" /><span>{{ t(entry.labelKey) }}</span></NuxtLink
+              >
+              <template v-else
+                ><button
+                  type="button"
+                  class="side-link side-group"
+                  :class="{ 'is-current': currentGroup === entry.key }"
+                  :aria-expanded="groupOpen(entry.key)"
+                  :aria-controls="`side-group-${entry.key}`"
+                  @click="toggleGroup(entry.key)"
+                >
+                  <ReworkIcon :name="entry.icon" /><span>{{ t(entry.labelKey) }}</span
+                  ><ReworkIcon name="chevron" class="side-chev" /></button
+                ><ul v-show="groupOpen(entry.key)" :id="`side-group-${entry.key}`" class="side-sub">
+                  <li v-for="item in entry.items" :key="item.to">
+                    <NuxtLink
+                      class="side-sublink"
+                      :to="localePath(item.to)"
+                      :aria-current="tabCurrent(item, path) ? 'page' : undefined"
+                      >{{ t(item.labelKey) }}</NuxtLink
+                    >
+                  </li>
+                </ul></template
+              >
+            </li>
+            <li>
+              <NuxtLink
+                class="side-link"
+                :to="localePath(ALL_FEATURES.to)"
+                :aria-current="path === ALL_FEATURES.to ? 'page' : undefined"
+                ><ReworkIcon name="grid" /><span>{{ t(ALL_FEATURES.labelKey) }}</span></NuxtLink
+              >
+            </li>
+          </ul>
+        </nav>
+        <div class="side-foot">
+          <NuxtLink
+            v-for="link in FOOTER_LINKS"
+            :key="link.key"
+            class="side-foot__link"
+            :to="localePath(link.to)"
+            :aria-current="path === link.to ? 'page' : undefined"
+            >{{ t(link.labelKey) }}</NuxtLink
+          >
+          <span class="side-foot__tools"
+            ><NuxtLink
+              class="side-tool"
+              :to="switchLocalePath(alternateLocale(locale)) || localePath('/')"
+              :aria-label="t('rework.language')"
+              >{{ t("rework.nextLanguage") }}</NuxtLink
+            ><button
+              class="side-tool"
+              type="button"
+              :aria-label="t('rework.theme')"
+              @click="setTheme(theme === 'dark' ? 'light' : 'dark')"
+            >
+              <ReworkIcon name="theme" /></button
+          ></span>
+        </div>
+      </div>
+    </aside>
     <header v-if="!route.meta.composerHeader" class="rework-bar">
+      <button
+        ref="drawerButton"
+        type="button"
+        class="icon-button menu-button"
+        :aria-label="t('rework.shell.menu')"
+        aria-haspopup="dialog"
+        :aria-expanded="drawerOpen"
+        aria-controls="rework-side"
+        @click="openDrawer"
+      >
+        <ReworkIcon name="menu" />
+      </button>
       <NuxtLink
         v-if="backHref"
         :to="backHref"
@@ -248,23 +411,8 @@ await fetchCurrentUser();
         :to="localePath('/')"
         class="mobile-brand"
         aria-label="Taiko Viewer"
-        ><ReworkBrand
+        ><img src="/optimized/logo-168.webp" alt="" width="36" height="36" decoding="async"
       /></NuxtLink>
-      <strong class="module-title">{{ moduleTitle }}</strong>
-      <nav
-        v-if="tabs.length"
-        ref="desktopTabBox"
-        class="rework-tabs desktop-tabs"
-        :aria-label="t('rework.sectionNav')"
-      >
-        <NuxtLink
-          v-for="tab in tabs"
-          :key="tab.to"
-          :to="localePath(tab.to)"
-          :aria-current="tabCurrent(tab, path) ? 'page' : undefined"
-          >{{ t(tab.labelKey || `rework.${tab.key}`) }}</NuxtLink
-        >
-      </nav>
       <button
         ref="searchButton"
         class="search-trigger"
@@ -281,24 +429,7 @@ await fetchCurrentUser();
         ><kbd>Ctrl K</kbd>
       </button>
       <div class="bar-actions">
-        <button
-          v-if="!showMobileNav"
-          class="icon-button mobile-search"
-          type="button"
-          :aria-label="t('rework.search')"
-          @click="openSearch"
-        >
-          <ReworkIcon name="search" /></button
-        ><NuxtLink
-          class="icon-button sync-control"
-          :class="syncKind ? `is-${syncKind}` : undefined"
-          :to="localePath('/account/sync')"
-          :aria-label="syncLabel"
-          :aria-current="path === '/account/sync' ? 'page' : undefined"
-          data-sync-control
-          :data-sync-state="syncKind || undefined"
-          ><ReworkIcon name="sync" /><span v-if="syncMark" class="sync-dot" :class="`is-${syncMark}`" aria-hidden="true" /></NuxtLink
-        ><NuxtLink
+        <NuxtLink
           class="icon-button bell"
           :to="localePath('/forum/notifications')"
           :aria-label="unreadCount ? `${t('rework.notifications')} (${unreadCount})` : t('rework.notifications')"
@@ -352,7 +483,7 @@ await fetchCurrentUser();
         :key="tab.to"
         :to="localePath(tab.to)"
         :aria-current="tabCurrent(tab, path) ? 'page' : undefined"
-        >{{ t(tab.labelKey || `rework.${tab.key}`) }}</NuxtLink
+        >{{ t(tab.labelKey) }}</NuxtLink
       >
     </nav>
     <main
@@ -372,30 +503,14 @@ await fetchCurrentUser();
       class="rework-bottom"
       :aria-label="t('rework.mainNav')"
     >
-      <template v-for="item in mobileDestinations" :key="item.key"
-        ><button
-          v-if="item.key === 'search'"
-          type="button"
-          class="don-search"
-          :aria-label="t('rework.search')"
-          aria-haspopup="dialog"
-          @click="openSearch"
-        >
-          <span class="don-face"><ReworkIcon name="search" /></span></button
-        ><NuxtLink
-          v-else
-          :to="localePath(item.to)"
-          :aria-current="
-            active === item.key ||
-            (item.key === 'my' &&
-              (!active || ['play', 'growth', 'tools'].includes(active)))
-              ? 'page'
-              : undefined
-          "
-          ><ReworkIcon :name="item.key" /><span>{{
-            t(`rework.${item.key}`)
-          }}</span></NuxtLink
-        ></template
+      <NuxtLink
+        v-for="item in MOBILE_TABS"
+        :key="item.key"
+        :to="localePath(item.to)"
+        :aria-current="currentTab === item.key ? 'page' : undefined"
+        ><span class="bottom-pill"><ReworkIcon :name="item.icon" /></span><span>{{
+          t(item.labelKey)
+        }}</span></NuxtLink
       >
     </nav>
     <ClientOnly
@@ -414,8 +529,8 @@ await fetchCurrentUser();
 .rework-shell.is-legacy {
   background: var(--chrome-bg);
 }
-/* The frame (rail, top bar, tabs, phone bottom bar) keeps the teal tint: --chrome-* (slice G tuning). */
-.rework-rail,
+/* The frame: a dark sidebar in both themes (--side-*), the top bar, tabs and phone bottom bar on --chrome-*. */
+.rework-side,
 .rework-bar,
 .rework-tabs,
 .rework-bottom {
@@ -428,93 +543,104 @@ await fetchCurrentUser();
   outline: 2px solid var(--focus-ring);
   outline-offset: 3px;
 }
-.rework-rail {
+/* ---------- Sidebar (≥ 1100 px; the same element is the drawer at 768–1099 px) ---------- */
+.rework-side {
   position: fixed;
   inset: 0 auto 0 0;
-  width: var(--rail-w);
-  display: flex;
-  align-items: center;
-  flex-direction: column;
-  gap: 4px;
-  background: var(--chrome-surface);
-  border-right: 1px solid var(--chrome-line);
   z-index: var(--z-rail);
-  padding: 12px 4px;
+  width: 256px;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  background: var(--side-bg);
+  color: var(--side-ink);
+  font-size: var(--fs-14);
 }
-.brand {
-  display: grid;
-  place-items: center;
-  height: 56px;
-  margin-bottom: 12px;
+.side-head {
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 18px 14px 12px;
 }
-.rail-item {
-  width: 72px;
-  min-height: 64px;
+.side-brand-row {
   display: flex;
   align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 3px;
-  color: var(--ink-2);
-  font-size: 12px;
+  gap: 8px;
+}
+.side-brand {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 6px;
+  color: var(--side-ink-strong);
   text-decoration: none;
   border-radius: var(--r-ctl);
 }
-.rail-pill {
-  display: grid;
-  place-items: center;
-  width: 52px;
-  height: 34px;
-  border-radius: var(--r-note);
+.side-brand img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  flex: none;
 }
-.rail-item:hover .rail-pill {
-  background: var(--chrome-sunk);
+.side-word {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: 0.2px;
+  white-space: nowrap;
 }
-.rail-item[aria-current] .rail-pill {
-  background: var(--nav-active-bg);
-  color: var(--nav-active-ink);
+.side-close {
+  display: none;
 }
-.rail-item[aria-current] {
-  color: var(--nav-active-text);
-  font-weight: 700;
-}
-.rail-footer {
-  margin-top: auto;
+.side-sync {
   display: flex;
   flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  border-radius: var(--r-panel);
+  background: var(--side-surface);
 }
-.icon-button {
-  width: 44px;
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  background: transparent;
-  color: var(--ink-2);
-  text-decoration: none;
-  border-radius: var(--r-ctl);
-  cursor: pointer;
-}
-.icon-button:hover {
-  background: var(--chrome-sunk);
-}
-.bell,
-.sync-control {
+.side-sync__btn {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 12px;
+  border-radius: var(--r-ctl);
+  background: var(--action-bg);
+  color: var(--action-ink);
+  font-size: var(--fs-14);
+  font-weight: 700;
+  text-decoration: none;
 }
-.sync-control[aria-current],
-.sync-control.is-running {
-  color: var(--nav-active-text);
+.side-sync__btn:hover {
+  background: var(--action-bg-hover);
+}
+.side-sync__btn:active,
+.side-sync__btn[aria-current] {
+  background: var(--action-bg-active);
+}
+.side-sync__btn svg {
+  width: 18px;
+  height: 18px;
+}
+.side-sync__state {
+  font-size: var(--fs-12);
+  color: var(--side-ink-2);
+  text-align: center;
 }
 .sync-dot {
   position: absolute;
-  top: 9px;
-  right: 9px;
+  top: 6px;
+  right: 8px;
   width: 9px;
   height: 9px;
   border-radius: 50%;
-  box-shadow: 0 0 0 2px var(--chrome-bg);
+  box-shadow: 0 0 0 2px var(--side-ink-strong);
 }
 .sync-dot.is-warn {
   background: var(--warn);
@@ -531,6 +657,181 @@ await fetchCurrentUser();
   to {
     transform: rotate(360deg);
   }
+}
+.side-scroll {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  padding: 4px 14px 16px;
+}
+.side-list,
+.side-sub {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.side-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.side-link {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 10px 0 12px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: var(--r-ctl);
+  background: transparent;
+  color: var(--side-ink);
+  font: inherit;
+  font-size: 15px;
+  font-weight: 500;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+.side-link svg {
+  width: 19px;
+  height: 19px;
+}
+.side-link span {
+  flex: 1;
+  min-width: 0;
+}
+.side-link:hover,
+.side-sublink:hover,
+.side-foot__link:hover,
+.side-tool:hover {
+  background: var(--side-surface);
+  color: var(--side-ink-strong);
+}
+.side-link[aria-current],
+.side-sublink[aria-current] {
+  background: var(--nav-active-bg);
+  color: var(--nav-active-ink);
+  font-weight: 700;
+}
+.side-group.is-current {
+  background: var(--side-surface);
+  color: var(--side-ink-strong);
+  font-weight: 700;
+}
+.side-chev {
+  width: 16px;
+  height: 16px;
+  color: var(--side-ink-2);
+  transform: rotate(-90deg);
+}
+.side-group.is-current .side-chev {
+  color: currentColor;
+}
+.side-group[aria-expanded="true"] .side-chev {
+  transform: none;
+}
+.side-sub {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 2px 0 6px 21px;
+  padding-left: 10px;
+  border-left: 1px solid var(--side-line);
+}
+.side-sublink {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 12px;
+  border-radius: var(--r-ctl);
+  color: var(--side-ink);
+  font-weight: 500;
+  text-decoration: none;
+}
+.side-foot {
+  margin-top: auto;
+  padding-top: 12px;
+  border-top: 1px solid var(--side-line);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+.side-foot__link {
+  display: flex;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 9px;
+  border-radius: var(--r-ctl);
+  color: var(--side-ink);
+  font-size: var(--fs-13);
+  text-decoration: none;
+}
+.side-foot__link[aria-current] {
+  color: var(--side-ink-strong);
+  font-weight: 700;
+}
+.side-foot__tools {
+  margin-left: auto;
+  display: flex;
+  gap: 4px;
+}
+.side-tool {
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 0;
+  border-radius: var(--r-ctl);
+  background: var(--side-surface);
+  color: var(--side-ink);
+  font: inherit;
+  font-size: var(--fs-13);
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+}
+.side-tool svg {
+  width: 16px;
+  height: 16px;
+}
+.rework-side :is(a, button):focus-visible {
+  outline-offset: 1px;
+}
+.side-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-sheet) - 1);
+  background: var(--scrim);
+}
+/* ---------- Top bar ---------- */
+.icon-button {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-2);
+  text-decoration: none;
+  border-radius: var(--r-ctl);
+  cursor: pointer;
+}
+.icon-button:hover {
+  background: var(--chrome-sunk);
+}
+.bell {
+  position: relative;
 }
 .bell[aria-current] {
   color: var(--nav-active-text);
@@ -557,45 +858,79 @@ await fetchCurrentUser();
   height: var(--bar-h);
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
   padding: 0 var(--gutter);
   background: var(--chrome-bg);
   border-bottom: 1px solid var(--chrome-line);
 }
-.module-title {
-  font-size: 18px;
-  white-space: nowrap;
+.menu-button,
+.mobile-brand {
+  display: none;
+}
+.mobile-brand {
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--r-ctl);
+}
+.mobile-brand img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
 }
 .search-trigger {
   display: flex;
   align-items: center;
   gap: 10px;
   min-height: 44px;
-  width: clamp(220px, 24vw, 320px);
-  flex-shrink: 0;
-  margin-left: auto;
-  padding: 0 12px;
-  border: 1px solid var(--line-strong);
-  border-radius: var(--r-note);
-  background: var(--chrome-surface);
+  flex: 1 1 280px;
+  min-width: 0;
+  max-width: 520px;
+  padding: 0 12px 0 14px;
+  box-sizing: border-box;
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--chrome-sunk);
   color: var(--ink-3);
   font: inherit;
-  font-size: 13px;
+  font-size: var(--fs-14);
   cursor: pointer;
+}
+.search-trigger:hover {
+  border-color: var(--line-strong);
+}
+.search-trigger svg {
+  width: 18px;
+  height: 18px;
 }
 .search-trigger span {
   flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   text-align: left;
 }
 .search-trigger kbd {
+  flex: none;
   white-space: nowrap;
-  font-size: 11px;
+  padding: 2px 7px;
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-xs);
+  background: var(--surface);
+  color: var(--ink-2);
+  font: inherit;
+  font-size: var(--fs-12);
+  font-weight: 600;
 }
 .bar-actions {
   flex-shrink: 0;
   display: flex;
   align-items: center;
   gap: 4px;
+  margin-left: auto;
 }
 .account-link {
   display: flex;
@@ -668,6 +1003,7 @@ button.account-link {
   padding-top: 4px;
   border-top: 1px solid var(--line);
 }
+/* ---------- Section tabs (below 1100 px) ---------- */
 .rework-tabs {
   display: flex;
   gap: 4px;
@@ -676,17 +1012,9 @@ button.account-link {
   padding: 0 var(--gutter);
   background: var(--chrome-bg);
   border-bottom: 1px solid var(--chrome-line);
-  position: relative;
-}
-.desktop-tabs {
-  height: 100%;
-  flex: 1;
-  min-width: 0;
-  padding: 0;
-  border-bottom: 0;
-}
-.mobile-tabs {
-  display: none;
+  position: sticky;
+  top: var(--bar-h);
+  z-index: calc(var(--z-bar) - 1);
 }
 .rework-tabs a {
   display: flex;
@@ -712,15 +1040,13 @@ button.account-link {
 .rework-main--immersive {
   padding: 0;
 }
-.mobile-brand,
-.mobile-search,
 .rework-bottom {
   display: none;
 }
 .skip-link {
   position: fixed;
   top: -100px;
-  left: 100px;
+  left: calc(var(--rail-w) + 16px);
   z-index: 100;
   padding: 12px;
   background: var(--chrome-surface);
@@ -729,25 +1055,57 @@ button.account-link {
 .skip-link:focus {
   top: 8px;
 }
-@media (max-width: 1099px) {
-  .search-trigger {
-    width: 44px;
-    padding: 0;
-    justify-content: center;
-  }
-  .search-trigger span,
-  .search-trigger kbd {
+@media (min-width: 1100px) {
+  .rework-tabs {
     display: none;
+  }
+}
+@media (max-width: 1099px) {
+  .rework-side {
+    display: none;
+  }
+  .rework-side.is-open {
+    display: flex;
+    z-index: var(--z-sheet);
+    width: min(300px, calc(100vw - 48px));
+    box-shadow: var(--shadow-pop);
+  }
+  .rework-side.is-open .side-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: none;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    border-radius: var(--r-ctl);
+    background: transparent;
+    color: var(--side-ink);
+    cursor: pointer;
+  }
+  .rework-side.is-open :is(.side-link, .side-sync__btn) {
+    min-height: 44px;
+  }
+  .rework-side.is-open :is(.side-sublink, .side-foot__link) {
+    min-height: 44px;
+  }
+  .rework-side.is-open .side-tool {
+    width: 44px;
+    height: 44px;
+  }
+  .menu-button,
+  .mobile-brand {
+    display: inline-flex;
   }
   .rework-bar {
     gap: 8px;
   }
+  .search-trigger kbd {
+    display: none;
+  }
 }
 @media (max-width: 767px) {
-  .rework-shell {
-    padding-left: 0;
-  }
-  .rework-rail {
+  .menu-button {
     display: none;
   }
   .rework-bar {
@@ -755,46 +1113,27 @@ button.account-link {
     padding: 0 12px;
     gap: 8px;
   }
-  .module-title {
-    margin-right: auto;
-    min-width: 0;
-    font-size: 16px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .mobile-brand,
-  .mobile-search {
-    display: inline-flex;
-  }
   .mobile-brand {
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    width: 44px;
-    height: 44px;
-    margin: 0 -8px;
+    margin-left: -4px;
   }
-  .mobile-brand svg {
-    width: 28px;
-    height: 28px;
+  .search-trigger {
+    flex: 1 1 auto;
+    max-width: none;
+    border-radius: var(--r-note);
+    padding: 0 14px;
+    gap: 8px;
   }
-  .search-trigger,
   .account-link,
   .account-menu {
     display: none;
   }
   .bar-actions {
     gap: 0;
+    margin-left: 0;
   }
-  .desktop-tabs {
-    display: none;
-  }
-  .mobile-tabs {
-    display: flex;
+  .rework-tabs {
     padding: 0 12px;
-    position: sticky;
     top: var(--bar-h-m);
-    z-index: calc(var(--z-bar) - 1);
   }
   .rework-main {
     padding: 20px 16px 32px;
@@ -817,49 +1156,38 @@ button.account-link {
     border-top: 1px solid var(--chrome-line);
     background: var(--chrome-surface);
   }
-  .rework-bottom a,
-  .rework-bottom button {
+  .rework-bottom a {
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 3px;
+    gap: 2px;
+    min-width: 0;
     min-height: 56px;
-    border: 0;
-    background: transparent;
     color: var(--ink-2);
-    font: inherit;
-    font-size: 11px;
+    font-size: 11.5px;
+    font-weight: 600;
     text-decoration: none;
-    cursor: pointer;
+    white-space: nowrap;
+  }
+  .bottom-pill {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    height: 30px;
+    border-radius: var(--r-note);
+  }
+  .bottom-pill svg {
+    width: 21px;
+    height: 21px;
   }
   .rework-bottom [aria-current] {
     color: var(--nav-active-text);
-    font-weight: 700;
+    font-weight: 800;
   }
-  .rework-bottom [aria-current] svg {
-    background: var(--nav-active-bg);
-    color: var(--nav-active-ink);
-    border-radius: var(--r-ctl);
-    box-sizing: content-box;
-    padding: 3px 10px;
-  }
-  .don-search .don-face {
-    display: grid;
-    place-items: center;
-    width: 54px;
-    height: 54px;
-    margin-top: -18px;
-    border-radius: 50%;
-    background: var(--don);
-    color: var(--note-ring);
-    box-shadow:
-      inset 0 0 0 4px color-mix(in srgb, var(--note-ring) 92%, transparent),
-      0 0 0 2px var(--note-outline),
-      var(--shadow-lift);
-  }
-  .don-search:active .don-face {
-    transform: scale(0.9);
+  .rework-bottom [aria-current] .bottom-pill {
+    background: var(--brand-soft);
   }
   .skip-link {
     left: 8px;

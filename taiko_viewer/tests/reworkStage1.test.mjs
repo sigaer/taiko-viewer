@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {activeDestination,mobileDestinations} from '../utils/rework/navigation.ts';
+import {activeDestination,mobileTab,MOBILE_TABS} from '../utils/rework/navigation.ts';
 import {
  catalogState,catalogRequest,catalogQuery,catalogLocation,legacyCatalogLocation,legacyCatalogHref,songSearchRequest,searchAllState,
  shelfSwitch,sortSwitch,keywordSwitch,pageSwitch,defaultSort,pagerItems,pageCount,isLibraryPath,libraryReturnTarget,
@@ -8,11 +8,14 @@ import {
 } from '../utils/rework/catalog.ts';
 import {searchShortcut,searchSelection} from '../utils/rework/search.ts';
 
-test('desktop groups respect locale and segment boundaries; mobile search is an action',()=>{
+test('navigation groups respect locale and segment boundaries; the phone bar ends with 全部',()=>{
  assert.equal(activeDestination('/ja/songs/1?d=5'),'songs');assert.equal(activeDestination('/songsmith'),null);
- assert.equal(activeDestination('/ja/tools/progress'),'play');assert.equal(activeDestination('/my/growth'),'growth');
+ assert.equal(activeDestination('/ja/tools/progress'),'scores');assert.equal(activeDestination('/my/growth'),'scores');
  assert.equal(activeDestination('/songs?shelf=all'),'songs');assert.equal(activeDestination('/ja/songs/constants'),'songs');
- assert.equal(mobileDestinations.length,5);assert.deepEqual(mobileDestinations[2],{key:'search',action:'search'});
+ assert.deepEqual(MOBILE_TABS.map(t=>t.to),['/','/songs','/account/songs','/forum','/more']);
+ assert.ok(MOBILE_TABS.every(t=>!('action' in t)),'no search key in the bottom bar');
+ assert.equal(mobileTab('/ja/tools/b30'),'scores');assert.equal(mobileTab('/forum/thread/3'),'community');
+ for (const p of ['/more','/settings','/tools/rt-calculator','/account/sync','/my','/about']) assert.equal(mobileTab(p),'all',p);
 });
 
 test('default sort depends on the shelf; invalid values fall back; the effective sort is returned',()=>{

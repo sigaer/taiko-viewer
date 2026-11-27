@@ -157,7 +157,7 @@ function measure() {
   const body = main.querySelector(".page-body");
   const first = body ? [...body.children].find((c) => visible(c) && !c.classList.contains("page-loading")) : null;
   const firstBlock = first ? [...first.querySelectorAll(":scope > *")].find(visible) || first : null;
-  const currentTab = [...document.querySelectorAll(".rework-tabs [aria-current='page']")].find(visible);
+  const currentTab = [...document.querySelectorAll(".rework-tabs [aria-current='page'], .rework-side .side-sublink[aria-current='page']")].find(visible);
   const buttons = [...main.querySelectorAll(".rw-btn, .el-button")].filter(visible).map((b) => ({
     kind: b.classList.contains("rw-btn--primary") || b.classList.contains("el-button--primary") ? "primary" : b.classList.contains("rw-btn--danger") || b.classList.contains("el-button--danger") ? "danger" : b.classList.contains("rw-btn--ghost") ? "ghost" : "secondary",
     lib: b.classList.contains("el-button") ? "el" : "rw",
@@ -171,8 +171,7 @@ function measure() {
   return {
     url: location.pathname + location.search,
     htmlClass: document.documentElement.className,
-    group: document.querySelector(".rework-rail .rail-item[aria-current='page']")?.getAttribute("href") || null,
-    moduleTitle: document.querySelector(".rework-bar .module-title")?.textContent.trim() || null,
+    group: document.querySelector(".rework-side .side-group.is-current span")?.textContent.trim() || document.querySelector(".rework-side .side-link[aria-current='page']")?.getAttribute("href") || null,
     tab: currentTab ? currentTab.textContent.trim() : null,
     h1Count: h1s.length,
     h1: h1 ? { text: h1.textContent.replace(/\s+/g, " ").trim().slice(0, 80), box: box(h1), ...css(h1, ["font-size", "font-weight", "line-height", "font-family"]) } : null,

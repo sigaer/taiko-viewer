@@ -395,7 +395,7 @@ export async function runScenarios({ browser, base, out, dataset, stub = false, 
   for (const width of [1440, 390])
     await scenario("search-all-results", { width }, async ({ page }) => {
       await page.goto(base + "/about", { waitUntil: "networkidle" });
-      await (width > 767 ? page.locator(".search-trigger") : page.locator(".don-search")).click();
+      await page.locator(".search-trigger").click();
       await page.locator("dialog[open] input").fill(KEYWORD);
       const all = expectedPage(dataset, { q: KEYWORD, shelf: "all" });
       const label = msg(copy.zh, "rework.viewAll", { count: all.total });

@@ -267,8 +267,8 @@ export async function runPagesScenarios({ browser, base, out, web = webRoot, lab
     assert.equal(await page.locator('.dan-rail a[aria-current="page"]').textContent(), "九段");
     assert.equal(await page.locator('.dan-years a[aria-current="page"]').textContent(), "2026");
     assert.equal(await page.locator(".dan-rail a").count(), 19);
-    assert.equal(await page.locator('.desktop-tabs a[aria-current="page"]').getAttribute("href"), "/grade", "songs tab 段位 current on a course");
-    assert.deepEqual(await page.locator(".desktop-tabs a").allTextContents(), ["rework.catalog", "rework.constants", "rework.grade", "rework.guide", "rework.titles"].map((k) => msg(zh, k)));
+    assert.equal(await page.locator('.mobile-tabs a[aria-current="page"]').getAttribute("href"), "/grade", "songs tab 段位 current on a course");
+    assert.deepEqual(await page.locator(".mobile-tabs a").allTextContents(), ["rework.catalog", "rework.constants", "rework.grade", "rework.guide", "rework.titles"].map((k) => msg(zh, k)));
     assert.equal(await h1Text(page), msg(zh, "rework.grade"), "h1 = tab label");
     const songs = await page.$$eval(".dan-song", (els) => els.map((el) => ({ title: el.querySelector(".ds-songcell__title")?.textContent, href: el.querySelector(".dan-song__link")?.getAttribute("href") || null, wiki: el.querySelector(".dan-song__wiki")?.getAttribute("target"), diff: el.querySelector(".ds-diff")?.getAttribute("aria-label") })));
     assert.deepEqual(songs.map((s) => s.href), ["/songs/901?difficulty=4", "/songs/902?difficulty=4", "/songs/903?difficulty=4"]);
@@ -325,11 +325,11 @@ export async function runPagesScenarios({ browser, base, out, web = webRoot, lab
     await page.goto(`${base}/guide`, { waitUntil: "networkidle" });
     await hydrated(page);
     assert.equal(await h1Text(page), msg(zh, "rework.guide"));
-    assert.equal(await page.locator('.desktop-tabs a[aria-current="page"]').getAttribute("href"), "/guide");
+    assert.equal(await page.locator('.mobile-tabs a[aria-current="page"]').getAttribute("href"), "/guide");
     await page.locator(`.gi-level[href="/guide/4/10"]`).click();
     await page.waitForURL(/\/guide\/4\/10$/);
     await page.locator(".gl-tags").waitFor();
-    assert.equal(await page.locator('.desktop-tabs a[aria-current="page"]').getAttribute("href"), "/guide", "攻略 tab current on a star page");
+    assert.equal(await page.locator('.mobile-tabs a[aria-current="page"]').getAttribute("href"), "/guide", "攻略 tab current on a star page");
     assert.equal(await page.locator('.gl-levels a[aria-current="page"]').textContent(), "★10");
     assert.deepEqual(await page.$$eval(".gl-dist td", (els) => els.map((el) => el.textContent.trim())), ["2", "3", "45", "5", "6", "7", "0", "68"]);
     assert.deepEqual(await page.$$eval(".gl-tag__count", (els) => els.map((el) => el.textContent.trim())), ["2", "3", "45", "5", "6", "7", "0"]);
@@ -475,11 +475,11 @@ export async function runPagesScenarios({ browser, base, out, web = webRoot, lab
     }
     assert.deepEqual(mismatches, [], "label = destination title");
     step("tools tabs");
-    const tabs = await page.$$eval(".desktop-tabs a", (els) => els.map((el) => ({ href: el.getAttribute("href"), text: el.textContent.trim() })));
+    const tabs = await page.$$eval(".mobile-tabs a", (els) => els.map((el) => ({ href: el.getAttribute("href"), text: el.textContent.trim() })));
     assert.equal(tabs.length, 8);
     for (const tab of tabs) {
       await go(page, "zh", tab.href.replace(/^\/ja/, ""));
-      await page.locator(`.desktop-tabs a[aria-current="page"][href="${tab.href}"]`).waitFor();
+      await page.locator(`.mobile-tabs a[aria-current="page"][href="${tab.href}"]`).waitFor();
       if (tab.href !== "/more") assert.equal(await h1Text(page), tab.text, `${tab.href}: tab = h1`);
     }
     step("language");

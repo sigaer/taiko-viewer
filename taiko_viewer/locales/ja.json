@@ -2161,6 +2161,17 @@
     }
   },
   "rework": {
+    "shell": {
+      "myScores": "マイ成績",
+      "allFeatures": "すべての機能",
+      "all": "すべて",
+      "syncScores": "成績を同期",
+      "syncScoresState": "成績を同期：{state}",
+      "menu": "メニュー",
+      "closeMenu": "メニューを閉じる",
+      "common": "よく使う機能",
+      "accountSupport": "アカウントとサポート"
+    },
     "passport": "成長の記録",
     "home": {
       "allRecommendations": "おすすめをすべて見る",
@@ -2214,7 +2225,7 @@
     "my": "マイ",
     "accountMenu": "アカウントメニュー",
     "search": "検索",
-    "searchPlaceholder": "楽曲・ページを検索",
+    "searchPlaceholder": "楽曲・機能を検索",
     "cancel": "キャンセル",
     "loading": "検索中…",
     "searchError": "検索に失敗しました。再試行してください",

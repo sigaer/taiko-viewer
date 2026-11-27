@@ -18,7 +18,7 @@ import {
   readTable
 } from "../utils/rework/dan.ts";
 import { legacyGradePage } from "../utils/gradeDojoLegacy.ts";
-import { MORE_GROUPS, SONGS_TABS, TOOLS_TABS, activeDestination, tabCurrent } from "../utils/rework/navigation.ts";
+import { NAV_GROUPS, SUPPORT_LINKS, SONGS_TABS, TOOLS_TABS, activeDestination, tabCurrent } from "../utils/rework/navigation.ts";
 
 const read = (path) => readFile(new URL(`../${path}`, import.meta.url), "utf8").then((s) => s.replace(/\r\n/g, "\n"));
 const json = async (path) => JSON.parse(await read(path));
@@ -149,7 +149,9 @@ test("shell tabs: the library and tools groups cover the slice pages; labels are
   assert.ok(tabCurrent(SONGS_TABS[3], "/guide/4/10") && !tabCurrent(SONGS_TABS[4], "/titles/x"));
   assert.ok(!tabCurrent(SONGS_TABS[0], "/songs/1"), "song detail is not the list");
   for (const path of ["/grade/2026/九段", "/guide/1/5", "/titles"]) assert.equal(activeDestination(path), "songs");
+  assert.deepEqual(TOOLS_TABS.map((t) => t.to), ["/tools/rt-calculator", "/tools/chart-config", "/tools/tja-constants", "/tools/note-count", "/tools/word-cloud"], "工具 = the five tools (redesign v2)");
   for (const tab of TOOLS_TABS) assert.equal(activeDestination(tab.to), "tools", tab.to);
+  for (const path of ["/more", "/settings", "/about"]) assert.equal(activeDestination(path), null, `${path}: no section tabs`);
   for (const tab of [...SONGS_TABS, ...TOOLS_TABS]) for (const m of [zh, ja]) assert.equal(typeof get(m, tab.labelKey), "string", tab.labelKey);
   // each page's <h1> uses its tab's label key
   const h1 = {
@@ -172,9 +174,10 @@ test("shell tabs: the library and tools groups cover the slice pages; labels are
 
 test("/more: grouped as the shell groups them, each entry named by its destination's title", async () => {
   const zh = await json("locales/zh.json");
-  assert.deepEqual(MORE_GROUPS.map((g) => g.key), ["songs", "tools", "account", "support"]);
-  assert.deepEqual(MORE_GROUPS[1].items.map((i) => i.path), TOOLS_TABS.slice(1).map((t) => t.to), "tools group = the 工具 tabs");
-  assert.deepEqual(MORE_GROUPS[0].items.map((i) => i.path), SONGS_TABS.slice(2).map((t) => t.to));
+  assert.deepEqual(NAV_GROUPS.map((g) => g.key), ["songs", "scores", "tools"]);
+  assert.deepEqual(NAV_GROUPS[2].items.map((i) => i.to), TOOLS_TABS.map((t) => t.to), "tools group = the 工具 tabs");
+  assert.deepEqual(NAV_GROUPS[0].items.map((i) => i.to), SONGS_TABS.map((t) => t.to));
+  assert.deepEqual(SUPPORT_LINKS.map((i) => i.to), ["/my", "/forum/me", "/account/sync", "/docs/score-token", "/account/developer", "/support", "/alias-log", "/settings", "/about"]);
   const titleKeyOf = {
     "/account/sync": [/<ReworkPageHeader :title="t\('account\.sync'\)"/, "pages/account/sync.vue"],
     "/docs/score-token": [/<ReworkPageHeader :title="copy\.title">/, "pages/docs/score-token.vue"],
@@ -183,15 +186,18 @@ test("/more: grouped as the shell groups them, each entry named by its destinati
     "/alias-log": [/<ReworkPageHeader :title="t\('nav\.aliasLog'\)">/, "pages/alias-log.vue"],
     "/settings": [/<ReworkPageHeader :title="t\('nav\.settings'\)" \/>/, "components/rework/account/Settings.vue"]
   };
-  for (const group of MORE_GROUPS) {
-    assert.equal(typeof get(zh, group.titleKey), "string");
+  for (const group of [...NAV_GROUPS, { labelKey: "rework.shell.accountSupport", items: SUPPORT_LINKS }]) {
+    assert.equal(typeof get(zh, group.labelKey), "string");
     for (const item of group.items) {
       assert.equal(typeof get(zh, item.labelKey), "string", item.labelKey);
-      if (titleKeyOf[item.path]) assert.match(await read(titleKeyOf[item.path][1]), titleKeyOf[item.path][0], item.path);
+      if (titleKeyOf[item.to]) assert.match(await read(titleKeyOf[item.to][1]), titleKeyOf[item.to][0], item.to);
     }
   }
   const page = await read("pages/more.vue");
   assert.doesNotMatch(page, /"\/tools"/, "no link to the /tools redirect");
+  assert.match(page, /<ReworkPageHeader :title="t\('rework\.shell\.allFeatures'\)" \/>/);
+  assert.match(page, /:groups="NAV_GROUPS"/);
+  assert.match(page, /:links="SUPPORT_LINKS"/);
   assert.match(await read("pages/tools/index.vue"), /navigateTo\(localePath\("\/more"\), \{ redirectCode: 302 \}\)/, "/tools still 302 → /more");
 });
 
@@ -303,14 +309,14 @@ test("slice G: the Element Plus mapping is the shell default; only the out-of-sc
   }
 });
 
-test("slice G: colour tuning (neutral light page, teal frame, one step lower dark primary, disabled tokens)", async () => {
+test("slice G colour tuning, as superseded by the redesign palette (2026-11-27): neutral page, plain frame, vermilion fill, disabled tokens", async () => {
   const css = await read("assets/css/ds/tokens.css");
   const block = (sel) => css.slice(css.indexOf(sel), css.indexOf("}", css.indexOf(sel)));
   const light = block('html.viewer-rework:not([data-theme="dark"]) {');
   const dark = block('html.viewer-rework[data-theme="dark"] {');
-  for (const [k, v] of [["--bg", "#f0f4f4"], ["--bg-sunk", "#e4eaea"], ["--surface", "#ffffff"], ["--surface-2", "#f7f9f9"], ["--line", "#d3dcdc"], ["--chrome-bg", "#eaf6f5"], ["--chrome-surface", "#f9fdfc"], ["--chrome-sunk", "#def0ee"], ["--chrome-line", "#ccdfdc"], ["--brand-primary", "#006c76"]])
+  for (const [k, v] of [["--bg", "#f4f5f8"], ["--bg-sunk", "#eceef3"], ["--surface", "#ffffff"], ["--surface-2", "#f8f9fb"], ["--line", "#e2e5ec"], ["--chrome-bg", "#ffffff"], ["--chrome-surface", "#ffffff"], ["--chrome-sunk", "#f4f5f8"], ["--chrome-line", "#e2e5ec"], ["--brand-primary", "#d8391f"], ["--brand-ink", "#b02a14"], ["--link", "#1770a8"]])
     assert.match(light, new RegExp(`${k}: ${v};`), `light ${k}`);
-  for (const [k, v] of [["--bg", "#0c2023"], ["--surface", "#1a383d"], ["--chrome-bg", "#0c2023"], ["--chrome-surface", "#1a383d"], ["--action-bg", "#45aeb5"], ["--action-bg-hover", "#5cbcc2"], ["--action-bg-active", "#3a9da4"], ["--brand-primary", "#86d9dc"], ["--brand-focus", "#86d9dc"], ["--disabled-bg", "#1f3d42"], ["--disabled-ink", "#6b8a8c"]])
+  for (const [k, v] of [["--bg", "#0f1120"], ["--surface", "#191c30"], ["--chrome-bg", "#191c30"], ["--chrome-surface", "#191c30"], ["--action-bg", "#d8391f"], ["--action-bg-hover", "#c8321a"], ["--action-bg-active", "#be2f17"], ["--action-ink", "#ffffff"], ["--brand-primary", "#ff8a70"], ["--brand-focus", "#7cc4f0"], ["--disabled-bg", "#1f2338"], ["--disabled-ink", "#6f7594"]])
     assert.match(dark, new RegExp(`${k}: ${v};`), `dark ${k}`);
   const tuning = await json("scripts/ds/spec/tuning-2026-11-18.json");
   assert.deepEqual(Object.keys(tuning.changed.light), ["--bg", "--bg-sunk", "--surface", "--surface-2", "--line"]);
@@ -321,7 +327,9 @@ test("slice G: colour tuning (neutral light page, teal frame, one step lower dar
   const fill = rows.find((r) => r.theme === "dark" && r.group === "role non-text" && r.fg === "--action-bg" && r.bg === "--surface");
   assert.ok(fill.ratio >= 3, "dark primary fill against the surface");
   const shell = await read("components/rework/Shell.vue");
-  for (const sel of [".rework-rail {", ".rework-bar {", ".rework-tabs {"]) assert.match(shell.slice(shell.indexOf(sel), shell.indexOf("}", shell.indexOf(sel))), /background: var\(--chrome-(bg|surface)\)/, sel);
+  for (const sel of [".rework-bar {", ".rework-tabs {"]) assert.match(shell.slice(shell.indexOf(sel), shell.indexOf("}", shell.indexOf(sel))), /background: var\(--chrome-(bg|surface)\)/, sel);
+  const sideRule = shell.slice(shell.indexOf(".rework-side {"), shell.indexOf("}", shell.indexOf(".rework-side {")));
+  assert.match(sideRule, /background: var\(--side-bg\);/, "redesign v2: the sidebar is dark in both themes");
   assert.match(shell, /border-top: 1px solid var\(--chrome-line\);\n    background: var\(--chrome-surface\);/, "phone bottom bar");
   assert.match(await read("assets/css/ds/rework.css"), /\.rw-btn\[aria-disabled="true"\] \{\n  border-color: var\(--disabled-line\);\n  background: var\(--disabled-bg\);\n  color: var\(--disabled-ink\);/);
   const ep = await read("assets/css/ds/element-plus.css");
@@ -369,4 +377,38 @@ test("slice G: home banner in the greeting row; other songs back to their shelf;
   const runner = await read("scripts/rework/selfcheck-runner.mjs");
   assert.match(runner, /report\.devLock = releaseOwnDevLock\(\{ port, spawnedAt, portFree: report\.portFreeAfter \}\);/);
   assert.doesNotMatch(runner, /NUXT_IGNORE_LOCK/);
+});
+
+// ---------------------------------------------------------------- redesign v2 shell (2026-11-27)
+
+test("redesign v2: one navigation model feeds the sidebar, drawer, tabs, bottom bar, /more and search", async () => {
+  const nav = await import("../utils/rework/navigation.ts");
+  const zh = await json("locales/zh.json");
+  const ja = await json("locales/ja.json");
+  assert.deepEqual(nav.MAIN_NAV.map((e) => `${e.kind}:${e.key}`), ["link:today", "group:songs", "group:scores", "link:community", "group:tools"]);
+  assert.deepEqual(nav.SCORES_TABS.map((t) => t.to), ["/account/songs", "/tools/b30", "/tools/trend", "/tools/progress", "/tools/recommend", "/my/growth", "/my/weekly"]);
+  assert.deepEqual(nav.COMMON_FEATURES.map((f) => f.to), ["/account/sync", "/tools/b30", "/tools/recommend", "/tools/rt-calculator", "/grade"]);
+  const every = [...nav.MAIN_NAV.flatMap((e) => (e.kind === "group" ? e.items : [e])), ...nav.FOOTER_LINKS, ...nav.ACCOUNT_LINKS];
+  for (const item of every) assert.ok(nav.FEATURES.some((f) => f.to === item.to), `search finds ${item.to}`);
+  for (const f of [...nav.FEATURES, ...nav.COMMON_FEATURES, ...nav.MOBILE_TABS]) {
+    for (const m of [zh, ja]) assert.equal(typeof get(m, f.labelKey), "string", f.labelKey);
+    if (f.groupKey) for (const m of [zh, ja]) assert.equal(typeof get(m, f.groupKey), "string", f.groupKey);
+  }
+  const icon = await read("components/rework/Icon.vue");
+  for (const f of [...nav.FEATURES, ...nav.MOBILE_TABS, ...nav.NAV_GROUPS]) assert.ok(new RegExp(`\n  ${f.icon}: "`).test(icon.replace(/\r\n/g, "\n")), `icon ${f.icon}`);
+  const shell = await read("components/rework/Shell.vue");
+  assert.doesNotMatch(shell, /desktopDestinations|mobileDestinations|don-search|rework-rail/);
+  assert.match(shell, /v-for="entry in MAIN_NAV"/);
+  assert.match(shell, /v-for="item in MOBILE_TABS"/);
+  assert.match(shell, /:aria-expanded="groupOpen\(entry\.key\)"/);
+  assert.match(shell, /:aria-controls="`side-group-\$\{entry\.key\}`"/);
+  assert.match(shell, /useState<Partial<Record<NavGroupKey, boolean>>>\("rework-nav-groups"/, "group toggles live in useState");
+  assert.doesNotMatch(shell, /localStorage|sessionStorage/, "first paint never reads browser storage");
+  assert.match(shell, /aria-haspopup="dialog"\n\s*:aria-expanded="drawerOpen"\n\s*aria-controls="rework-side"/);
+  assert.match(shell, /drawerOpen\.value = false;\n\s*nextTick\(revealTab\);/, "navigation closes the drawer");
+  assert.match(shell, /data-sync-control/);
+  assert.match(shell, /:data-sync-state="syncKind \|\| undefined"/);
+  const search = await read("components/rework/SearchPanel.vue");
+  assert.match(search, /\(q \? FEATURES : COMMON_FEATURES\)/);
+  assert.match(await read("assets/css/ds/rework.css"), /@media \(min-width: 1100px\) \{\n  html\.viewer-rework:root \{\n    --rail-w: 256px;/);
 });

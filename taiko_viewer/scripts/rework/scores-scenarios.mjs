@@ -39,7 +39,7 @@ export const PAGES = [
   { key: "recommend", path: "/tools/recommend", tab: "/tools/recommend" },
   { key: "my", path: "/my", tab: null }
 ];
-const TAB_PATHS = ["/account/songs", "/tools/b30", "/tools/trend", "/tools/progress", "/tools/recommend"];
+const TAB_PATHS = ["/account/songs", "/tools/b30", "/tools/trend", "/tools/progress", "/tools/recommend", "/my/growth", "/my/weekly"];
 const PNG = { b30: stripedPng(1400, 900, 1), trend: stripedPng(1200, 700, 2), progress: stripedPng(1600, 1100, 3) };
 const BINDING_MESSAGE = "请先绑定鼓众 ID";
 const NO_DATA_MESSAGE = "未找到本地成绩数据，请先在「多端同步」更新数据";
@@ -277,7 +277,7 @@ export async function runScoresScenarios({ browser, base, out, web = webRoot, la
         assert.equal(login.pathname, `${prefix(lang)}/account/login`);
         assert.equal(login.searchParams.get("redirect"), `${prefix(lang)}${item.path}`, "back to this page after sign-in");
         assert.ok(await noOverflow(page));
-        if (item.tab) assert.equal(await page.locator(`.desktop-tabs a[aria-current="page"]`).getAttribute("href"), `${prefix(lang)}${item.tab}`);
+        if (item.tab) assert.equal(await page.locator(`.mobile-tabs a[aria-current="page"]`).getAttribute("href"), `${prefix(lang)}${item.tab}`);
         pages.push(item.path);
         if (lang === "zh" && (item.key === "b30" || item.key === "my")) await shot(page, `ssr-signed-out-${item.key}-zh-1440-light`);
       }
@@ -368,7 +368,7 @@ export async function runScoresScenarios({ browser, base, out, web = webRoot, la
         }
         if (item.tab) {
           h1Left[item.key] = Math.round(await page.locator("h1").first().evaluate((el) => el.getBoundingClientRect().left));
-          const sel = width < 768 ? ".mobile-tabs" : ".desktop-tabs";
+          const sel = ".mobile-tabs";
           const hrefs = await page.$$eval(`${sel} a`, (as) => as.map((a) => a.getAttribute("href")));
           assert.deepEqual(hrefs, TAB_PATHS.map((x) => prefix(lang) + x), "成绩 tabs");
           assert.equal(await page.locator(`${sel} a[aria-current="page"]`).getAttribute("href"), prefix(lang) + item.tab);
@@ -741,7 +741,7 @@ export async function runScoresScenarios({ browser, base, out, web = webRoot, la
   for (const width of [1440, 390])
     await scenario("play-tabs", { width }, async ({ page }) => {
       await enterSignedIn(page, base, "zh", "/account/songs");
-      const sel = width < 768 ? ".mobile-tabs" : ".desktop-tabs";
+      const sel = ".mobile-tabs";
       for (const to of TAB_PATHS.slice(1).concat(TAB_PATHS[0])) {
         const t0 = Date.now();
         await page.locator(`${sel} a[href="${to}"]`).click();

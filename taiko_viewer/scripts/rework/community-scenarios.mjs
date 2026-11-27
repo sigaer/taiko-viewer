@@ -384,8 +384,8 @@ export async function runCommunityScenarios({ browser, base, out, web = webRoot,
       await page.goto(`${base}${prefix(lang)}/forum`, { waitUntil: "networkidle" });
       await page.locator(".rw-state--failed").first().waitFor();
       assert.equal((await page.locator("h1").first().textContent()).trim(), msg(m, "rework.community"));
-      assert.equal(await page.locator(`.desktop-tabs a[aria-current="page"]`).getAttribute("href"), `${prefix(lang)}/forum`);
-      assert.deepEqual(await page.locator(".desktop-tabs a").allTextContents(), TAB_KEYS.map((k) => msg(m, k)));
+      assert.equal(await page.locator(`.mobile-tabs a[aria-current="page"]`).getAttribute("href"), `${prefix(lang)}/forum`);
+      assert.deepEqual(await page.locator(".mobile-tabs a").allTextContents(), TAB_KEYS.map((k) => msg(m, k)));
       assert.equal(await page.locator(".rework-bar .bell").getAttribute("href"), `${prefix(lang)}/forum/notifications`);
       if (lang === "zh") await shot(page, "ssr-forum-failed-zh-1440-light");
       await page.goto(`${base}${prefix(lang)}/forum/thread/${PLAIN}`, { waitUntil: "networkidle" });
@@ -431,7 +431,7 @@ export async function runCommunityScenarios({ browser, base, out, web = webRoot,
         assert.ok(await noOverflow(page), `${name}: no horizontal overflow`);
         const tabIndex = TABS.indexOf(path);
         if (tabIndex >= 0) {
-          const tabs = width < 768 ? ".mobile-tabs" : ".desktop-tabs";
+          const tabs = ".mobile-tabs";
           assert.equal(await page.locator(`${tabs} a[aria-current="page"]`).getAttribute("href"), `${prefix(lang)}${path}`, `${name}: current tab`);
           assert.equal((await page.locator(`${tabs} a[aria-current="page"]`).textContent()).trim(), (await page.locator("h1").textContent()).trim(), `${name}: tab = <h1>`);
         }

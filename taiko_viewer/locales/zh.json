@@ -2215,6 +2215,17 @@
     }
   },
   "rework": {
+    "shell": {
+      "myScores": "我的成绩",
+      "allFeatures": "全部功能",
+      "all": "全部",
+      "syncScores": "同步成绩",
+      "syncScoresState": "同步成绩：{state}",
+      "menu": "菜单",
+      "closeMenu": "关闭菜单",
+      "common": "常用功能",
+      "accountSupport": "账号与支持"
+    },
     "passport": "成长档案",
     "home": {
       "allRecommendations": "全部推荐",
@@ -2268,7 +2279,7 @@
     "my": "我的",
     "accountMenu": "账号菜单",
     "search": "搜索",
-    "searchPlaceholder": "搜索歌曲、页面",
+    "searchPlaceholder": "搜索歌曲或功能",
     "cancel": "取消",
     "loading": "正在搜索…",
     "searchError": "搜索失败，请重试",

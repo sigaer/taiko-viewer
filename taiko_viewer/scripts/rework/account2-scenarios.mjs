@@ -386,7 +386,7 @@ export async function runAccount2Scenarios({ browser, base, out, web = webRoot, 
     step("before the sync page: the plain control");
     await page.goto(`${base}/about`, { waitUntil: "networkidle" });
     await injectSignedIn(page, state.user);
-    assert.deepEqual(await syncControl(page), { state: null, label: msg(zh, "rework.sync"), dot: null });
+    assert.deepEqual(await syncControl(page), { state: null, label: msg(zh, "rework.shell.syncScores"), dot: null });
     let first = true;
     for (const [variant, e] of Object.entries(expect)) {
       step(variant);
@@ -433,7 +433,7 @@ export async function runAccount2Scenarios({ browser, base, out, web = webRoot, 
       const control = await syncControl(page);
       assert.equal(control.state, e.control, `${variant}: shell control state`);
       assert.equal(control.dot, e.dot, `${variant}: shell control mark`);
-      assert.equal(control.label, msg(zh, "rework.account.sync.indicator.label", { state: S(`indicator.${e.control}`) }));
+      assert.equal(control.label, msg(zh, "rework.shell.syncScoresState", { state: S(`indicator.${e.control}`) }));
       if (["ready", "unbound", "failed"].includes(variant)) await shot(page, `sync-${variant}-intercepted-zh-1440-light`, true);
     }
     step("the control keeps the state on other pages and drops it for another account");

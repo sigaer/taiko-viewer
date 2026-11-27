@@ -1,0 +1,631 @@
+{
+ "title": "Redesign palette (approved 2026-11-27): vermilion brand, indigo-ink neutrals, blue links and focus, dark sidebar. Applied on top of tuning-2026-11-18.json.",
+ "doc": "docs/design-system/viewer-ds.md §改版调色（2026-11-27）",
+ "note": "changed.*.prototype is the frozen prototype value (null when the token was added by an earlier tuning), previous the value before this tuning. 'both' applies to the light and dark themes alike.",
+ "changed": {
+  "both": {
+   "--toast-ink": {
+    "prototype": "#f1fbf9",
+    "previous": "#f1fbf9",
+    "tuned": "#eef0f7"
+   },
+   "--lane-line": {
+    "prototype": "#2f5257",
+    "previous": "#2f5257",
+    "tuned": "#3a3f62"
+   },
+   "--lane-focus": {
+    "prototype": "#86d9dc",
+    "previous": "#86d9dc",
+    "tuned": "#7cc4f0"
+   },
+   "--stage-bg": {
+    "prototype": "#1d3d42",
+    "previous": "#1d3d42",
+    "tuned": "#1b1e33"
+   },
+   "--stage-sunk": {
+    "prototype": "#17353a",
+    "previous": "#17353a",
+    "tuned": "#15182a"
+   },
+   "--stage-surface": {
+    "prototype": "#27494e",
+    "previous": "#27494e",
+    "tuned": "#262a45"
+   },
+   "--stage-ink": {
+    "prototype": "#e4f4f1",
+    "previous": "#e4f4f1",
+    "tuned": "#eef0f7"
+   },
+   "--stage-ink-2": {
+    "prototype": "#c0dad8",
+    "previous": "#c0dad8",
+    "tuned": "#c4c8d8"
+   },
+   "--stage-ink-3": {
+    "prototype": "#a3c2c1",
+    "previous": "#a3c2c1",
+    "tuned": "#a5abc4"
+   },
+   "--stage-line": {
+    "prototype": "#3a5d62",
+    "previous": "#3a5d62",
+    "tuned": "#3a3f62"
+   },
+   "--stage-line-strong": {
+    "prototype": "#4d7277",
+    "previous": "#4d7277",
+    "tuned": "#4f557c"
+   },
+   "--stage-ctl-border": {
+    "prototype": "#82a8aa",
+    "previous": "#82a8aa",
+    "tuned": "#8a90b0"
+   },
+   "--stage-focus": {
+    "prototype": "#86d9dc",
+    "previous": "#86d9dc",
+    "tuned": "#7cc4f0"
+   },
+   "--selected-ink": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--brand-ink)"
+   },
+   "--seg-on-ink": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--brand-ink)"
+   },
+   "--nav-active-bg": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--action-bg)"
+   },
+   "--nav-active-ink": {
+    "prototype": "var(--brand-on-primary)",
+    "previous": "var(--brand-on-primary)",
+    "tuned": "var(--action-ink)"
+   },
+   "--nav-active-text": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--brand-ink)"
+   },
+   "--accent": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--action-bg)"
+   },
+   "--annual-ink": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--brand-ink)"
+   },
+   "--role-mod-ink": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--brand-ink)"
+   },
+   "--role-admin-ink": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--brand-ink)"
+   },
+   "--btn-ink-bg": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--action-bg)"
+   },
+   "--btn-ink-line": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--action-bg)"
+   },
+   "--btn-ink-ink": {
+    "prototype": "var(--brand-on-primary)",
+    "previous": "var(--brand-on-primary)",
+    "tuned": "var(--action-ink)"
+   },
+   "--btn-ink-hover": {
+    "prototype": "var(--brand-hover)",
+    "previous": "var(--brand-hover)",
+    "tuned": "var(--action-bg-hover)"
+   },
+   "--vote-on-ink": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--brand-ink)"
+   },
+   "--input-focus-line": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--brand-focus)"
+   },
+   "--info-line": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--link)"
+   }
+  },
+  "light": {
+   "--brand-primary": {
+    "prototype": "#006c76",
+    "previous": "#006c76",
+    "tuned": "#d8391f"
+   },
+   "--brand-hover": {
+    "prototype": "#005860",
+    "previous": "#005860",
+    "tuned": "#be2f17"
+   },
+   "--brand-soft": {
+    "prototype": "#d7ece9",
+    "previous": "#d7ece9",
+    "tuned": "#fdebe6"
+   },
+   "--brand-focus": {
+    "prototype": "#006c76",
+    "previous": "#006c76",
+    "tuned": "#1a76b0"
+   },
+   "--bg": {
+    "prototype": "#eaf6f5",
+    "previous": "#f0f4f4",
+    "tuned": "#f4f5f8"
+   },
+   "--bg-sunk": {
+    "prototype": "#def0ee",
+    "previous": "#e4eaea",
+    "tuned": "#eceef3"
+   },
+   "--surface-2": {
+    "prototype": "#f2f9f8",
+    "previous": "#f7f9f9",
+    "tuned": "#f8f9fb"
+   },
+   "--line": {
+    "prototype": "#ccdfdc",
+    "previous": "#d3dcdc",
+    "tuned": "#e2e5ec"
+   },
+   "--chrome-bg": {
+    "prototype": null,
+    "previous": "#eaf6f5",
+    "tuned": "#ffffff"
+   },
+   "--chrome-surface": {
+    "prototype": null,
+    "previous": "#f9fdfc",
+    "tuned": "#ffffff"
+   },
+   "--chrome-sunk": {
+    "prototype": null,
+    "previous": "#def0ee",
+    "tuned": "#f4f5f8"
+   },
+   "--chrome-line": {
+    "prototype": null,
+    "previous": "#ccdfdc",
+    "tuned": "#e2e5ec"
+   },
+   "--line-strong": {
+    "prototype": "#b4cecb",
+    "previous": "#b4cecb",
+    "tuned": "#cdd2dd"
+   },
+   "--ink": {
+    "prototype": "#203f43",
+    "previous": "#203f43",
+    "tuned": "#15182a"
+   },
+   "--ink-2": {
+    "prototype": "#3d5a5e",
+    "previous": "#3d5a5e",
+    "tuned": "#454b64"
+   },
+   "--ink-3": {
+    "prototype": "#4d696c",
+    "previous": "#4d696c",
+    "tuned": "#636982"
+   },
+   "--ctl-border": {
+    "prototype": "#6e8c8e",
+    "previous": "#6e8c8e",
+    "tuned": "#858ba3"
+   },
+   "--ok": {
+    "prototype": "#26724e",
+    "previous": "#26724e",
+    "tuned": "#1e7a4f"
+   },
+   "--ok-wash": {
+    "prototype": "#e4f3ea",
+    "previous": "#e4f3ea",
+    "tuned": "#e2f4ea"
+   },
+   "--toast-bg": {
+    "prototype": "#24494d",
+    "previous": "#24494d",
+    "tuned": "#20243a"
+   },
+   "--lane": {
+    "prototype": "#17353a",
+    "previous": "#17353a",
+    "tuned": "#1b1e33"
+   },
+   "--shadow-pop": {
+    "prototype": "0 18px 50px -12px rgb(22 43 48 / 0.28), 0 2px 6px rgb(22 43 48 / 0.08)",
+    "previous": "0 18px 50px -12px rgb(22 43 48 / 0.28), 0 2px 6px rgb(22 43 48 / 0.08)",
+    "tuned": "0 18px 50px -12px rgb(21 24 42 / 0.28), 0 2px 6px rgb(21 24 42 / 0.08)"
+   },
+   "--shadow-lift": {
+    "prototype": "0 6px 18px -8px rgb(22 43 48 / 0.22)",
+    "previous": "0 6px 18px -8px rgb(22 43 48 / 0.22)",
+    "tuned": "0 6px 18px -8px rgb(21 24 42 / 0.22)"
+   },
+   "--scrim": {
+    "prototype": "rgb(15 27 33 / 0.46)",
+    "previous": "rgb(15 27 33 / 0.46)",
+    "tuned": "rgb(21 24 42 / 0.46)"
+   },
+   "--link": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "#1770a8"
+   },
+   "--info-wash": {
+    "prototype": "var(--brand-soft)",
+    "previous": "var(--brand-soft)",
+    "tuned": "#dff0fa"
+   },
+   "--info-ink": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "#18619c"
+   }
+  },
+  "dark": {
+   "--action-bg": {
+    "prototype": "var(--brand-primary)",
+    "previous": "#45aeb5",
+    "tuned": "#d8391f"
+   },
+   "--action-bg-hover": {
+    "prototype": "var(--brand-hover)",
+    "previous": "#5cbcc2",
+    "tuned": "#c8321a"
+   },
+   "--action-ink": {
+    "prototype": "var(--brand-on-primary)",
+    "previous": "var(--brand-on-primary)",
+    "tuned": "#ffffff"
+   },
+   "--brand-primary": {
+    "prototype": "#86d9dc",
+    "previous": "#86d9dc",
+    "tuned": "#ff8a70"
+   },
+   "--brand-hover": {
+    "prototype": "#a0e3e5",
+    "previous": "#a0e3e5",
+    "tuned": "#ffa48f"
+   },
+   "--brand-soft": {
+    "prototype": "#2a565a",
+    "previous": "#2a565a",
+    "tuned": "#3a2026"
+   },
+   "--brand-on-primary": {
+    "prototype": "#0b2a2d",
+    "previous": "#0b2a2d",
+    "tuned": "#15182a"
+   },
+   "--brand-focus": {
+    "prototype": "#86d9dc",
+    "previous": "#86d9dc",
+    "tuned": "#7cc4f0"
+   },
+   "--bg": {
+    "prototype": "#0c2023",
+    "previous": "#0c2023",
+    "tuned": "#0f1120"
+   },
+   "--bg-sunk": {
+    "prototype": "#081619",
+    "previous": "#081619",
+    "tuned": "#0a0c18"
+   },
+   "--surface": {
+    "prototype": "#1a383d",
+    "previous": "#1a383d",
+    "tuned": "#191c30"
+   },
+   "--surface-2": {
+    "prototype": "#234a50",
+    "previous": "#234a50",
+    "tuned": "#22263e"
+   },
+   "--line": {
+    "prototype": "#2f5257",
+    "previous": "#2f5257",
+    "tuned": "#2c3150"
+   },
+   "--chrome-bg": {
+    "prototype": null,
+    "previous": "#0c2023",
+    "tuned": "#191c30"
+   },
+   "--chrome-surface": {
+    "prototype": null,
+    "previous": "#1a383d",
+    "tuned": "#191c30"
+   },
+   "--chrome-sunk": {
+    "prototype": null,
+    "previous": "#081619",
+    "tuned": "#22263e"
+   },
+   "--chrome-line": {
+    "prototype": null,
+    "previous": "#2f5257",
+    "tuned": "#2c3150"
+   },
+   "--line-strong": {
+    "prototype": "#447378",
+    "previous": "#447378",
+    "tuned": "#4a5075"
+   },
+   "--ink": {
+    "prototype": "#e4f4f1",
+    "previous": "#e4f4f1",
+    "tuned": "#eef0f7"
+   },
+   "--ink-2": {
+    "prototype": "#accbca",
+    "previous": "#accbca",
+    "tuned": "#b5bad0"
+   },
+   "--ink-3": {
+    "prototype": "#a3c0c0",
+    "previous": "#a3c0c0",
+    "tuned": "#9399b4"
+   },
+   "--ink-inv": {
+    "prototype": "#10282b",
+    "previous": "#10282b",
+    "tuned": "#15182a"
+   },
+   "--ctl-border": {
+    "prototype": "#779fa1",
+    "previous": "#779fa1",
+    "tuned": "#7c83a3"
+   },
+   "--toast-bg": {
+    "prototype": "#31565b",
+    "previous": "#31565b",
+    "tuned": "#2c3150"
+   },
+   "--lane": {
+    "prototype": "#081619",
+    "previous": "#081619",
+    "tuned": "#0a0c18"
+   },
+   "--shadow-pop": {
+    "prototype": "0 24px 60px -12px rgb(0 0 0 / 0.6), 0 0 0 1px #3d6165",
+    "previous": "0 24px 60px -12px rgb(0 0 0 / 0.6), 0 0 0 1px #3d6165",
+    "tuned": "0 24px 60px -12px rgb(0 0 0 / 0.6), 0 0 0 1px #3a3f62"
+   },
+   "--scrim": {
+    "prototype": "rgb(5 14 16 / 0.62)",
+    "previous": "rgb(5 14 16 / 0.62)",
+    "tuned": "rgb(5 6 14 / 0.62)"
+   },
+   "--link": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "#7cc4f0"
+   },
+   "--info-wash": {
+    "prototype": "var(--brand-soft)",
+    "previous": "var(--brand-soft)",
+    "tuned": "#16304a"
+   },
+   "--info-ink": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "#8ad4f4"
+   },
+   "--overlay-bg": {
+    "prototype": "#265056",
+    "previous": "#265056",
+    "tuned": "#22263e"
+   },
+   "--action-bg-active": {
+    "prototype": null,
+    "previous": "#3a9da4",
+    "tuned": "#be2f17"
+   },
+   "--disabled-bg": {
+    "prototype": null,
+    "previous": "#1f3d42",
+    "tuned": "#1f2338"
+   },
+   "--disabled-ink": {
+    "prototype": null,
+    "previous": "#6b8a8c",
+    "tuned": "#6f7594"
+   },
+   "--disabled-line": {
+    "prototype": null,
+    "previous": "#2f5257",
+    "tuned": "#2c3150"
+   }
+  },
+  "stage": {
+   "--action-bg": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "#d8391f"
+   },
+   "--action-bg-hover": {
+    "prototype": "var(--brand-hover)",
+    "previous": "var(--brand-hover)",
+    "tuned": "#c8321a"
+   },
+   "--action-bg-active": {
+    "prototype": null,
+    "previous": "var(--action-bg-hover)",
+    "tuned": "#be2f17"
+   },
+   "--action-ink": {
+    "prototype": "var(--brand-on-primary)",
+    "previous": "var(--brand-on-primary)",
+    "tuned": "#ffffff"
+   },
+   "--link": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "#7cc4f0"
+   },
+   "--selected-ink": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--brand-ink)"
+   },
+   "--seg-on-ink": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--brand-ink)"
+   },
+   "--nav-active-bg": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--action-bg)"
+   },
+   "--nav-active-ink": {
+    "prototype": "var(--brand-on-primary)",
+    "previous": "var(--brand-on-primary)",
+    "tuned": "var(--action-ink)"
+   },
+   "--nav-active-text": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--brand-ink)"
+   },
+   "--info-wash": {
+    "prototype": "var(--brand-soft)",
+    "previous": "var(--brand-soft)",
+    "tuned": "#16304a"
+   },
+   "--info-ink": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "#8ad4f4"
+   },
+   "--accent": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--action-bg)"
+   },
+   "--annual-ink": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--brand-ink)"
+   },
+   "--role-mod-ink": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--brand-ink)"
+   },
+   "--role-admin-ink": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--brand-ink)"
+   },
+   "--btn-ink-bg": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--action-bg)"
+   },
+   "--btn-ink-line": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--action-bg)"
+   },
+   "--btn-ink-ink": {
+    "prototype": "var(--brand-on-primary)",
+    "previous": "var(--brand-on-primary)",
+    "tuned": "var(--action-ink)"
+   },
+   "--btn-ink-hover": {
+    "prototype": "var(--brand-hover)",
+    "previous": "var(--brand-hover)",
+    "tuned": "var(--action-bg-hover)"
+   },
+   "--vote-on-ink": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--brand-ink)"
+   },
+   "--input-focus-line": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--brand-focus)"
+   },
+   "--info-line": {
+    "prototype": "var(--brand-primary)",
+    "previous": "var(--brand-primary)",
+    "tuned": "var(--link)"
+   },
+   "--brand-primary": {
+    "prototype": "#86d9dc",
+    "previous": "#86d9dc",
+    "tuned": "#ff8a70"
+   },
+   "--brand-hover": {
+    "prototype": "#a0e3e5",
+    "previous": "#a0e3e5",
+    "tuned": "#ffa48f"
+   },
+   "--brand-soft": {
+    "prototype": "#244b4e",
+    "previous": "#244b4e",
+    "tuned": "#3a2026"
+   },
+   "--brand-on-primary": {
+    "prototype": "#0b2a2d",
+    "previous": "#0b2a2d",
+    "tuned": "#15182a"
+   },
+   "--brand-focus": {
+    "prototype": "#86d9dc",
+    "previous": "#86d9dc",
+    "tuned": "#7cc4f0"
+   }
+  }
+ },
+ "added": {
+  "both": {
+   "--side-line": "#2c3150",
+   "--side-ink": "#c4c8d8",
+   "--side-ink-2": "#8a90ab",
+   "--side-ink-strong": "#ffffff"
+  },
+  "light": {
+   "--brand-ink": "#b02a14",
+   "--side-bg": "#15182a",
+   "--side-surface": "#1f2338"
+  },
+  "dark": {
+   "--brand-ink": "#ff8a70",
+   "--side-bg": "#0b0d18",
+   "--side-surface": "#191c30"
+  },
+  "stage": {
+   "--brand-ink": "#ff8a70"
+  }
+ }
+}

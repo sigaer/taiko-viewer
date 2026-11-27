@@ -3,7 +3,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
-import { activeDestination } from '../utils/rework/navigation.ts';
+import { activeDestination, SCORES_TABS } from '../utils/rework/navigation.ts';
 import {
   accountReadKind, errorStatus, errorStatusMessage, SCORE_ROW_WINDOW, rowWindowCount, rowWindow, rowWindowRange, pageCount,
   scoreDate, scoreDateTime, scoreTitles, starOf, fitPercent, deviationText, fitPosition, FIT_SCALE, progressShare, PLAY_TABS
@@ -108,12 +108,14 @@ test('recommendation reasons: fit from the API deviation, the strict band, progr
 test('the 成绩 tabs list every page of the group at its current address', async () => {
   assert.deepEqual(PLAY_TABS.map((t) => t.to), ['/account/songs', '/tools/b30', '/tools/trend', '/tools/progress', '/tools/recommend']);
   for (const tab of PLAY_TABS) {
-    assert.equal(activeDestination(tab.to), 'play', tab.to);
-    assert.equal(activeDestination('/ja' + tab.to), 'play');
+    assert.equal(activeDestination(tab.to), 'scores', tab.to);
+    assert.equal(activeDestination('/ja' + tab.to), 'scores');
   }
   assert.equal(activeDestination('/tools/word-cloud'), 'tools', 'word cloud stays with the tools (slice F)');
   const shell = await read('components/rework/Shell.vue');
-  assert.match(shell, /play: \[\.\.\.PLAY_TABS\]/);
+  // redesign v2: 我的成绩 = the 成绩 tabs followed by the 成长 tabs, one tab row in the shell
+  assert.deepEqual(SCORES_TABS.slice(0, PLAY_TABS.length).map((t) => [t.key, t.to]), PLAY_TABS.map((t) => [t.key, t.to]));
+  assert.match(shell, /scores: \[\.\.\.SCORES_TABS\]/);
   for (const lang of ['zh', 'ja']) {
     const m = await locale(lang);
     for (const tab of PLAY_TABS) assert.equal(typeof m.rework[tab.key], 'string', `${lang} rework.${tab.key}`);
@@ -266,12 +268,13 @@ test('slice C: every static locale key the reworked components use exists in bot
 test('slice C: the 成长 tabs are the two growth pages, named like their own <h1>', async () => {
   const [zh, ja, shell] = [await locale('zh'), await locale('ja'), await read('components/rework/Shell.vue')];
   assert.deepEqual(GROWTH_TABS.map((t) => t.to), ['/my/growth', '/my/weekly']);
-  assert.ok(GROWTH_TABS.every((t) => activeDestination(t.to) === 'growth'));
+  assert.ok(GROWTH_TABS.every((t) => activeDestination(t.to) === 'scores'));
   for (const messages of [zh, ja]) {
     assert.equal(get(messages, 'rework.passport'), get(messages, 'passport.title'));
     assert.equal(get(messages, 'rework.weekly'), get(messages, 'weekly.title'));
   }
-  assert.match(shell, /growth: \[\.\.\.GROWTH_TABS\]/);
+  assert.deepEqual(SCORES_TABS.slice(-GROWTH_TABS.length).map((t) => [t.key, t.to]), GROWTH_TABS.map((t) => [t.key, t.to]));
+  assert.match(shell, /scores: \[\.\.\.SCORES_TABS\]/);
   assert.doesNotMatch(shell, /today: \[/, '今日 is a single page without section tabs');
 });
 

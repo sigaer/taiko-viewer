@@ -186,7 +186,7 @@ export function build(root = ROOT) {
   md.push("|---|---|---|---|---|---|---|");
   for (const r of rowsEl) md.push(`| \`${r.name}\` | ${show(r.cells[0][0])} → ${show(r.cells[0][1])} | ${show(r.cells[1][0])} → ${show(r.cells[1][1])} | ${r.verdicts[0]} | ${r.verdicts[1]} | ${r.readers} | ${kind(r)} |`);
   md.push("");
-  md.push("Known visible changes once aliased (02.1 / 02.2 of the stage-0 task list): the primary colour (vermilion → Viewer Teal), the dark-theme lightness ladder, difficulty colours, info (blue-grey → neutral) and tooltips (dark chip → overlay surface).");
+  md.push("Known visible changes once aliased (02.1 / 02.2 of the stage-0 task list): the primary colour (production vermilion → the redesign vermilion; the dark theme fills with the same vermilion), links and focus (teal → blue), the neutrals (teal-grey → indigo-ink), the dark-theme lightness ladder, difficulty colours, info (blue-grey → neutral) and tooltips (dark chip → overlay surface).");
   md.push("");
   return { markdown: md.join("\n"), problems };
 }

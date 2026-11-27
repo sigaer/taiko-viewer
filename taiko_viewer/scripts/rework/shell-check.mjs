@@ -305,25 +305,17 @@ try {
             ),
             "no horizontal overflow",
           );
+          // redesign v2: the sidebar marks the current page from 1100 px; below it the section tabs do
+          // (/about has no section tabs, so only the sidebar is checked there).
           const visibleTabs = page.locator(
-            width > 767 ? ".desktop-tabs" : ".mobile-tabs",
+            width >= 1100 ? ".rework-side" : ".mobile-tabs",
           );
-          assert.equal(
-            await visibleTabs.locator('a[aria-current="page"]').count(),
-            1,
-          );
-          assert.ok(
-            await visibleTabs.evaluate(
-              (el) =>
-                el.scrollWidth <= el.clientWidth ||
-                getComputedStyle(el).overflowX === "auto",
-            ),
-            "tabs fit or scroll",
-          );
-          const trigger =
-            width <= 767
-              ? page.locator(".don-search")
-              : page.locator(".search-trigger");
+          if (width >= 1100)
+            assert.equal(
+              await visibleTabs.locator('a[aria-current="page"]').count(),
+              1,
+            );
+          const trigger = page.locator(".search-trigger");
           await trigger.click();
           await page.locator("dialog[open] input").waitFor();
           assert.equal(

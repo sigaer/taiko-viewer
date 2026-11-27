@@ -5,9 +5,19 @@
  * .num            digits in the number font (same rule as base.css for the sample pages; DS components use it)
  * .rw-btn         a button or link styled as a button: secondary by default, --primary for the one main action,
  *                 --ghost for a quiet action, --sm for dense rows. Always at least 44 px tall (touch target).
- * .rw-link        an inline text link (brand colour = interaction)
+ * .rw-link        an inline text link (--link, blue)
  * .rw-vh          visually hidden, still read by screen readers
  */
+/* Shell frame width (redesign v2): the 256 px sidebar from 1100 px, no persistent sidebar below (drawer on tablets).
+   tokens.css keeps the V1.3 base value; the shell's own width wins here (html.viewer-rework:root outranks it). */
+html.viewer-rework:root {
+  --rail-w: 0px;
+}
+@media (min-width: 1100px) {
+  html.viewer-rework:root {
+    --rail-w: 256px;
+  }
+}
 html.viewer-rework .num {
   font-family: var(--font-num);
   font-weight: 600;

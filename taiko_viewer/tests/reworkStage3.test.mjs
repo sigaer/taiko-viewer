@@ -46,7 +46,7 @@ const floor = (id, floorNo, replies = 0, author = 1) => ({
 test("community tabs: three existing addresses; each label is that page's <h1>", async () => {
   assert.deepEqual(COMMUNITY_TABS.map((t) => t.to), ["/forum", "/forum/me", "/forum/notifications"]);
   const shell = await read("components/rework/Shell.vue");
-  assert.match(shell, /community: \[\.\.\.COMMUNITY_TABS\]/);
+  assert.match(shell, /community: COMMUNITY_TABS\.map\(\(tab\) => \(\{ \.\.\.tab, labelKey: `rework\.\$\{tab\.key\}` \}\)\)/);
   const [index, me, notifications] = await Promise.all(["pages/forum/index.vue", "pages/forum/me.vue", "pages/forum/notifications.vue"].map(read));
   assert.match(index, /:title="t\('rework\.community'\)"/);
   assert.match(me, /:title="t\('rework\.myPosts'\)"/);

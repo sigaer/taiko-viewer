@@ -11,7 +11,8 @@
  * (0,3,1). Every rule here starts with `html.ds-preview:root` / `html.rework-ep:root` (0,2,1) and repeats the
  * production selector after it, so it wins regardless of stylesheet order.
  *
- * Primary = brand (Viewer Teal) through the Role tokens; info = neutral (--ink-2 on --bg-sunk);
+ * Primary = the solid fill (--action-*, vermilion) through the Role tokens; links = --link (blue); info = neutral (--ink-2 on --bg-sunk);
+ * destructive = danger outline on the surface (the danger hue is close to the brand, so it is never a solid fill);
  * success / warning / danger = status tokens. No note colours (--don*, --ka*, --roll*) anywhere in this file.
  * Every production-mapped variable has a counterpart below (checked by scripts/ds/token-mapping.mjs).
  */

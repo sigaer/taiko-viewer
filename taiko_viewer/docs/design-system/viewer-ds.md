@@ -173,3 +173,62 @@
 `--action-bg` 对 `--surface` / `--bg` / `--surface-2`（≥ 3，深色 4.76 / 6.40 / 3.68）；禁用文字（≥ 2.5）。
 
 证据（不提交）：主检出 `.claude/stage-artifacts/slice-g/colour/before/`、`after/`：拦截数据的成绩列表、登录后首页、同步、工单，真实的曲库、歌曲详情、登录页，各 1440 / 390 × 浅 / 深。
+
+## 改版调色（2026-11-27）
+
+按已批准的改版设计（`Foundations` / `Main` / `Sidebar` 设计稿）换掉 Viewer Teal：**朱红品牌、靛墨中性色、蓝色链接**。只改 token 的值与 Role 层的指向，没有改组件结构与模板；音符（咚 / 咔 / 连打）、难度、王冠、评价、类型、判定的颜色都不变，真实素材不动。
+差异记录在 `scripts/ds/spec/tuning-2026-11-27.json`，叠在 `tuning-2026-11-18.json` 之上：`check-tokens.mjs` 按顺序应用两份调整（`TUNING_FILES`），快照 = 原型级联 + 两份调整；`--prototype` 时核对「生产文件去掉两份调整 = 原型」与 `04` §2.2–§2.5 的表格（211 个值，0 不符）。
+文件格式：`changed.{both,light,dark,stage}` 记 `prototype`（冻结原型的值；该 token 本身是上一次调整新增的则为 `null`）、`previous`（本次之前的值）、`tuned`；`added` 记新增；`both` 表示浅深相同。
+
+主要 token（原值 → 新值）：
+
+| token | 浅 | 深 |
+|---|---|---|
+| `--brand-primary` | `#006c76` → `#d8391f` | `#86d9dc` → `#ff8a70` |
+| `--brand-hover` | `#005860` → `#be2f17` | `#a0e3e5` → `#ffa48f` |
+| `--brand-soft` | `#d7ece9` → `#fdebe6` | `#2a565a` → `#3a2026` |
+| `--brand-on-primary` | `#ffffff` | `#0b2a2d` → `#15182a` |
+| `--brand-focus` | `#006c76` → `#1a76b0` | `#86d9dc` → `#7cc4f0` |
+| `--bg` / `--bg-sunk` | `#f0f4f4` / `#e4eaea` → `#f4f5f8` / `#eceef3` | `#0c2023` / `#081619` → `#0f1120` / `#0a0c18` |
+| `--surface` / `--surface-2` | `#ffffff` / `#f7f9f9` → `#ffffff` / `#f8f9fb` | `#1a383d` / `#234a50` → `#191c30` / `#22263e` |
+| `--line` / `--line-strong` | `#d3dcdc` / `#b4cecb` → `#e2e5ec` / `#cdd2dd` | `#2f5257` / `#447378` → `#2c3150` / `#4a5075` |
+| `--chrome-bg` / `-surface` / `-sunk` / `-line` | `#eaf6f5` / `#f9fdfc` / `#def0ee` / `#ccdfdc` → `#ffffff` / `#ffffff` / `#f4f5f8` / `#e2e5ec` | `#0c2023` / `#1a383d` / `#081619` / `#2f5257` → `#191c30` / `#191c30` / `#22263e` / `#2c3150` |
+| `--ink` / `--ink-2` / `--ink-3` | `#203f43` / `#3d5a5e` / `#4d696c` → `#15182a` / `#454b64` / `#636982` | `#e4f4f1` / `#accbca` / `#a3c0c0` → `#eef0f7` / `#b5bad0` / `#9399b4` |
+| `--ctl-border` | `#6e8c8e` → `#858ba3` | `#779fa1` → `#7c83a3` |
+| `--link` | `#006c76` → `#1770a8` | `#86d9dc` → `#7cc4f0` |
+| `--info-wash` / `--info-ink` | `#d7ece9` / `#006c76` → `#dff0fa` / `#18619c` | `#2a565a` / `#86d9dc` → `#16304a` / `#8ad4f4` |
+| `--action-bg` / `-hover` / `-active` | `#006c76` / `#005860` / `= hover` → `#d8391f` / `#be2f17` / `= hover` | `#45aeb5` / `#5cbcc2` / `#3a9da4` → `#d8391f` / `#c8321a` / `#be2f17` |
+| `--action-ink` | `#ffffff` | `#0b2a2d` → `#ffffff` |
+| `--ok` / `--ok-wash` | `#26724e` / `#e4f3ea` → `#1e7a4f` / `#e2f4ea` | 不变 |
+| `--overlay-bg` / `--toast-bg` | 不变 / `#24494d` → `#20243a` | `#265056` / `#31565b` → `#22263e` / `#2c3150` |
+| `--disabled-bg` / `-ink` / `-line` | 不变 | `#1f3d42` / `#6b8a8c` / `#2f5257` → `#1f2338` / `#6f7594` / `#2c3150` |
+| `--lane` | `#17353a` → `#1b1e33` | `#081619` → `#0a0c18` |
+| 阴影、遮罩 | `rgb(22 43 48 / …)`、`rgb(15 27 33 / 0.46)` → `rgb(21 24 42 / …)` | 描边 `#3d6165` → `#3a3f62`；遮罩 `rgb(5 14 16 / 0.62)` → `rgb(5 6 14 / 0.62)` |
+| `--toast-ink` / `--lane-line` / `--lane-focus` | `#f1fbf9` / `#2f5257` / `#86d9dc` → `#eef0f7` / `#3a3f62` / `#7cc4f0`（两主题相同） | |
+| `--stage-*`（两主题相同） | bg / sunk / surface `#1d3d42` / `#17353a` / `#27494e` → `#1b1e33` / `#15182a` / `#262a45`；ink / -2 / -3 → `#eef0f7` / `#c4c8d8` / `#a5abc4`；line / -strong → `#3a3f62` / `#4f557c`；ctl-border → `#8a90b0`；focus → `#7cc4f0` | |
+
+新增：`--brand-ink`（品牌色文字：浅 `#b02a14`，深 `#ff8a70`）；深色侧栏 `--side-bg`（浅 `#15182a`，深 `#0b0d18`）、`--side-surface`（浅 `#1f2338`，深 `#191c30`）、`--side-line` `#2c3150`、`--side-ink` `#c4c8d8`、`--side-ink-2` `#8a90ab`、`--side-ink-strong` `#ffffff`。
+`.stage` 里的品牌取深色值（`--brand-primary` `#ff8a70`、`--brand-soft` `#3a2026`、`--brand-ink` `#ff8a70`、`--brand-focus` / `--link` `#7cc4f0`），实心填充与深色主题相同（`#d8391f` / `#c8321a` / `#be2f17`，白字）。
+
+Role 层的指向规则（品牌色变成红色后不再一律指向 `--brand-primary`）：
+
+- **实心填充**（主按钮、导航当前项、实心选中）：`--action-bg` + `--action-ink`，两主题都是朱红底白字。`--nav-active-bg` / `--nav-active-ink`、`--btn-ink-bg` / `-line` / `-ink` / `-hover`、`--accent` 改为指向 `--action-*`。深色主题的 `--brand-primary`（浅朱红）只用于文字、指示与线，不做填充。
+- **品牌色文字**：`--brand-ink`。`--selected-ink`、`--seg-on-ink`、`--nav-active-text`、`--vote-on-ink`、`--annual-ink`、`--role-mod-ink`、`--role-admin-ink`。原因：`#d8391f` 作文字在 `#f4f5f8` 上只有 4.26:1。
+- **链接、信息、焦点**：蓝色，不用品牌色。`--link`、`--info-wash`、`--info-ink` 在主题块里直接取值，`--info-line` 指向 `--link`，`--focus-ring` 与 `--input-focus-line` 指向 `--brand-focus`。
+- **线与图形**：仍是 `--brand-primary`（≥ 3:1）。`--selected-line`、`--seg-on-ring`、`--tab-line`、`--progress-line`、`--series` / `--series-alt`、`--row-sel-line`、`--vote-on`、`--brand-mark`，以及 `--row-sel-bg`、`--series-band-*`、`--selection` 的混色。
+- **浅底**：`--selected-bg`、`--seg-on-bg`、`--annual-wash`、`--unread-wash`、`--role-*-bg`、`--vote-on-wash` 仍是 `--brand-soft`。
+- **危险操作**与品牌同色相，所以永远不是实心填充：`.rw-btn--danger` 与 `el-button--danger` 本来就是表面底上的危险色描边与文字（悬停 `--danger-wash`），这次不用改；`--danger` 不变（浅 `#c42b13` 对表面 5.6:1）。
+
+与设计稿取值不同的地方（对比度不达标时取最近的达标值）：
+
+| token | 设计稿 | 采用 | 原因 |
+|---|---|---|---|
+| `--ink-3`（浅） | `#666c85` | `#636982` | 在 `--bg-sunk` 上 4.47，不到 4.5；改后 4.67 |
+| `--link`（浅） | `#1a76b0` | `#1770a8` | 在 `--bg-sunk` 上 4.24；改后 4.62，在 `--row-sel-bg` 上 4.50。焦点环 `--brand-focus` 仍是 `#1a76b0`（只要求 3:1） |
+| `--action-bg-hover`（深、舞台） | `#e5492f` | `#c8321a` | 白字在 `#e5492f` 上 3.94；比 `#d8391f` 更亮又能保持 4.5 的值（约 `#da3b20`）与默认几乎看不出差别，所以悬停改为暗一档（白字 5.35，对 `--surface` 3.14） |
+
+设计稿没有给出、按同一思路补的值：深色 `--chrome-*` 跟随浅色的对应关系（框架 = `--surface`，悬停底 = `--surface-2`）；深色 `--brand-on-primary` `#15182a`（浅朱红上的深字）；深色 `--lane` `#0a0c18`；`--lane-line` 与深色阴影描边 `#3a3f62`；深色 `--ink-inv` `#15182a`。
+
+对比度（`contrast-check.mjs`，456 对全部通过）新增的配对：`--brand-ink` 在 `--surface` / `--bg` / `--bg-sunk` / `--surface-2` / `--brand-soft` / `--chrome-bg` 与舞台面上（≥ 4.5）；`--side-ink` / `-2` / `-strong` 在 `--side-bg` / `--side-surface` 上（≥ 4.5）；焦点环与 `--action-bg` 在侧栏底上（≥ 3）；舞台的 `--action-ink` 在悬停、按下底上（≥ 4.5）。
+
+范围外、仍是青绿的：`assets/css/tokens.css`（`--viewer-*`，以及由它决定的 `theme-color`）、管理后台、年度报告；`components/rework/Shell.vue` 的范围外页面仍以 `--chrome-bg` 作页面底，调色后浅色下是白色，外壳重做时一并处理。

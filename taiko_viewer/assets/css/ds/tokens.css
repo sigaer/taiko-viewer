@@ -1,5 +1,5 @@
 /*
- * Viewer Design System V1.3 tokens (C+: real game assets + Viewer Teal).
+ * Viewer Design System V1.3 tokens (C+: real game assets; redesign palette: vermilion brand, indigo-ink neutrals, blue links).
  *
  * Stage 1: viewer-rework opts the default shell into tokens only.
  * Stage 0 scoping rule (D0-2): every declaration lives under html.ds-preview or html.viewer-rework. Nothing here is on :root,
@@ -14,6 +14,11 @@
  * a near-neutral light page (--bg, --bg-sunk, --surface, --surface-2, --line), the teal-tinted frame kept through
  * --chrome-*, a less luminous dark primary fill (--action-bg*), and --disabled-* for disabled controls. These values
  * differ from the frozen prototype on purpose.
+ *
+ * Redesign palette (viewer-ds.md, section 改版调色（2026-11-27）; scripts/ds/spec/tuning-2026-11-27.json): the teal brand
+ * and teal-tinted neutrals are replaced by a vermilion brand on indigo-ink neutrals. Solid fills read --action-*,
+ * brand-coloured text reads --brand-ink, links / info / focus are blue, the frame (--chrome-*) is plain surface, and
+ * --side-* is a dark sidebar in both themes. Game colours (note, difficulty, crown, rank, genre, judge) are unchanged.
  */
 
 html.ds-preview,
@@ -130,8 +135,8 @@ html.viewer-rework {
   --overlay-shadow: var(--shadow-pop);
   /* ---------- Semantic ---------- */
   --focus-ring: var(--brand-focus);
-  --toast-ink: #f1fbf9;
-  --lane-line: #2f5257;
+  --toast-ink: #eef0f7;
+  --lane-line: #3a3f62;
   --lane-ink: #e9edf7;
   --note-ring: var(--ai-0);
   --note-outline: var(--ai-950);
@@ -146,22 +151,22 @@ html.viewer-rework {
   --lane-fc: var(--note-fc);
   --lane-ink-2: #c3c9db;
   --lane-ink-3: #a5aec8;
-  --lane-focus: #86d9dc;
+  --lane-focus: #7cc4f0;
   --focus-lane: inset 0 0 0 2px var(--lane-focus);
   --lane-ghost: var(--ai-500);
   --lane-ghost-ring: var(--ai-300);
   --lane-measure: var(--ai-400);
   /* ---------- Stage surface source values (two themes alike) ---------- */
-  --stage-bg: #1d3d42;
-  --stage-sunk: #17353a;
-  --stage-surface: #27494e;
-  --stage-ink: #e4f4f1;
-  --stage-ink-2: #c0dad8;
-  --stage-ink-3: #a3c2c1;
-  --stage-line: #3a5d62;
-  --stage-line-strong: #4d7277;
-  --stage-ctl-border: #82a8aa;
-  --stage-focus: #86d9dc;
+  --stage-bg: #1b1e33;
+  --stage-sunk: #15182a;
+  --stage-surface: #262a45;
+  --stage-ink: #eef0f7;
+  --stage-ink-2: #c4c8d8;
+  --stage-ink-3: #a5abc4;
+  --stage-line: #3a3f62;
+  --stage-line-strong: #4f557c;
+  --stage-ctl-border: #8a90b0;
+  --stage-focus: #7cc4f0;
   --stage-don-ink: #ff8266;
   --stage-don-wash: #3b1f24;
   --stage-ka: #5cc4ef;
@@ -171,28 +176,27 @@ html.viewer-rework {
   --stage-roll-ink: #ffd568;
   --stage-roll-wash: #38301a;
   /* ---------- Role ---------- */
+  /* Solid primary fills (primary button, current nav item, filled selection): --action-bg with --action-ink.
+     Brand-coloured text: --brand-ink. Lines and graphics: --brand-primary. Links, info and focus: blue (theme blocks). */
   --action-bg: var(--brand-primary);
   --action-bg-hover: var(--brand-hover);
   --action-ink: var(--brand-on-primary);
-  --link: var(--brand-primary);
   --selected-bg: var(--brand-soft);
-  --selected-ink: var(--brand-primary);
+  --selected-ink: var(--brand-ink);
   --selected-line: var(--brand-primary);
   --seg-on-bg: var(--brand-soft);
-  --seg-on-ink: var(--brand-primary);
+  --seg-on-ink: var(--brand-ink);
   --seg-on-ring: var(--brand-primary);
   --tab-line: var(--brand-primary);
-  --nav-active-bg: var(--brand-primary);
-  --nav-active-ink: var(--brand-on-primary);
-  --nav-active-text: var(--brand-primary);
-  --info-wash: var(--brand-soft);
-  --info-ink: var(--brand-primary);
+  --nav-active-bg: var(--action-bg);
+  --nav-active-ink: var(--action-ink);
+  --nav-active-text: var(--brand-ink);
   --brand-mark: var(--brand-primary);
   --overlay-line: var(--line-strong);
   --popover-line: var(--line-strong);
   --density-bar: var(--line-strong);
   --judge-h: 6px;
-  --accent: var(--brand-primary);
+  --accent: var(--action-bg);
   --row-sel-bg: color-mix(in srgb, var(--brand-primary) 12%, var(--surface));
   --row-sel-line: var(--brand-primary);
   --warn-wash: var(--roll-wash);
@@ -203,18 +207,18 @@ html.viewer-rework {
   --chart-mark: var(--ink-2);
   --progress-line: var(--brand-primary);
   --annual-wash: var(--brand-soft);
-  --annual-ink: var(--brand-primary);
+  --annual-ink: var(--brand-ink);
   --unread-wash: var(--brand-soft);
   --toast-surface: var(--overlay-bg);
   --toast-text: var(--ink);
   --role-mod-bg: var(--brand-soft);
-  --role-mod-ink: var(--brand-primary);
+  --role-mod-ink: var(--brand-ink);
   --role-admin-bg: var(--brand-soft);
-  --role-admin-ink: var(--brand-primary);
-  --btn-ink-bg: var(--brand-primary);
-  --btn-ink-line: var(--brand-primary);
-  --btn-ink-ink: var(--brand-on-primary);
-  --btn-ink-hover: var(--brand-hover);
+  --role-admin-ink: var(--brand-ink);
+  --btn-ink-bg: var(--action-bg);
+  --btn-ink-line: var(--action-bg);
+  --btn-ink-ink: var(--action-ink);
+  --btn-ink-hover: var(--action-bg-hover);
   --btn-ink-hover-line: transparent;
   --tag-don-bg: var(--bg-sunk);
   --tag-don-ink: var(--ink-2);
@@ -226,9 +230,9 @@ html.viewer-rework {
   --series-fill: 12%;
   --vote-on: var(--brand-primary);
   --vote-on-wash: var(--brand-soft);
-  --vote-on-ink: var(--brand-primary);
-  --input-focus-line: var(--brand-primary);
-  --info-line: var(--brand-primary);
+  --vote-on-ink: var(--brand-ink);
+  --input-focus-line: var(--brand-focus);
+  --info-line: var(--link);
   --series-focus: var(--ink);
   --series-focus-ink: var(--ink);
   --selection: color-mix(in srgb, var(--brand-primary) 30%, transparent);
@@ -268,29 +272,37 @@ html.viewer-rework {
 /* ============ Light ============ */
 html.ds-preview:not([data-theme="dark"]),
 html.viewer-rework:not([data-theme="dark"]) {
-  /* Brand: Viewer Teal */
-  --brand-primary: #006c76;
-  --brand-hover: #005860;
-  --brand-soft: #d7ece9;
+  /* Brand: vermilion */
+  --brand-primary: #d8391f;
+  --brand-hover: #be2f17;
+  --brand-soft: #fdebe6;
   --brand-on-primary: #ffffff;
-  --brand-focus: #006c76;
-  /* Semantic */
-  --bg: #f0f4f4;
-  --bg-sunk: #e4eaea;
+  --brand-ink: #b02a14;
+  --brand-focus: #1a76b0;
+  /* Semantic: indigo-ink neutrals */
+  --bg: #f4f5f8;
+  --bg-sunk: #eceef3;
   --surface: #ffffff;
-  --surface-2: #f7f9f9;
-  --line: #d3dcdc;
-  /* the frame (rail, top bar, tabs, phone bottom bar) keeps the teal tint */
-  --chrome-bg: #eaf6f5;
-  --chrome-surface: #f9fdfc;
-  --chrome-sunk: #def0ee;
-  --chrome-line: #ccdfdc;
-  --line-strong: #b4cecb;
-  --ink: #203f43;
-  --ink-2: #3d5a5e;
-  --ink-3: #4d696c;
+  --surface-2: #f8f9fb;
+  --line: #e2e5ec;
+  /* the frame (top bar, tabs, phone bottom bar) is plain surface */
+  --chrome-bg: #ffffff;
+  --chrome-surface: #ffffff;
+  --chrome-sunk: #f4f5f8;
+  --chrome-line: #e2e5ec;
+  --line-strong: #cdd2dd;
+  --ink: #15182a;
+  --ink-2: #454b64;
+  --ink-3: #636982;
   --ink-inv: #ffffff;
-  --ctl-border: #6e8c8e;
+  --ctl-border: #858ba3;
+  /* the sidebar is dark in both themes */
+  --side-bg: #15182a;
+  --side-surface: #1f2338;
+  --side-line: #2c3150;
+  --side-ink: #c4c8d8;
+  --side-ink-2: #8a90ab;
+  --side-ink-strong: #ffffff;
   --don: var(--shu-500);
   --don-solid: var(--shu-600);
   --ink-on-solid: var(--ai-0);
@@ -302,18 +314,22 @@ html.viewer-rework:not([data-theme="dark"]) {
   --roll: var(--yamabuki-500);
   --roll-ink: var(--yamabuki-700);
   --roll-wash: var(--yamabuki-100);
-  --ok: #26724e;
-  --ok-wash: #e4f3ea;
+  --ok: #1e7a4f;
+  --ok-wash: #e2f4ea;
   --warn: var(--yamabuki-700);
   --danger: var(--shu-650);
   --danger-wash: var(--shu-100);
   --status-attn: var(--yamabuki-600);
-  --toast-bg: #24494d;
-  --lane: #17353a;
-  --shadow-pop: 0 18px 50px -12px rgb(22 43 48 / 0.28), 0 2px 6px rgb(22 43 48 / 0.08);
-  --shadow-lift: 0 6px 18px -8px rgb(22 43 48 / 0.22);
-  --scrim: rgb(15 27 33 / 0.46);
+  --toast-bg: #20243a;
+  --lane: #1b1e33;
+  --shadow-pop: 0 18px 50px -12px rgb(21 24 42 / 0.28), 0 2px 6px rgb(21 24 42 / 0.08);
+  --shadow-lift: 0 6px 18px -8px rgb(21 24 42 / 0.22);
+  --scrim: rgb(21 24 42 / 0.46);
   /* Role */
+  /* links, info and focus are blue, never the brand */
+  --link: #1770a8;
+  --info-wash: #dff0fa;
+  --info-ink: #18619c;
   --overlay-bg: var(--surface);
   --don-data: #e58572;
   --action-bg-active: var(--action-bg-hover);
@@ -348,28 +364,35 @@ html.viewer-rework:not([data-theme="dark"]) {
 /* ============ Dark ============ */
 html.ds-preview[data-theme="dark"],
 html.viewer-rework[data-theme="dark"] {
-  /* Brand: Viewer Teal */
-  --brand-primary: #86d9dc;
-  --brand-hover: #a0e3e5;
-  --brand-soft: #2a565a;
-  --brand-on-primary: #0b2a2d;
-  --brand-focus: #86d9dc;
+  /* Brand: light vermilion for text, indicators and lines; fills use --action-bg */
+  --brand-primary: #ff8a70;
+  --brand-hover: #ffa48f;
+  --brand-soft: #3a2026;
+  --brand-on-primary: #15182a;
+  --brand-ink: #ff8a70;
+  --brand-focus: #7cc4f0;
   /* Semantic */
-  --bg: #0c2023;
-  --bg-sunk: #081619;
-  --surface: #1a383d;
-  --surface-2: #234a50;
-  --line: #2f5257;
-  --line-strong: #447378;
-  --chrome-bg: #0c2023;
-  --chrome-surface: #1a383d;
-  --chrome-sunk: #081619;
-  --chrome-line: #2f5257;
-  --ink: #e4f4f1;
-  --ink-2: #accbca;
-  --ink-3: #a3c0c0;
-  --ink-inv: #10282b;
-  --ctl-border: #779fa1;
+  --bg: #0f1120;
+  --bg-sunk: #0a0c18;
+  --surface: #191c30;
+  --surface-2: #22263e;
+  --line: #2c3150;
+  --line-strong: #4a5075;
+  --chrome-bg: #191c30;
+  --chrome-surface: #191c30;
+  --chrome-sunk: #22263e;
+  --chrome-line: #2c3150;
+  --ink: #eef0f7;
+  --ink-2: #b5bad0;
+  --ink-3: #9399b4;
+  --ink-inv: #15182a;
+  --ctl-border: #7c83a3;
+  --side-bg: #0b0d18;
+  --side-surface: #191c30;
+  --side-line: #2c3150;
+  --side-ink: #c4c8d8;
+  --side-ink-2: #8a90ab;
+  --side-ink-strong: #ffffff;
   --don: var(--shu-400);
   --don-solid: var(--shu-400);
   --ink-on-solid: var(--ai-950);
@@ -387,22 +410,26 @@ html.viewer-rework[data-theme="dark"] {
   --danger: #ff8266;
   --danger-wash: #3b1f24;
   --status-attn: var(--roll);
-  --toast-bg: #31565b;
-  --lane: #081619;
-  --shadow-pop: 0 24px 60px -12px rgb(0 0 0 / 0.6), 0 0 0 1px #3d6165;
+  --toast-bg: #2c3150;
+  --lane: #0a0c18;
+  --shadow-pop: 0 24px 60px -12px rgb(0 0 0 / 0.6), 0 0 0 1px #3a3f62;
   --shadow-lift: 0 8px 22px -8px rgb(0 0 0 / 0.5);
-  --scrim: rgb(5 14 16 / 0.62);
+  --scrim: rgb(5 6 14 / 0.62);
   /* Role */
-  --overlay-bg: #265056;
+  --link: #7cc4f0;
+  --info-wash: #16304a;
+  --info-ink: #8ad4f4;
+  --overlay-bg: #22263e;
   --don-data: #e8806c;
-  /* the primary fill one step below the link / selected / focus teal (#86d9dc) */
-  --action-bg: #45aeb5;
-  --action-bg-hover: #5cbcc2;
-  --action-bg-active: #3a9da4;
+  /* the primary fill is the light-theme vermilion with white text, not the text vermilion (#ff8a70) */
+  --action-bg: #d8391f;
+  --action-bg-hover: #c8321a;
+  --action-bg-active: #be2f17;
+  --action-ink: #ffffff;
   /* disabled controls: low contrast fill and text, so they do not read as an enabled dark button */
-  --disabled-bg: #1f3d42;
-  --disabled-ink: #6b8a8c;
-  --disabled-line: #2f5257;
+  --disabled-bg: #1f2338;
+  --disabled-ink: #6f7594;
+  --disabled-line: #2c3150;
   /* Domain */
   --judge-ng: #a583f5;
   --diff-easy: #ff7a55;
@@ -445,27 +472,20 @@ html.viewer-rework :lang(ja) {
   }
 }
 
-/* ============ Stage surface (.stage; dark teal in both themes) ============ */
+/* ============ Stage surface (.stage; dark indigo in both themes) ============ */
 html.ds-preview .stage,
 html.viewer-rework .stage {
   /* Role tokens are declared again here: custom properties resolve where they are declared (04 §2.1) */
-  --action-bg: var(--brand-primary);
-  --action-bg-hover: var(--brand-hover);
-  --action-bg-active: var(--action-bg-hover);
-  --action-ink: var(--brand-on-primary);
-  --link: var(--brand-primary);
   --selected-bg: var(--brand-soft);
-  --selected-ink: var(--brand-primary);
+  --selected-ink: var(--brand-ink);
   --selected-line: var(--brand-primary);
   --seg-on-bg: var(--brand-soft);
-  --seg-on-ink: var(--brand-primary);
+  --seg-on-ink: var(--brand-ink);
   --seg-on-ring: var(--brand-primary);
   --tab-line: var(--brand-primary);
-  --nav-active-bg: var(--brand-primary);
-  --nav-active-ink: var(--brand-on-primary);
-  --nav-active-text: var(--brand-primary);
-  --info-wash: var(--brand-soft);
-  --info-ink: var(--brand-primary);
+  --nav-active-bg: var(--action-bg);
+  --nav-active-ink: var(--action-ink);
+  --nav-active-text: var(--brand-ink);
   --brand-mark: var(--brand-primary);
   --overlay-bg: var(--surface);
   --overlay-line: var(--line-strong);
@@ -473,7 +493,7 @@ html.viewer-rework .stage {
   --don-data: var(--don);
   --density-bar: var(--line-strong);
   --judge-h: 6px;
-  --accent: var(--brand-primary);
+  --accent: var(--action-bg);
   --row-sel-bg: color-mix(in srgb, var(--brand-primary) 12%, var(--surface));
   --row-sel-line: var(--brand-primary);
   --warn-wash: var(--roll-wash);
@@ -484,18 +504,18 @@ html.viewer-rework .stage {
   --chart-mark: var(--ink-2);
   --progress-line: var(--brand-primary);
   --annual-wash: var(--brand-soft);
-  --annual-ink: var(--brand-primary);
+  --annual-ink: var(--brand-ink);
   --unread-wash: var(--brand-soft);
   --toast-surface: var(--overlay-bg);
   --toast-text: var(--ink);
   --role-mod-bg: var(--brand-soft);
-  --role-mod-ink: var(--brand-primary);
+  --role-mod-ink: var(--brand-ink);
   --role-admin-bg: var(--brand-soft);
-  --role-admin-ink: var(--brand-primary);
-  --btn-ink-bg: var(--brand-primary);
-  --btn-ink-line: var(--brand-primary);
-  --btn-ink-ink: var(--brand-on-primary);
-  --btn-ink-hover: var(--brand-hover);
+  --role-admin-ink: var(--brand-ink);
+  --btn-ink-bg: var(--action-bg);
+  --btn-ink-line: var(--action-bg);
+  --btn-ink-ink: var(--action-ink);
+  --btn-ink-hover: var(--action-bg-hover);
   --btn-ink-hover-line: transparent;
   --tag-don-bg: var(--bg-sunk);
   --tag-don-ink: var(--ink-2);
@@ -507,18 +527,26 @@ html.viewer-rework .stage {
   --series-fill: 12%;
   --vote-on: var(--brand-primary);
   --vote-on-wash: var(--brand-soft);
-  --vote-on-ink: var(--brand-primary);
-  --input-focus-line: var(--brand-primary);
-  --info-line: var(--brand-primary);
+  --vote-on-ink: var(--brand-ink);
+  --input-focus-line: var(--brand-focus);
+  --info-line: var(--link);
   --series-focus: var(--ink);
   --series-focus-ink: var(--ink);
   --selection: color-mix(in srgb, var(--brand-primary) 30%, transparent);
-  /* Brand on the stage: dark-theme values (04 §2.2) */
-  --brand-primary: #86d9dc;
-  --brand-hover: #a0e3e5;
-  --brand-soft: #244b4e;
-  --brand-on-primary: #0b2a2d;
-  --brand-focus: #86d9dc;
+  /* Brand on the stage: dark-theme values (04 §2.2); the fill is the vermilion with white text */
+  --brand-primary: #ff8a70;
+  --brand-hover: #ffa48f;
+  --brand-soft: #3a2026;
+  --brand-on-primary: #15182a;
+  --brand-ink: #ff8a70;
+  --brand-focus: #7cc4f0;
+  --action-bg: #d8391f;
+  --action-bg-hover: #c8321a;
+  --action-bg-active: #be2f17;
+  --action-ink: #ffffff;
+  --link: #7cc4f0;
+  --info-wash: #16304a;
+  --info-ink: #8ad4f4;
   --focus-ring: var(--brand-focus);
   --focus: 0 0 0 2px var(--stage-bg), 0 0 0 4px var(--brand-focus);
   /* Semantic tokens remapped to the stage surface */

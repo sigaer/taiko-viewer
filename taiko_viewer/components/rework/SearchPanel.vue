@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { SongCatalogItem, SongCatalogPagePayload } from "~/types/content";
 import { catalogLocation, searchAllState, songSearchRequest, songTitle } from "~/utils/rework/catalog";
-import { desktopDestinations } from "~/utils/rework/navigation";
+import { COMMON_FEATURES, FEATURES } from "~/utils/rework/navigation";
 import { searchSelection } from "~/utils/rework/search";
 const props = defineProps<{ open: boolean }>();
 const emit = defineEmits<{ close: [navigate?: string] }>();
@@ -23,21 +23,22 @@ let controller: AbortController | undefined;
 let generation = 0;
 const normalize = (value: string) =>
   value.normalize("NFKC").toLocaleLowerCase().trim();
-const actions = computed(() =>
-  [...desktopDestinations, { key: "settings", to: "/settings" }]
+// Page results come from the navigation model (utils/rework/navigation.ts): every feature with its group's name.
+// An empty query shows the common features only; typing filters every feature by its label.
+const actions = computed(() => {
+  const q = normalize(query.value);
+  return (q ? FEATURES : COMMON_FEATURES)
     .map((x) => ({
       id: "page-" + x.key,
-      label: t(`rework.${x.key}`),
+      label: t(x.labelKey),
       to: localePath(x.to),
       kind: "page",
+      icon: x.icon,
+      group: x.groupKey ? t(x.groupKey) : t("rework.page"),
       song: null,
     }))
-    .filter(
-      (x) =>
-        !query.value.trim() ||
-        normalize(x.label).includes(normalize(query.value)),
-    ),
-);
+    .filter((x) => !q || normalize(x.label).includes(q));
+});
 const shownSongs = computed(() => songs.value.slice(0, 8));
 // Last option: every match in the library, only when the panel shows fewer songs than the API found.
 const viewAll = computed(() =>
@@ -48,6 +49,8 @@ const viewAll = computed(() =>
           label: t("rework.viewAll", { count: total.value }),
           to: catalogLocation(searchAllState(query.value.trim()), localePath),
           kind: "all",
+          icon: "songs",
+          group: "",
           song: null,
         },
       ]
@@ -59,6 +62,8 @@ const results = computed(() => [
     label: songTitle(song, locale.value),
     to: localePath("/songs/" + song.id),
     kind: "song",
+    icon: "music",
+    group: t("rework.song"),
     song,
   })),
   ...actions.value,
@@ -200,6 +205,7 @@ onBeforeUnmount(() => {
                 : t("rework.results", { count: results.length - viewAll.length })
           }}
         </p>
+        <p v-if="!query.trim() && actions.length" :id="`${id}-common`" class="search-group">{{ t("rework.shell.common") }}</p>
         <ul
           :id="`${id}-results`"
           role="listbox"
@@ -220,12 +226,10 @@ onBeforeUnmount(() => {
               v-if="result.song"
               :song-id="result.song.id"
               size="md"
-            /><ReworkIcon v-else :name="result.kind === 'all' ? 'songs' : 'tools'" /><span
+            /><span v-else class="result-icon" :class="{ 'is-primary': result.id === 'page-syncScores' }"><ReworkIcon :name="result.icon" /></span><span
               class="result-label"
               >{{ result.label
-              }}<small v-if="result.kind !== 'all'">{{
-                result.kind === "song" ? t("rework.song") : t("rework.page")
-              }}</small></span
+              }}<small v-if="result.group">{{ result.group }}</small></span
             ><span aria-hidden="true">↵</span>
           </li>
         </ul>
@@ -327,6 +331,32 @@ li {
 }
 li.selected {
   background: var(--bg-sunk);
+}
+.search-group {
+  margin: 0;
+  padding: 6px 12px 4px;
+  font-size: var(--fs-12);
+  font-weight: 700;
+  color: var(--ink-3);
+}
+.result-icon {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: var(--r-ctl);
+  background: var(--bg-sunk);
+  color: var(--ink);
+}
+.result-icon svg {
+  width: 20px;
+  height: 20px;
+}
+.result-icon.is-primary {
+  background: var(--action-bg);
+  color: var(--action-ink);
 }
 .result-label {
   flex: 1;

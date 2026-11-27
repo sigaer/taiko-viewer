@@ -44,6 +44,29 @@ const paths: Record<string, string> = {
   key: "M14 10a4 4 0 1 1-8 0 4 4 0 0 1 8 0M13 13l7 7M17 17l2-2M15 15l1.5-1.5",
   // slice G: settings in the account menu (a cog: hub and eight teeth)
   settings: "M12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1",
+  // redesign v2 shell: the navigation model's entries (utils/rework/navigation.ts), the drawer button
+  music: "M9 18V5l12-2v13M9 18a3 3 0 1 1-6 0 3 3 0 0 1 6 0zM21 16a3 3 0 1 1-6 0 3 3 0 0 1 6 0z",
+  table: "M3 5h18v14H3zM3 10h18M3 15h18M9 5v14",
+  medal: "M12 15a6 6 0 1 0 0-12 6 6 0 0 0 0 12zM8.5 14.5 7 22l5-3 5 3-1.5-7.5",
+  book: "M4 4h6a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4zM20 4h-6a2 2 0 0 0-2 2v14a2 2 0 0 1 2-2h6z",
+  tag: "M3 12V3h9l9 9-9 9zM7.5 7.5h.01",
+  list: "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01",
+  bars: "M5 21V10M12 21V3M19 21v-7",
+  trend: "M3 17l6-6 4 4 8-8M15 7h6v6",
+  grid: "M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z",
+  star: "M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z",
+  sprout: "M12 21V11M12 11c0-4 3-7 8-7 0 5-3 8-8 7zM12 14c0-3-2-5-7-5 0 4 2 6 7 5z",
+  calendar: "M4 6h16v14H4zM4 10h16M8 3v4M16 3v4",
+  calc: "M6 3h12v18H6zM9 7h6M9 12h.01M12 12h.01M15 12h.01M9 16h.01M12 16h.01M15 16h.01",
+  config: "M4 6h9M17 6h3M15 4v4M4 12h3M11 12h9M9 10v4M4 18h11M19 18h1M17 16v4",
+  hash: "M5 9h14M5 15h14M10 4 8 20M16 4l-2 16",
+  file: "M7 3h7l5 5v13H7zM14 3v5h5",
+  cloud: "M7 18a4 4 0 0 1-.5-8A6 6 0 0 1 18 9.5 4.3 4.3 0 0 1 17.5 18z",
+  support: "M4 13a8 8 0 0 1 16 0M4 13v4h3v-5H4M20 13v4h-3v-5h3M17 17c0 2-2 3-5 3",
+  info: "M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18M12 11v6M12 7.5h.01",
+  code: "m8 7-5 5 5 5M16 7l5 5-5 5M14 4l-4 16",
+  history: "M3 12a9 9 0 1 0 3-6.7L3 8M3 3v5h5M12 7v5l3 2",
+  menu: "M4 6h16M4 12h16M4 18h16",
 };
 /** Icons drawn filled (the pressed state of like). */
 const filled = new Set(["heartFilled"]);

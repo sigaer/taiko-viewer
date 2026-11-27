@@ -125,6 +125,14 @@ export function pairs() {
   for (const bg of ["--surface", "--bg", "--surface-2"]) add("role non-text", "--action-bg", bg, UI); // primary fill vs its surroundings
   // Disabled text is exempt from 1.4.3; the floor keeps the label legible while it no longer reads as enabled
   add("disabled", "--disabled-ink", "--disabled-bg", 2.5);
+  // Redesign palette (2026-11-27): brand-coloured text, the dark sidebar (--side-*)
+  for (const bg of ["--surface", "--bg", "--bg-sunk", "--surface-2", "--brand-soft", "--chrome-bg"]) add("brand text", "--brand-ink", bg);
+  add("stage brand", "--brand-ink", "--surface", TEXT, "stage");
+  add("stage brand", "--brand-ink", "--brand-soft", TEXT, "stage");
+  add("stage role", "--action-ink", "--action-bg-hover", TEXT, "stage");
+  add("stage role", "--action-ink", "--action-bg-active", TEXT, "stage");
+  for (const ink of ["--side-ink", "--side-ink-2", "--side-ink-strong"]) for (const bg of ["--side-bg", "--side-surface"]) add("sidebar", ink, bg);
+  for (const fg of ["--focus-ring", "--action-bg"]) for (const bg of ["--side-bg", "--side-surface"]) add("sidebar non-text", fg, bg, UI);
   return list;
 }
 

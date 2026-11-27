@@ -53,8 +53,8 @@
   歌曲单元 `DsSongCell`、音符 `DsNote`、判定条 `DsJudgeBar`、图表 `components/ds/charts/*`，
   以及 `public/icons/` 下现有的图标。真实素材不改色、不加滤镜、不重新压缩。缺一种形态时给已有组件
   加属性（像 `DsDiff` 的 `showConstant`），不另写一个相似组件。
-- **颜色只用 token**：新代码不写十六进制色，不引用 Primitive 层。品牌色（青绿）只用于主操作、
-  链接、选中与焦点；音符色（咚 / 咔 / 连打）只表示游戏含义与数据，不做按钮和装饰。
+- **颜色只用 token**：新代码不写十六进制色，不引用 Primitive 层。品牌色（朱红，2026-11-27 起）只用于主操作、
+  选中与当前项；链接、信息与焦点是蓝色（`viewer-ds.md` §改版调色（2026-11-27））；音符色（咚 / 咔 / 连打）只表示游戏含义与数据，不做按钮和装饰。
 - **Element Plus**：只在表单与弹层内部使用。**切片 G 起 V1.3 的 Element Plus 映射是默认外壳里所有页面的默认值**：
   `components/rework/Shell.vue` 在 `<html>` 上加 `rework-ep`（SSR 首屏即有，Teleport 弹层同样生效），只跳过
   `utils/rework/navigation.ts` 的 `isLegacyPage` 列出的范围外页面（`LEGACY_PAGES`：`/annual`；`LEGACY_PREFIXES`：`/admin`），
