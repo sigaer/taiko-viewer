@@ -1,0 +1,28 @@
+{
+  "name": "taiko-viewer-redesign-v1",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Taiko Viewer 全站重新设计 Design V1.3（Phase A）高保真原型（仅 Mock 数据，与生产实现隔离）",
+  "scripts": {
+    "dev": "vite --port 4310",
+    "build": "vite build",
+    "preview": "vite preview --port 4311",
+    "qa": "node qa/run.mjs --suite all",
+    "qa:quick": "node qa/run.mjs --suite all --quick",
+    "qa:curate": "node qa/curate.mjs"
+  },
+  "dependencies": {
+    "@fontsource-variable/noto-sans-jp": "^5.2.5",
+    "@fontsource-variable/noto-sans-sc": "^5.2.5",
+    "@fontsource/barlow": "^5.2.5",
+    "@fontsource/barlow-condensed": "^5.2.5",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "playwright-core": "^1.49.1",
+    "vite": "^6.0.7"
+  }
+}

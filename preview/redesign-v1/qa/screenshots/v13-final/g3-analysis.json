@@ -1,0 +1,448 @@
+{
+ "thresholds": {
+  "neutral": 0.12,
+  "darkTint": [
+   0.2,
+   0.35
+  ],
+  "brand": [
+   170,
+   200
+  ],
+  "binShare": 0.015
+ },
+ "rows": [
+  {
+   "page": "today",
+   "vp": "1440x900",
+   "theme": "light",
+   "before": {
+    "don": 0.0039,
+    "brand": 0.0141,
+    "ratio": 0.28,
+    "donNoCovers": 0.0035,
+    "brandNoCovers": 0.0142,
+    "ratioNoCovers": 0.25,
+    "neutral": 0.8359,
+    "darkTint": 0.1295,
+    "other": 0.0166
+   },
+   "after": {
+    "don": 0.0043,
+    "brand": 0.015,
+    "ratio": 0.29,
+    "donNoCovers": 0.0031,
+    "brandNoCovers": 0.0151,
+    "ratioNoCovers": 0.21,
+    "neutral": 0.8385,
+    "darkTint": 0.1297,
+    "other": 0.0125
+   }
+  },
+  {
+   "page": "today",
+   "vp": "1440x900",
+   "theme": "dark",
+   "before": {
+    "don": 0.0038,
+    "brand": 0.0173,
+    "ratio": 0.22,
+    "donNoCovers": 0.0034,
+    "brandNoCovers": 0.0174,
+    "ratioNoCovers": 0.2,
+    "neutral": 0.927,
+    "darkTint": 0.0396,
+    "other": 0.0123
+   },
+   "after": {
+    "don": 0.0043,
+    "brand": 0.0241,
+    "ratio": 0.18,
+    "donNoCovers": 0.0031,
+    "brandNoCovers": 0.0244,
+    "ratioNoCovers": 0.13,
+    "neutral": 0.612,
+    "darkTint": 0.3478,
+    "other": 0.0117
+   }
+  },
+  {
+   "page": "today",
+   "vp": "390x844",
+   "theme": "light",
+   "before": {
+    "don": 0.0091,
+    "brand": 0.0147,
+    "ratio": 0.62,
+    "donNoCovers": 0.0082,
+    "brandNoCovers": 0.0146,
+    "ratioNoCovers": 0.56,
+    "neutral": 0.9226,
+    "darkTint": 0.0038,
+    "other": 0.0498
+   },
+   "after": {
+    "don": 0.0097,
+    "brand": 0.0178,
+    "ratio": 0.54,
+    "donNoCovers": 0.0069,
+    "brandNoCovers": 0.0177,
+    "ratioNoCovers": 0.39,
+    "neutral": 0.9619,
+    "darkTint": 0.0038,
+    "other": 0.0068
+   }
+  },
+  {
+   "page": "today",
+   "vp": "390x844",
+   "theme": "dark",
+   "before": {
+    "don": 0.0086,
+    "brand": 0.0239,
+    "ratio": 0.36,
+    "donNoCovers": 0.0078,
+    "brandNoCovers": 0.0239,
+    "ratioNoCovers": 0.33,
+    "neutral": 0.8468,
+    "darkTint": 0.1096,
+    "other": 0.011
+   },
+   "after": {
+    "don": 0.0095,
+    "brand": 0.0446,
+    "ratio": 0.21,
+    "donNoCovers": 0.0067,
+    "brandNoCovers": 0.0448,
+    "ratioNoCovers": 0.15,
+    "neutral": 0.3441,
+    "darkTint": 0.595,
+    "other": 0.0068
+   }
+  },
+  {
+   "page": "song",
+   "vp": "1440x900",
+   "theme": "light",
+   "before": {
+    "don": 0.0153,
+    "brand": 0.0227,
+    "ratio": 0.67,
+    "donNoCovers": 0.0148,
+    "brandNoCovers": 0.0228,
+    "ratioNoCovers": 0.65,
+    "neutral": 0.808,
+    "darkTint": 0.1469,
+    "other": 0.0071
+   },
+   "after": {
+    "don": 0.0149,
+    "brand": 0.02,
+    "ratio": 0.74,
+    "donNoCovers": 0.0141,
+    "brandNoCovers": 0.0201,
+    "ratioNoCovers": 0.7,
+    "neutral": 0.811,
+    "darkTint": 0.1469,
+    "other": 0.0072
+   }
+  },
+  {
+   "page": "song",
+   "vp": "1440x900",
+   "theme": "dark",
+   "before": {
+    "don": 0.0153,
+    "brand": 0.0265,
+    "ratio": 0.58,
+    "donNoCovers": 0.0148,
+    "brandNoCovers": 0.0266,
+    "ratioNoCovers": 0.56,
+    "neutral": 0.9208,
+    "darkTint": 0.0313,
+    "other": 0.0062
+   },
+   "after": {
+    "don": 0.0149,
+    "brand": 0.0333,
+    "ratio": 0.45,
+    "donNoCovers": 0.0141,
+    "brandNoCovers": 0.0335,
+    "ratioNoCovers": 0.42,
+    "neutral": 0.7797,
+    "darkTint": 0.1658,
+    "other": 0.0062
+   }
+  },
+  {
+   "page": "song",
+   "vp": "390x844",
+   "theme": "light",
+   "before": {
+    "don": 0.0199,
+    "brand": 0.041,
+    "ratio": 0.49,
+    "donNoCovers": 0.0192,
+    "brandNoCovers": 0.0415,
+    "ratioNoCovers": 0.46,
+    "neutral": 0.7942,
+    "darkTint": 0.1327,
+    "other": 0.0122
+   },
+   "after": {
+    "don": 0.0171,
+    "brand": 0.0404,
+    "ratio": 0.42,
+    "donNoCovers": 0.0164,
+    "brandNoCovers": 0.0409,
+    "ratioNoCovers": 0.4,
+    "neutral": 0.8213,
+    "darkTint": 0.1099,
+    "other": 0.0113
+   }
+  },
+  {
+   "page": "song",
+   "vp": "390x844",
+   "theme": "dark",
+   "before": {
+    "don": 0.0198,
+    "brand": 0.0441,
+    "ratio": 0.45,
+    "donNoCovers": 0.0191,
+    "brandNoCovers": 0.0447,
+    "ratioNoCovers": 0.43,
+    "neutral": 0.8495,
+    "darkTint": 0.0755,
+    "other": 0.0111
+   },
+   "after": {
+    "don": 0.0169,
+    "brand": 0.0607,
+    "ratio": 0.28,
+    "donNoCovers": 0.0162,
+    "brandNoCovers": 0.0615,
+    "ratioNoCovers": 0.26,
+    "neutral": 0.6676,
+    "darkTint": 0.2446,
+    "other": 0.0102
+   }
+  },
+  {
+   "page": "scores",
+   "vp": "1440x900",
+   "theme": "light",
+   "before": {
+    "don": 0.0011,
+    "brand": 0.0083,
+    "ratio": 0.13,
+    "donNoCovers": 0.0005,
+    "brandNoCovers": 0.0078,
+    "ratioNoCovers": 0.06,
+    "neutral": 0.981,
+    "darkTint": 0.002,
+    "other": 0.0075
+   },
+   "after": {
+    "don": 0.0015,
+    "brand": 0.0082,
+    "ratio": 0.18,
+    "donNoCovers": 0.0005,
+    "brandNoCovers": 0.0077,
+    "ratioNoCovers": 0.06,
+    "neutral": 0.9804,
+    "darkTint": 0.0021,
+    "other": 0.0078
+   }
+  },
+  {
+   "page": "scores",
+   "vp": "1440x900",
+   "theme": "dark",
+   "before": {
+    "don": 0.0011,
+    "brand": 0.0194,
+    "ratio": 0.06,
+    "donNoCovers": 0.0006,
+    "brandNoCovers": 0.0188,
+    "ratioNoCovers": 0.03,
+    "neutral": 0.902,
+    "darkTint": 0.0703,
+    "other": 0.0072
+   },
+   "after": {
+    "don": 0.0014,
+    "brand": 0.0275,
+    "ratio": 0.05,
+    "donNoCovers": 0.0005,
+    "brandNoCovers": 0.027,
+    "ratioNoCovers": 0.02,
+    "neutral": 0.2886,
+    "darkTint": 0.6748,
+    "other": 0.0076
+   }
+  },
+  {
+   "page": "scores",
+   "vp": "390x844",
+   "theme": "light",
+   "before": {
+    "don": 0.0095,
+    "brand": 0.0349,
+    "ratio": 0.27,
+    "donNoCovers": 0.007,
+    "brandNoCovers": 0.0359,
+    "ratioNoCovers": 0.19,
+    "neutral": 0.9393,
+    "darkTint": 0.0019,
+    "other": 0.0143
+   },
+   "after": {
+    "don": 0.0094,
+    "brand": 0.0347,
+    "ratio": 0.27,
+    "donNoCovers": 0.007,
+    "brandNoCovers": 0.0357,
+    "ratioNoCovers": 0.2,
+    "neutral": 0.9406,
+    "darkTint": 0.0018,
+    "other": 0.0135
+   }
+  },
+  {
+   "page": "scores",
+   "vp": "390x844",
+   "theme": "dark",
+   "before": {
+    "don": 0.0091,
+    "brand": 0.0444,
+    "ratio": 0.2,
+    "donNoCovers": 0.0068,
+    "brandNoCovers": 0.0453,
+    "ratioNoCovers": 0.15,
+    "neutral": 0.8461,
+    "darkTint": 0.0869,
+    "other": 0.0135
+   },
+   "after": {
+    "don": 0.009,
+    "brand": 0.0483,
+    "ratio": 0.19,
+    "donNoCovers": 0.0067,
+    "brandNoCovers": 0.049,
+    "ratioNoCovers": 0.14,
+    "neutral": 0.6945,
+    "darkTint": 0.2354,
+    "other": 0.0128
+   }
+  },
+  {
+   "page": "community",
+   "vp": "1440x900",
+   "theme": "light",
+   "before": {
+    "don": 0.001,
+    "brand": 0.0088,
+    "ratio": 0.11,
+    "donNoCovers": 0.0005,
+    "brandNoCovers": 0.0089,
+    "ratioNoCovers": 0.06,
+    "neutral": 0.9753,
+    "darkTint": 0.0024,
+    "other": 0.0124
+   },
+   "after": {
+    "don": 0.0057,
+    "brand": 0.0085,
+    "ratio": 0.67,
+    "donNoCovers": 0.0006,
+    "brandNoCovers": 0.0086,
+    "ratioNoCovers": 0.07,
+    "neutral": 0.9714,
+    "darkTint": 0.0024,
+    "other": 0.0119
+   }
+  },
+  {
+   "page": "community",
+   "vp": "1440x900",
+   "theme": "dark",
+   "before": {
+    "don": 0.001,
+    "brand": 0.0169,
+    "ratio": 0.06,
+    "donNoCovers": 0.0006,
+    "brandNoCovers": 0.0171,
+    "ratioNoCovers": 0.04,
+    "neutral": 0.9399,
+    "darkTint": 0.0311,
+    "other": 0.0111
+   },
+   "after": {
+    "don": 0.0056,
+    "brand": 0.0149,
+    "ratio": 0.38,
+    "donNoCovers": 0.0005,
+    "brandNoCovers": 0.0152,
+    "ratioNoCovers": 0.03,
+    "neutral": 0.8665,
+    "darkTint": 0.1014,
+    "other": 0.0116
+   }
+  },
+  {
+   "page": "community",
+   "vp": "390x844",
+   "theme": "light",
+   "before": {
+    "don": 0.0081,
+    "brand": 0.0057,
+    "ratio": 1.42,
+    "donNoCovers": 0.0072,
+    "brandNoCovers": 0.0058,
+    "ratioNoCovers": 1.24,
+    "neutral": 0.9618,
+    "darkTint": 0.0074,
+    "other": 0.017
+   },
+   "after": {
+    "don": 0.0119,
+    "brand": 0.014,
+    "ratio": 0.85,
+    "donNoCovers": 0.0074,
+    "brandNoCovers": 0.0143,
+    "ratioNoCovers": 0.52,
+    "neutral": 0.9527,
+    "darkTint": 0.0014,
+    "other": 0.0199
+   }
+  },
+  {
+   "page": "community",
+   "vp": "390x844",
+   "theme": "dark",
+   "before": {
+    "don": 0.0076,
+    "brand": 0.0216,
+    "ratio": 0.35,
+    "donNoCovers": 0.0068,
+    "brandNoCovers": 0.0219,
+    "ratioNoCovers": 0.31,
+    "neutral": 0.8982,
+    "darkTint": 0.0564,
+    "other": 0.0162
+   },
+   "after": {
+    "don": 0.0114,
+    "brand": 0.0261,
+    "ratio": 0.44,
+    "donNoCovers": 0.0068,
+    "brandNoCovers": 0.0267,
+    "ratioNoCovers": 0.25,
+    "neutral": 0.8084,
+    "darkTint": 0.1354,
+    "other": 0.0187
+   }
+  }
+ ]
+}

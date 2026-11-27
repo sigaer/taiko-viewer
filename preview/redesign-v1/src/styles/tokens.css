@@ -1,0 +1,651 @@
+/*
+ * Taiko Viewer — Design V1「譜面 Fumen」Design Tokens
+ * 三层结构：Primitive（原始色）→ Semantic（语义）→ Domain（游戏语义）
+ * 生产实现时可原样迁入 taiko_viewer/assets，Element Plus 变量从 Semantic 层映射。
+ */
+
+:root {
+  /* ---------- Primitive：藍（Indigo ink）---------- */
+  --ai-950: #0b1120;
+  --ai-900: #101728;
+  --ai-850: #151e35;
+  --ai-800: #1a2440;
+  --ai-750: #212d4e;
+  --ai-700: #2b3860;
+  --ai-600: #3f4d78;
+  --ai-500: #5a6790;
+  --ai-400: #7f8aaa;
+  --ai-300: #a7afc6;
+  --ai-200: #cdd2e0;
+  --ai-150: #dfe3ec;
+  --ai-100: #eaedf3;
+  --ai-50: #f3f5f8;
+  --ai-0: #ffffff;
+
+  /* ---------- Primitive：音符三色 ---------- */
+  /* 朱 = ドン（面）  浅葱 = カッ（缘）  山吹 = 連打 */
+  --shu-700: #b62a17;
+  --shu-650: #c42b13;     /* 文字级朱：在 --shu-100 上 ≥ 4.5:1 */
+  --shu-600: #d23a22;
+  --shu-500: #e8482e;
+  --shu-400: #ff6a4d;
+  --shu-100: #fde4de;
+  --asagi-700: #0b6f82;
+  --asagi-600: #128a9f;
+  --asagi-500: #1fa5ba;
+  --asagi-400: #4cc6d8;
+  --asagi-100: #d9f1f5;
+  --yamabuki-700: #906200;
+  --yamabuki-600: #b47c00;  /* 非文字状态点：在白底上 ≥ 3:1 */
+  --yamabuki-500: #f2b51d;
+  --yamabuki-400: #ffcb45;
+  --yamabuki-100: #fdf0c8;
+
+  /* ---------- Typography ---------- */
+  --font-cjk-sc: 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif;
+  --font-cjk-jp: 'Noto Sans JP Variable', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif;
+  --font-ui: 'Barlow', var(--font-cjk-sc);
+  --font-num: 'Barlow Condensed', 'Barlow', var(--font-cjk-sc);
+
+  --fs-11: 0.6875rem;
+  --fs-12: 0.75rem;
+  --fs-13: 0.8125rem;
+  --fs-14: 0.875rem;
+  --fs-16: 1rem;
+  --fs-18: 1.125rem;
+  --fs-22: 1.375rem;
+  --fs-28: 1.75rem;
+  --fs-36: 2.25rem;
+  --fs-48: 3rem;
+  --fs-64: 4rem;
+
+  --lh-tight: 1.15;
+  --lh-snug: 1.35;
+  --lh-body: 1.6;
+
+  /* ---------- Space（4px 基准）---------- */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 20px;
+  --sp-6: 24px;
+  --sp-8: 32px;
+  --sp-10: 40px;
+  --sp-12: 48px;
+  --sp-16: 64px;
+
+  /* ---------- Radius：按层级区分，而不是全站一个圆角 ---------- */
+  --r-ctl: 8px;      /* 输入框、按钮、标签 */
+  --r-panel: 14px;   /* 面板、对话框 */
+  --r-sheet: 22px;   /* 移动端底部抽屉顶角 */
+  --r-note: 999px;   /* 音符、胶囊、头像 */
+  --r-xs: 6px;       /* 标签、星级点、小号内嵌控件 */
+
+  /* ---------- Layout ---------- */
+  --rail-w: 84px;
+  --bar-h: 60px;
+  --bar-h-m: 52px;      /* 手机顶栏 */
+  --subtab-h-m: 44px;   /* 手机二级页签条 */
+  --tab-h: 62px;
+  --content-max: 1480px;
+  --gutter: 28px;
+
+  /* ---------- Motion ---------- */
+  --ease-out: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --ease-hit: cubic-bezier(0.3, 1.6, 0.5, 1);   /* 击打回弹：只用于按下圆形击打物（咚键、播放键、音符）与达成反馈，不用于容器；减少动效时不缩放 */
+  --dur-1: 120ms;
+  --dur-2: 220ms;
+  --dur-3: 420ms;
+
+  /* ---------- Z ---------- */
+  --z-rail: 20;
+  --z-bar: 30;
+  --z-sheet: 60;
+  --z-palette: 80;
+  --z-toast: 90;
+  --z-proto: 100;
+
+  /* ---------- 控件（D12）：按钮、输入框、选择框、文本域、分段、筛选胶囊共用 ---------- */
+  --hit: 44px;               /* 手机最小可点区域 */
+  --ctl-h-xs: 28px;          /* 桌面：筛选胶囊、分段内钮 */
+  --ctl-h-sm: 30px;          /* .btn-sm */
+  --ctl-h: 38px;             /* 默认按钮、输入框 */
+  --ctl-h-lg: 46px;          /* .btn-lg；手机上的输入框 */
+  --ctl-radius: var(--r-ctl);
+  --ctl-pad-x: 12px;         /* 输入框、选择框、文本域、筛选胶囊、分段内钮的左右内边距 */
+  --btn-pad-x: 14px;         /* .btn 的左右内边距 */
+  --btn-pad-x-sm: 10px;      /* .btn-sm */
+  --btn-pad-x-lg: 20px;      /* .btn-lg */
+  /* 标签类高度：--tag-h 给 .tag、.role、DanBadge（行内小标签）；
+     --plate-h 给 TitlePlate（称号牌是一块「牌」，双线框，有意比标签高 2px） */
+  --tag-h: 20px;
+  --tag-radius: var(--r-xs);
+  --plate-h: 22px;
+
+  /* ---------- 浮层（D12）：对话框、抽屉、命令面板、菜单、浮动面板、Toast ---------- */
+  --overlay-radius: var(--r-panel);
+  --overlay-pad: 20px;
+  --overlay-pad-sm: 6px;     /* 菜单类浮层（账号菜单）：菜单项自带内边距，外框只留窄边 */
+  --overlay-shadow: var(--shadow-pop);
+}
+
+/* ============ Semantic：Light（紙） ============ */
+:root,
+:root[data-theme='light'] {
+  color-scheme: light;
+  --bg: var(--ai-50);
+  --bg-sunk: var(--ai-100);
+  --surface: var(--ai-0);
+  --surface-2: #f8f9fb;
+  --line: var(--ai-150);
+  --line-strong: var(--ai-200);
+  --ink: #17203a;
+  --ink-2: #47526f;
+  --ink-3: #5f6983;               /* D11：在 --bg-sunk 上 ≥ 4.5:1 */
+  --ink-inv: #ffffff;
+  --ctl-border: #838ba1;          /* 输入类控件边框：在 --surface / --bg 上 ≥ 3:1 */
+
+  --don: var(--shu-500);           /* 音符、指示、图形 */
+  --don-solid: var(--shu-600);     /* 主按钮填充：白字 ≥ 4.5:1 */
+  --ink-on-solid: var(--ai-0);     /* 实色填充（主按钮、难度标签）上的文字 */
+  --don-ink: var(--shu-650);       /* 文字级红：在 --surface / --bg / --don-wash 上 ≥ 4.5:1 */
+  --don-wash: var(--shu-100);
+  --ka: var(--asagi-500);
+  --ka-ink: var(--asagi-700);
+  --ka-wash: var(--asagi-100);
+  --roll: var(--yamabuki-500);
+  --roll-ink: var(--yamabuki-700);
+  --roll-wash: var(--yamabuki-100);
+
+  --ok: #007a46;
+  --ok-wash: #dcf3e6;
+  --warn: var(--yamabuki-700);
+  --danger: var(--shu-650);
+  --danger-wash: var(--shu-100);
+  --status-attn: var(--yamabuki-600);  /* 状态点「需要你做一步 / 部分成功」 */
+
+  --focus-ring: var(--asagi-700);
+  --toast-bg: var(--ai-800);
+  --toast-ink: var(--ai-50);
+
+  --lane: #232d4b;                /* 譜面レーン底色：浅色模式下也是深色带 */
+  --lane-line: #3a466b;
+  --lane-ink: #e9edf7;
+
+  --shadow-pop: 0 18px 50px -12px rgb(16 23 40 / 0.28), 0 2px 6px rgb(16 23 40 / 0.08);
+  --shadow-lift: 0 6px 18px -8px rgb(16 23 40 / 0.22);
+  --scrim: rgb(16 23 40 / 0.46);
+}
+
+/* ============ Semantic：Dark（夜藍） ============ */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+  --bg: var(--ai-900);
+  --bg-sunk: var(--ai-950);
+  --surface: var(--ai-850);
+  --surface-2: var(--ai-800);
+  --line: #26314f;
+  --line-strong: #34416a;
+  --ink: #e9edf7;
+  --ink-2: #b1b9d0;
+  --ink-3: #8994b2;
+  --ink-inv: #101728;
+  --ctl-border: #606f9c;
+
+  --don: var(--shu-400);
+  --don-solid: var(--shu-400);
+  --ink-on-solid: var(--ai-950);
+  --don-ink: #ff8266;
+  --don-wash: #3b1f24;
+  --ka: var(--asagi-400);
+  --ka-ink: #6fd6e6;
+  --ka-wash: #12303f;
+  --roll: var(--yamabuki-400);
+  --roll-ink: #ffd568;
+  --roll-wash: #38301a;
+
+  --ok: #4ccb8a;
+  --ok-wash: #153527;
+  --warn: #ffd568;
+  --danger: #ff8266;
+  --danger-wash: #3b1f24;
+  --status-attn: var(--roll);
+
+  --focus-ring: var(--asagi-400);
+  --toast-bg: var(--ai-700);
+  --toast-ink: var(--ai-50);
+
+  --lane: var(--ai-750);          /* 与 --bg（ai-900）、--surface（ai-850）拉开层次 */
+  --lane-line: #34416a;
+  --lane-ink: #e9edf7;
+
+  --shadow-pop: 0 24px 60px -12px rgb(0 0 0 / 0.6), 0 0 0 1px #34416a;
+  --shadow-lift: 0 8px 22px -8px rgb(0 0 0 / 0.5);
+  --scrim: rgb(5 8 16 / 0.62);
+}
+
+/* ============ Semantic：两套主题共用 ============ */
+:root {
+  /* 音符（D4）：谱面带内外通用的中性 token */
+  --note-ring: var(--ai-0);          /* 音符白色内环；也用于实色块上的白色图形 */
+  --note-outline: var(--ai-950);     /* 音符深色外轮廓；也用于压暗混色 */
+  --note-fc: #ffd75a;                /* 全连音符的金色内环 */
+
+  /* 状态色（S2）：同步角标等 */
+  --status-ok: var(--ok);
+  --status-fail: var(--danger);
+
+  /* 焦点环（D6 / D11）：2px 底色间隙 + 2px 实色环，在主按钮等实色块上也可见 */
+  --focus-gap: var(--surface);
+  --focus: 0 0 0 2px var(--focus-gap), 0 0 0 4px var(--focus-ring);
+
+  /* 譜面レーン：两套主题里都是深色带，音符颜色固定。--lane-* 只在谱面带、谱面图、空状态条里使用 */
+  --lane-don: var(--shu-400);
+  --lane-ka: var(--asagi-400);
+  --lane-roll: var(--yamabuki-500);
+  --lane-fc: var(--note-fc);
+  --lane-ink-2: #c3c9db;             /* 谱面带上的次要文字（日期）：≥ 4.5:1 */
+  --lane-ink-3: #a5aec8;             /* 谱面带上的弱文字（星期、休息日、小节号）：≥ 4.5:1，含选中列的提亮底 */
+  --lane-focus: var(--asagi-400);    /* 谱面带上的焦点环 */
+  --focus-lane: inset 0 0 0 2px var(--lane-focus);
+  --lane-ghost: var(--ai-500);
+  --lane-ghost-ring: var(--ai-300);
+  --lane-measure: var(--ai-400);     /* 谱面图里更醒目的小节线 */
+
+  /* 舞台面 Stage（I1）：两套主题里都是深藍底（与谱面带同一色族），用于个人主页身份带、年度回顾手机封面等。
+     页面用 base.css 的 .stage 类，它在局部把 --ink / --surface / --line 等重映射到这里的值，子组件无需单独改色。
+     文字对 --stage-bg / --stage-surface / --stage-sunk 均 ≥ 4.5:1（见 contrast-check.mjs） */
+  --stage-bg: var(--ai-750);
+  --stage-sunk: var(--ai-800);
+  --stage-surface: var(--ai-700);
+  --stage-ink: #e9edf7;
+  --stage-ink-2: #c3c9db;
+  --stage-ink-3: #a5aec8;
+  --stage-line: #34416a;
+  --stage-line-strong: #46557f;
+  --stage-ctl-border: #8592bb;     /* 舞台上的控件边框：≥ 3:1 */
+  --stage-focus: var(--asagi-400);
+  --stage-don-ink: #ff8266;
+  --stage-don-wash: #3b1f24;
+  --stage-ka: var(--asagi-400);
+  --stage-ka-ink: #6fd6e6;
+  --stage-ka-wash: #12303f;
+  --stage-roll: var(--yamabuki-400);
+  --stage-roll-ink: #ffd568;
+  --stage-roll-wash: #38301a;
+}
+
+/* ============ Role：交互角色（V1.3 B3） ============
+   组件表达「按钮 / 链接 / 选中 / 导航 / 焦点 / 信息」时只引用这里，不再直接引用音符色（--don* / --ka* 只表示游戏数据）。
+   fumen（版本 A、B）解析为 V1.2 的实际值；teal（版本 C）在下面的 [data-brand='teal'] 里改到品牌色。
+   这些 token 的值引用别的 token，自定义属性在声明它的元素上计算，所以 .stage（局部重映射了 --ink / --ka-ink 等）要再声明一遍。 */
+:root,
+.stage {
+  --action-bg: var(--don-solid);
+  --action-bg-hover: color-mix(in srgb, var(--don-solid) 88%, var(--note-outline));
+  --action-ink: var(--ink-on-solid);
+  --link: var(--ka-ink);
+  --selected-bg: var(--ink);          /* 选中的筛选胶囊 */
+  --selected-ink: var(--bg);
+  --selected-line: var(--ink);
+  --seg-on-bg: var(--surface);        /* 分段控件的选中项 */
+  --seg-on-ink: var(--ink);
+  --seg-on-ring: var(--ctl-border);
+  --tab-line: var(--don);             /* 页签指示线 */
+  --nav-active-bg: var(--ink);        /* 桌面窄轨的选中胶囊 */
+  --nav-active-ink: var(--bg);
+  --nav-active-text: var(--ink);      /* 选中导航项的文字（窄轨、手机底栏） */
+  --info-wash: var(--ka-wash);        /* 信息条、进行中的步骤 */
+  --info-ink: var(--ka-ink);
+  --brand-mark: var(--ka);            /* 标志的鼓缘 */
+  --overlay-bg: var(--surface);       /* 浮层底：浅色与 fumen 等于 --surface；teal 深色单独一级（G1） */
+  --overlay-line: transparent;        /* 浮层 1px 外框（box-shadow 画，不占版面）：teal 为 --line-strong */
+  --popover-line: var(--line);        /* Popover 的边框 */
+  --don-data: var(--don);             /* C+ G3：图表里成片的朱色（密度图难点柱、判定条「良」段）；teal 下柔化 */
+  --density-bar: color-mix(in srgb, var(--ink-3) 55%, transparent); /* 密度图普通小节 */
+  --judge-h: 8px;                     /* 成绩判定条高度；teal 6px */
+  --accent: var(--don);               /* 控件强调（复选框 accent-color、悬停投影、正文列表圆点）；teal 为品牌色 */
+  /* Phase B Stage 2（G10）：页面里原先直接用音符色表示交互 / 状态的地方，统一走下面的角色 */
+  --row-sel-bg: color-mix(in srgb, var(--ka) 9%, var(--surface)); /* 选中 / 定位的表格行、选项、拖放区 */
+  --row-sel-line: var(--ka);
+  --warn-wash: var(--roll-wash);      /* 警告状态的浅底（字用 --warn）；两套品牌相同 */
+  --lock-ink: var(--roll-ink);        /* 已锁定的成绩 */
+  --series-band-bg: var(--ka-wash);   /* 图表上的区间带（推荐区间、阶段） */
+  --series-band-line: color-mix(in srgb, var(--ka) 45%, transparent);
+  --series-band-cur: color-mix(in srgb, var(--ka) 22%, var(--surface));
+  --chart-mark: var(--roll);          /* 图表上的事件标注（段位、里程碑的引导线） */
+  --progress-line: var(--ka);         /* 步骤条已完成的连线 */
+  --annual-wash: var(--roll-wash);    /* 年度回顾入口卡片 */
+  --annual-ink: var(--roll-ink);
+  --unread-wash: var(--don-wash);     /* 未读通知的行首条 */
+  --toast-surface: var(--toast-bg);   /* Toast：fumen 是深色条；teal 用浮层底（G1：浮层一级） */
+  --toast-text: var(--toast-ink);
+  --role-mod-bg: var(--ka-wash);      /* 版主 / 官方身份标签 */
+  --role-mod-ink: var(--ka-ink);
+  --role-admin-bg: var(--don-wash);
+  --role-admin-ink: var(--don-ink);
+  --btn-ink-bg: var(--ink);           /* .btn-ink：fumen 是藍墨实色；teal 里是品牌实色（见下方 teal 块），需要次要按钮时加 .c-secondary */
+  --btn-ink-line: var(--ink);
+  --btn-ink-ink: var(--bg);
+  --btn-ink-hover: color-mix(in srgb, var(--ink) 86%, var(--bg));
+  --btn-ink-hover-line: transparent;
+  --tag-don-bg: var(--don-wash);      /* .tag-don（置顶、报名中等强调） */
+  --tag-don-ink: var(--don-ink);
+  --tag-info-bg: var(--ka-wash);      /* .tag-info / .tag-ka */
+  --tag-info-ink: var(--ka-ink);
+  --emph-num: var(--don-ink);         /* Rating 等大数字的强调色 */
+  --series: var(--don);               /* 单一序列图表（Rating 走势、六维雷达） */
+  --series-alt: var(--ka);            /* 第二种单序列图表（谱面能力分布） */
+  --series-fill: 16%;                 /* 雷达填充 */
+  --vote-on: var(--don);              /* 歌曲详情「有帮助」投票的按下态 */
+  --vote-on-wash: var(--don-wash);
+  --vote-on-ink: var(--don-ink);
+  --input-focus-line: var(--ka);      /* 搜索框等聚焦时的边框 */
+  --info-line: var(--ka);             /* 信息类按下态 / 当前步骤的描边 */
+  --series-focus: var(--ka);          /* 雷达上「当前重点」维度的点与标签 */
+  --series-focus-ink: var(--ka-ink);
+  --selection: color-mix(in srgb, var(--ka) 30%, transparent);
+}
+
+/* ============ Domain：游戏语义色（两套主题共用色相，亮度各自校准） ============ */
+:root {
+  /* 判定 */
+  --judge-good: var(--don);
+  --judge-ok: var(--ink-3);
+  --judge-ng: #7648c8;
+
+  /* 难度：--diff-* 用于色块、边框、图形（其上文字用 --ink-on-solid，≥ 4.5:1）；
+     --diff-*-ink 用于文字（在 --surface / --bg / --bg-sunk 与其上的自身 14% 浅底上 ≥ 4.5:1；QA 实测手机列表在 --bg 上） */
+  --diff-easy: #d14019;
+  --diff-normal: #448208;
+  --diff-hard: #2876b8;
+  --diff-oni: #d02f7a;
+  --diff-ura: #7648c8;
+  --diff-easy-ink: #af2b00;
+  --diff-normal-ink: #346c00;
+  --diff-hard-ink: #18619c;
+  --diff-oni-ink: #af1a63;
+  --diff-ura-ink: #6d42b8;
+
+  /* 王冠 */
+  --crown-none: var(--ai-300);
+  --crown-clear: #9aa5b8;      /* 银 */
+  --crown-fc: #e0a400;         /* 金（只作图形；作文字时用 --crown-fc-ink） */
+  --crown-fc-ink: #975e00;
+  --crown-dfc: conic-gradient(from 210deg, #ff5a5a, #ffb13d, #f6e24b, #58d68d, #4cc6d8, #7a7cf0, #d05be0, #ff5a5a);
+
+  /* 评价（粋・雅・極）：--rank-* 用于描边与图形，评价字用 --rank-*-ink */
+  --rank-iki1: #8c93a3;        /* 白粋 */
+  --rank-iki2: #b0703a;        /* 铜粋 */
+  --rank-iki3: #8e9fb8;        /* 银粋 */
+  --rank-miyabi1: #d79a00;     /* 金雅 */
+  --rank-miyabi2: #e2618f;     /* 粉雅（日文：桃雅） */
+  --rank-miyabi3: #8650d2;     /* 紫雅 */
+  --rank-kiwami: #17203a;      /* 極：实色底，外环为金色 --rank-kiwami-ring */
+  --rank-kiwami-ring: #c9a227;
+  --rank-iki1-ink: #656c7b;
+  --rank-iki2-ink: #995b23;
+  --rank-iki3-ink: #5e6e85;
+  --rank-miyabi1-ink: #9a6000;
+  --rank-miyabi2-ink: #b83b6c;
+  --rank-miyabi3-ink: #804acb;
+
+  /* 称号（V1.3，docs/16 A5）：游戏称号牌面上的文字（深色 + 白色描边，游戏里的写法），深浅主题相同；
+     站内称号左侧的彩虹竖条 */
+  --plate-ink: #2b1d14;
+  --plate-ink-outline: #ffffff;
+  --site-title-bar: linear-gradient(#ff5a5a, #ffb13d, #f6e24b, #58d68d, #4cc6d8, #7a7cf0, #d05be0);
+
+  /* 流派 Genre：只作色点 / 封面底色，不作文字 */
+  --genre-pops: #2d9fb8;
+  --genre-anime: #f08a24;
+  --genre-kids: #f0508c;
+  --genre-vocaloid: #9aa7b8;
+  --genre-game: #a865d8;
+  --genre-variety: #5db33a;
+  --genre-classic: #c9a227;
+  --genre-namco: #e8482e;
+
+  /* 社区版块 Section（I4）：只作色点 / 色条（非文字），在 --surface 与 --bg 上 ≥ 3:1 */
+  --section-official: #c8402b;
+  --section-events: #c4650a;
+  --section-beginner-help: #2f7fb8;
+  --section-score-guides: #d24f2e;
+  --section-dojo: #a87512;
+  --section-achievements: #c44a2a;
+  --section-arcade: #356f97;
+  --section-general: #2f7fb8;
+  --section-creative: #b9527c;
+}
+
+:root[data-theme='dark'] {
+  --diff-easy: #ff7a55;
+  --diff-normal: #8fcb5a;
+  --diff-hard: #5aa9ea;
+  --diff-oni: #ff66a8;
+  --diff-ura: #a583f5;
+  --diff-easy-ink: var(--diff-easy);
+  --diff-normal-ink: var(--diff-normal);
+  --diff-hard-ink: var(--diff-hard);
+  --diff-oni-ink: var(--diff-oni);
+  --diff-ura-ink: #b192f8;  /* 也要在点灯格浅底（--crown-clear 16% / --surface）上 ≥ 4.5:1 */
+  --judge-ng: #a583f5;
+  --crown-none: #3f4d78;
+  --crown-clear: #b9c3d6;
+  --crown-fc: #ffc93a;
+  --crown-fc-ink: var(--crown-fc);
+  --rank-kiwami: #e9edf7;
+  --rank-iki1-ink: #9198a8;
+  --rank-iki2-ink: #c6844f;
+  --rank-iki3-ink: var(--rank-iki3);
+  --rank-miyabi1-ink: var(--rank-miyabi1);
+  --rank-miyabi2-ink: #eb6997;
+  --rank-miyabi3-ink: #aa76fb;
+  --section-official: #ff7a5f;
+  --section-events: #ff9f45;
+  --section-beginner-help: #5cb2ea;
+  --section-score-guides: #ff8061;
+  --section-dojo: #e3b04a;
+  --section-achievements: #f2775a;
+  --section-arcade: #6aa8d6;
+  --section-general: #5cb2ea;
+  --section-creative: #e57fa8;
+}
+
+/* ============ Brand：Viewer Teal（版本 C，data-brand="teal"；docs/15 B3–B7） ============
+   浅色、深色各一套 Semantic 覆盖；版本 A、B 不经过这里。
+   选择器写成 :not([data-theme='dark']) / [data-theme='dark']，避免与 :root[data-theme='dark'] 同优先级时互相覆盖。 */
+:root[data-brand='teal']:not([data-theme='dark']) {
+  --brand-primary: #006c76;
+  --brand-hover: #005860;
+  --brand-soft: #d7ece9;
+  --brand-on-primary: #ffffff;
+  --brand-focus: #006c76;
+
+  --bg: #eaf6f5;
+  --bg-sunk: #def0ee;
+  --surface: #f9fdfc;
+  --surface-2: #f2f9f8;
+  --line: #ccdfdc;
+  --line-strong: #b4cecb;
+  --ink: #203f43;
+  --ink-2: #3d5a5e;
+  --ink-3: #4d696c;
+  --ctl-border: #6e8c8e;
+  --ok: #26724e;
+  --ok-wash: #e4f3ea;
+  --toast-bg: #24494d;
+  --toast-ink: #f1fbf9;
+  /* B5：咔向蓝偏移，与品牌青绿分开 */
+  --ka: #2b9bcf;
+  --ka-ink: #0f6a96;
+  --ka-wash: #ddeff8;
+  --lane: #17353a;
+  --lane-line: #2f5257;
+  --shadow-pop: 0 18px 50px -12px rgb(22 43 48 / 0.28), 0 2px 6px rgb(22 43 48 / 0.08);
+  --shadow-lift: 0 6px 18px -8px rgb(22 43 48 / 0.22);
+  --scrim: rgb(15 27 33 / 0.46);
+  --don-data: #e58572;     /* C+ G3（Stage 2 裁定：#e0705c 未达到歌曲详情首屏 ≤ 60% 的口径时调亮到 #e58572） */
+  /* contrast-check 在 teal 浅色下不达标的游戏数据文字色，同色相内调暗（V1.2 值在注释里） */
+  --rank-iki2-ink: #955922;  /* #995b23 */
+  --crown-fc-ink: #925b00;   /* #975e00 */
+  --rank-miyabi1-ink: #925d00; /* #9a6000：teal 浅底上 4.50:1 处在边界，调暗留余量 */
+}
+:root[data-brand='teal'][data-theme='dark'] {
+  --brand-primary: #86d9dc;
+  --brand-hover: #a0e3e5;
+  --brand-soft: #2a565a;   /* C+ G1（Phase A #244b4e）：要在 --surface 上看得出 */
+  --brand-on-primary: #0b2a2d;
+  --brand-focus: #86d9dc;
+
+  /* C+ G1 深色层次：下沉 < 页面 < 卡片 < 分区 ≈ 浮层（Phase A 值在注释里） */
+  --bg: #0c2023;           /* #10282b */
+  --bg-sunk: #081619;      /* #0b1e21 */
+  --surface: #1a383d;      /* #193338 */
+  --surface-2: #234a50;    /* #234247 */
+  --overlay-bg: #265056;   /* 新增：对话框、抽屉、搜索面板、菜单、浮动面板 */
+  --line: #2f5257;         /* #2e4e52 */
+  --line-strong: #447378;  /* #3d6165 */
+  --ink: #e4f4f1;
+  --ink-2: #accbca;
+  --ink-3: #a3c0c0;        /* G1 定为 #9ababa（Phase A #8fb0b0）；在 --overlay-bg 上只有 4.27:1，同色相调亮到 4.60:1 */
+  --ink-inv: #10282b;
+  --ctl-border: #779fa1;   /* Phase A #719b9d：在 --overlay-bg 上 2.91:1，调亮到 3.08:1 */
+  --toast-bg: #31565b;
+  --toast-ink: #f1fbf9;
+  --ka: #5cc4ef;
+  --ka-ink: #8ad4f4;
+  --ka-wash: #16344a;
+  --lane: #081619;         /* = --bg-sunk */
+  --lane-line: #2f5257;    /* = --line */
+  --shadow-pop: 0 24px 60px -12px rgb(0 0 0 / 0.6), 0 0 0 1px #3d6165;
+  --scrim: rgb(5 14 16 / 0.62);
+  --don-data: #e8806c;     /* C+ G3 */
+  /* teal 深色的表面比夜藍亮，以下数据文字色在 14% 浅底上不足 4.5:1，同色相内调亮（V1.2 值在注释里） */
+  --diff-easy-ink: #ff8a69;     /* #ff7a55；Phase A teal #ff8664 */
+  --diff-hard-ink: #75b7ed;     /* #5aa9ea；Phase A teal #6cb2ec */
+  --diff-oni-ink: #ff7fb7;      /* #ff66a8；Phase A teal #ff7ab4 */
+  --diff-ura-ink: #d0befb;      /* #b192f8；Phase A teal #b497f8；Stage 2 在点灯格的全连浅底上要 ≥ 4.5:1 */
+  --rank-iki1-ink: #a8adba;     /* #9198a8；Phase A teal #a2a8b6 */
+  --rank-iki2-ink: #d19c72;     /* #c6844f；Phase A teal #cf976a */
+  --rank-iki3-ink: #a4b1c6;     /* #8e9fb8；Phase A teal #9eacc2 */
+  --rank-miyabi1-ink: #e6a500;  /* #d79a00；Phase A teal #dc9e00 */
+  --rank-miyabi2-ink: #ef89ad;  /* #eb6997；Phase A teal #ee80a7 */
+  --rank-miyabi3-ink: #b98ffc;  /* #aa76fb；Phase A teal #b68afc */
+}
+/* 两套主题共用：谱面带的咔、舞台面（深青）、版块色点改为中性 */
+:root[data-brand='teal'] {
+  --lane-ka: #56c1ee;
+  --lane-focus: #86d9dc;
+  --judge-good: var(--don-data); /* C+ G3：判定条「良」段是成片的朱色 */
+  --stage-bg: #1d3d42;
+  --stage-sunk: #17353a;
+  --stage-surface: #27494e;
+  --stage-ink: #e4f4f1;
+  --stage-ink-2: #c0dad8;
+  --stage-ink-3: #a3c2c1;
+  --stage-line: #3a5d62;
+  --stage-line-strong: #4d7277;
+  --stage-ctl-border: #82a8aa;
+  --stage-focus: #86d9dc;
+  --stage-ka: #5cc4ef;
+  --stage-ka-ink: #8ad4f4;
+  --stage-ka-wash: #16344a;
+  --section-official: var(--ink-3);
+  --section-events: var(--ink-3);
+  --section-beginner-help: var(--ink-3);
+  --section-score-guides: var(--ink-3);
+  --section-dojo: var(--ink-3);
+  --section-achievements: var(--ink-3);
+  --section-arcade: var(--ink-3);
+  --section-general: var(--ink-3);
+  --section-creative: var(--ink-3);
+}
+/* 舞台面是深色面：品牌色在其上用深色主题的值 */
+:root[data-brand='teal'] .stage {
+  --brand-primary: #86d9dc;
+  --brand-hover: #a0e3e5;
+  --brand-soft: #244b4e;
+  --brand-on-primary: #0b2a2d;
+  --brand-focus: #86d9dc;
+}
+/* 角色 → 品牌 */
+:root[data-brand='teal'],
+:root[data-brand='teal'] .stage {
+  --action-bg: var(--brand-primary);
+  --action-bg-hover: var(--brand-hover);
+  --action-ink: var(--brand-on-primary);
+  --link: var(--brand-primary);
+  --selected-bg: var(--brand-soft);
+  --selected-ink: var(--brand-primary);
+  --selected-line: var(--brand-primary);
+  --seg-on-bg: var(--brand-soft);
+  --seg-on-ink: var(--brand-primary);
+  --seg-on-ring: var(--brand-primary);
+  --tab-line: var(--brand-primary);
+  --nav-active-bg: var(--brand-primary);
+  --nav-active-ink: var(--brand-on-primary);
+  --nav-active-text: var(--brand-primary);
+  --focus-ring: var(--brand-focus);
+  --info-wash: var(--brand-soft);
+  --info-ink: var(--brand-primary);
+  --brand-mark: var(--brand-primary);
+  --overlay-line: var(--line-strong);
+  --popover-line: var(--line-strong);
+  --density-bar: var(--line-strong);
+  --judge-h: 6px;
+  --accent: var(--brand-primary);
+  --row-sel-bg: color-mix(in srgb, var(--brand-primary) 12%, var(--surface)); /* 行里有 --ink-3 文字：brand-soft 在深色下只有 4.21:1 */
+  --row-sel-line: var(--brand-primary);
+  --lock-ink: var(--ink-2);
+  --series-band-bg: color-mix(in srgb, var(--brand-primary) 10%, var(--surface));
+  --series-band-line: color-mix(in srgb, var(--brand-primary) 45%, transparent);
+  --series-band-cur: color-mix(in srgb, var(--brand-primary) 22%, var(--surface));
+  --chart-mark: var(--ink-2);
+  --progress-line: var(--brand-primary);
+  --annual-wash: var(--brand-soft);
+  --annual-ink: var(--brand-primary);
+  --unread-wash: var(--brand-soft);
+  --toast-surface: var(--overlay-bg);
+  --toast-text: var(--ink);
+  --role-mod-bg: var(--brand-soft);
+  --role-mod-ink: var(--brand-primary);
+  --role-admin-bg: var(--brand-soft);
+  --role-admin-ink: var(--brand-primary);
+  /* .btn-ink 在 teal 里是品牌实色（与 .btn-primary 相同）；同一区域出现两个实色按钮时，页面给其中一个加 .c-secondary 降为次要按钮 */
+  --btn-ink-bg: var(--brand-primary);
+  --btn-ink-line: var(--brand-primary);
+  --btn-ink-ink: var(--brand-on-primary);
+  --btn-ink-hover: var(--brand-hover);
+  --btn-ink-hover-line: transparent;
+  --tag-don-bg: var(--bg-sunk);
+  --tag-don-ink: var(--ink-2);
+  --tag-info-bg: var(--bg-sunk);
+  --tag-info-ink: var(--ink-2);
+  --emph-num: var(--ink);
+  --series: var(--brand-primary);
+  --series-alt: var(--brand-primary);
+  --series-fill: 12%;
+  --vote-on: var(--brand-primary);
+  --vote-on-wash: var(--brand-soft);
+  --vote-on-ink: var(--brand-primary);
+  --input-focus-line: var(--brand-primary);
+  --info-line: var(--brand-primary);
+  --series-focus: var(--ink);
+  --series-focus-ink: var(--ink);
+  --selection: color-mix(in srgb, var(--brand-primary) 30%, transparent);
+}
+/* focus 在 :root 已按 fumen 的 --focus-ring 解析成整条阴影，这里要整条重写 */
+:root[data-brand='teal'] {
+  --focus: 0 0 0 2px var(--focus-gap), 0 0 0 4px var(--brand-focus);
+}
+:root[data-brand='teal'] .stage {
+  --focus: 0 0 0 2px var(--stage-bg), 0 0 0 4px var(--brand-focus);
+}
+
+@media (max-width: 767px) {
+  :root {
+    --gutter: 16px;
+  }
+}

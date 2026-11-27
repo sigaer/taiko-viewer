@@ -1,0 +1,51 @@
+{
+ "source": "origin/main:taiko_viewer/utils/scoreRank.ts",
+ "commit": "f9b39e6",
+ "definitions": [
+  {
+   "value": 0,
+   "zh": "未设置",
+   "ja": "未設定"
+  },
+  {
+   "value": 1,
+   "zh": "未取得",
+   "ja": "未取得"
+  },
+  {
+   "value": 2,
+   "zh": "白粹",
+   "ja": "白粋"
+  },
+  {
+   "value": 3,
+   "zh": "铜粹",
+   "ja": "銅粋"
+  },
+  {
+   "value": 4,
+   "zh": "银粹",
+   "ja": "銀粋"
+  },
+  {
+   "value": 5,
+   "zh": "金雅",
+   "ja": "金雅"
+  },
+  {
+   "value": 6,
+   "zh": "粉雅",
+   "ja": "桃雅"
+  },
+  {
+   "value": 7,
+   "zh": "紫雅",
+   "ja": "紫雅"
+  },
+  {
+   "value": 8,
+   "zh": "极",
+   "ja": "極"
+  }
+ ]
+}

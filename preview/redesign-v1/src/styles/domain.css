@@ -1,0 +1,850 @@
+/* 业务原子：音符、难度、王冠、评价、点灯格、封面。全站只有这一处定义游戏语义的视觉（D2 / D15）。
+   页面不得自己声明难度色、王冠色、评价色：用这里的类或对应组件。
+   颜色约定：--c = 色块 / 边框 / 图形；--c-ink = 文字（≥ 4.5:1）。 */
+
+/* ---------- 音符 Note ---------- */
+.note {
+  --n: 14px;
+  display: inline-block;
+  width: var(--n);
+  height: var(--n);
+  border-radius: 50%;
+  flex: none;
+  background: var(--don);
+  box-shadow: inset 0 0 0 calc(var(--n) * 0.14) color-mix(in srgb, var(--note-ring) 92%, transparent), 0 0 0 1px color-mix(in srgb, var(--note-outline) 55%, transparent);
+}
+.note.ka {
+  background: var(--ka);
+}
+.note.roll {
+  background: var(--roll);
+}
+.note.big {
+  --n: 20px;
+}
+.note.ghost {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--ink-3);
+}
+/* 新全连：金色内环（同谱面带上的全连音符） */
+.note.fc {
+  box-shadow: inset 0 0 0 calc(var(--n) * 0.16) var(--note-fc), 0 0 0 1px color-mix(in srgb, var(--note-outline) 55%, transparent);
+}
+/* 新全良：朱色鼓面 + 白环 + 虹色外环 */
+.note.dfc {
+  background: radial-gradient(circle closest-side, var(--don) 0 50%, var(--note-ring) 52% 72%, transparent 74%), var(--crown-dfc);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--note-outline) 55%, transparent);
+}
+
+/* ---------- 难度色来源 ----------
+   .dc-easy … .dc-ura：只设置 --c / --c-ink，给需要难度色的自定义元素用。 */
+.diff,
+.star-pip,
+.diff-tab {
+  --c: var(--diff-oni);
+  --c-ink: var(--diff-oni-ink);
+}
+.dc-easy,
+:is(.diff, .star-pip, .diff-tab).easy {
+  --c: var(--diff-easy);
+  --c-ink: var(--diff-easy-ink);
+}
+.dc-normal,
+:is(.diff, .star-pip, .diff-tab).normal {
+  --c: var(--diff-normal);
+  --c-ink: var(--diff-normal-ink);
+}
+.dc-hard,
+:is(.diff, .star-pip, .diff-tab).hard {
+  --c: var(--diff-hard);
+  --c-ink: var(--diff-hard-ink);
+}
+.dc-oni,
+:is(.diff, .star-pip, .diff-tab).oni {
+  --c: var(--diff-oni);
+  --c-ink: var(--diff-oni-ink);
+}
+.dc-ura,
+:is(.diff, .star-pip, .diff-tab).ura {
+  --c: var(--diff-ura);
+  --c-ink: var(--diff-ura-ink);
+}
+
+/* ---------- 难度 Diff ---------- */
+.diff {
+  position: relative;
+  display: inline-flex;
+  align-items: stretch;
+  height: 22px;
+  border-radius: var(--r-xs);
+  overflow: hidden;
+  font-size: var(--fs-12);
+  line-height: 22px;
+  white-space: nowrap;
+  border: 1px solid var(--c);
+  flex: none;
+}
+.diff .d {
+  padding: 0 6px;
+  background: var(--c);
+  color: var(--ink-on-solid);
+  font-weight: 700;
+}
+.diff .s {
+  padding: 0 6px 0 5px;
+  font-family: var(--font-num);
+  font-weight: 700;
+  font-size: var(--fs-14);
+  color: var(--c-ink);
+  background: color-mix(in srgb, var(--c) 10%, var(--surface));
+}
+.diff .k {
+  padding: 0 6px;
+  font-family: var(--font-num);
+  font-weight: 600;
+  font-size: var(--fs-14);
+  color: var(--ink);
+  background: var(--surface);
+  border-left: 1px solid color-mix(in srgb, var(--c) 40%, transparent);
+}
+.diff .k.na {
+  font-family: var(--font-ui);
+  font-weight: 400;
+  color: var(--ink-3);
+}
+.diff.lg {
+  height: 28px;
+  line-height: 28px;
+  font-size: var(--fs-13);
+}
+.diff.lg .s,
+.diff.lg .k {
+  font-size: var(--fs-16);
+}
+/* 只显示星级的小方块形式，用在紧凑表格里 */
+.star-pip {
+  display: inline-grid;
+  place-items: center;
+  min-width: 22px;
+  height: 22px;
+  padding: 0 4px;
+  border-radius: var(--r-xs);
+  background: color-mix(in srgb, var(--c) 14%, transparent);
+  color: var(--c-ink);
+  font-family: var(--font-num);
+  font-weight: 700;
+  font-size: var(--fs-14);
+}
+/* 没有这个难度：统一显示「—」（D8），无论元素里写的是什么 */
+.star-pip.off {
+  background: transparent;
+  color: var(--ink-3);
+  font-weight: 400;
+  font-size: 0;
+}
+.star-pip.off::after {
+  content: '—';
+  font-family: var(--font-ui);
+  font-size: var(--fs-14);
+}
+
+/* ---------- 难度切换条 .diff-tab（D2）----------
+   <div role="tablist"><button role="tab" class="diff-tab oni" aria-selected="true">
+     <span class="dn">魔王</span><span class="ds num">★10</span><span class="dk num">9.85</span>[<Crown size="sm" />]
+   </button></div>
+   手机上未选中的项只显示星级与定数。 */
+.diff-tab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: var(--hit);
+  padding: 0 14px;
+  border-radius: var(--ctl-radius);
+  border: 1.5px solid color-mix(in srgb, var(--c) 55%, var(--line));
+  background: var(--surface);
+  color: var(--ink);
+  white-space: nowrap;
+  flex: none;
+  transition: background var(--dur-1), color var(--dur-1);
+}
+.diff-tab .dn {
+  font-size: var(--fs-13);
+  font-weight: 700;
+  color: var(--c-ink);
+}
+.diff-tab .ds {
+  font-size: var(--fs-18);
+  font-weight: 700;
+}
+.diff-tab .dk {
+  font-size: var(--fs-16);
+  color: var(--ink-2);
+}
+.diff-tab:hover {
+  background: color-mix(in srgb, var(--c) 8%, var(--surface));
+}
+.diff-tab[aria-selected='true'] {
+  background: var(--c);
+  border-color: var(--c);
+  color: var(--ink-on-solid);
+}
+.diff-tab[aria-selected='true'] .dn,
+.diff-tab[aria-selected='true'] .dk {
+  color: inherit;
+}
+.diff-tab[aria-selected='true'] .dk {
+  font-weight: 500;
+}
+@media (max-width: 767px) {
+  .diff-tab {
+    height: var(--ctl-h-lg);
+    padding: 0 12px;
+    gap: 6px;
+  }
+  /* C5：放不下全称时用单字短标（简 / 普 / 难 / 鬼 / 里），不只靠颜色区分；全称留给读屏 */
+  .diff-tab:not([aria-selected='true']) {
+    position: relative; /* 让视觉隐藏的全称留在难度条（横滑容器）里，不撑宽页面 */
+  }
+  .diff-tab:not([aria-selected='true']) .dn {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+  .diff-tab:not([aria-selected='true']) .dshort {
+    display: inline;
+    font-weight: 700;
+    color: var(--c-ink);
+  }
+}
+.diff-tab .dshort {
+  display: none;
+}
+
+/* ---------- 王冠 Crown ---------- */
+.crown {
+  display: inline-block;
+  width: 20px;
+  height: 16px;
+  flex: none;
+  background: var(--crown-none);
+  -webkit-mask: var(--crown-mask) center / contain no-repeat;
+  mask: var(--crown-mask) center / contain no-repeat;
+  --crown-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 16'%3E%3Cpath d='M1.5 4.2 5.6 8 10 1.6 14.4 8l4.1-3.8-1.6 9.4a1 1 0 0 1-1 .8H4.1a1 1 0 0 1-1-.8z'/%3E%3C/svg%3E");
+}
+/* 未游玩：不画王冠形（灰王冠会被读成银色通关），统一显示缺失值「—」（D8） */
+.crown.none {
+  display: inline-grid;
+  place-items: center;
+  background: transparent;
+  -webkit-mask: none;
+  mask: none;
+  color: var(--ink-3);
+  font-family: var(--font-ui);
+  font-size: var(--fs-14);
+  font-weight: 400;
+  line-height: 1;
+}
+.crown.none::after {
+  content: '—';
+}
+/* 已游玩未通关：空心圆（形状区分，不靠透明度） */
+.crown.played {
+  background: transparent;
+  -webkit-mask: none;
+  mask: none;
+  position: relative;
+}
+.crown.played::after {
+  content: '';
+  position: absolute;
+  inset: 4px 6px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink-3);
+}
+.crown.clear {
+  background: var(--crown-clear);
+}
+.crown.fc {
+  background: var(--crown-fc);
+}
+.crown.dfc {
+  background: var(--crown-dfc);
+}
+.crown.lg {
+  width: 30px;
+  height: 24px;
+}
+.crown.lg.none {
+  font-size: var(--fs-18);
+}
+.crown.sm {
+  width: 15px;
+  height: 12px;
+}
+.crown.sm.none {
+  font-size: var(--fs-12);
+}
+
+/* ---------- 段位合格标记：红合格 = 朱，金合格 = 全连金（只作图形；文字用 .tag-don / .tag-roll）---------- */
+.pass.red {
+  background: var(--don);
+}
+.pass.gold {
+  background: var(--crown-fc);
+}
+
+/* ---------- 评价 Rank（粹 / 雅 / 极）：圈 = --c，字 = --c-ink ---------- */
+.rank {
+  --c: var(--ink-3);
+  --c-ink: var(--ink-3);
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--c);
+  color: var(--c-ink);
+  font-size: var(--fs-12);
+  font-weight: 900;
+  line-height: 1;
+  flex: none;
+}
+/* 没有评价：统一显示「—」（D8） */
+.rank.none {
+  border-color: transparent;
+  color: var(--ink-3);
+  font-family: var(--font-ui);
+  font-size: var(--fs-14);
+  font-weight: 400;
+}
+.rank.none:empty::after {
+  content: '—';
+}
+.rank.iki1,
+.rk.iki1 {
+  --c: var(--rank-iki1);
+  --c-ink: var(--rank-iki1-ink);
+}
+.rank.iki2,
+.rk.iki2 {
+  --c: var(--rank-iki2);
+  --c-ink: var(--rank-iki2-ink);
+}
+.rank.iki3,
+.rk.iki3 {
+  --c: var(--rank-iki3);
+  --c-ink: var(--rank-iki3-ink);
+}
+.rank.miyabi1,
+.rk.miyabi1 {
+  --c: var(--rank-miyabi1);
+  --c-ink: var(--rank-miyabi1-ink);
+}
+.rank.miyabi2,
+.rk.miyabi2 {
+  --c: var(--rank-miyabi2);
+  --c-ink: var(--rank-miyabi2-ink);
+}
+.rank.miyabi3,
+.rk.miyabi3 {
+  --c: var(--rank-miyabi3);
+  --c-ink: var(--rank-miyabi3-ink);
+}
+.rk.kiwami {
+  --c: var(--rank-kiwami-ring);
+  --c-ink: var(--ink);
+}
+.rank:is(.miyabi1, .miyabi2, .miyabi3) {
+  background: color-mix(in srgb, var(--c) 14%, var(--surface));
+}
+.rank.kiwami {
+  border: 0;
+  color: var(--bg);
+  background: var(--rank-kiwami);
+  box-shadow: 0 0 0 2px var(--surface), 0 0 0 3.5px var(--rank-kiwami-ring);
+}
+.rank.lg {
+  width: 32px;
+  height: 32px;
+  font-size: var(--fs-16);
+}
+
+/* ---------- 真实素材：难度 / 王冠 / 评价（data-assets="authentic"，docs/16 A2–A4）----------
+   素材原样显示：不用滤镜、混合模式、遮罩或透明度改色；容器中性，颜色由素材自己表现。 */
+.adiff {
+  position: relative; /* 读屏文字（.sr-only，绝对定位）留在徽章里，不在横滑容器外撑出页面 */
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  height: 22px;
+  padding: 0 6px 0 3px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-xs);
+  background: var(--surface);
+  font-size: var(--fs-14);
+  line-height: 1;
+  white-space: nowrap;
+  flex: none;
+}
+.adiff.lg {
+  height: 28px;
+  font-size: var(--fs-16);
+}
+.adiff-ico {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+}
+.adiff-ico img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.adiff-ura {
+  margin-left: -2px;
+  font-size: var(--fs-12);
+  font-weight: 700;
+  color: var(--ink-2);
+}
+.adiff .s {
+  font-weight: 700;
+  color: var(--ink);
+}
+.adiff .k {
+  color: var(--ink-2);
+}
+.adiff .k.na {
+  color: var(--ink-3);
+}
+.acrown {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  color: var(--ink-3);
+  font-size: var(--fs-14);
+  line-height: 1;
+}
+.acrown picture,
+.arank picture {
+  display: contents;
+}
+.acrown img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.acrown.none::after {
+  content: '—';
+}
+/* 已游玩：8px 空心圆环（不是王冠） */
+.acrown.played::after {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink-3);
+}
+.arank {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  overflow: visible;
+  color: var(--ink-3);
+  font-size: var(--fs-14);
+  line-height: 1;
+}
+.arank img {
+  width: var(--draw);
+  height: var(--draw);
+  max-width: none;
+  object-fit: contain;
+}
+.arank.txt {
+  width: auto !important;
+  font-size: var(--fs-12);
+  font-weight: 700;
+  color: var(--ink-2);
+}
+
+/* 难度页签（歌曲详情）：图标 + 难度名 + ★ + 定数；容器中性，选中靠 2px 描边、浅底与底部指示线，不靠图标颜色。
+   B（fumen）：该难度色描边、14% 浅底；C（teal）：--selected-line / --selected-bg。 */
+.dt-ico {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+  flex: none;
+}
+:is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic) {
+  position: relative;
+  border-color: var(--line);
+  gap: 6px;
+}
+:is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic) .dn,
+:is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic) .dshort {
+  color: var(--ink);
+}
+:is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic):hover {
+  background: var(--bg-sunk);
+}
+:is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic)[aria-selected='true'] {
+  --on-line: var(--c);
+  border-color: var(--on-line);
+  box-shadow: inset 0 0 0 0.5px var(--on-line);
+  background: color-mix(in srgb, var(--c) 14%, var(--surface));
+  color: var(--ink);
+}
+:root[data-brand='teal'] :is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic)[aria-selected='true'] {
+  --on-line: var(--selected-line);
+  background: var(--selected-bg);
+}
+/* 选中态的内描边是 box-shadow，会盖掉 :focus-visible 的焦点环：两者叠在一起 */
+:is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic)[aria-selected='true']:focus-visible {
+  box-shadow: inset 0 0 0 0.5px var(--on-line), var(--focus);
+}
+:is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic)[aria-selected='true']::after {
+  content: '';
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  bottom: 3px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--on-line);
+}
+:is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic)[aria-selected='true'] .dn,
+:is(:root[data-assets='authentic'] .diff-tab:not(.legacy), .diff-tab.authentic)[aria-selected='true'] .dk {
+  color: var(--ink);
+}
+
+/* ---------- 点灯格 Lamp（点灯进度、成绩格；D2）----------
+   王冠模式：.lamp.none / .played / .clear / .fc / .dfc
+   评价模式：.lamp.rk + 评价键（.iki1 … .miyabi3 / .kiwami / .none）
+   尺寸：默认为 14px 图例方块；.lamp.big 为曲目格（.lamp-title / .lamp-meta / .lamp-glyph）。
+   「没打过」用虚线边框（形状），「未通关」用实线细框，不靠透明度区分。 */
+.lamp {
+  --bd: var(--line-strong);
+  --bg2: var(--surface);
+  --fg: var(--ink-3);
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: var(--r-xs);
+  border: 1.5px solid var(--bd);
+  background: var(--bg2);
+  color: var(--fg);
+  flex: none;
+}
+.lamp.none {
+  --bd: var(--ctl-border);
+  border-style: dashed;
+}
+.lamp.played {
+  --bd: var(--ink-3);
+  --fg: var(--ink-2);
+}
+.lamp.clear {
+  --bd: var(--crown-clear);
+  --bg2: color-mix(in srgb, var(--crown-clear) 16%, var(--surface));
+  --fg: var(--ink);
+}
+.lamp.fc {
+  --bd: var(--crown-fc);
+  --bg2: color-mix(in srgb, var(--crown-fc) 20%, var(--surface));
+  --fg: var(--ink);
+}
+.lamp.dfc {
+  border: 2px solid transparent;
+  background: linear-gradient(var(--surface), var(--surface)) padding-box, var(--crown-dfc) border-box;
+  --fg: var(--ink);
+}
+.lamp.rk {
+  --bd: var(--c, var(--line-strong));
+  --bg2: color-mix(in srgb, var(--c, transparent) 14%, var(--surface));
+  --fg: var(--ink);
+}
+.lamp.rk.none {
+  --c: var(--ctl-border);
+  --bg2: var(--surface);
+  --fg: var(--ink-3);
+}
+.lamp.big {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  width: auto;
+  height: 52px;
+  padding: 6px 8px;
+  border-radius: var(--r-ctl);
+  font-weight: 400;
+  transition: transform var(--dur-1);
+}
+.lamp.big.dfc {
+  padding: 5.5px 7.5px;
+}
+.lamp.big.none .lamp-title {
+  font-weight: 500;
+}
+a.lamp.big:hover {
+  transform: translateY(-2px);
+}
+.lamp-title {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--fs-12);
+  font-weight: 700;
+  line-height: 1.2;
+}
+.lamp-meta {
+  font-family: var(--font-num);
+  font-size: var(--fs-13);
+  line-height: 1;
+  color: var(--ink-2);
+}
+.lamp-meta em {
+  font-style: normal;
+  margin-left: 4px;
+  font-family: var(--font-ui);
+  font-size: var(--fs-11);
+  font-weight: 700;
+  color: var(--diff-ura-ink);
+}
+.lamp-glyph {
+  position: absolute;
+  right: 6px;
+  bottom: 4px;
+  font-size: var(--fs-13);
+  font-weight: 900;
+  color: var(--c-ink, var(--ink));
+}
+:root[data-motion='reduce'] a.lamp.big:hover {
+  transform: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  a.lamp.big:hover {
+    transform: none;
+  }
+}
+
+/* ---------- 封面 Cover（原型用生成式封面；正式环境替换为 static.sakura-bot.cn/cover）----------
+   尺寸与圆角阶梯（D3）：.sm 32px --r-xs ／ 默认 44px --r-ctl ／ .lg 72px --r-ctl + 2px ／
+   .tile 96px --r-ctl + 2px（头条、代表成绩）／ .xl 168px --r-panel */
+.cover {
+  --g: var(--genre-namco);
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 44px;
+  aspect-ratio: 1;
+  border-radius: var(--r-ctl);
+  overflow: hidden;
+  flex: none;
+  background: var(--g);
+  color: var(--note-ring);
+  font-weight: 900;
+  font-size: 20px;
+  line-height: 1;
+  isolation: isolate;
+}
+.cover::before {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: 130%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  right: -62%;
+  bottom: -62%;
+  background: color-mix(in srgb, var(--note-outline) 26%, transparent);
+}
+.cover::after {
+  content: '';
+  position: absolute;
+  z-index: -1;
+  width: 54%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  left: -18%;
+  top: -18%;
+  border: 3px solid color-mix(in srgb, var(--note-ring) 28%, transparent);
+}
+.cover {
+  filter: hue-rotate(var(--h, 0deg));
+}
+.cover b {
+  filter: hue-rotate(calc(var(--h, 0deg) * -1));
+  text-shadow: 0 1px 3px color-mix(in srgb, var(--note-outline) 45%, transparent);
+}
+.cover.v1::before {
+  right: auto;
+  left: -62%;
+}
+.cover.v1::after {
+  left: auto;
+  right: -18%;
+}
+.cover.v2::before {
+  bottom: auto;
+  top: -70%;
+}
+.cover.v2::after {
+  top: auto;
+  bottom: -18%;
+}
+.cover.sm {
+  width: 32px;
+  border-radius: var(--r-xs);
+  font-size: 15px;
+}
+.cover.lg {
+  width: 72px;
+  border-radius: calc(var(--r-ctl) + 2px);
+  font-size: 32px;
+}
+.cover.tile {
+  width: 96px;
+  border-radius: calc(var(--r-ctl) + 2px);
+  font-size: 42px;
+}
+.cover.xl {
+  width: 168px;
+  border-radius: var(--r-panel);
+  font-size: 76px;
+}
+.cover.fill {
+  width: 100%;
+}
+
+/* ---------- 真实曲绘（data-assets="authentic"，docs/16 A1）----------
+   与生成式封面同一套尺寸、圆角阶梯（.cover 的 .sm / .lg / .tile / .xl / .fill），只换内部画法：
+   加载前是 --bg-sunk 底；图片铺满、不加渐变或色罩；外圈 1px --line 内描边。
+   两种占位：.missing（真实曲目，加载失败）与 .sample（合成 / 未验证曲目，45° 细斜纹，≥ 96px 时写「示例」）。 */
+.cover.acov {
+  background: var(--bg-sunk);
+  color: var(--ink-3);
+  filter: none;
+  container-type: inline-size;
+}
+.cover.acov::before {
+  content: none;
+}
+.cover.acov::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: auto;
+  aspect-ratio: auto;
+  border: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 0 0 1px var(--line);
+  pointer-events: none;
+}
+.cover.acov.sample {
+  background:
+    repeating-linear-gradient(45deg, var(--line) 0 1px, transparent 1px 7px),
+    var(--bg-sunk);
+}
+.acov-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--dur-1) ease-out;
+}
+.acov-img.on {
+  opacity: 1;
+}
+:root[data-motion='reduce'] .acov-img {
+  transition: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .acov-img {
+    transition: none;
+  }
+}
+.cover.acov {
+  display: grid;
+  place-items: center;
+  align-content: center;
+  gap: 4px;
+}
+.acov-ico {
+  width: 40%;
+  max-width: 40px;
+  height: auto;
+  aspect-ratio: 1;
+}
+.acov-lbl {
+  display: none;
+  font-size: var(--fs-12);
+  font-weight: 500;
+  line-height: 1;
+}
+@container (min-width: 96px) {
+  .acov-lbl {
+    display: block;
+  }
+}
+
+/* ---------- 判定条（良 / 可 / 不可） ---------- */
+.judge {
+  display: flex;
+  height: var(--judge-h);
+  border-radius: var(--r-xs);
+  overflow: hidden;
+  background: var(--bg-sunk);
+}
+.judge i {
+  display: block;
+  height: 100%;
+}
+.judge .g {
+  background: var(--judge-good);
+}
+.judge .o {
+  background: var(--judge-ok);
+}
+.judge .n {
+  background: var(--judge-ng);
+}
+.judge-legend {
+  display: flex;
+  gap: var(--sp-4);
+  font-size: var(--fs-12);
+  color: var(--ink-2);
+}
+.judge-legend b {
+  font-family: var(--font-num);
+  font-size: var(--fs-16);
+  font-weight: 700;
+  color: var(--ink);
+  margin-left: 4px;
+}
+
+/* ---------- 社区角色 ---------- */
+.role {
+  display: inline-flex;
+  align-items: center;
+  height: var(--tag-h);
+  padding: 0 6px;
+  border-radius: var(--r-xs);
+  font-size: var(--fs-11);
+  font-weight: 700;
+}
+.role.moderator {
+  background: var(--role-mod-bg);
+  color: var(--role-mod-ink);
+}
+.role.admin {
+  background: var(--role-admin-bg);
+  color: var(--role-admin-ink);
+}

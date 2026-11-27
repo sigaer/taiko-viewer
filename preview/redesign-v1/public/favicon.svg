@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
+  <!-- Taiko Viewer 原型 favicon：鼓的俯视图（朱色鼓面 + 浅葱鼓缘 + 一圈鋲），浅色 / 深色各一套颜色（F4.2，独立资源允许写色值） -->
+  <style>
+    .rim { fill: #1fa5ba; }
+    .rv { fill: #0b1120; opacity: .7; }
+    .face { fill: #e8482e; stroke: #ffffff; stroke-width: 2; }
+    .mark { stroke: #ffffff; stroke-width: 3; stroke-linecap: round; fill: none; }
+    @media (prefers-color-scheme: dark) {
+      .rim { fill: #4cc6d8; }
+      .rv { fill: #0b1120; opacity: .8; }
+      .face { fill: #ff6a4d; stroke: #e9edf7; }
+      .mark { stroke: #e9edf7; }
+    }
+  </style>
+  <circle class="rim" cx="20" cy="20" r="19"/>
+  <circle class="rv" cx="36.20" cy="20.00" r="1.15"/><circle class="rv" cx="34.03" cy="28.10" r="1.15"/><circle class="rv" cx="28.10" cy="34.03" r="1.15"/><circle class="rv" cx="20.00" cy="36.20" r="1.15"/><circle class="rv" cx="11.90" cy="34.03" r="1.15"/><circle class="rv" cx="5.97" cy="28.10" r="1.15"/><circle class="rv" cx="3.80" cy="20.00" r="1.15"/><circle class="rv" cx="5.97" cy="11.90" r="1.15"/><circle class="rv" cx="11.90" cy="5.97" r="1.15"/><circle class="rv" cx="20.00" cy="3.80" r="1.15"/><circle class="rv" cx="28.10" cy="5.97" r="1.15"/><circle class="rv" cx="34.03" cy="11.90" r="1.15"/>
+  <circle class="face" cx="20" cy="20" r="13"/>
+  <path class="mark" d="M14.5 15.5h11M20 15.5V26"/>
+</svg>
