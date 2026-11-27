@@ -26,6 +26,7 @@ const props = defineProps<{
   /** Localized parent location for the mobile back button */
   backHref?: string;
 }>();
+useHead({ htmlAttrs: { "data-viewer-shell": "" } });
 const route = useRoute();
 const nuxtApp = useNuxtApp();
 const router = useRouter();
@@ -365,6 +366,7 @@ await fetchCurrentUser();
         <slot />
       </div>
     </main>
+    <div id="viewer-shell-dock" />
     <nav
       v-if="showMobileNav"
       class="rework-bottom"

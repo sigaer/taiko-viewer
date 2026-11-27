@@ -32,6 +32,7 @@ const emit = defineEmits<{
   clearTarget: [];
 }>();
 const { t } = useI18n();
+const firefoxShell = useFirefoxAndroidShell();
 const field = ref<HTMLTextAreaElement | null>(null);
 const fieldId = useId();
 // Upload previews (slice G): a preview that fails to load shows the same neutral placeholder as a failed content image
@@ -48,6 +49,7 @@ const open = () => {
 </script>
 
 <template>
+  <Teleport to="#viewer-shell-dock" :disabled="!firefoxShell">
   <section class="crb" :class="{ 'is-expanded': expanded && signedIn }" :aria-label="t('rework.forum.thread.publishReply')" data-reply-box>
     <ReworkGate v-if="!signedIn" need="login" variant="row" :redirect="redirect" :title="t('rework.forum.thread.replyLogin')" :register="false" compact />
     <template v-else>
@@ -98,6 +100,7 @@ const open = () => {
       </template>
     </template>
   </section>
+  </Teleport>
 </template>
 
 <style scoped>

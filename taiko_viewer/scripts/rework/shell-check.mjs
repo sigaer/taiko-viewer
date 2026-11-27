@@ -11,6 +11,7 @@ import mysql from "mysql2/promise";
 import { chromium } from "playwright-core";
 const web = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const output = process.argv[2];
+const firefox = process.argv.includes("--firefox") ? await import("./firefox-android-scenarios.mjs") : null;
 const rc = process.argv.includes("--rc") ? await import("./rc-scenarios.mjs") : null;
 let prepared;
 assert.ok(output?.startsWith("/var/tmp/"));
@@ -201,11 +202,15 @@ try {
   assert.ok(ready);
   if (!process.argv.includes("--scope")) browser = await chromium.launch({
     headless: true,
-    ...(rc ? {args:["--ignore-certificate-errors"]} : {}),
+    ...((rc || firefox) ? {args:["--ignore-certificate-errors"]} : {}),
     executablePath:
       "/root/.cache/ms-playwright/chromium_headless_shell-1228/chrome-headless-shell-linux64/chrome-headless-shell",
   });
-  if (rc) {
+  if (firefox) {
+    const report = await firefox.run({ browser, base, out });
+    results.push(...report.results);
+    errors.push(...report.results.filter(r => !r.pass).map(r => r.name + ": " + r.error));
+  } else if (rc) {
     const report = process.argv.includes("--scope") ? await rc.runScope({web,out,base:"http://127.0.0.1:35322"}) : await rc.run({browser, base, out, data, password, prepared, coreOnly:process.argv.includes("--rc-core")});
     results.push(...report.results);
     errors.push(...report.results.filter(r => !r.pass).map(r => r.name + ": " + r.error));

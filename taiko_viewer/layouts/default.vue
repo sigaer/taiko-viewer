@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { firefoxKeyboardViewport } from "~/utils/firefox-android.mjs";
+import { viewerScrollElement } from "~/utils/viewer-scroll";
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, watch } from "vue";
 import zhCn from "element-plus/es/locale/lang/zh-cn";
 import ja from "element-plus/es/locale/lang/ja";
@@ -201,9 +203,34 @@ watch(
 // --kb-h = the height the keyboard covers (innerHeight − visualViewport height − offsetTop; 0 when the browser
 // resizes the layout instead). Values are only written when they change. Not verified on real devices yet (P0).
 let keyboardInsetPx = -1;
+let firefoxBaselineHeight = 0;
+let firefoxBaselineWidth = 0;
+let firefoxViewportStyle = "";
 const syncKeyboard = () => {
   keyboardOpen.value = Boolean(window.visualViewport && window.innerHeight - window.visualViewport.height > 150 && /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || ''));
   const viewport = window.visualViewport;
+  if (viewerScrollElement() && viewport) {
+    const editable = /INPUT|TEXTAREA|SELECT/.test(document.activeElement?.tagName || "");
+    if (!firefoxBaselineHeight || firefoxBaselineWidth !== window.innerWidth || (!editable && viewport.height >= firefoxBaselineHeight - 150)) {
+      firefoxBaselineHeight = Math.max(window.innerHeight, viewport.height);
+      firefoxBaselineWidth = window.innerWidth;
+    }
+    keyboardOpen.value = firefoxKeyboardViewport({ innerHeight: window.innerHeight, height: viewport.height, offsetTop: viewport.offsetTop, scale: viewport.scale, editable, baselineHeight: firefoxBaselineHeight }).open;
+    // Size only the keyboard-visible Shell. Never offset the TabBar in response
+    // to normal toolbar animation; it is a normal flex child in this mode.
+    const signature = keyboardOpen.value ? `${viewport.height}:${viewport.offsetTop}` : "";
+    if (signature !== firefoxViewportStyle) {
+      firefoxViewportStyle = signature;
+      const style = document.documentElement.style;
+      if (signature) {
+        style.setProperty("--firefox-keyboard-height", `${viewport.height}px`);
+        style.setProperty("--firefox-keyboard-top", `${viewport.offsetTop}px`);
+      } else {
+        style.removeProperty("--firefox-keyboard-height");
+        style.removeProperty("--firefox-keyboard-top");
+      }
+    }
+  }
   const inset = keyboardOpen.value && viewport ? Math.max(0, Math.round(window.innerHeight - (viewport.height + viewport.offsetTop))) : -1;
   if (inset === keyboardInsetPx) return;
   keyboardInsetPx = inset;
@@ -217,6 +244,12 @@ const syncKeyboard = () => {
   }
 };
 onMounted(() => {
+  if (document.documentElement.classList.contains('firefox-android')) {
+    window.addEventListener('resize', syncKeyboard);
+    document.addEventListener('focusin', syncKeyboard);
+    document.addEventListener('focusout', syncKeyboard);
+    syncKeyboard();
+  }
   window.visualViewport?.addEventListener('resize',syncKeyboard);
   window.visualViewport?.addEventListener('scroll',syncKeyboard);
   stopPageLoading();
@@ -226,6 +259,11 @@ onMounted(() => {
 onBeforeUnmount(() => {
   stopPageLoading();
   if (!process.client) return;
+  window.removeEventListener('resize', syncKeyboard);
+  document.removeEventListener('focusin', syncKeyboard);
+  document.removeEventListener('focusout', syncKeyboard);
+  document.documentElement.style.removeProperty('--firefox-keyboard-height');
+  document.documentElement.style.removeProperty('--firefox-keyboard-top');
   window.visualViewport?.removeEventListener('resize',syncKeyboard);
   window.visualViewport?.removeEventListener('scroll',syncKeyboard);
   document.documentElement.removeAttribute('data-kb');

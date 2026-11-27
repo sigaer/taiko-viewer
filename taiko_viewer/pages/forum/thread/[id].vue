@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { viewerScrollY, scrollViewerTo } from "~/utils/viewer-scroll";
 import { computed } from "vue";
 import { ElMessage } from "element-plus";
 import type { ForumContentBlock, ForumThreadDetail } from "~/types/forum";
@@ -302,7 +303,7 @@ const toggleBlockedContent = (postId: number) => {
 const restoreScrollPosition = async (scrollY: number) => {
   if (!import.meta.client) return;
   await nextTick();
-  requestAnimationFrame(() => window.scrollTo({ top: scrollY, behavior: "auto" }));
+  requestAnimationFrame(() => scrollViewerTo({ top: scrollY, behavior: "auto" }));
 };
 
 const submitReply = async () => {
@@ -328,7 +329,7 @@ const submitReply = async () => {
         imageUrl,
       })),
     ];
-    const scrollY = import.meta.client ? window.scrollY : 0;
+    const scrollY = import.meta.client ? viewerScrollY() : 0;
     const result = await apiFetch<ForumThreadDetail>(`/api/forum/threads/${requestedThread}/replies`, {
       method: "POST",
       body: {
@@ -360,7 +361,7 @@ const toggleThreadLike = async (event?: MouseEvent) => {
   if (likingThread.value || !viewActive) return;
   const request = requestGuard.capture(), requestedThread = String(route.params.id);
   const trigger = event?.currentTarget instanceof HTMLElement ? event.currentTarget : null;
-  const scrollY = import.meta.client ? window.scrollY : 0;
+  const scrollY = import.meta.client ? viewerScrollY() : 0;
   likingThread.value = true;
   try {
     const wasLiked = Boolean(detail.value?.viewerHasLiked);
@@ -388,7 +389,7 @@ const togglePostLike = async (postId: number, event?: MouseEvent) => {
   if (activePostLikeId.value !== null || !viewActive) return;
   const request = requestGuard.capture(), requestedThread = String(route.params.id);
   const trigger = event?.currentTarget instanceof HTMLElement ? event.currentTarget : null;
-  const scrollY = import.meta.client ? window.scrollY : 0;
+  const scrollY = import.meta.client ? viewerScrollY() : 0;
   activePostLikeId.value = postId;
   try {
     const allPosts = detail.value?.posts || [];
