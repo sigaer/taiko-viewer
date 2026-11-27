@@ -1,0 +1,180 @@
+{
+  "baselineMain": "aa95a437390e03fb50895503949e288efee97d1b",
+  "backupBundleSha256": "415b4a71cf834ec0db8e5e14cddeb53bccb8bac76ba1b12c70a329384c5c2ff2",
+  "branches": [
+    {
+      "ref": "refs/remotes/origin/candidate/viewer-multi-goal-b4-2-20261125",
+      "sha": "bd63d0a82dae6f8c15c49542eca8aa62a233e2a3",
+      "behind": 3,
+      "ahead": 18,
+      "branch": "candidate/viewer-multi-goal-b4-2-20261125",
+      "action": "archive",
+      "tag": "archive/20261127/candidate/viewer-multi-goal-b4-2-20261125"
+    },
+    {
+      "ref": "refs/remotes/origin/candidate/viewer-multi-objective-b4-1-20261124",
+      "sha": "a08f5a97812962d00fe8cc92192fc3b38b86d142",
+      "behind": 3,
+      "ahead": 17,
+      "branch": "candidate/viewer-multi-objective-b4-1-20261124",
+      "action": "archive",
+      "tag": "archive/20261127/candidate/viewer-multi-objective-b4-1-20261124"
+    },
+    {
+      "ref": "refs/remotes/origin/candidate/viewer-player-intelligence-b3-20261124",
+      "sha": "c49717b6b7b7f697c0975c3d1477b7abffb26b7f",
+      "behind": 3,
+      "ahead": 12,
+      "branch": "candidate/viewer-player-intelligence-b3-20261124",
+      "action": "archive",
+      "tag": "archive/20261127/candidate/viewer-player-intelligence-b3-20261124"
+    },
+    {
+      "ref": "refs/remotes/origin/candidate/viewer-type-specific-evaluators-b4-3-20261125",
+      "sha": "1db6be666002c635a01a18ff1695fd03880832b4",
+      "behind": 3,
+      "ahead": 38,
+      "branch": "candidate/viewer-type-specific-evaluators-b4-3-20261125",
+      "action": "archive",
+      "tag": "archive/20261127/candidate/viewer-type-specific-evaluators-b4-3-20261125"
+    },
+    {
+      "ref": "refs/remotes/origin/ci/viewer-production-deploy",
+      "sha": "08091586884af0c551cbf1e97e581dfca64bc968",
+      "behind": 54,
+      "ahead": 1,
+      "branch": "ci/viewer-production-deploy",
+      "action": "merge-accepted"
+    },
+    {
+      "ref": "refs/remotes/origin/design/viewer-recommendation-b4-contract-20261124",
+      "sha": "a68d8bda40189f527392ffee262473699d912a41",
+      "behind": 3,
+      "ahead": 14,
+      "branch": "design/viewer-recommendation-b4-contract-20261124",
+      "action": "archive",
+      "tag": "archive/20261127/design/viewer-recommendation-b4-contract-20261124"
+    },
+    {
+      "ref": "refs/remotes/origin/design/viewer-redesign-v1",
+      "sha": "b4bd45bde431e18ce39fdef9ebd85937b788f4e3",
+      "behind": 56,
+      "ahead": 6,
+      "branch": "design/viewer-redesign-v1",
+      "action": "merge-accepted"
+    },
+    {
+      "ref": "refs/remotes/origin/feat/admin-dashboard-dau",
+      "sha": "8b1b7345e97df9bedd7be862683577ae9c9de10b",
+      "behind": 15,
+      "ahead": 0,
+      "branch": "feat/admin-dashboard-dau",
+      "action": "already-merged"
+    },
+    {
+      "ref": "refs/remotes/origin/feature/viewer-ds-phase0",
+      "sha": "f473fbc4379ee9824b50753abf9c892824c67305",
+      "behind": 43,
+      "ahead": 1,
+      "branch": "feature/viewer-ds-phase0",
+      "action": "merge-accepted"
+    },
+    {
+      "ref": "refs/remotes/origin/feature/viewer-engineering-infrastructure-v2",
+      "sha": "7323415d61a6e46672e4cd36df11c0211066dc0a",
+      "behind": 54,
+      "ahead": 4,
+      "branch": "feature/viewer-engineering-infrastructure-v2",
+      "action": "archive",
+      "tag": "archive/20261127/feature/viewer-engineering-infrastructure-v2"
+    },
+    {
+      "ref": "refs/remotes/origin/feature/viewer-rework-stage1",
+      "sha": "b41c2e72191f716ed8cf34e017db5bddc1b63cd2",
+      "behind": 38,
+      "ahead": 0,
+      "branch": "feature/viewer-rework-stage1",
+      "action": "already-merged"
+    },
+    {
+      "ref": "refs/remotes/origin/feature/viewer-rework-stage2",
+      "sha": "f493816f4691d848961e878a8d94329ac882a7e7",
+      "behind": 36,
+      "ahead": 0,
+      "branch": "feature/viewer-rework-stage2",
+      "action": "already-merged"
+    },
+    {
+      "ref": "refs/remotes/origin/feature/viewer-rework-stage3",
+      "sha": "6371b6c64d4ff7fba0d4f7b0b4a21d8fe55633a4",
+      "behind": 35,
+      "ahead": 0,
+      "branch": "feature/viewer-rework-stage3",
+      "action": "already-merged"
+    },
+    {
+      "ref": "refs/remotes/origin/feature/viewer-rework-stage4",
+      "sha": "34d4f5a6a48beae651dec3f68494e273c5a7e2f8",
+      "behind": 33,
+      "ahead": 0,
+      "branch": "feature/viewer-rework-stage4",
+      "action": "already-merged"
+    },
+    {
+      "ref": "refs/remotes/origin/feature/viewer-rework-stage5",
+      "sha": "d15134cc08edfc45c6f2c5a78585f076f38723c5",
+      "behind": 31,
+      "ahead": 0,
+      "branch": "feature/viewer-rework-stage5",
+      "action": "already-merged"
+    },
+    {
+      "ref": "refs/remotes/origin/fix/firefox-android-bottom-nav-jitter",
+      "sha": "acd71e32ab29a56e96fbef515d78dffebf3b5724",
+      "behind": 21,
+      "ahead": 2,
+      "branch": "fix/firefox-android-bottom-nav-jitter",
+      "action": "merge-accepted"
+    },
+    {
+      "ref": "refs/remotes/origin/fix/home-desktop-columns-20261119",
+      "sha": "89ed540a29b286c6fff6a92b3c9528e90f7195a4",
+      "behind": 20,
+      "ahead": 0,
+      "branch": "fix/home-desktop-columns-20261119",
+      "action": "already-merged"
+    },
+    {
+      "ref": "refs/remotes/origin/integration/viewer-1.15.0-rc",
+      "sha": "dcbe0edf88fa7100fa44fe13ee8b95ab65910230",
+      "behind": 27,
+      "ahead": 0,
+      "branch": "integration/viewer-1.15.0-rc",
+      "action": "already-merged"
+    },
+    {
+      "ref": "refs/remotes/origin/integration/viewer-1.15.0-restore",
+      "sha": "5daeafbaf831f5fe3f34b49ef6b1b785e46d8d7f",
+      "behind": 22,
+      "ahead": 0,
+      "branch": "integration/viewer-1.15.0-restore",
+      "action": "already-merged"
+    },
+    {
+      "ref": "refs/remotes/origin/main",
+      "sha": "aa95a437390e03fb50895503949e288efee97d1b",
+      "behind": 0,
+      "ahead": 0,
+      "branch": "main",
+      "action": "keep-main"
+    },
+    {
+      "ref": "refs/remotes/origin/rollback/viewer-1.15.0-gate",
+      "sha": "6ca4f81a6a9cab15068b1028569e524e00863479",
+      "behind": 24,
+      "ahead": 0,
+      "branch": "rollback/viewer-1.15.0-gate",
+      "action": "already-merged"
+    }
+  ]
+}
