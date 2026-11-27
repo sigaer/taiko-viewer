@@ -1,18 +1,7 @@
-name: Developer API batch 1
+name: Viewer validation
 
 on:
-  pull_request:
-    branches: [main]
-    paths:
-      - "taiko_viewer/**"
-      - "packages/sakura-taiko-contract/**"
-      - ".github/workflows/developer-api-batch1.yml"
-  push:
-    branches: [main]
-    paths:
-      - "taiko_viewer/**"
-      - "packages/sakura-taiko-contract/**"
-      - ".github/workflows/developer-api-batch1.yml"
+  workflow_call:
 
 permissions:
   contents: read
@@ -23,11 +12,14 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/checkout@v4
         with:
           repository: sigaer/taiko-bot
           ref: a632913dfbdbec1d465f8eaccc0bb80c35e25745
           path: taiko-bot-source
+          persist-credentials: false
       - name: Prepare pinned shared Annual schema
         run: |
           schema_dir="$(dirname "$(dirname "$GITHUB_WORKSPACE")")/schemas"
@@ -57,6 +49,8 @@ jobs:
       - name: Verify version projection and API batch regression tests
         working-directory: taiko_viewer
         run: node --experimental-strip-types --test tests/firefoxAndroidShell.test.mjs tests/oidcConfig.test.mjs tests/songShelvesHttp.test.mjs tests/accountEntryState.test.mjs tests/rememberedAccountIdentifier.test.mjs tests/songSsrObservation.test.ts tests/chartUgcSetupContext.test.mjs tests/versionProjection.test.mjs tests/developerApiBatch1.test.mjs tests/developerAnalysisWorker.test.mjs tests/viewerRelease.test.mjs tests/toolChartIdentity.test.mjs tests/uiBatch2State.test.mjs tests/accountSongsUi.test.mjs tests/recommendationToolIdentity.test.mjs tests/recommendationGoalIdentity.test.mjs tests/recommendationSongItem.test.mjs tests/playerGoalService.test.mjs tests/playerGoalHttp.test.mjs tests/playerGoal.test.ts tests/goalEvaluation.test.ts tests/homeGrowthFeedback.test.ts tests/homeDailyProgress.test.mjs tests/homeDeepState.test.mjs tests/homeStateResolver.test.ts tests/homePresentation.test.ts tests/accountAnonymousAuth.test.mjs tests/growthPageState.test.mjs tests/passportNarrative.test.ts tests/passportFinalUx.test.ts tests/growthPassport.test.ts tests/growthWeekly.test.ts tests/growthPassportHttp.test.mjs tests/growthWeeklyHttp.test.mjs tests/forumCommunityHandlers.test.mjs tests/forumCoreState.test.mjs
+      - name: Verify production deployment boundaries
+        run: node --test tests/viewerDeployment.test.mjs
       - name: Verify cross-language catalog Golden
         working-directory: packages/sakura-taiko-contract
         run: python -I tests/test_api_v1.py
