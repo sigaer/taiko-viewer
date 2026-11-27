@@ -1,15 +1,15 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-11-25T02:18:19.504835+00:00",
+  "generated_at": "2026-11-27T02:14:07.895236+00:00",
   "stats": {
     "rows_total": 866,
-    "api_relations_total": 662,
-    "relations_total": 747,
-    "songs_total": 446,
-    "titles_total": 543,
+    "api_relations_total": 666,
+    "relations_total": 751,
+    "songs_total": 447,
+    "titles_total": 545,
     "matched_relations_total": 747,
     "ambiguous_relations_total": 0,
-    "unmatched_relations_total": 0,
+    "unmatched_relations_total": 4,
     "song_ids_total": 440,
     "complete_title_bindings_total": 723
   },
@@ -11890,6 +11890,62 @@
       ]
     },
     {
+      "song_name": "Jingle Bells 第765号",
+      "title_name": "ジングルベル第765番",
+      "requirement_type": "all_perfect",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《Jingle Bells 第765号》的“魔王（隐藏）”难度下达成全良连段吧",
+      "source_row_index": 1158,
+      "song_ids": [],
+      "song_match": "unmatched",
+      "song_match_method": "unmatched",
+      "title_ids": [
+        1807
+      ]
+    },
+    {
+      "song_name": "Jingle Bells 第765号",
+      "title_name": "ジングルベル第765番",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《Jingle Bells 第765号》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 1159,
+      "song_ids": [],
+      "song_match": "unmatched",
+      "song_match_method": "unmatched",
+      "title_ids": [
+        1808
+      ]
+    },
+    {
+      "song_name": "Jingle Bells 第765号",
+      "title_name": "ジングルベル第765番",
+      "requirement_type": "clear",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《Jingle Bells 第765号》的“魔王（隐藏）”难度下达成通关吧",
+      "source_row_index": 1160,
+      "song_ids": [],
+      "song_match": "unmatched",
+      "song_match_method": "unmatched",
+      "title_ids": [
+        1809
+      ]
+    },
+    {
+      "song_name": "Jingle Bells 第765号",
+      "title_name": "サンタが町にやってきた",
+      "requirement_type": "full_combo",
+      "difficulty_scope": "inner_oni",
+      "condition_text": "在《Jingle Bells 第765号》的“魔王（隐藏）”难度下达成全连吧",
+      "source_row_index": 1161,
+      "song_ids": [],
+      "song_match": "unmatched",
+      "song_match_method": "unmatched",
+      "title_ids": [
+        1810
+      ]
+    },
+    {
       "song_name": "Purple Rose Fusion",
       "title_name": "紫薔薇の融合",
       "requirement_type": "full_combo",
@@ -14895,6 +14951,60 @@
         "difficulty_scope": "inner_oni",
         "condition_text": "在《Irregular Clock》的“魔王（隐藏）”难度下达成全连吧",
         "source_row_index": 721
+      }
+    ],
+    "Jingle Bells 第765号": [
+      {
+        "song_ids": [],
+        "title_ids": [
+          1807
+        ],
+        "song_match": "unmatched",
+        "song_match_method": "unmatched",
+        "title_name": "ジングルベル第765番",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Jingle Bells 第765号》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 1158
+      },
+      {
+        "song_ids": [],
+        "title_ids": [
+          1808
+        ],
+        "song_match": "unmatched",
+        "song_match_method": "unmatched",
+        "title_name": "ジングルベル第765番",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Jingle Bells 第765号》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 1159
+      },
+      {
+        "song_ids": [],
+        "title_ids": [
+          1809
+        ],
+        "song_match": "unmatched",
+        "song_match_method": "unmatched",
+        "title_name": "ジングルベル第765番",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Jingle Bells 第765号》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 1160
+      },
+      {
+        "song_ids": [],
+        "title_ids": [
+          1810
+        ],
+        "song_match": "unmatched",
+        "song_match_method": "unmatched",
+        "title_name": "サンタが町にやってきた",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Jingle Bells 第765号》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 1161
       }
     ],
     "JOIN THE PAC -太鼓之达人 Ver.-": [
@@ -28867,6 +28977,21 @@
         "source_row_index": 554
       }
     ],
+    "サンタが町にやってきた": [
+      {
+        "song_ids": [],
+        "title_ids": [
+          1810
+        ],
+        "song_match": "unmatched",
+        "song_match_method": "unmatched",
+        "song_name": "Jingle Bells 第765号",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Jingle Bells 第765号》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 1161
+      }
+    ],
     "シミュレーションは完璧だ": [
       {
         "song_ids": [
@@ -28963,6 +29088,47 @@
         "difficulty_scope": "oni",
         "condition_text": "在《Synchronica Airline》的“魔王”难度下达成全连吧",
         "source_row_index": 481
+      }
+    ],
+    "ジングルベル第765番": [
+      {
+        "song_ids": [],
+        "title_ids": [
+          1807
+        ],
+        "song_match": "unmatched",
+        "song_match_method": "unmatched",
+        "song_name": "Jingle Bells 第765号",
+        "requirement_type": "all_perfect",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Jingle Bells 第765号》的“魔王（隐藏）”难度下达成全良连段吧",
+        "source_row_index": 1158
+      },
+      {
+        "song_ids": [],
+        "title_ids": [
+          1808
+        ],
+        "song_match": "unmatched",
+        "song_match_method": "unmatched",
+        "song_name": "Jingle Bells 第765号",
+        "requirement_type": "full_combo",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Jingle Bells 第765号》的“魔王（隐藏）”难度下达成全连吧",
+        "source_row_index": 1159
+      },
+      {
+        "song_ids": [],
+        "title_ids": [
+          1809
+        ],
+        "song_match": "unmatched",
+        "song_match_method": "unmatched",
+        "song_name": "Jingle Bells 第765号",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Jingle Bells 第765号》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 1160
       }
     ],
     "スカーレット警察、出動！！": [
@@ -56533,6 +56699,38 @@
         1545
       ],
       "complete": true
+    },
+    {
+      "official_title_id": 1807,
+      "title_name": "ジングルベル第765番",
+      "rarity": 61,
+      "condition": "在《Jingle Bells 第765号》的“魔王（隐藏）”难度下达成全良连段吧",
+      "song_ids": [],
+      "complete": false
+    },
+    {
+      "official_title_id": 1808,
+      "title_name": "ジングルベル第765番",
+      "rarity": 60,
+      "condition": "在《Jingle Bells 第765号》的“魔王（隐藏）”难度下达成全连吧",
+      "song_ids": [],
+      "complete": false
+    },
+    {
+      "official_title_id": 1809,
+      "title_name": "ジングルベル第765番",
+      "rarity": 59,
+      "condition": "在《Jingle Bells 第765号》的“魔王（隐藏）”难度下达成通关吧",
+      "song_ids": [],
+      "complete": false
+    },
+    {
+      "official_title_id": 1810,
+      "title_name": "サンタが町にやってきた",
+      "rarity": 2,
+      "condition": "在《Jingle Bells 第765号》的“魔王（隐藏）”难度下达成全连吧",
+      "song_ids": [],
+      "complete": false
     }
   ]
 }
