@@ -1,6 +1,6 @@
 {
   "schema_version": 2,
-  "generated_at": "2026-11-27T02:14:07.895236+00:00",
+  "generated_at": "2026-11-28T02:20:12.441612+00:00",
   "stats": {
     "rows_total": 866,
     "api_relations_total": 666,
@@ -9900,7 +9900,7 @@
         1449
       ],
       "song_match": "matched",
-      "song_match_method": "reviewed_alias",
+      "song_match_method": "exact",
       "title_ids": [
         1426
       ]
@@ -9916,7 +9916,7 @@
         1449
       ],
       "song_match": "matched",
-      "song_match_method": "reviewed_alias",
+      "song_match_method": "exact",
       "title_ids": [
         1427
       ]
@@ -9932,7 +9932,7 @@
         1449
       ],
       "song_match": "matched",
-      "song_match_method": "reviewed_alias",
+      "song_match_method": "exact",
       "title_ids": [
         1428
       ]
@@ -9948,7 +9948,7 @@
         1449
       ],
       "song_match": "matched",
-      "song_match_method": "reviewed_alias",
+      "song_match_method": "exact",
       "title_ids": [
         1429
       ]
@@ -10028,7 +10028,7 @@
         1448
       ],
       "song_match": "matched",
-      "song_match_method": "reviewed_alias",
+      "song_match_method": "exact",
       "title_ids": [
         1434
       ]
@@ -10044,7 +10044,7 @@
         1448
       ],
       "song_match": "matched",
-      "song_match_method": "reviewed_alias",
+      "song_match_method": "exact",
       "title_ids": [
         1435
       ]
@@ -10060,7 +10060,7 @@
         1448
       ],
       "song_match": "matched",
-      "song_match_method": "reviewed_alias",
+      "song_match_method": "exact",
       "title_ids": [
         1436
       ]
@@ -10076,7 +10076,7 @@
         1448
       ],
       "song_match": "matched",
-      "song_match_method": "reviewed_alias",
+      "song_match_method": "exact",
       "title_ids": [
         1437
       ]
@@ -10092,7 +10092,7 @@
         1448
       ],
       "song_match": "matched",
-      "song_match_method": "reviewed_alias",
+      "song_match_method": "exact",
       "title_ids": [
         1438
       ]
@@ -10108,7 +10108,7 @@
         1448
       ],
       "song_match": "matched",
-      "song_match_method": "reviewed_alias",
+      "song_match_method": "exact",
       "title_ids": [
         1439
       ]
@@ -13278,7 +13278,7 @@
           1434
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_name": "ダジャレdeオシャレ",
         "requirement_type": "all_perfect",
         "difficulty_scope": "oni",
@@ -13293,7 +13293,7 @@
           1435
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_name": "ダジャレdeオシャレ",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
@@ -13308,7 +13308,7 @@
           1436
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_name": "ダジャレdeオシャレ",
         "requirement_type": "clear",
         "difficulty_scope": "oni",
@@ -13323,7 +13323,7 @@
           1437
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_name": "ダジャレdeオシャレ",
         "requirement_type": "all_perfect",
         "difficulty_scope": "inner_oni",
@@ -13338,7 +13338,7 @@
           1438
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_name": "ダジャレdeオシャレ",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
@@ -13353,7 +13353,7 @@
           1439
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_name": "ダジャレdeオシャレ",
         "requirement_type": "clear",
         "difficulty_scope": "inner_oni",
@@ -14983,19 +14983,6 @@
       {
         "song_ids": [],
         "title_ids": [
-          1809
-        ],
-        "song_match": "unmatched",
-        "song_match_method": "unmatched",
-        "title_name": "ジングルベル第765番",
-        "requirement_type": "clear",
-        "difficulty_scope": "inner_oni",
-        "condition_text": "在《Jingle Bells 第765号》的“魔王（隐藏）”难度下达成通关吧",
-        "source_row_index": 1160
-      },
-      {
-        "song_ids": [],
-        "title_ids": [
           1810
         ],
         "song_match": "unmatched",
@@ -15005,6 +14992,19 @@
         "difficulty_scope": "inner_oni",
         "condition_text": "在《Jingle Bells 第765号》的“魔王（隐藏）”难度下达成全连吧",
         "source_row_index": 1161
+      },
+      {
+        "song_ids": [],
+        "title_ids": [
+          1809
+        ],
+        "song_match": "unmatched",
+        "song_match_method": "unmatched",
+        "title_name": "ジングルベル第765番",
+        "requirement_type": "clear",
+        "difficulty_scope": "inner_oni",
+        "condition_text": "在《Jingle Bells 第765号》的“魔王（隐藏）”难度下达成通关吧",
+        "source_row_index": 1160
       }
     ],
     "JOIN THE PAC -太鼓之达人 Ver.-": [
@@ -20933,7 +20933,7 @@
           1426
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_name": "クラシックメドレー（冬休み編）",
         "requirement_type": "all_perfect",
         "difficulty_scope": "oni",
@@ -20948,7 +20948,7 @@
           1427
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_name": "クラシックメドレー（冬休み編）",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
@@ -20963,7 +20963,7 @@
           1428
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_name": "クラシックメドレー（冬休み編）",
         "requirement_type": "clear",
         "difficulty_scope": "oni",
@@ -20978,7 +20978,7 @@
           1429
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_name": "年の瀬の達人",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
@@ -28790,7 +28790,7 @@
           1426
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "song_name": "古典乐组曲（寒假篇）",
         "requirement_type": "all_perfect",
         "difficulty_scope": "oni",
@@ -28805,7 +28805,7 @@
           1427
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "song_name": "古典乐组曲（寒假篇）",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
@@ -28820,7 +28820,7 @@
           1428
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "song_name": "古典乐组曲（寒假篇）",
         "requirement_type": "clear",
         "difficulty_scope": "oni",
@@ -29341,7 +29341,7 @@
           1434
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "song_name": "DAJARE de OSHARE",
         "requirement_type": "all_perfect",
         "difficulty_scope": "oni",
@@ -29356,7 +29356,7 @@
           1435
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "song_name": "DAJARE de OSHARE",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
@@ -29371,7 +29371,7 @@
           1436
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "song_name": "DAJARE de OSHARE",
         "requirement_type": "clear",
         "difficulty_scope": "oni",
@@ -29386,7 +29386,7 @@
           1437
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "song_name": "DAJARE de OSHARE",
         "requirement_type": "all_perfect",
         "difficulty_scope": "inner_oni",
@@ -29401,7 +29401,7 @@
           1438
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "song_name": "DAJARE de OSHARE",
         "requirement_type": "full_combo",
         "difficulty_scope": "inner_oni",
@@ -29416,7 +29416,7 @@
           1439
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "song_name": "DAJARE de OSHARE",
         "requirement_type": "clear",
         "difficulty_scope": "inner_oni",
@@ -32585,7 +32585,7 @@
           1429
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "song_name": "古典乐组曲（寒假篇）",
         "requirement_type": "full_combo",
         "difficulty_scope": "oni",
@@ -47905,7 +47905,7 @@
           1448
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_ids": [
           1434
         ]
@@ -47921,7 +47921,7 @@
           1448
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_ids": [
           1435
         ]
@@ -47937,7 +47937,7 @@
           1448
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_ids": [
           1436
         ]
@@ -47953,7 +47953,7 @@
           1448
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_ids": [
           1437
         ]
@@ -47969,7 +47969,7 @@
           1448
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_ids": [
           1438
         ]
@@ -47985,7 +47985,7 @@
           1448
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_ids": [
           1439
         ]
@@ -48003,7 +48003,7 @@
           1449
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_ids": [
           1426
         ]
@@ -48019,7 +48019,7 @@
           1449
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_ids": [
           1427
         ]
@@ -48035,7 +48035,7 @@
           1449
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_ids": [
           1428
         ]
@@ -48051,7 +48051,7 @@
           1449
         ],
         "song_match": "matched",
-        "song_match_method": "reviewed_alias",
+        "song_match_method": "exact",
         "title_ids": [
           1429
         ]
