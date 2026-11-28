@@ -364,7 +364,7 @@ test("slice G: home banner in the greeting row; other songs back to their shelf;
   assert.match(home, /<div v-if="!bannerInGreeting" class="home-annual"><AnnualHero \/><\/div>/);
   const hello = await read("components/rework/today/Hello.vue");
   assert.match(hello, /<div v-if="banner" class="th-banner"><AnnualHero \/><\/div>/);
-  assert.match(hello, /grid-template-columns: auto minmax\(0, 1fr\) minmax\(0, 612px\);/);
+  assert.match(hello, /grid-template-columns: auto minmax\(0, 1fr\) minmax\(0, 0\.9fr\);/);
   const detail = await read("pages/songs/[id].vue");
   assert.ok(detail.includes(`const list = status === 1 ? "removed" : status === 2 && listQuery !== "other" ? "other" : null;`));
   const reply = await read("components/rework/community/ReplyBox.vue");

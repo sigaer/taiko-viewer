@@ -19,7 +19,7 @@ let viewActive = true;
 let uploadGeneration = 0;
 let blockSeq = 0;
 onActivated(() => { viewActive = true; });
-onDeactivated(() => { viewActive = false; uploadGeneration++; uploadCount.value = 0; });
+onDeactivated(() => { viewActive = false; requestGuard.invalidate(); uploadGeneration++; uploadCount.value = 0; saving.value = false; });
 onBeforeUnmount(() => { viewActive = false; uploadGeneration++; });
 
 definePageMeta({
@@ -53,6 +53,18 @@ const uploading = computed(() => uploadCount.value > 0);
 const canEdit = computed(() => Boolean(data.value && data.value.status === "published" && ownsItem(data.value.author.id, accountUser.value?.id ?? null, data.value.isLocked)));
 const blockedReason = computed(() => (!data.value || canEdit.value ? "" : data.value.isLocked ? t("rework.forum.thread.locked") : t("rework.forum.editor.notOwner")));
 const threadPath = computed(() => localePath(`/forum/thread/${route.params.id}`));
+
+watch(() => [accountUser.value?.id, route.params.id], () => {
+  requestGuard.invalidate();
+  uploadGeneration++;
+  uploadCount.value = 0;
+  saving.value = false;
+  filledFor.value = "";
+  form.title = "";
+  form.summary = "";
+  form.tagsInput = "";
+  blocks.value = [];
+}, { flush: "sync" });
 
 watch([data, () => accountUser.value?.id], ([detail]) => {
   const owner = `${accountUser.value?.id || ""}:${route.params.id}`;
@@ -129,7 +141,7 @@ const save = async () => {
       retry: 0,
       body: { title: form.title, summary: form.summary, tags: splitTags(form.tagsInput), contentBlocks, locale: locale.value }
     });
-    if (!requestGuard.current(request) || String(route.params.id) !== requested) return;
+    if (!requestGuard.current(request) || !viewActive || String(route.params.id) !== requested) return;
     // The next visit fills the form from the saved thread; the thread page reads it again when it opens.
     filledFor.value = "";
     ElMessage.success(t("rework.forum.tools.saved"));

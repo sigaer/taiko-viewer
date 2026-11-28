@@ -24,7 +24,7 @@ const repo = resolve(web, "..");
 const output = process.argv.find((x) => x.startsWith("--output="))?.slice(9);
 // --check=catalog runs the song library acceptance (catalog-check.mjs) instead of the shell check.
 const check = process.argv.find((x) => x.startsWith("--check="))?.slice(8) || "shell";
-assert.ok(["shell", "catalog", "rc", "rc-core", "scope", "firefox"].includes(check), "Unknown --check");
+assert.ok(["shell", "catalog", "rc", "rc-core", "scope", "firefox", "redesign-v2"].includes(check), "Unknown --check");
 assert.ok(
   output?.startsWith("/var/tmp/"),
   "An isolated Nitro output is required",
@@ -237,7 +237,7 @@ try {
   );
   const result = await run(
     process.execPath,
-    [web + `/scripts/rework/${(check.startsWith("rc") || check === "scope" || check === "firefox") ? "shell" : check}-check.mjs`, output, ...(check === "firefox" ? ["--firefox"] : []), ...((check.startsWith("rc") || check === "scope") ? ["--rc", ...(check === "rc-core" ? ["--rc-core"] : []), ...(check === "scope" ? ["--scope"] : [])] : [])],
+    [web + `/scripts/rework/${(check.startsWith("rc") || check === "scope" || check === "firefox") ? "shell" : check}-check.mjs`, output, ...(check === "redesign-v2" && process.argv.includes("--auth-only") ? ["--auth-only"] : []), ...(check === "firefox" ? ["--firefox"] : []), ...((check.startsWith("rc") || check === "scope") ? ["--rc", ...(check === "rc-core" ? ["--rc-core"] : []), ...(check === "scope" ? ["--scope"] : [])] : [])],
     "runtime",
     testEnv,
     800000,

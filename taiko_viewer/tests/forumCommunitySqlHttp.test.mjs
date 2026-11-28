@@ -36,6 +36,8 @@ test('isolated real HTTP creates thread, replies, delivers owned notification, m
   for(const sql of CREATE_TABLES)if(names.some(name=>sql.startsWith('CREATE TABLE IF NOT EXISTS '+name+' (')))await pool.execute(sql);
   for(const sql of MIGRATIONS)if(names.some(name=>sql.startsWith('ALTER TABLE '+name+' '))){try{await pool.execute(sql);}catch(e){if(!['ER_DUP_FIELDNAME','ER_DUP_KEYNAME'].includes(e.code))throw e;}}
   const {initializeForumSchema}=await import('../server/utils/forum-schema-bootstrap.ts');await initializeForumSchema();
+  const {ACCOUNT_TITLE_TABLE_SQL}=await import('../server/services/account-titles/schema.ts');
+  await pool.execute(ACCOUNT_TITLE_TABLE_SQL);
   for(const [id,name] of [[990331,'author'],[990332,'replier']]){
    await pool.execute('INSERT INTO web_user_accounts(id,username,email,password_hash,email_verified) VALUES (?,?,?,?,1)',[id,'synthetic-'+name,name+'@example.test','synthetic-session-fixture']);
    await pool.execute('INSERT INTO web_user_sessions(session_token,user_id,expires_at) VALUES (?,?,DATE_ADD(NOW(),INTERVAL 1 DAY))',[(id===990331?'a':'b').repeat(64),id]);

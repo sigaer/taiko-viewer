@@ -451,42 +451,62 @@ export const createForumReply = async (event: H3Event, threadIdInput: unknown, p
     .trim();
   const replySnippet = bodyText || "发来了一条图片回复";
   const parentPostId = sanitizeInt(payload.parentPostId, 0);
-  const db = getAccountDb();
+  const db = await getAccountDb().getConnection();
   let parentPost: PostRow | null = null;
   let floorNo = 0;
   let rootPostId: number | null = null;
 
-  if (parentPostId > 0) {
-    const [rows] = await db.execute<DbRow<PostRow>[]>(
-      "SELECT * FROM forum_posts WHERE id = ? AND thread_id = ? AND status = 'published' LIMIT 1",
-      [parentPostId, threadId]
+  let createdPostId: number;
+  try {
+    await db.beginTransaction();
+    const [current] = await db.execute<DbRow<ThreadRow>[]>(
+      "SELECT * FROM forum_threads WHERE id = ? FOR UPDATE", [threadId]
     );
-    parentPost = rows[0] || null;
-    if (!parentPost) {
-      throw createError({ statusCode: 404, statusMessage: "回复目标不存在" });
+    if (!current[0] || current[0].status !== "published") {
+      throw createError({ statusCode: 404, statusMessage: "帖子不存在" });
     }
-    rootPostId = parentPost.root_post_id || parentPost.id;
-  } else {
-    const [rows] = await db.execute<Array<{ maxFloor: number | null }>>(
-      "SELECT MAX(floor_no) AS maxFloor FROM forum_posts WHERE thread_id = ? AND parent_post_id IS NULL",
+    if (current[0].is_locked) {
+      throw createError({ statusCode: 400, statusMessage: "该帖子已锁定，暂时无法回复" });
+    }
+    if (parentPostId > 0) {
+      const [rows] = await db.execute<DbRow<PostRow>[]>(
+        "SELECT * FROM forum_posts WHERE id = ? AND thread_id = ? AND status = 'published' LIMIT 1",
+        [parentPostId, threadId]
+      );
+      parentPost = rows[0] || null;
+      if (!parentPost) {
+        throw createError({ statusCode: 404, statusMessage: "回复目标不存在" });
+      }
+      rootPostId = parentPost.root_post_id || parentPost.id;
+    } else {
+      const [rows] = await db.execute<Array<{ maxFloor: number | null }>>(
+        "SELECT MAX(floor_no) AS maxFloor FROM forum_posts WHERE thread_id = ? AND parent_post_id IS NULL",
+        [threadId]
+      );
+      floorNo = sanitizeInt(rows[0]?.maxFloor) + 1;
+    }
+
+    const [result] = await db.execute<ResultSetHeader>(
+      `INSERT INTO forum_posts
+        (thread_id, author_user_id, parent_post_id, root_post_id, floor_no, body_text, content_blocks_json, status)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 'published')`,
+      [threadId, user.id, parentPost ? parentPost.id : null, rootPostId, floorNo, bodyText, JSON.stringify(contentBlocks)]
+    );
+    createdPostId = result.insertId;
+    await db.execute(
+      `UPDATE forum_threads
+       SET reply_count = reply_count + 1, latest_post_at = NOW(), updated_at = NOW()
+       WHERE id = ?`,
       [threadId]
     );
-    floorNo = sanitizeInt(rows[0]?.maxFloor) + 1;
-  }
 
-  const [result] = await db.execute<ResultSetHeader>(
-    `INSERT INTO forum_posts
-      (thread_id, author_user_id, parent_post_id, root_post_id, floor_no, body_text, content_blocks_json, status)
-     VALUES (?, ?, ?, ?, ?, ?, ?, 'published')`,
-    [threadId, user.id, parentPost ? parentPost.id : null, rootPostId, floorNo, bodyText, JSON.stringify(contentBlocks)]
-  );
-  const createdPostId = result.insertId;
-  await db.execute(
-    `UPDATE forum_threads
-     SET reply_count = reply_count + 1, latest_post_at = NOW(), updated_at = NOW()
-     WHERE id = ?`,
-    [threadId]
-  );
+    await db.commit();
+  } catch (error) {
+    await db.rollback();
+    throw error;
+  } finally {
+    db.release();
+  }
 
   if (parentPost) {
     if (parentPost.author_user_id !== user.id) {
@@ -709,7 +729,11 @@ export const moderateForumThread = async (event: H3Event, payload: Record<string
   }
   const db = getAccountDb();
   const value = action === "hide" ? (enabled ? "hidden" : "published") : enabled ? 1 : 0;
-  await db.execute(`UPDATE forum_threads SET ${target.sql}, updated_at = NOW() WHERE id = ?`, [value, threadId]);
+  const [result] = await db.execute<ResultSetHeader>(
+    `UPDATE forum_threads SET ${target.sql}, updated_at = NOW() WHERE id = ? AND status IN ('published', 'hidden')`,
+    [value, threadId]
+  );
+  if (!result.affectedRows) throw createError({ statusCode: 404, statusMessage: "帖子不存在" });
   await db.execute(
     "INSERT INTO forum_moderation_logs (thread_id, operator_user_id, action, reason) VALUES (?, ?, ?, ?)",
     [threadId, user.id, `${action}:${enabled ? "on" : "off"}`, reason || null]
@@ -865,30 +889,41 @@ export const updateForumPostByAuthor = async (event: H3Event, postIdInput: unkno
 
 export const deleteForumPostByAuthor = async (event: H3Event, postIdInput: unknown) => {
   const { user, postId, post } = await loadAuthorPost(event, postIdInput);
-  const db = getAccountDb();
-  const isFloor = post.parent_post_id === null;
-  let liveChildren = 0;
-  if (isFloor) {
-    const [rows] = await db.execute<DbRow<{ total: number }>[]>(
-      "SELECT COUNT(*) AS total FROM forum_posts WHERE (root_post_id = ? OR parent_post_id = ?) AND id <> ? AND status = 'published'",
-      [postId, postId, postId]
+  const db = await getAccountDb().getConnection();
+  try {
+    await db.beginTransaction();
+    // All reply insertions take this lock before checking their parent, so a floor cannot disappear under a reply.
+    await db.execute("SELECT id FROM forum_threads WHERE id = ? FOR UPDATE", [post.thread_id]);
+    const isFloor = post.parent_post_id === null;
+    let liveChildren = 0;
+    if (isFloor) {
+      const [rows] = await db.execute<DbRow<{ total: number }>[]>(
+        "SELECT COUNT(*) AS total FROM forum_posts WHERE (root_post_id = ? OR parent_post_id = ?) AND id <> ? AND status = 'published'",
+        [postId, postId, postId]
+      );
+      liveChildren = sanitizeInt(rows[0]?.total);
+    }
+    assertAuthorWrite(decideFloorDelete(isFloor, liveChildren));
+    const [result] = await db.execute<ResultSetHeader>(
+      `UPDATE forum_posts p
+       INNER JOIN forum_threads t ON t.id = p.thread_id
+       SET p.status = ?
+       WHERE p.id = ? AND p.author_user_id = ? AND p.status = 'published' AND t.status = 'published' AND t.is_locked = 0`,
+      [FORUM_DELETED_STATUS, postId, user.id]
     );
-    liveChildren = sanitizeInt(rows[0]?.total);
+    if (!result.affectedRows) {
+      throw createError({ statusCode: 404, statusMessage: "回复不存在" });
+    }
+    await db.execute(
+      "UPDATE forum_threads SET reply_count = GREATEST(reply_count - 1, 0), updated_at = NOW() WHERE id = ?",
+      [post.thread_id]
+    );
+    await db.commit();
+  } catch (error) {
+    await db.rollback();
+    throw error;
+  } finally {
+    db.release();
   }
-  assertAuthorWrite(decideFloorDelete(isFloor, liveChildren));
-  const [result] = await db.execute<ResultSetHeader>(
-    `UPDATE forum_posts p
-     INNER JOIN forum_threads t ON t.id = p.thread_id
-     SET p.status = ?
-     WHERE p.id = ? AND p.author_user_id = ? AND p.status = 'published' AND t.status = 'published' AND t.is_locked = 0`,
-    [FORUM_DELETED_STATUS, postId, user.id]
-  );
-  if (!result.affectedRows) {
-    throw createError({ statusCode: 404, statusMessage: "回复不存在" });
-  }
-  await db.execute(
-    "UPDATE forum_threads SET reply_count = GREATEST(reply_count - 1, 0), updated_at = NOW() WHERE id = ?",
-    [post.thread_id]
-  );
   return await getForumThreadDetail(event, post.thread_id);
 };

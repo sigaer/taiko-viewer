@@ -18,10 +18,11 @@ test("community home keeps the mobile surface content-first", () => {
   assert.ok(source.indexOf('class="community-feed"') < source.indexOf('class="community-chart-activity"'));
 });
 
-test("forum breadcrumb is hidden only on mobile", () => {
-  const source = read("layouts/default.vue");
-  assert.match(source, /forum-breadcrumb/);
-  assert.match(source, /@media \(max-width: 700px\)[\s\S]*\.breadcrumb-bar\.forum-breadcrumb \{ display: none; \}/);
+test("forum parent navigation uses the shell's labelled back link", () => {
+  const layout = read("layouts/default.vue");
+  const shell = read("components/rework/Shell.vue");
+  assert.match(layout, /:back-href="mobileBackHref"/);
+  assert.match(shell, /v-if="backHref"[\s\S]*:to="backHref"[\s\S]*:aria-label="t\('rework.back'\)"/);
 });
 
 test("thread detail uses an article flow with an explicit reply boundary", () => {
@@ -43,8 +44,8 @@ test("thread detail uses an article flow with an explicit reply boundary", () =>
 });
 
 test("thread media does not use a colored attachment panel", () => {
-  const source = read("pages/forum/thread/[id].vue");
-  const mediaStyles = source.slice(source.indexOf(".thread-image img"), source.indexOf(".thread-image figcaption"));
+  const source = read("components/rework/community/Blocks.vue");
+  const mediaStyles = source.slice(source.indexOf(".cb__trigger :deep(img)"), source.indexOf(".cb__failed"));
   assert.match(mediaStyles, /background: transparent/);
   assert.doesNotMatch(mediaStyles, /aspect-ratio/);
 });
@@ -76,7 +77,7 @@ test("reply actions focus the shared composer and preserve target context", () =
 test("thread mutations update local state without route-level refresh", () => {
   const source = read("pages/forum/thread/[id].vue");
   const threadLike = source.slice(source.indexOf("const toggleThreadLike"), source.indexOf("const togglePostLike"));
-  const postLike = source.slice(source.indexOf("const togglePostLike"), source.indexOf("const renderReplyBlocks"));
+  const postLike = source.slice(source.indexOf("const togglePostLike"), source.indexOf("const toggleFavorite"));
   assert.match(threadLike, /apiFetch<ForumLikeMutationResult>/);
   assert.match(threadLike, /detail\.value\.viewerHasLiked = result\.liked/);
   assert.match(threadLike, /detail\.value\.likeCount = result\.likeCount/);
@@ -88,7 +89,7 @@ test("thread mutations update local state without route-level refresh", () => {
   assert.match(postLike, /restoreScrollPosition\(scrollY\)/);
   assert.match(postLike, /trigger\?\.focus\(\{ preventScroll: true \}\)/);
   assert.doesNotMatch(postLike, /await refresh\(\)/);
-  assert.match(source, /data\.value = result/);
+  assert.match(source, /threadResource\.accept\(result\)/);
   assert.match(source, /restoreScrollPosition\(scrollY\)/);
 });
 
@@ -107,13 +108,11 @@ test("thread actions expose lightweight icon, pressed, and focus states", () => 
   assert.match(actions + floor, /min-height: var\(--hit\)/);
 });
 
-test("community dark mode remaps semantic text and composer surface tokens", () => {
-  const thread = read("pages/forum/thread/[id].vue");
-  assert.match(thread, /body\.theme-dark \.forum-thread-page \{[\s\S]*--viewer-text: #f2e7dc/);
-  assert.match(thread, /body\.theme-dark \.forum-thread-page \{[\s\S]*--viewer-text-muted: #cab8aa/);
-  assert.match(thread, /body\.theme-dark \.forum-thread-page \{[\s\S]*--viewer-surface: rgba\(27, 24, 22, 0\.92\)/);
-  assert.match(thread, /body\.theme-dark \.reply-box \{[\s\S]*var\(--viewer-surface\)/);
-  assert.match(thread, /body\.theme-dark \.reply-box :deep\(\.el-textarea__inner\) \{[\s\S]*var\(--viewer-text\)/);
+test("community composer inherits semantic surface and text colors in both themes", () => {
+  const box = read("components/rework/community/ReplyBox.vue");
+  assert.match(box, /background: var\(--surface\)/);
+  assert.match(box, /color: var\(--ink\)/);
+  assert.doesNotMatch(box, /--viewer-text|--viewer-surface/);
 });
 
 test("notifications mark one item read locally before deep-link navigation", () => {
@@ -123,7 +122,8 @@ test("notifications mark one item read locally before deep-link navigation", () 
   assert.match(openNotification, /body: \{ ids: \[item\.id\] \}/);
   assert.match(openNotification, /syncUnreadCount\(result\.unreadCount\)/);
   assert.match(source, /hash: item\.postId \? `#reply-\$\{item\.postId\}` : undefined/);
-  assert.doesNotMatch(openNotification, /refresh\(/);
+  assert.ok(openNotification.indexOf("item.isRead = true") < openNotification.indexOf("await navigateTo(target)"));
+  assert.ok(openNotification.indexOf("await navigateTo(target)") < openNotification.indexOf("if (marked) await refresh()"));
 });
 
 test("reply deep links use stable ids after DOM render and highlight the target", () => {

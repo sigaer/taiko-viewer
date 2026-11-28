@@ -123,6 +123,42 @@ test('isolated author edit / delete HTTP: ownership, lock, hidden and deleted st
   await ask('POST',`/api/forum/threads/${thread.id}/replies`,'replier',{bodyText:'Reply to deleted'},404);
   await ask('POST',`/api/forum/threads/${thread.id}/delete`,'author',undefined,404);
   checks.push('thread delete: owner only, soft status, 404 for guest / author / moderator, gone from lists and moderation, no favourite / reply / restore');
+  // Concurrent deletion and child insertion must serialize on the thread row.
+  for (let attempt=0; attempt<3; attempt++) {
+    const raceThread=await ask('POST','/api/forum/threads','author',{sectionSlug:'general',threadType:'discussion',title:'Concurrent floor test',contentBlocks:body('Race fixture')});
+    const raceFloor=(await ask('POST',`/api/forum/threads/${raceThread.id}/replies`,'replier',{bodyText:'Floor'})).posts[0];
+    const concurrent=async(path,account,payload)=>{
+      const response=await fetch(base+path,{method:'POST',headers:{'content-type':'application/json',cookie:'stv_session='+(account==='author'?'a':'b').repeat(64)},body:JSON.stringify(payload||{}),signal:AbortSignal.timeout(10000)});
+      await response.json();return response.status;
+    };
+    const statuses=await Promise.all([
+      concurrent(`/api/forum/posts/${raceFloor.id}/delete`,'replier'),
+      concurrent(`/api/forum/threads/${raceThread.id}/replies`,'author',{bodyText:'Concurrent child',parentPostId:raceFloor.id})
+    ]);
+    assert.ok((statuses[0]===200 && statuses[1]===404) || (statuses[0]===400 && statuses[1]===200),'one of deleting the floor or adding its child must be refused');
+    const [[orphans]]=await pool.query("SELECT COUNT(*) AS total FROM forum_posts p JOIN forum_posts root ON root.id=p.root_post_id WHERE p.thread_id=? AND p.status='published' AND root.status<>'published'",[raceThread.id]);
+    assert.equal(orphans.total,0);
+    const [[counts]]=await pool.query("SELECT t.reply_count,(SELECT COUNT(*) FROM forum_posts p WHERE p.thread_id=t.id AND p.status='published') AS actual FROM forum_threads t WHERE t.id=?",[raceThread.id]);
+    assert.equal(counts.reply_count,counts.actual);
+  }
+  checks.push('concurrent floor deletion / child insertion: no orphan reply and committed counts agree');
+  // Force an author deletion between moderation's read and update, on real SQL.
+  const raceModeration=await ask('POST','/api/forum/threads','author',{sectionSlug:'general',threadType:'discussion',title:'Concurrent moderation test',contentBlocks:body('Race fixture')});
+  const originalExecute=pool.execute.bind(pool);
+  let injected=false;
+  pool.execute=async(sql,params)=>{
+    if (!injected && typeof sql==='string' && sql.startsWith('UPDATE forum_threads SET status = ?, updated_at = NOW() WHERE id = ?') && params?.[1]===raceModeration.id) {
+      injected=true;
+      await originalExecute("UPDATE forum_threads SET status='deleted' WHERE id=?",[raceModeration.id]);
+    }
+    return originalExecute(sql,params);
+  };
+  try { await ask('POST','/api/forum/moderation/action','admin',{threadId:raceModeration.id,action:'hide',enabled:false},404); }
+  finally { pool.execute=originalExecute; }
+  assert.equal(injected,true);
+  const [[raceRow]]=await pool.query('SELECT status FROM forum_threads WHERE id=?',[raceModeration.id]);
+  assert.equal(raceRow.status,'deleted');
+  checks.push('moderation racing an author deletion cannot restore the deleted thread');
   const result={pass:true,level:'actual H3 HTTP and private MySQL; synthetic catalog/session rows',database:identity.databaseName,actualSelectDatabase:true,privateDatadirVerified:true,checks,calls,productionConnections:0,productionWrites:0};
   await writeFile(resolve(process.env.VIEWER_REVIEW_OUT,'author-edit-sql-http.json'),JSON.stringify(result,null,2)+'\n');console.log(JSON.stringify({pass:true,database:identity.databaseName,checks:checks.length,httpRequests:calls.length,productionConnections:0}));
  }finally{

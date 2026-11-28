@@ -17,7 +17,7 @@ const rows = computed(() => [
   }))
 ]);
 const value = (raw: number | null | undefined) => typeof raw === 'number' && Number.isFinite(raw) ? raw.toFixed(2) : '—';
-const time = (raw: string | undefined) => raw ? new Intl.DateTimeFormat(locale.value === 'ja' ? 'ja-JP' : 'zh-CN', {
+const time = (raw: string | undefined) => raw ? new Intl.DateTimeFormat(locale.value, {
   timeZone: 'Asia/Shanghai', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
 }).format(new Date(raw)) : '—';
 </script>

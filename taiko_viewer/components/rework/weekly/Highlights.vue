@@ -16,7 +16,15 @@ const to = (h: WeeklyGrowthHighlight) => localePath({ path: `/songs/${h.songId}`
 const supportingFacts = (h: WeeklyGrowthHighlight) => (h.facts || []).filter(fact =>
   fact.factKey !== h.primaryFactKey && ['clear', 'fc', 'df', 'rank-upgrade', 'score-pb', 'ng-reduced', 'combo-improved'].includes(fact.type)
 );
-const value = (n: number | null) => n === null ? '—' : n.toLocaleString(locale.value === 'ja' ? 'ja-JP' : 'zh-CN');
+const factLabel = (type: string) => {
+  const labels: Record<string, string> = {
+    clear: t("weekly.fact.clear"), fc: t("weekly.fact.fc"), df: t("weekly.fact.df"),
+    "rank-upgrade": t("weekly.fact.rank-upgrade"), "score-pb": t("weekly.fact.score-pb"),
+    "ng-reduced": t("weekly.fact.ng-reduced"), "combo-improved": t("weekly.fact.combo-improved")
+  };
+  return labels[type] || type;
+};
+const value = (n: number | null) => n === null ? '—' : n.toLocaleString(locale.value);
 </script>
 
 <template>
@@ -31,7 +39,7 @@ const value = (n: number | null) => n === null ? '—' : n.toLocaleString(locale
           <DsRank v-if="highlight.primaryType === 'rank-upgrade' && rankValue(highlight.after) !== null"
             :value="rankValue(highlight.after)" :previous="rankValue(highlight.before)"
             :variant="rankValue(highlight.before) !== null ? 'upgrade' : 'default'" />
-          <span v-else-if="factCrown(highlight.primaryType)" class="wl-crown-change" role="img" :aria-label="t(`weekly.fact.${highlight.primaryType}`)" :title="t(`weekly.fact.${highlight.primaryType}`)">
+          <span v-else-if="factCrown(highlight.primaryType)" class="wl-crown-change" role="img" :aria-label="factLabel(highlight.primaryType)" :title="factLabel(highlight.primaryType)">
             <template v-if="highlight.before !== null">
               <DsCrown :state="crownBefore(highlight.before)" size="md" aria-hidden="true" />
               <span class="wl-arrow" aria-hidden="true">→</span>
@@ -49,14 +57,14 @@ const value = (n: number | null) => n === null ? '—' : n.toLocaleString(locale
             <DsRank v-if="fact.type === 'rank-upgrade' && rankValue(fact.after) !== null"
               :value="rankValue(fact.after)" :previous="rankValue(fact.before)"
               :variant="rankValue(fact.before) !== null ? 'upgrade' : 'default'" />
-            <span v-else-if="factCrown(fact.type)" class="wl-crown-change" role="img" :aria-label="t(`weekly.fact.${fact.type}`)" :title="t(`weekly.fact.${fact.type}`)">
+            <span v-else-if="factCrown(fact.type)" class="wl-crown-change" role="img" :aria-label="factLabel(fact.type)" :title="factLabel(fact.type)">
               <template v-if="fact.before !== null">
                 <DsCrown :state="crownBefore(fact.before)" size="sm" aria-hidden="true" />
                 <span class="wl-arrow" aria-hidden="true">→</span>
               </template>
               <DsCrown :state="factCrown(fact.type)!" size="md" aria-hidden="true" />
             </span>
-            <template v-else>{{ t(`weekly.fact.${fact.type}`) }} <span v-if="fact.before !== null">{{ value(fact.before) }} → </span><strong>{{ value(fact.after) }}</strong></template>
+            <template v-else>{{ factLabel(fact.type) }} <span v-if="fact.before !== null">{{ value(fact.before) }} → </span><strong>{{ value(fact.after) }}</strong></template>
           </li>
         </ul>
         <small v-if="highlight.goalCompleted" class="wl-goal">{{ t("weekly.goalCompleted") }}</small>
