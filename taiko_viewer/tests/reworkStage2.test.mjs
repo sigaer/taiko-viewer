@@ -313,9 +313,16 @@ test('slice C pages: own header, Element Plus mapping, gates, no hand-written gr
 });
 
 test('slice C: charts draw only values the APIs return', async () => {
+  // Redesign 2026-11-27: the overall Rating is the numeral of the vermilion card (Hero), the six dimensions keep the radar.
   const profile = await read('components/rework/today/Profile.vue');
-  assert.match(profile, /<DsDrumDial :value="rating"/);
-  assert.match(profile, /<DsRadar v-if="showRadar"/);
+  assert.match(profile, /<div v-if="showRadar" class="tpf-radar">\s*<DsRadar :axes="axes"/);
+  assert.doesNotMatch(profile, /DsDrumDial|rating:/, 'the dimensions card does not repeat the Rating');
+  const hero = await read('components/rework/today/Hero.vue');
+  assert.match(hero, /defineProps<\{ rating: number \| null \}>\(\)/);
+  assert.match(hero, /props\.rating\.toFixed\(2\)/);
+  assert.doesNotMatch(hero, /<svg|<DsCharts|sourceGeneratedAt|observedAt/, 'no change figure, sparkline or last-sync time the overview does not return');
+  const surface = await read('components/home/PlayerGrowthSurface.vue');
+  assert.match(surface, /<ReworkTodayHero :rating="pending \|\| failed \? null : overview\.playerState\.overallRating" \/>/);
   const value = await read('components/rework/today/AccountValue.vue');
   assert.doesNotMatch(value, /12,840|--bar/, 'no invented Rating card on the guest home');
   for (const path of ['components/rework/today/Board.vue', 'components/rework/weekly/Hero.vue']) assert.doesNotMatch(await read(path), /<DsLane|ReworkLane/, path + ': no lane without per-day data');

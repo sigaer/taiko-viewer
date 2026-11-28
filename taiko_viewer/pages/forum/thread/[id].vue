@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { viewerScrollY, scrollViewerTo } from "~/utils/viewer-scroll";
 import { computed } from "vue";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 import type { ForumContentBlock, ForumThreadDetail } from "~/types/forum";
 import { buildPageDescription } from "~/utils/seo";
 import { FORUM_IMAGE_MAX_BYTES } from "~/utils/forum";
-import { replyWindows, windowOfPost } from "~/utils/rework/community";
+import { floorIdForNumber, onlyAuthorFloors, ownsItem, replyWindows, threadLink, windowOfPost } from "~/utils/rework/community";
+import { browserDraftStorage, cleanReplyDraft, readDraft, removeDraft, replyDraftKey, writeDraft } from "~/utils/rework/communityDraft";
 
 const route = useRoute();
+const router = useRouter();
 const { t } = useI18n();
 const localePath = useLocalePath();
 const apiFetch = useViewerApiFetch();
@@ -38,6 +40,12 @@ const likingThread = ref(false);
 const activePostLikeId = ref<number | null>(null);
 const revealedBlockedPostIds = ref<number[]>([]);
 const replyInput = ref<{ focus?: () => void } | null>(null);
+// Favourite, 只看楼主, and the author's own edit / delete (the server checks ownership again).
+const favoriteBusy = ref(false);
+const onlyOp = ref(false);
+const editingPostId = ref<number | null>(null);
+const ownBusy = ref(false);
+const deletingThread = ref(false);
 
 type ForumLikeMutationResult = {
   liked: boolean;
@@ -74,9 +82,15 @@ useViewerSeo(() => ({
 
 const detail = computed(() => data.value);
 const signedIn = computed(() => Boolean(accountUser.value));
+const viewerId = computed(() => accountUser.value?.id ?? null);
+// The author's controls appear on a published, unlocked thread of their own (hidden threads are moderators' view).
+const ownsThread = computed(() => Boolean(detail.value && detail.value.status === "published" && ownsItem(detail.value.author.id, viewerId.value, detail.value.isLocked)));
+const editThreadTo = computed(() => (ownsThread.value ? localePath(`/forum/edit/${route.params.id}`) : ""));
+// 只看楼主 keeps the floors the thread author posted (with all their replies), in the server order.
+const visibleFloors = computed(() => (onlyOp.value && detail.value ? onlyAuthorFloors(detail.value.posts, detail.value.author.id) : detail.value?.posts || []));
 // Replies mount in windows of at most REPLY_WINDOW items (V1.3 budget ≤ 60); one window when the thread fits.
 // The server order is kept; a deep link (#reply-<id>) first shows the window that holds that post.
-const replyWindowList = computed(() => replyWindows(detail.value?.posts || []));
+const replyWindowList = computed(() => replyWindows(visibleFloors.value));
 const replyWindowIndex = ref(0);
 const showReplyWindow = async (index: number) => {
   replyWindowIndex.value = Math.min(Math.max(0, index), Math.max(0, replyWindowList.value.length - 1));
@@ -138,13 +152,43 @@ const resetPrivateState = () => {
   likingThread.value = false; activePostLikeId.value = null;
   revealedBlockedPostIds.value = []; viewerOpen.value = false;
   replyWindowIndex.value = 0;
+  favoriteBusy.value = false; onlyOp.value = false; editingPostId.value = null; ownBusy.value = false; deletingThread.value = false;
+  // The reply draft belongs to one account and one thread: stop saving, then load the new pair's draft.
+  replyDraftReady = false;
+  void nextTick(restoreReplyDraft);
 };
 watch(() => [accountUser.value?.id, route.params.id], resetPrivateState, { flush: 'sync' });
 onDeactivated(() => {
   viewActive = false; requestGuard.invalidate();
   likingThread.value = false; activePostLikeId.value = null; uploadingImages.value = false;
   viewerOpen.value = false;
+  favoriteBusy.value = false; ownBusy.value = false; deletingThread.value = false;
 });
+
+// Reply draft (localStorage, read only after mount): text, already uploaded image URLs and the reply target.
+let replyDraftReady = false;
+const currentReplyDraftKey = () => replyDraftKey(accountUser.value?.id, route.params.id);
+const postExists = (id: number) => (detail.value?.posts || []).some((post) => post.id === id || post.replies.some((reply) => reply.id === id));
+function restoreReplyDraft() {
+  replyDraftReady = false;
+  if (!threadPageMounted.value) return;
+  const draft = readDraft(browserDraftStorage(), currentReplyDraftKey(), cleanReplyDraft);
+  if (draft && !replyBody.value && !replyImages.value.length) {
+    replyBody.value = draft.body;
+    replyImages.value = [...draft.images];
+    if (draft.targetId && (!detail.value || postExists(draft.targetId))) replyTarget.value = { id: draft.targetId, label: draft.targetLabel };
+  }
+  replyDraftReady = true;
+}
+watch(
+  () => [replyBody.value, replyImages.value.join("\n"), replyTarget.value.id, replyTarget.value.label],
+  () => {
+    if (!replyDraftReady) return;
+    writeDraft(browserDraftStorage(), currentReplyDraftKey(), {
+      body: replyBody.value, images: replyImages.value, targetId: replyTarget.value.id, targetLabel: replyTarget.value.label
+    }, cleanReplyDraft);
+  }
+);
 onActivated(() => { viewActive = true; });
 
 const highlightedReplyId = ref<number | null>(null);
@@ -161,6 +205,8 @@ const scrollToReplyHash = async () => {
   const match = route.hash.match(/^#reply-(\d+)$/);
   if (!match) return;
   const replyId = Number(match[1]);
+  // A link to a post that 只看楼主 hides shows all floors again.
+  if (onlyOp.value && windowOfPost(replyWindowList.value, replyId) < 0) onlyOp.value = false;
   const targetWindow = windowOfPost(replyWindowList.value, replyId);
   if (targetWindow >= 0) replyWindowIndex.value = targetWindow;
   await nextTick();
@@ -203,6 +249,7 @@ watch([() => detail.value, () => route.hash], () => {
 
 onMounted(() => {
   threadPageMounted.value = true;
+  restoreReplyDraft();
   void scrollToReplyHash();
 });
 onDeactivated(() => {
@@ -313,6 +360,7 @@ const submitReply = async () => {
   )
     return;
   const request = requestGuard.capture(), requestedThread = String(route.params.id), generation = privateGeneration;
+  const draftKey = currentReplyDraftKey();
   submitting.value = true;
   try {
     const contentBlocks = [
@@ -338,6 +386,8 @@ const submitReply = async () => {
         parentPostId: replyTarget.value.id || undefined,
       },
     });
+    // An accepted reply retires its stored draft (that account and thread) in any case.
+    removeDraft(browserDraftStorage(), draftKey);
     // An accepted reply from this unchanged identity/thread retires its draft
     // even while away; only an active current view may consume the DTO.
     if (generation !== privateGeneration) return;
@@ -419,6 +469,141 @@ const togglePostLike = async (postId: number, event?: MouseEvent) => {
   }
 };
 
+// Favourite (threads/:id/favorite with the wanted state, so a repeated click cannot flip it twice).
+const toggleFavorite = async (event?: MouseEvent) => {
+  if (favoriteBusy.value || !viewActive || !detail.value) return;
+  const request = requestGuard.capture(), requestedThread = String(route.params.id);
+  const trigger = event?.currentTarget instanceof HTMLElement ? event.currentTarget : null;
+  const wanted = !detail.value.viewerHasFavorited;
+  favoriteBusy.value = true;
+  try {
+    const result = await apiFetch<{ favorited: boolean; favoriteCount: number }>(`/api/forum/threads/${requestedThread}/favorite`, {
+      method: "POST",
+      body: { enabled: wanted }
+    });
+    if (!mutationCurrent(request, requestedThread)) return;
+    if (detail.value) detail.value.viewerHasFavorited = result.favorited;
+    ElMessage.success(result.favorited ? t("rework.forum.tools.favoriteAdded") : t("rework.forum.tools.favoriteRemoved"));
+  } catch (error: any) {
+    if (mutationCurrent(request, requestedThread)) showActionError(error, t("rework.forum.tools.favoriteFailed"), t("rework.forum.tools.loginForFavorite"));
+  } finally {
+    if (mutationCurrent(request, requestedThread)) {
+      favoriteBusy.value = false;
+      trigger?.focus({ preventScroll: true });
+    }
+  }
+};
+
+// Copy the thread link, or a post's (#reply-<id>, the deep-link format above).
+const copyLink = async (postId?: number) => {
+  if (!import.meta.client) return;
+  const link = threadLink(window.location.origin, localePath(`/forum/thread/${route.params.id}`), postId);
+  try {
+    await navigator.clipboard.writeText(link);
+    ElMessage.success(t("rework.forum.tools.copied"));
+  } catch {
+    ElMessage.error(t("rework.forum.tools.copyFailed"));
+  }
+};
+
+const setOnlyOp = (value: boolean) => {
+  onlyOp.value = value;
+  replyWindowIndex.value = 0;
+};
+
+// Jump to a floor number: the existing #reply-<id> deep link does the window, scroll, focus and highlight.
+const jumpToFloor = async (value: string) => {
+  const posts = detail.value?.posts || [];
+  const id = floorIdForNumber(posts, value);
+  if (id === null) {
+    ElMessage.warning(t("rework.forum.tools.floorMissing"));
+    return;
+  }
+  if (onlyOp.value && windowOfPost(replyWindowList.value, id) < 0) onlyOp.value = false;
+  handledReplyHash = "";
+  const hash = `#reply-${id}`;
+  if (route.hash === hash) await scrollToReplyHash();
+  else await router.replace({ query: route.query, hash });
+};
+
+// The author's own replies: edit in place, delete after confirmation. Both answer with the thread detail.
+const startEdit = (postId: number) => {
+  if (ownBusy.value) return;
+  editingPostId.value = postId;
+};
+const cancelEdit = () => {
+  if (!ownBusy.value) editingPostId.value = null;
+};
+const saveEdit = async (postId: number, payload: { bodyText: string; images: string[] }) => {
+  if (ownBusy.value || !viewActive) return;
+  const request = requestGuard.capture(), requestedThread = String(route.params.id);
+  ownBusy.value = true;
+  try {
+    const result = await apiFetch<ForumThreadDetail>(`/api/forum/posts/${postId}/edit`, {
+      method: "POST",
+      body: {
+        bodyText: payload.bodyText,
+        contentBlocks: payload.images.map((imageUrl) => ({ type: "image" as const, imageUrl }))
+      }
+    });
+    if (!mutationCurrent(request, requestedThread)) return;
+    threadResource.accept(result);
+    editingPostId.value = null;
+    ElMessage.success(t("rework.forum.tools.saved"));
+  } catch (error: any) {
+    if (mutationCurrent(request, requestedThread)) showActionError(error, t("rework.forum.tools.saveFailed"), copy.value.loginForReply);
+  } finally {
+    if (mutationCurrent(request, requestedThread)) ownBusy.value = false;
+  }
+};
+const confirmDelete = async (title: string, message: string) => {
+  try {
+    await ElMessageBox.confirm(message, title, { type: "warning", confirmButtonText: t("rework.forum.tools.delete"), cancelButtonText: t("common.cancel") });
+    return true;
+  } catch {
+    return false;
+  }
+};
+const removePost = async (postId: number) => {
+  if (ownBusy.value || !viewActive) return;
+  const requestedThread = String(route.params.id);
+  if (!(await confirmDelete(t("rework.forum.tools.deleteReplyTitle"), t("rework.forum.tools.deleteReplyConfirm")))) return;
+  if (!viewActive || String(route.params.id) !== requestedThread) return;
+  const request = requestGuard.capture();
+  ownBusy.value = true;
+  try {
+    const result = await apiFetch<ForumThreadDetail>(`/api/forum/posts/${postId}/delete`, { method: "POST" });
+    if (!mutationCurrent(request, requestedThread)) return;
+    threadResource.accept(result);
+    if (editingPostId.value === postId) editingPostId.value = null;
+    ElMessage.success(t("rework.forum.tools.deleted"));
+  } catch (error: any) {
+    if (mutationCurrent(request, requestedThread)) showActionError(error, t("rework.forum.tools.deleteFailed"), copy.value.loginForReply);
+  } finally {
+    if (mutationCurrent(request, requestedThread)) ownBusy.value = false;
+  }
+};
+const removeThread = async () => {
+  if (deletingThread.value || !viewActive || !ownsThread.value) return;
+  const requestedThread = String(route.params.id);
+  if (!(await confirmDelete(t("rework.forum.tools.deleteThreadTitle"), t("rework.forum.tools.deleteThreadConfirm")))) return;
+  if (!viewActive || String(route.params.id) !== requestedThread) return;
+  const request = requestGuard.capture();
+  deletingThread.value = true;
+  try {
+    await apiFetch<{ ok: boolean }>(`/api/forum/threads/${requestedThread}/delete`, { method: "POST" });
+    // The stored reply draft of a deleted thread has nowhere to go.
+    removeDraft(browserDraftStorage(), replyDraftKey(accountUser.value?.id, requestedThread));
+    if (!mutationCurrent(request, requestedThread)) return;
+    ElMessage.success(t("rework.forum.tools.deleted"));
+    await navigateTo(localePath("/forum/me"));
+  } catch (error: any) {
+    if (mutationCurrent(request, requestedThread)) showActionError(error, t("rework.forum.tools.deleteFailed"), copy.value.loginForReply);
+  } finally {
+    if (mutationCurrent(request, requestedThread)) deletingThread.value = false;
+  }
+};
+
 </script>
 
 <template>
@@ -431,6 +616,7 @@ const togglePostLike = async (postId: number, event?: MouseEvent) => {
       <template #head><ReworkCommunityThreadHead :thread="detail" /></template>
       <template #side><ReworkCommunityChartCard v-if="detail.song" :song="detail.song" /></template>
       <article class="thread-article">
+        <ReworkCommunityCard class="thread-card">
         <section class="thread-content" :aria-label="copy.articleBody">
           <ReworkCommunityBlocks
             body
@@ -447,9 +633,17 @@ const togglePostLike = async (postId: number, event?: MouseEvent) => {
           :like-count="detail.likeCount"
           :reply-count="detail.replyCount"
           :busy="likingThread"
+          :favorited="detail.viewerHasFavorited"
+          :favorite-busy="favoriteBusy"
+          :edit-to="editThreadTo"
+          :deleting="deletingThread"
           @like="toggleThreadLike"
           @reply="setReplyTarget(null)"
+          @favorite="toggleFavorite"
+          @copy="copyLink()"
+          @remove="removeThread"
         />
+        </ReworkCommunityCard>
         <ReworkCommunityReplies
           :count="detail.replyCount"
           :windows="replyWindowList"
@@ -459,12 +653,25 @@ const togglePostLike = async (postId: number, event?: MouseEvent) => {
           :revealed-ids="revealedBlockedPostIds"
           :active-like-id="activePostLikeId"
           :viewer-label="copy.imageViewer"
+          :viewer-id="viewerId"
+          :locked="detail.isLocked"
+          :editing-id="editingPostId"
+          :own-busy="ownBusy"
+          :only-op="onlyOp"
+          :has-floors="detail.posts.length > 0"
           @window="showReplyWindow"
           @like="togglePostLike"
           @reply="setReplyTarget"
           @reveal="toggleBlockedContent"
           @open="openImageViewer"
           @failed="markImageFailed"
+          @copy="copyLink"
+          @edit="startEdit"
+          @cancel-edit="cancelEdit"
+          @save="saveEdit"
+          @remove="removePost"
+          @update:only-op="setOnlyOp"
+          @jump="jumpToFloor"
         >
           <ReworkCommunityReplyBox
             ref="replyInput"
@@ -511,7 +718,7 @@ const togglePostLike = async (postId: number, event?: MouseEvent) => {
   min-width: 0;
 }
 .thread-content {
-  margin-top: 8px;
+  min-width: 0;
 }
 @media (max-width: 767px) {
   .forum-thread-page {

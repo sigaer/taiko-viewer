@@ -379,7 +379,12 @@ watch(() => reportTipId.value ? props.reportSuccessById[reportTipId.value] : fal
 
 <style scoped>
 .ugc {
+  container-type: inline-size;
   min-width: 0;
+  padding: var(--sp-4) var(--sp-5) var(--sp-5);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
   font-family: var(--font-ui);
   color: var(--ink);
 }
@@ -691,13 +696,19 @@ select:focus-visible {
   font-weight: 600;
   color: var(--ok);
 }
-@media (max-width: 1099px) {
+/* One column wherever the card is narrow: the right column of the song detail page, tablets and phones */
+@container (max-width: 639px) {
   .ugc-grid {
     grid-template-columns: minmax(0, 1fr);
     gap: var(--sp-6);
   }
 }
 @media (max-width: 767px) {
+  .ugc {
+    padding: var(--sp-3) var(--sp-4) var(--sp-4);
+  }
+}
+@container (max-width: 459px) {
   .ugc-choices {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }

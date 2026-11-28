@@ -1,4 +1,5 @@
 import type {
+  SongCatalogItem,
   V2ConstantsDifficulty,
   V2ConstantsItem,
   V2ConstantsPayload,
@@ -7,6 +8,9 @@ import type {
 import { getSongCatalog, resolveCatalogSongId } from "./songs";
 import { getCatalogConstants } from "./catalogConstants";
 import { readPersistentCache, writePersistentCache } from "./persistentCache";
+import { getSongAliasIndex } from "./songAliases";
+import { findMatchedAlias, normalizeSearchText, songAliases } from "./songSearch";
+import { filterByConstantRange, normalizeConstantRange } from "~/utils/rework/constantQuery";
 
 import consoleSupplement from "~/assets/data/v2_console_constants.json";
 import { buildV2ConstantsRows, DIFFICULTY_ORDER, isRecord, type RemoteConstantsPayload } from "./v2ConstantsModel";
@@ -33,6 +37,10 @@ export type V2ConstantsQuery = {
   pageSize?: unknown;
   sortBy?: unknown;
   sortOrder?: unknown;
+  /** Range filter (optional): value column, inclusive bounds; see utils/rework/constantQuery.ts. */
+  dimension?: unknown;
+  min?: unknown;
+  max?: unknown;
 };
 
 const SOURCE_CACHE_TTL_MS = 60 * 60 * 1000;
@@ -257,6 +265,17 @@ const compareRows = (
   );
 };
 
+// Catalogue songs by id, rebuilt only when the catalogue array changes (it is replaced when the file changes).
+const songsByIdCache = new WeakMap<SongCatalogItem[], Map<number, SongCatalogItem>>();
+const songsById = (songs: SongCatalogItem[]) => {
+  let map = songsByIdCache.get(songs);
+  if (!map) {
+    map = new Map(songs.map((song) => [Number(song.id), song]));
+    songsByIdCache.set(songs, map);
+  }
+  return map;
+};
+
 export const getV2ConstantsPayload = async (
   query: V2ConstantsQuery = {}
 ): Promise<V2ConstantsPayload> => {
@@ -273,17 +292,33 @@ export const getV2ConstantsPayload = async (
   const sortOrder = String(query.sortOrder || "asc").toLowerCase() === "desc" ? "desc" : "asc";
   const direction = sortOrder === "desc" ? -1 : 1;
 
+  const range = normalizeConstantRange({ dimension: query.dimension, min: query.min, max: query.max });
+
   const snapshot = await getV2ConstantsRowsSnapshot();
-  const rows = snapshot.rows;
-  const filtered = rows.filter((row) => {
-    if (difficulty && row.difficulty !== difficulty) {
-      return false;
+  const rows = filterByConstantRange(snapshot.rows, range);
+  // Alias matches: only for rows the id and title did not match; the alias index and the catalogue are file caches.
+  const aliasKeyword = keyword ? normalizeSearchText(keyword) : "";
+  const [aliasIndex, catalog] = aliasKeyword ? await Promise.all([getSongAliasIndex(), getSongCatalog()]) : [null, null];
+  const catalogById = aliasIndex?.size && catalog ? songsById(catalog) : null;
+  const matchedAliases = new Map<number, string | null>();
+  const aliasOf = (id: number) => {
+    if (!catalogById || !aliasIndex) return null;
+    if (!matchedAliases.has(id)) {
+      const song = catalogById.get(id);
+      matchedAliases.set(id, findMatchedAlias(songAliases(song ?? { id }, aliasIndex), aliasKeyword));
     }
-    if (!keyword) {
-      return true;
+    return matchedAliases.get(id) ?? null;
+  };
+  const filtered: V2ConstantsItem[] = [];
+  for (const row of rows) {
+    if (difficulty && row.difficulty !== difficulty) continue;
+    if (!keyword || String(row.id).includes(keyword) || row.songName.toLowerCase().includes(keyword)) {
+      filtered.push(row);
+      continue;
     }
-    return String(row.id).includes(keyword) || row.songName.toLowerCase().includes(keyword);
-  });
+    const matchedAlias = aliasOf(row.id);
+    if (matchedAlias) filtered.push({ ...row, matchedAlias });
+  }
   filtered.sort((left, right) => compareRows(left, right, sortBy, direction));
   const start = (page - 1) * pageSize;
 
@@ -294,6 +329,7 @@ export const getV2ConstantsPayload = async (
     generatedAt: snapshot.generatedAt,
     fetchedAt: snapshot.fetchedAt,
     stale: snapshot.stale,
-    items: filtered.slice(start, start + pageSize)
+    items: filtered.slice(start, start + pageSize),
+    range
   };
 };

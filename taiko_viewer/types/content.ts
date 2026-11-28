@@ -24,6 +24,8 @@ export type SongCatalogItem = {
   level_3?: number | string;
   level_4?: number | string;
   level_5?: number | string;
+  /** List search only: the alias the keyword matched when no title, id or category did. */
+  matchedAlias?: string;
 };
 
 export type RatingContentItem = {
@@ -100,6 +102,26 @@ export type V2ConstantsItem = {
   burst: number;
   complex: number;
   rhythm: number;
+  /** Keyword search only: the alias the keyword matched when the id and title did not. */
+  matchedAlias?: string;
+};
+
+/** Value columns a range filter can apply to (GET /api/content/v2-constants `dimension`). */
+export type V2ConstantsDimension =
+  | "mainConstant"
+  | "subConstant1"
+  | "subConstant2"
+  | "stamina"
+  | "handspeed"
+  | "burst"
+  | "complex"
+  | "rhythm";
+
+/** An active range filter: inclusive bounds, at least one of them set. */
+export type V2ConstantsRange = {
+  dimension: V2ConstantsDimension;
+  min: number | null;
+  max: number | null;
 };
 
 export type V2ConstantsPayload = {
@@ -110,6 +132,8 @@ export type V2ConstantsPayload = {
   fetchedAt: string;
   stale: boolean;
   items: V2ConstantsItem[];
+  /** The range filter the server applied (null when none). */
+  range?: V2ConstantsRange | null;
 };
 
 export type TitleCatalogItem = {

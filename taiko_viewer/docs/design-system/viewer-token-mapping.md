@@ -6,14 +6,14 @@ Input for stage 1 (aliasing `--viewer-*` to V1.3 tokens and switching Element Pl
 
 ## --viewer-* (63)
 
-alias keeps the look: 3 · alias changes the look: 41 · no equivalent: 19
+alias keeps the look: 2 · alias changes the look: 42 · no equivalent: 19
 
 | old | new | light old → new | dark old → new | light | dark | readers | verdict |
 |---|---|---|---|---|---|---|---|
 | `--viewer-font-zh` | `--font-cjk-sc` | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | differs | differs | 1 | alias changes the look |
 | `--viewer-font-ja` | `--font-cjk-jp` | -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, 'Noto Sans CJK JP', 'Noto Sans JP', sans-serif → 'Noto Sans JP Variable', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif | -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Yu Gothic', Meiryo, 'Noto Sans CJK JP', 'Noto Sans JP', sans-serif → 'Noto Sans JP Variable', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif | differs | differs | 1 | alias changes the look |
-| `--viewer-font-family` | `--font-ui` | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Barlow', 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Barlow', 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | differs | differs | 24 | alias changes the look |
-| `--viewer-display-font` | `--font-ui` | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Barlow', 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Barlow', 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | differs | differs | 31 | alias changes the look |
+| `--viewer-font-family` | `--font-ui` | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Outfit', 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Outfit', 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | differs | differs | 24 | alias changes the look |
+| `--viewer-display-font` | `--font-ui` | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Outfit', 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Microsoft YaHei UI', 'Microsoft YaHei', 'Noto Sans CJK SC', 'Noto Sans SC', sans-serif → 'Outfit', 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif | differs | differs | 31 | alias changes the look |
 | `--viewer-bg` | `--bg` | #eaf6f5 → #f4f5f8 | #10282b → #0f1120 | differs | differs | 2 | alias changes the look |
 | `--viewer-surface` | `--surface` | #f9fdfc → #ffffff | #193338 → #191c30 | differs | differs | 5 | alias changes the look |
 | `--viewer-surface-subtle` | `--bg-sunk` | #def0ee → #eceef3 | #234247 → #0a0c18 | differs | differs | 6 | alias changes the look |
@@ -61,7 +61,7 @@ alias keeps the look: 3 · alias changes the look: 41 · no equivalent: 19
 | `--viewer-guide-easy` | — | #e4efeb → — | #244343 → — | — | — | 0 | no equivalent |
 | `--viewer-guide-easier` | — | #d3e4dd → — | #2d504c → — | — | — | 0 | no equivalent |
 | `--viewer-guide-easiest` | — | #d1e6e7 → — | #2a4e52 → — | — | — | 0 | no equivalent |
-| `--viewer-radius` | `--r-panel` | 14px → 14px | 14px → 14px | same | same | 1 | alias keeps the look |
+| `--viewer-radius` | `--r-panel` | 14px → 20px | 14px → 20px | differs | differs | 1 | alias changes the look |
 | `--viewer-space-group` | `--sp-8` | 32px → 32px | 32px → 32px | same | same | 1 | alias keeps the look |
 | `--viewer-space-item` | `--sp-3` | 12px → 12px | 12px → 12px | same | same | 0 | alias keeps the look |
 | `--viewer-content-standard` | — | 1000px → — | 1000px → — | — | — | 1 | no equivalent |
@@ -76,7 +76,7 @@ alias keeps the look: 3 · alias changes the look: 41 · no equivalent: 19
 
 ## --el-* (68): production mapping → V1.3 mapping (as on the sample pages)
 
-alias keeps the look: 4 · alias changes the look: 64 · no equivalent: 0
+alias keeps the look: 3 · alias changes the look: 65 · no equivalent: 0
 
 | variable | light old → new | dark old → new | light | dark | readers | verdict |
 |---|---|---|---|---|---|---|
@@ -139,7 +139,7 @@ alias keeps the look: 4 · alias changes the look: 64 · no equivalent: 0
 | `--el-border-color-light` | #ccdfdc → #e2e5ec | #35575a → #2c3150 | differs | differs | 0 | alias changes the look |
 | `--el-border-color-lighter` | #ccdfdc → #e2e5ec | #35575a → #2c3150 | differs | differs | 1 | alias changes the look |
 | `--el-border-color-extra-light` | #ccdfdc → #e2e5ec | #35575a → #2c3150 | differs | differs | 0 | alias changes the look |
-| `--el-border-radius-base` | 8px → 8px | 8px → 8px | same | same | 0 | alias keeps the look |
+| `--el-border-radius-base` | 8px → 12px | 8px → 12px | differs | differs | 0 | alias changes the look |
 | `--el-border-radius-small` | 6px → 6px | 6px → 6px | same | same | 0 | alias keeps the look |
 | `--el-box-shadow-light` | 0 6px 24px rgb(22 43 48 / .06) → 0 18px 50px -12px rgb(21 24 42 / 0.28), 0 2px 6px rgb(21 24 42 / 0.08) | 0 6px 24px rgb(0 8 13 / .22) → 0 24px 60px -12px rgb(0 0 0 / 0.6), 0 0 0 1px #3a3f62 | differs | differs | 0 | alias changes the look |
 | `--el-box-shadow` | 0 10px 36px rgb(22 43 48 / .06) → 0 18px 50px -12px rgb(21 24 42 / 0.28), 0 2px 6px rgb(21 24 42 / 0.08) | 0 10px 36px rgb(0 8 13 / .22) → 0 24px 60px -12px rgb(0 0 0 / 0.6), 0 0 0 1px #3a3f62 | differs | differs | 0 | alias changes the look |

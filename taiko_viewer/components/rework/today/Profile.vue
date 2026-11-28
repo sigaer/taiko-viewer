@@ -1,16 +1,14 @@
 <script setup lang="ts">
-// Rating and the six dimensions of the signed-in home (frozen Today.vue deck, left part). Rating: DsDrumDial against
-// 15.5 (/api/account/growth/overview playerState.overallRating). Dimensions: DsRadar of playerState.skills (a value
-// that is not above zero is left out, as before); the focused dimension is the priority dimension unless the
-// dimensions are tied. No 30-day comparison, rank position or play streak: the overview does not return them.
+// The six dimensions of the signed-in home: DsRadar of /api/account/growth/overview playerState.skills (a value that
+// is not above zero is left out, as before); the focused dimension is the priority dimension unless the dimensions are
+// tied. The overall Rating moved to the vermilion card (today/Hero.vue, redesign 2026-11-27). No 30-day comparison,
+// rank position or play streak: the overview does not return them.
 import type { PlayerRatingDimension } from "~/types/recommendation-intelligence";
-import DsDrumDial from "~/components/ds/charts/DrumDial.vue";
 import DsRadar from "~/components/ds/charts/Radar.vue";
 import { GROWTH_DIMENSION_ORDER } from "~/utils/playerGrowth";
 import { dimensionLabelKey, radarAxes, radarHasData } from "~/utils/rework/today";
 
 const props = defineProps<{
-  rating: number | null;
   skills: PlayerRatingDimension[];
   focus: string | null;
   observation: string;
@@ -25,59 +23,54 @@ const showRadar = computed(() => radarHasData(axes.value));
 </script>
 
 <template>
-  <section class="tpf growth-focus" :aria-label="t('passport.skillOverview')">
-    <div class="tpf-rating">
-      <DsDrumDial :value="rating" :size="248" name="Rating">
-        <span class="tpf-k">Rating</span>
-        <b class="num tpf-v">{{ rating === null ? "—" : rating.toFixed(2) }}</b>
-        <span class="tpf-k num">/ 15.5</span>
-      </DsDrumDial>
-    </div>
-    <div class="tpf-radar">
-      <DsRadar v-if="showRadar" :axes="axes" :focus="focus" :size="248" centered :name="t('passport.skillOverview')" />
-    </div>
-    <div class="tpf-support">
-      <p class="tpf-say">{{ observation }}</p>
+  <section class="tpf growth-focus" aria-labelledby="growth-focus-title">
+    <header class="tpf-head">
+      <h2 id="growth-focus-title" class="tpf-title">{{ t("passport.skillOverview") }}</h2>
       <NuxtLink class="rw-link tpf-link" :to="localePath('/my/growth')">{{ t("passport.title") }}</NuxtLink>
+    </header>
+    <div v-if="showRadar" class="tpf-radar">
+      <DsRadar :axes="axes" :focus="focus" :size="232" centered :name="t('passport.skillOverview')" />
     </div>
+    <p class="tpf-say">{{ observation }}</p>
   </section>
 </template>
 
 <style scoped>
 .tpf {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  align-items: center;
-  gap: var(--sp-2) var(--sp-6);
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
   height: 100%;
+  min-width: 0;
   box-sizing: border-box;
-  padding: var(--sp-4) var(--sp-6);
+  padding: var(--sp-4) var(--sp-5) var(--sp-5);
   border: 1px solid var(--line);
   border-radius: var(--r-panel);
   background: var(--surface);
 }
-.tpf-rating,
+.tpf-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-3);
+}
+.tpf-title {
+  margin: 0;
+  font-size: var(--fs-16);
+  font-weight: 700;
+  line-height: var(--lh-snug);
+}
+.tpf-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--hit);
+  font-size: var(--fs-13);
+  font-weight: 600;
+}
 .tpf-radar {
   display: grid;
   place-items: center;
-  min-width: 0;
-}
-.tpf-rating { grid-row: 1 / span 2; }
-.tpf-k {
-  color: var(--ink-3);
-  font-size: var(--fs-13);
-}
-.tpf-v {
-  font-size: var(--fs-48);
-  font-weight: 700;
-  line-height: 1;
-  letter-spacing: -0.01em;
-}
-.tpf-support {
-  grid-column: 2;
-  display: grid;
-  justify-items: center;
-  gap: var(--sp-2);
   min-width: 0;
 }
 .tpf-radar :deep(svg) {
@@ -86,26 +79,13 @@ const showRadar = computed(() => radarHasData(axes.value));
 }
 .tpf-say {
   margin: 0;
-  max-width: 32em;
   color: var(--ink-2);
   font-size: var(--fs-14);
   line-height: var(--lh-body);
-  text-align: center;
-}
-.tpf-link {
-  display: inline-flex;
-  align-items: center;
-  min-height: var(--hit);
-  font-size: var(--fs-13);
 }
 @media (max-width: 767px) {
   .tpf {
-    grid-template-columns: minmax(0, 1fr);
-    padding: var(--sp-4) var(--sp-3);
+    padding: var(--sp-3) var(--sp-4) var(--sp-4);
   }
-  .tpf-support {
-    grid-column: 1;
-  }
-  .tpf-rating { grid-row: auto; }
 }
 </style>

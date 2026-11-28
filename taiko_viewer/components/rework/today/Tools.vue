@@ -1,28 +1,40 @@
 <script setup lang="ts">
-// Public tools of the home page (was components/home/HomePublicTools.vue): the same four destinations and "view all"
-// (/more); analytics event unchanged.
+// Feature grid of the home page, built from the navigation model (utils/rework/today.ts homeFeatures): an icon tile
+// and the destination page's own name, and 全部功能 (/more).
+//   default (PUBLIC_FEATURE_KEYS)       what the site offers, for visitors and players without data. It replaced the
+//                                       four hand-written public tools (chart config, note count, guide, grade); their
+//                                       analytics event home_public_tool_click is unchanged.
+//   quick                               the phone's 常用 grid of a player with data (QUICK_FEATURE_KEYS), no event.
+// Four columns on phones; on wider screens as many as fit.
+import type { PropType } from "vue";
+import { PUBLIC_FEATURE_KEYS, QUICK_FEATURE_KEYS, homeFeatures } from "~/utils/rework/today";
+import { ALL_FEATURES } from "~/utils/rework/navigation";
 import { trackViewerEvent } from "~/utils/analytics";
 
+const props = defineProps({
+  keys: { type: Array as PropType<readonly string[]>, default: undefined },
+  title: { type: String, default: "" },
+  quick: { type: Boolean, default: false }
+});
 const { t } = useI18n();
 const localePath = useLocalePath();
-const tools = [
-  { path: "/tools/chart-config", label: "tools.chartConfig", icon: "M5 5h14v14H5z M8 9h8 M8 12h5 M8 15h7" },
-  { path: "/tools/note-count", label: "tools.noteCount", icon: "M7 4h10v16H7z M10 8h4 M10 12h4 M10 16h2" },
-  { path: "/guide", label: "nav.guide", icon: "M4.5 5.5H12a2 2 0 0 1 2 2v11H6.5a2 2 0 0 0-2 2z M19.5 5.5H12a2 2 0 0 0-2 2v11h7.5a2 2 0 0 1 2 2z" },
-  { path: "/grade/2026", label: "nav.grade", icon: "M7 4h10v3a5 5 0 0 1-10 0z M5 6H3v1a4 4 0 0 0 4 4 M19 6h2v1a4 4 0 0 1-4 4 M9 19h6" }
-];
+const features = computed(() => homeFeatures(props.keys || (props.quick ? QUICK_FEATURE_KEYS : PUBLIC_FEATURE_KEYS)));
+const heading = computed(() => props.title || t("page.home.guest.publicTools"));
+const follow = (path: string) => {
+  if (!props.quick) trackViewerEvent("home_public_tool_click", { home_state: "guest", tool_path: path });
+};
 </script>
 
 <template>
-  <ReworkPanel class="tt guest-tools" plain :title="t('page.home.guest.publicTools')">
+  <ReworkPanel class="tt" :class="quick ? 'tt--quick' : 'guest-tools'" :title="heading">
     <template #actions>
-      <NuxtLink class="rw-link tt-more" :to="localePath('/more')">{{ t("common.viewAll") }}</NuxtLink>
+      <NuxtLink class="rw-link tt-more" :to="localePath(ALL_FEATURES.to)">{{ t(ALL_FEATURES.labelKey) }}</NuxtLink>
     </template>
     <ul class="tt-grid">
-      <li v-for="tool in tools" :key="tool.path">
-        <NuxtLink :to="localePath(tool.path)" class="tt-tool" @click="trackViewerEvent('home_public_tool_click', { home_state: 'guest', tool_path: tool.path })">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path :d="tool.icon" /></svg>
-          <b>{{ t(tool.label) }}</b>
+      <li v-for="feature in features" :key="feature.key">
+        <NuxtLink :to="localePath(feature.to)" class="tt-tool" @click="follow(feature.to)">
+          <span class="tt-icon" :data-tint="feature.tint"><ReworkIcon :name="feature.icon" /></span>
+          <span class="tt-name">{{ t(feature.labelKey) }}</span>
         </NuxtLink>
       </li>
     </ul>
@@ -35,73 +47,72 @@ const tools = [
   align-items: center;
   min-height: var(--hit);
   font-size: var(--fs-13);
+  font-weight: 600;
 }
 .tt-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+  gap: var(--sp-2);
   margin: 0;
   padding: 0;
-  overflow: hidden;
   list-style: none;
-  border: 1px solid var(--line);
-  border-radius: var(--r-panel);
-  background: var(--surface);
 }
 .tt-grid li {
   min-width: 0;
 }
-.tt-grid li + li {
-  border-left: 1px solid var(--line);
-}
 .tt-tool {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: var(--sp-2);
-  min-height: 92px;
-  padding: var(--sp-4) var(--sp-5);
+  min-height: var(--hit);
+  padding: var(--sp-3) var(--sp-1);
+  border-radius: var(--r-ctl);
   color: var(--ink);
+  text-align: center;
   text-decoration: none;
 }
 .tt-tool:hover {
-  background: var(--surface-2);
+  background: var(--bg-sunk);
 }
 .tt-tool:focus-visible {
   outline: 2px solid var(--focus-ring);
   outline-offset: -2px;
 }
-.tt-tool svg {
-  width: 22px;
-  height: 22px;
-  fill: none;
-  stroke: var(--ink-2);
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
+.tt-icon {
+  display: grid;
+  place-items: center;
+  width: 52px;
+  height: 52px;
+  border-radius: 16px;
+  background: var(--bg-sunk);
+  color: var(--ink-2);
 }
-.tt-tool b {
-  font-size: var(--fs-16);
-  font-weight: 700;
+.tt-icon[data-tint="brand"] {
+  background: var(--selected-bg);
+  color: var(--selected-ink);
+}
+.tt-icon[data-tint="info"] {
+  background: var(--info-wash);
+  color: var(--info-ink);
+}
+.tt-name {
+  max-width: 100%;
+  font-size: var(--fs-13);
+  font-weight: 600;
+  line-height: var(--lh-snug);
   overflow-wrap: anywhere;
 }
 @media (max-width: 767px) {
   .tt-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-  .tt-grid li + li {
-    border-left: 0;
-  }
-  .tt-grid li:nth-child(2n) {
-    border-left: 1px solid var(--line);
-  }
-  .tt-grid li:nth-child(-n + 2) {
-    border-bottom: 1px solid var(--line);
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--sp-3) var(--sp-1);
   }
   .tt-tool {
-    min-height: 76px;
-    padding: var(--sp-3) var(--sp-4);
+    padding: var(--sp-1) 0;
   }
-  .tt-tool b {
-    font-size: var(--fs-14);
+  .tt-name {
+    font-size: var(--fs-12);
   }
 }
 </style>

@@ -58,8 +58,10 @@ defineExpose({ focus: () => heading.value?.focus() });
 }
 .rw-head__title {
   margin: 0;
-  font-size: clamp(1.375rem, 2.4vw, 2rem);
+  font-family: var(--font-display);
+  font-size: clamp(var(--fs-22), 1rem + 1.4vw, var(--fs-30));
   font-weight: 800;
+  letter-spacing: -0.01em;
   line-height: var(--lh-tight);
   overflow-wrap: anywhere;
   line-break: strict;

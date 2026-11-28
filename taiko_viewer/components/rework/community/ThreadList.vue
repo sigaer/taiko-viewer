@@ -1,6 +1,6 @@
 <script setup lang="ts">
-// ReworkCommunityThreadList — a list of threads with its states (ReworkState): loading keeps the rows' height,
-// failed shows the read error with retry, empty shows `emptyTitle` and the `empty` slot's actions.
+// ReworkCommunityThreadList — a list of threads in one card with its states (ReworkState): loading keeps the rows'
+// height, failed shows the read error with retry, empty shows `emptyTitle` and the `empty` slot's actions.
 import type { PropType } from "vue";
 import type { ForumThreadCard } from "~/types/forum";
 
@@ -31,17 +31,36 @@ const emit = defineEmits<{ retry: [] }>();
 <style scoped>
 .ctl {
   display: grid;
-  border-top: 1px solid var(--line);
+  padding: 0 var(--sp-5);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
+}
+/* the card's edge closes the last row (the row draws its own bottom divider elsewhere, e.g. the song page) */
+.ctl > :last-child {
+  border-bottom: 0;
 }
 .ctl-state {
-  padding: 0;
   gap: 0;
+  padding: 0 var(--sp-5);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
 }
 .ctl-skel {
   display: grid;
   gap: var(--sp-2);
   padding: var(--sp-4) 0;
   border-bottom: 1px solid var(--line);
+}
+.ctl-skel:last-child {
+  border-bottom: 0;
+}
+@media (max-width: 767px) {
+  .ctl,
+  .ctl-state {
+    padding: 0 var(--sp-4);
+  }
 }
 .ctl-skel i {
   display: block;

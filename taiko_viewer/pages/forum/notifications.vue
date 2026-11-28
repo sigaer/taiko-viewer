@@ -2,6 +2,7 @@
 import { ElMessage } from "element-plus";
 import { isNavigationFailure } from "vue-router";
 import type { ForumHomePayload, ForumNotification } from "~/types/forum";
+import { NOTIFICATION_FILTERS, filterNotifications, type NotificationFilter } from "~/utils/rework/community";
 
 type NotificationPayload = {
   total: number;
@@ -204,6 +205,38 @@ const openNotification = async (item: ForumNotification) => {
   }
 };
 
+// Mark one notification read without opening it (same request and lock as opening it).
+const markRead = async (item: ForumNotification) => {
+  if (actionsDisabled.value || item.isRead || !data.value?.items.includes(item)) return;
+  const request = guard.capture(), requestedContext = context.value;
+  mutationBusy.value = true;
+  openingNotificationId.value = item.id;
+  try {
+    const result = await apiFetch<{ unreadCount: number }>("/api/forum/notifications/read", {
+      method: "POST", body: { ids: [item.id] }, retry: 0
+    });
+    if (!isCurrent(request, requestedContext)) return;
+    item.isRead = true;
+    syncUnreadCount(result.unreadCount);
+  } catch (error: any) {
+    if (isCurrent(request, requestedContext)) {
+      ElMessage.error(error?.data?.statusMessage || error?.message || t("errors.actionFailed"));
+    }
+  } finally {
+    if (isCurrent(request, requestedContext)) {
+      mutationBusy.value = false;
+      openingNotificationId.value = null;
+    }
+  }
+};
+
+// Type filter over the loaded page (the API returns each item's type; it has no type filter of its own).
+const typeFilter = ref<NotificationFilter>("all");
+const typeFilters = computed(() => NOTIFICATION_FILTERS.map((key) => ({
+  key, label: key === "all" ? t("rework.forum.notify.all") : t(`forum.notificationsType.${key}`)
+})));
+const visibleItems = computed(() => filterNotifications(data.value?.items || [], typeFilter.value));
+
 const selectPage = (value: number) => movePage(value - page.value);
 // Relative times ("{n} 分钟前" / yesterday / date) are drawn by ReworkCommunityTime after mount.
 </script>
@@ -220,16 +253,25 @@ const selectPage = (value: number) => movePage(value - page.value);
     <ReworkState v-else-if="loadError" kind="failed" :text="loadError" :retry-label="copy.retry" @retry="retry" />
     <template v-else-if="data">
       <ReworkState v-if="!data.items.length" kind="empty" :title="t('forum.emptyNotifications')" />
-      <ul v-else class="notification-list">
-        <ReworkCommunityNotificationItem
-          v-for="item in data.items"
-          :key="item.id"
-          :item="item"
-          :disabled="actionsDisabled"
-          :busy="openingNotificationId === item.id"
-          @open="openNotification(item)"
-        />
-      </ul>
+      <template v-else>
+        <div class="rw-seg notification-filters" role="group" :aria-label="t('rework.forum.notify.filterLabel')">
+          <button v-for="filter in typeFilters" :key="filter.key" type="button" :aria-pressed="typeFilter === filter.key" @click="typeFilter = filter.key">{{ filter.label }}</button>
+        </div>
+        <ReworkState v-if="!visibleItems.length" kind="empty" :title="t('rework.forum.notify.filteredEmpty')" compact />
+        <ReworkCommunityCard v-else flush>
+          <ul class="notification-list">
+            <ReworkCommunityNotificationItem
+              v-for="item in visibleItems"
+              :key="item.id"
+              :item="item"
+              :disabled="actionsDisabled"
+              :busy="openingNotificationId === item.id"
+              @open="openNotification(item)"
+              @mark="markRead(item)"
+            />
+          </ul>
+        </ReworkCommunityCard>
+      </template>
       <ReworkPager v-if="totalPages > 1 || page > 1" class="notification-pager" :page="page" :count="totalPages" @select="selectPage" />
     </template>
   </div>
@@ -245,6 +287,9 @@ const selectPage = (value: number) => movePage(value - page.value);
 }
 .notification-count {
   margin: 6px 0 0;
+}
+.notification-filters {
+  justify-self: start;
 }
 .notification-list {
   display: grid;

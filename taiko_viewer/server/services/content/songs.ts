@@ -8,6 +8,8 @@ import type {
 import { getContentRuntimePaths, readCachedJsonFile } from "./runtime";
 import { getSongBranchAudioVariants } from "./songBranchAudio";
 import { getSongTjaBundleUrl } from "./songTjaBundle";
+import { getSongAliasIndex } from "./songAliases";
+import { matchSongs, orderMatches } from "./songSearch";
 
 let songCatalogCache: { mtimeMs: number; data: SongCatalogItem[] } | null = null;
 let ratingEntriesCache: { mtimeMs: number; data: RatingContentItem[] } | null = null;
@@ -100,18 +102,11 @@ export const getSongCatalogPagePayload = async (options: SongCatalogPageOptions)
   const songs = await getSongCatalog();
   const page = Math.max(1, Math.floor(Number(options.page) || 1));
   const pageSize = Math.min(60, Math.max(12, Math.floor(Number(options.pageSize) || 24)));
-  const keyword = String(options.keyword || "").trim().toLocaleLowerCase();
+  const keyword = String(options.keyword || "").trim();
 
   let filtered = songs.filter(
     (song) => options.shelfStatus === undefined || normalizeShelfStatus(song.shelf_status) === options.shelfStatus
   );
-
-  if (keyword) {
-    filtered = filtered.filter((song) =>
-      [song.song_name, song.song_name_jp, song.type, categorySearchAliases[String(song.type || "")], song.id]
-        .some((value) => String(value ?? "").toLocaleLowerCase().includes(keyword))
-    );
-  }
 
   if (options.sort === "open-day-desc") {
     filtered = [...filtered].sort((a, b) => {
@@ -120,12 +115,27 @@ export const getSongCatalogPagePayload = async (options: SongCatalogPageOptions)
     });
   }
 
+  // Keyword: titles, id and category names as before, plus song aliases (alias-only matches carry `matchedAlias`).
+  // Catalogue order ranks exact > prefix > substring > alias; an explicit date sort keeps the date order and lists
+  // alias-only matches after the direct ones.
+  const matches = keyword
+    ? orderMatches(
+        matchSongs(filtered, keyword, await getSongAliasIndex(), (song) => [
+          song.type,
+          categorySearchAliases[String(song.type || "")]
+        ]),
+        options.sort === "open-day-desc" ? "direct-first" : "relevance"
+      )
+    : filtered.map((song) => ({ song, matchedAlias: undefined }));
+
   const start = (page - 1) * pageSize;
   return {
-    total: filtered.length,
+    total: matches.length,
     page,
     pageSize,
-    songs: filtered.slice(start, start + pageSize).map(toSongListItem)
+    songs: matches.slice(start, start + pageSize).map(({ song, matchedAlias }) =>
+      matchedAlias ? { ...toSongListItem(song), matchedAlias } : toSongListItem(song)
+    )
   };
 };
 

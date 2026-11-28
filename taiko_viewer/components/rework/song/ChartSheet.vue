@@ -75,7 +75,7 @@ export const chartImageUrl = (songId: number, difficulty: number, side?: string)
 }
 .sheet {
   position: relative;
-  height: 280px;
+  height: 320px;
   overflow-x: auto;
   overflow-y: hidden;
   border: 1px solid var(--line);

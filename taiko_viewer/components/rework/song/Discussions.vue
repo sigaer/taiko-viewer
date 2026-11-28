@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // Related discussions of the selected chart on the song detail page: components/forum/SongRelatedDiscussions.vue
 // (request, links and states unchanged) with the reworked page's tokens. Slice D: each discussion is the community's
-// thread row (ReworkCommunityThreadRow, compact), the same as in the forum lists.
+// thread row (ReworkCommunityThreadRow, compact), the same as in the forum lists. Redesign v2: a card in the right column.
 defineProps<{ songId: number; difficultyType: number }>();
 </script>
 
@@ -12,6 +12,18 @@ defineProps<{ songId: number; difficultyType: number }>();
 </template>
 
 <style scoped>
+.disc {
+  min-width: 0;
+  padding: var(--sp-4) var(--sp-5) var(--sp-5);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
+}
+@media (max-width: 767px) {
+  .disc {
+    padding: var(--sp-3) var(--sp-4) var(--sp-4);
+  }
+}
 .disc :deep(.related-discussions.related-discussions--song-detail) {
   gap: var(--sp-1);
   padding: 0;

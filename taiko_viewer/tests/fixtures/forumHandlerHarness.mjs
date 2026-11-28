@@ -86,6 +86,9 @@ export async function handlers(path, api, exported, options = {}) {
   };
   // Pure helpers the pages import (imports are stripped above): the real modules.
   const { catalogRequestFor } = await import('../../utils/rework/catalog.ts');
+  const { NOTIFICATION_FILTERS, filterNotifications } = await import('../../utils/rework/community.ts');
+  const drafts = await import('../../utils/rework/communityDraft.ts');
+  const mounted = [];
   const ports = {
     ...Object.fromEntries(Object.entries(reactivity).filter(([key]) => !['fire', 'notify'].includes(key))),
     useState, useAccountRequestGuard, useAsyncData,
@@ -98,7 +101,11 @@ export async function handlers(path, api, exported, options = {}) {
     useRoute: () => route, useRouter: () => ({ push: navigate }), navigateTo: navigate,
     isNavigationFailure: result => Boolean(result?.__navigationFailure),
     ElMessage: Object.fromEntries(['success', 'warning', 'error'].map(kind => [kind, text => messages.push({ kind, text })])),
-    FORUM_IMAGE_MAX_BYTES: 20 * 1024 * 1024, catalogRequestFor,
+    FORUM_IMAGE_MAX_BYTES: 20 * 1024 * 1024, catalogRequestFor, NOTIFICATION_FILTERS, filterNotifications,
+    // Drafts: the real helpers over an in-memory storage (options.storage), or none (as during server rendering).
+    browserDraftStorage: () => options.storage || null, cleanThreadDraft: drafts.cleanThreadDraft, readDraft: drafts.readDraft,
+    removeDraft: drafts.removeDraft, threadDraftKey: drafts.threadDraftKey, writeDraft: drafts.writeDraft,
+    onMounted: cb => mounted.push(cb),
     resolveForumSectionTranslation: (_t, _slug, name) => name,
     FormData: class { append() {} }
   };
@@ -110,6 +117,7 @@ export async function handlers(path, api, exported, options = {}) {
   return { ...model, unreadCount: ports.useForumUnreadCount().unreadCount, source, states, caches, messages, navigations, route,
     changeUser: id => { states.get('account-user').value = id === null ? null : { id }; },
     deactivate: () => reactivity.fire('deactivated'), activate: () => reactivity.fire('activated'),
+    mount: () => { for (const cb of mounted) cb(); },
     unmount: () => reactivity.fire('beforeUnmount') };
 }
 

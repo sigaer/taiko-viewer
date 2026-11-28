@@ -33,7 +33,6 @@ const songTo = computed(() => (song.value ? localePath(threadSongLocation(song.v
 const mediaFailed = ref(false);
 watch(() => props.thread.coverImageUrl, () => (mediaFailed.value = false));
 const showMedia = computed(() => !props.compact && !song.value && Boolean(props.thread.coverImageUrl) && !mediaFailed.value);
-const dot = computed(() => ({ color: `var(--section-${props.thread.section.slug}, var(--ink-3))` }));
 
 const isInteractiveTarget = (target: EventTarget | null, currentTarget: EventTarget | null) => {
   if (!(target instanceof Element)) return false;
@@ -67,7 +66,7 @@ const handleCardKeydown = (event: KeyboardEvent) => {
   >
     <div class="tr__main">
       <div class="tr__meta">
-        <NuxtLink :to="localePath(`/forum/section/${thread.section.slug}`)" class="tr__sec"><i class="tr__dot" :style="dot" aria-hidden="true" />{{ sectionName }}</NuxtLink>
+        <NuxtLink :to="localePath(`/forum/section/${thread.section.slug}`)" class="tr__sec">{{ sectionName }}</NuxtLink>
         <span v-if="thread.threadType !== 'discussion'" class="tr__tag">{{ typeText }}</span>
         <span v-for="state in states" :key="state" class="tr__tag" :class="`is-${state}`">{{ stateText(state) }}</span>
       </div>
@@ -77,7 +76,7 @@ const handleCardKeydown = (event: KeyboardEvent) => {
         <span v-for="tag in thread.tags" :key="tag">#{{ tag }}</span>
       </div>
       <div class="tr__foot">
-        <ReworkCommunityAuthor :user="thread.author" :size="24" titles="text" class="tr__who" />
+        <ReworkCommunityAuthor :user="thread.author" :size="24" titles="text" class="tr__who" link />
         <ReworkCommunityTime class="tr__time" :value="thread.latestPostAt || thread.createdAt" mode="date" />
         <span class="tr__stat" :title="t('forum.stats.reply')"><ReworkIcon name="reply" /><b class="num">{{ thread.replyCount }}</b><span class="rw-vh">{{ t("forum.stats.reply") }}</span></span>
         <span class="tr__stat" :title="t('forum.stats.like')"><ReworkIcon name="heart" /><b class="num">{{ thread.likeCount }}</b><span class="rw-vh">{{ t("forum.stats.like") }}</span></span>
@@ -103,7 +102,6 @@ const handleCardKeydown = (event: KeyboardEvent) => {
   padding: var(--sp-4) var(--sp-2);
   margin: 0 calc(var(--sp-2) * -1);
   border-bottom: 1px solid var(--line);
-  border-radius: var(--r-ctl);
   font-family: var(--font-ui);
   color: var(--ink);
   cursor: pointer;
@@ -141,30 +139,28 @@ const handleCardKeydown = (event: KeyboardEvent) => {
 .tr__sec {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  min-height: 24px;
-  color: var(--ink-2);
-  font-weight: 500;
+  height: 24px;
+  padding: 0 var(--sp-2);
+  border-radius: var(--tag-radius);
+  background: var(--info-wash);
+  color: var(--info-ink);
+  font-weight: 700;
   text-decoration: none;
 }
 .tr__sec:hover {
-  color: var(--link);
-}
-.tr__dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: currentColor;
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 .tr__tag {
   display: inline-flex;
   align-items: center;
-  height: var(--tag-h);
-  padding: 0 6px;
+  height: 24px;
+  padding: 0 var(--sp-2);
   border-radius: var(--tag-radius);
   background: var(--tag-info-bg);
   color: var(--tag-info-ink);
-  font-size: var(--fs-11);
+  font-size: var(--fs-12);
+  font-weight: 600;
 }
 .tr__tag.is-pinned,
 .tr__tag.is-featured {
@@ -180,6 +176,7 @@ const handleCardKeydown = (event: KeyboardEvent) => {
   color: var(--ink);
   font-size: var(--fs-16);
   font-weight: 700;
+  border-radius: var(--r-xs);
   line-height: 1.45;
   text-decoration: none;
   overflow-wrap: anywhere;

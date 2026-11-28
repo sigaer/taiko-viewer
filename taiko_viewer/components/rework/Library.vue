@@ -27,6 +27,8 @@ import { rememberLibraryLocation } from "~/composables/useLibraryReturn";
 
 // Unified song library. State lives in the URL (utils/rework/catalog.ts); the first page is rendered on the
 // server, later pages are fetched here with abort + sequence guards. Kept alive: only its own route is followed.
+// Layout (redesign v2): heading, a filter card (keyword; shelf and sort as links), then the results card: table
+// columns from 768 px (genre / BPM from 1100, release date from 1240, shelf on "all"), list rows below.
 defineOptions({ name: "ReworkLibrary" });
 const route = useRoute();
 const router = useRouter();
@@ -235,9 +237,34 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
 
 <template>
   <div class="lib" :class="{ 'with-shelf': showShelf }">
-    <div class="lib-filters">
-      <nav class="facet" :aria-label="t('rework.library.shelfLabel')">
-        <span class="facet-h" aria-hidden="true">{{ t("rework.library.shelfLabel") }}</span>
+    <div class="lib-head">
+      <h1 ref="heading" tabindex="-1">{{ t(`rework.library.title.${state.shelf}`) }}</h1>
+      <p class="summary" role="status" aria-live="polite">{{ summary }}</p>
+    </div>
+
+    <section class="lib-filters" :aria-label="t('rework.library.filters')">
+      <form class="lib-search" role="search" @submit.prevent="commitKeyword">
+        <label class="search-box">
+          <span class="vh">{{ t("rework.library.search") }}</span>
+          <ReworkIcon name="search" />
+          <input
+            :value="draft"
+            type="search"
+            enterkeyhint="search"
+            autocomplete="off"
+            spellcheck="false"
+            :placeholder="t('rework.library.searchPlaceholder')"
+            @input="onInput"
+            @compositionstart="onCompositionStart"
+            @compositionend="onCompositionEnd"
+            @keydown="onKeydown"
+          />
+        </label>
+        <button v-if="draft" type="button" class="clear" :aria-label="t('rework.library.clearKeyword')" @click="clearKeyword">
+          <ReworkIcon name="close" />
+        </button>
+      </form>
+      <nav class="facet facet--shelf" :aria-label="t('rework.library.shelfLabel')">
         <div class="opts">
           <NuxtLink v-for="shelf in CATALOG_SHELVES" :key="shelf" v-slot="{ href: to, navigate }" :to="shelfHref(shelf)" custom>
             <a class="opt" :href="to" :aria-current="state.shelf === shelf ? 'page' : undefined" @click="navigate">{{
@@ -246,7 +273,7 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
           </NuxtLink>
         </div>
       </nav>
-      <nav class="facet" :aria-label="t('rework.library.sortLabel')">
+      <nav class="facet facet--sort" :aria-label="t('rework.library.sortLabel')">
         <span class="facet-h" aria-hidden="true">{{ t("rework.library.sortLabel") }}</span>
         <div class="opts">
           <NuxtLink v-for="sort in CATALOG_SORTS" :key="sort" v-slot="{ href: to, navigate }" :to="sortHref(sort)" custom>
@@ -256,34 +283,7 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
           </NuxtLink>
         </div>
       </nav>
-    </div>
-
-    <form class="lib-search" role="search" @submit.prevent="commitKeyword">
-      <label class="search-box">
-        <span class="vh">{{ t("rework.library.search") }}</span>
-        <ReworkIcon name="search" />
-        <input
-          :value="draft"
-          type="search"
-          enterkeyhint="search"
-          autocomplete="off"
-          spellcheck="false"
-          :placeholder="t('rework.library.searchPlaceholder')"
-          @input="onInput"
-          @compositionstart="onCompositionStart"
-          @compositionend="onCompositionEnd"
-          @keydown="onKeydown"
-        />
-      </label>
-      <button v-if="draft" type="button" class="clear" :aria-label="t('rework.library.clearKeyword')" @click="clearKeyword">
-        <ReworkIcon name="close" />
-      </button>
-    </form>
-
-    <div class="lib-head">
-      <h1 ref="heading" tabindex="-1">{{ t(`rework.library.title.${state.shelf}`) }}</h1>
-      <p class="summary" role="status" aria-live="polite">{{ summary }}</p>
-    </div>
+    </section>
 
     <section class="lib-results" :aria-busy="busy">
       <ReworkState v-if="view === 'failed'" kind="failed" class="lib-state" :title="t('rework.library.failed')" :retry-label="t('rework.library.retry')" @retry="load" />
@@ -327,6 +327,7 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
                   :subtitle="row.names.subtitle || null"
                   :subtitle-lang="row.names.subtitleLang"
                 />
+                <small v-if="row.song.matchedAlias" class="alias-hit">{{ t("rework.aliasMatch") }} · <span>{{ row.song.matchedAlias }}</span></small>
               </NuxtLink>
             </span>
             <span class="c-genre">
@@ -338,7 +339,7 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
             </span>
             <span class="c-diffs">
               <span v-for="slot in row.slots" :key="slot.difficulty" class="slot" :class="{ 'is-none': !slot.star }">
-                <DsDiff v-if="slot.star" :difficulty="slot.difficulty" :star="slot.star" :show-constant="false" />
+                <DsDiff v-if="slot.star" :difficulty="slot.difficulty" :star="slot.star" :show-constant="false" size="lg" />
               </span>
             </span>
             <span class="c-bpm"><span class="k">BPM </span><span class="n">{{ row.bpm }}</span></span>
@@ -346,7 +347,9 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
             <span v-if="showShelf" class="c-shelf"><span class="vh">{{ t("rework.library.columns.shelf") }} </span>{{ row.shelf }}</span>
           </li>
         </ul>
-        <ReworkPager v-if="view === 'rows' && pages > 1" :page="state.page" :count="pages" :href="pageHref" />
+        <div v-if="view === 'rows' && pages > 1" class="lib-foot">
+          <ReworkPager :page="state.page" :count="pages" :href="pageHref" />
+        </div>
       </template>
     </section>
   </div>
@@ -355,14 +358,8 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
 <style scoped>
 .lib {
   display: grid;
-  grid-template-columns: 184px minmax(0, 1fr);
-  grid-template-areas:
-    "filters search"
-    "filters head"
-    "filters results";
-  grid-template-rows: auto auto 1fr;
-  column-gap: var(--sp-8);
-  align-items: start;
+  gap: var(--sp-4);
+  min-width: 0;
   font-family: var(--font-ui);
   color: var(--ink);
 }
@@ -374,66 +371,63 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
   clip-path: inset(50%);
   white-space: nowrap;
 }
-/* ---------- Shelf and sort ---------- */
-.lib-filters {
-  grid-area: filters;
-  position: sticky;
-  top: calc(var(--bar-h) + var(--sp-6));
+/* ---------- Heading and summary ---------- */
+.lib-head {
   display: flex;
-  flex-direction: column;
-  gap: var(--sp-6);
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--sp-1) var(--sp-4);
 }
-.facet-h {
-  display: block;
-  margin-bottom: var(--sp-2);
-  font-size: var(--fs-12);
-  font-weight: 500;
-  color: var(--ink-3);
+.lib-head h1 {
+  margin: 0;
+  /* the same heading as every other page title (ReworkPageHeader) */
+  font-family: var(--font-display, var(--font-ui));
+  font-size: clamp(var(--fs-22), 1rem + 1.4vw, var(--fs-30));
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: var(--lh-tight);
+  scroll-margin-top: calc(var(--bar-h) + var(--sp-4));
+  border-radius: var(--r-xs);
 }
-.opts {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+.lib-head h1:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 3px;
 }
-.opt {
-  display: flex;
-  align-items: center;
-  min-height: var(--hit);
-  padding: 0 var(--sp-3);
-  border-radius: var(--r-ctl);
-  color: var(--ink-2);
+.summary {
+  margin: 0;
   font-size: var(--fs-14);
-  text-decoration: none;
-  white-space: nowrap;
+  color: var(--ink-2);
 }
-.opt:hover {
-  background: var(--bg-sunk);
-  color: var(--ink);
+/* ---------- Filter card: keyword, shelf, sort ---------- */
+.lib-filters {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--sp-3);
+  padding: var(--sp-4) 18px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
 }
-.opt[aria-current="page"] {
-  background: var(--selected-bg);
-  color: var(--selected-ink);
-  font-weight: 700;
-}
-/* ---------- Search ---------- */
 .lib-search {
-  grid-area: search;
   position: relative;
+  flex: 1 1 260px;
+  min-width: 0;
   display: flex;
   align-items: center;
-  margin-bottom: var(--sp-4);
 }
 .search-box {
   flex: 1;
   min-width: 0;
   display: flex;
   align-items: center;
-  gap: var(--sp-2);
-  height: var(--ctl-h-lg);
+  gap: 10px;
+  height: var(--hit);
   padding: 0 var(--hit) 0 14px;
+  box-sizing: border-box;
+  border: 1.5px solid var(--ctl-border);
+  border-radius: var(--r-ctl);
   background: var(--surface);
-  border: 1px solid var(--ctl-border);
-  border-radius: var(--r-note);
   color: var(--ink-3);
 }
 .search-box:focus-within {
@@ -456,69 +450,93 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
 }
 .clear {
   position: absolute;
-  right: 1px;
+  right: 0;
   display: grid;
   place-items: center;
   width: var(--hit);
   height: var(--hit);
   border: 0;
-  border-radius: var(--r-note);
+  border-radius: var(--r-ctl);
   background: transparent;
   color: var(--ink-3);
   cursor: pointer;
 }
-/* ---------- Heading and summary ---------- */
-.lib-head {
-  grid-area: head;
+.facet {
   display: flex;
-  align-items: baseline;
-  flex-wrap: wrap;
-  gap: var(--sp-1) var(--sp-4);
-  margin-bottom: var(--sp-3);
-}
-.lib-head h1 {
-  margin: 0;
-  /* slice G: the same heading size as every other page title (ReworkPageHeader) */
-  font-size: clamp(1.375rem, 2.4vw, 2rem);
-  font-weight: 800;
-  line-height: var(--lh-tight);
-  scroll-margin-top: calc(var(--bar-h) + var(--sp-4));
-  border-radius: var(--r-xs);
-}
-.lib-head h1:focus-visible {
-  outline: 2px solid var(--focus-ring);
-  outline-offset: 3px;
-}
-.summary {
-  margin: 0;
-  font-size: var(--fs-13);
-  color: var(--ink-3);
-}
-/* ---------- Rows: table columns from 768 px, list below ---------- */
-.lib-results {
-  grid-area: results;
+  align-items: center;
+  gap: var(--sp-2);
   min-width: 0;
+}
+.facet-h {
+  font-size: var(--fs-14);
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+/* Segmented control: the .rw-seg look on links (shelf and sort are addresses, not toggles) */
+.opts {
+  display: flex;
+  gap: 2px;
+  padding: 4px;
+  border-radius: var(--r-ctl);
+  background: var(--bg-sunk);
+}
+.opt {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 36px;
+  padding: 0 var(--sp-4);
+  border-radius: calc(var(--r-ctl) - 3px);
+  color: var(--ink-2);
+  font-size: var(--fs-14);
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+/* 44 px touch target over the 36 px segment */
+.opt::before {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
+.opt:hover {
+  color: var(--ink);
+}
+.opt[aria-current="page"] {
+  background: var(--seg-on-bg);
+  color: var(--seg-on-ink);
+  font-weight: 700;
+  box-shadow: 0 0 0 1px var(--seg-on-ring);
+}
+/* ---------- Results card: table columns from 768 px, list rows below ---------- */
+.lib-results {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
 }
 .cols,
 .row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 112px repeat(4, 58px) 74px 64px 96px;
+  grid-template-columns: minmax(0, 1fr) 112px repeat(4, 60px) 76px 64px 96px;
   grid-template-areas: "song genre d d d d d bpm date";
   align-items: center;
   column-gap: var(--sp-2);
-  padding: 0 var(--sp-4);
+  padding: 0 var(--sp-5);
 }
 .with-shelf .cols,
 .with-shelf .row {
-  grid-template-columns: minmax(0, 1fr) 112px repeat(4, 58px) 74px 64px 96px 76px;
+  grid-template-columns: minmax(0, 1fr) 112px repeat(4, 60px) 76px 64px 96px 76px;
   grid-template-areas: "song genre d d d d d bpm date shelf";
 }
 .cols {
-  min-height: 40px;
-  border-bottom: 1px solid var(--line-strong);
+  min-height: var(--hit);
+  border-bottom: 1px solid var(--line);
   font-size: var(--fs-12);
-  font-weight: 500;
-  color: var(--ink-3);
+  font-weight: 700;
+  color: var(--ink-2);
 }
 .c-song { grid-area: song; min-width: 0; }
 .c-genre { grid-area: genre; min-width: 0; }
@@ -528,11 +546,17 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
 .c-shelf { grid-area: shelf; padding-left: var(--sp-3); white-space: nowrap; }
 .c-diffs {
   display: grid;
-  grid-template-columns: repeat(4, 58px) 74px;
+  grid-template-columns: repeat(4, 60px) 76px;
   column-gap: var(--sp-2);
 }
 .cols .c-diffs {
   display: block;
+}
+/* Difficulty cells: the DsDiff icon and star without the badge frame */
+.slot :deep(.ds-diff) {
+  padding: 0;
+  border: 0;
+  background: transparent;
 }
 .rows {
   margin: 0;
@@ -547,14 +571,17 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
   content: "";
   position: absolute;
   inset: 0;
-  background: color-mix(in srgb, var(--bg) 55%, transparent);
+  background: color-mix(in srgb, var(--surface) 55%, transparent);
 }
 .row {
   position: relative;
-  min-height: 64px;
+  min-height: 76px;
   border-bottom: 1px solid var(--line);
   font-size: var(--fs-13);
   color: var(--ink-2);
+}
+.rows > .row:last-child {
+  border-bottom: 0;
 }
 .row:hover {
   background: var(--bg-sunk);
@@ -562,7 +589,7 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
 .row-link {
   display: block;
   min-width: 0;
-  padding: var(--sp-2) 0;
+  padding: 11px 0;
   color: inherit;
   text-decoration: none;
   border-radius: var(--r-ctl);
@@ -580,8 +607,36 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
   outline: 2px solid var(--focus-ring);
   outline-offset: -2px;
 }
+.row-link :deep(.ds-cover) {
+  width: 54px;
+  border-radius: var(--r-ctl);
+}
+.row-link :deep(.ds-songcell) {
+  gap: 14px;
+}
+.row-link :deep(.ds-songcell__title) {
+  font-size: var(--fs-16);
+  font-weight: 700;
+  color: var(--ink);
+}
+.row-link :deep(.ds-songcell__sub) {
+  font-size: var(--fs-13);
+  color: var(--ink-3);
+}
 .row-link:hover :deep(.ds-songcell__title) {
   color: var(--link);
+}
+.alias-hit {
+  display: block;
+  overflow: hidden;
+  padding-left: calc(54px + 14px);
+  font-size: var(--fs-12);
+  color: var(--ink-3);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.alias-hit span {
+  color: var(--ink-2);
 }
 .c-genre {
   display: flex;
@@ -596,9 +651,9 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
 }
 .dot {
   flex: none;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: var(--r-note);
   background: currentColor;
 }
 .g-namco { color: var(--genre-namco); }
@@ -623,11 +678,16 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
 .c-date .n {
   color: var(--ink-3);
 }
-/* ---------- States ---------- */
-/* States are ReworkState; the list keeps its rule above them */
-.lib-state {
+.lib-foot {
+  display: flex;
+  justify-content: flex-end;
+  padding: var(--sp-3) var(--sp-5);
   border-top: 1px solid var(--line);
 }
+.lib-foot :deep(.pager) {
+  margin-top: 0;
+}
+/* ---------- States (ReworkState inside the results card) ---------- */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -648,13 +708,13 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
 .skeleton .c-song {
   display: flex;
   align-items: center;
-  gap: var(--sp-3);
-  padding: var(--sp-2) 0;
+  gap: 14px;
+  padding: 11px 0;
 }
 .sk-cover {
   flex: none;
-  width: 44px;
-  height: 44px;
+  width: 54px;
+  height: 54px;
   border-radius: var(--r-ctl);
   background: var(--bg-sunk);
 }
@@ -678,71 +738,28 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
 @media (max-width: 1239px) {
   .cols,
   .row {
-    grid-template-columns: minmax(0, 1fr) 104px repeat(4, 58px) 74px 64px;
+    grid-template-columns: minmax(0, 1fr) 104px repeat(4, 60px) 76px 64px;
     grid-template-areas: "song genre d d d d d bpm";
   }
   .with-shelf .cols,
   .with-shelf .row {
-    grid-template-columns: minmax(0, 1fr) 104px repeat(4, 58px) 74px 64px 76px;
+    grid-template-columns: minmax(0, 1fr) 104px repeat(4, 60px) 76px 64px 76px;
     grid-template-areas: "song genre d d d d d bpm shelf";
   }
   .c-date {
     display: none;
   }
 }
-/* 768–1099: filters above the list, song + difficulty columns */
+/* 768–1099: song + difficulty columns */
 @media (max-width: 1099px) {
-  .lib {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas: "search" "filters" "head" "results";
-    grid-template-rows: none;
-  }
-  .lib-filters {
-    position: static;
-    flex-direction: row;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--sp-2) var(--sp-4);
-    margin-bottom: var(--sp-3);
-  }
-  .facet-h {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-  }
-  .opts {
-    flex-direction: row;
-    gap: var(--sp-1);
-    padding: 3px;
-    border-radius: var(--r-note);
-    background: var(--bg-sunk);
-  }
-  .opt {
-    min-height: 38px;
-    padding: 0 14px;
-    border-radius: var(--r-note);
-    position: relative;
-  }
-  .opt::before {
-    content: "";
-    position: absolute;
-    inset: -3px 0;
-  }
-  .opt[aria-current="page"] {
-    background: var(--surface);
-    box-shadow: inset 0 0 0 1px var(--seg-on-ring);
-    color: var(--seg-on-ink);
-  }
   .cols,
   .row {
-    grid-template-columns: minmax(0, 1fr) repeat(4, 58px) 74px;
+    grid-template-columns: minmax(0, 1fr) repeat(4, 60px) 76px;
     grid-template-areas: "song d d d d d";
   }
   .with-shelf .cols,
   .with-shelf .row {
-    grid-template-columns: minmax(0, 1fr) repeat(4, 58px) 74px 76px;
+    grid-template-columns: minmax(0, 1fr) repeat(4, 60px) 76px 76px;
     grid-template-areas: "song d d d d d shelf";
   }
   .c-genre,
@@ -750,22 +767,26 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
     display: none;
   }
 }
-/* Below 768: list rows */
+/* Below 768: comfortable list rows; the filter card stacks */
 @media (max-width: 767px) {
+  .lib {
+    gap: var(--sp-3);
+  }
   .lib-filters {
-    flex-direction: column;
-    align-items: stretch;
-    gap: var(--sp-2);
+    padding: var(--sp-3);
+  }
+  .lib-search,
+  .facet {
+    flex: 1 1 100%;
   }
   .opts {
-    overflow-x: auto;
-    scrollbar-width: none;
-    align-self: flex-start;
-    max-width: 100%;
+    flex: 1 1 auto;
+    min-width: 0;
   }
   .opt {
-    flex: none;
-    padding: 0 12px;
+    flex: 1 1 0;
+    min-width: 0;
+    padding: 0 var(--sp-2);
   }
   .cols {
     display: none;
@@ -776,21 +797,22 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
     flex-wrap: wrap;
     align-items: center;
     gap: 4px var(--sp-3);
-    padding: var(--sp-2) 0 var(--sp-3);
+    min-height: 0;
+    padding: var(--sp-1) var(--sp-4) var(--sp-3);
   }
   .c-song {
     flex: 1 0 100%;
   }
   .row-link {
-    padding: var(--sp-1) 0 0;
+    padding: var(--sp-2) 0 0;
   }
   .c-diffs {
     order: 1;
     display: flex;
     flex-wrap: wrap;
-    gap: 4px;
+    gap: 4px var(--sp-3);
     flex: 1 0 100%;
-    padding-left: calc(44px + var(--sp-3));
+    padding-left: calc(54px + 14px);
   }
   .slot.is-none {
     display: none;
@@ -808,8 +830,11 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
     color: var(--ink-3);
   }
   .c-genre {
-    margin-left: calc(44px + var(--sp-3));
+    margin-left: calc(54px + 14px);
     max-width: 40%;
+  }
+  .c-shelf {
+    padding-left: 0;
   }
   .c-bpm .k {
     position: static;
@@ -822,6 +847,10 @@ const skeletonRows = Array.from({ length: 24 }, (_, index) => index);
   }
   .skeleton .c-diffs {
     display: block;
+  }
+  .lib-foot {
+    justify-content: center;
+    padding: var(--sp-3) var(--sp-4);
   }
   .lib-head h1 {
     scroll-margin-top: calc(var(--bar-h-m) + var(--subtab-h-m) + var(--sp-3));

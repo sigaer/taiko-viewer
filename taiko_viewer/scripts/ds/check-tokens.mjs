@@ -22,13 +22,15 @@ export const TOKEN_FILE = join(ROOT, "assets", "css", "ds", "tokens.css");
 export const SNAPSHOT = join(here, "spec", "tokens-v1.3-cplus.json");
 /**
  * Deliberate differences from the frozen prototype, applied in order: the slice G colour tuning
- * (viewer-ds.md §实施调色（2026-11-18）) and the redesign palette (viewer-ds.md §改版调色（2026-11-27）).
+ * (viewer-ds.md §实施调色（2026-11-18）), the redesign palette (viewer-ds.md §改版调色（2026-11-27）) and the redesign
+ * typeface and shape language (viewer-ds.md §改版字体与形状（2026-11-27）).
  * The snapshot is the prototype cascade with these overlays applied; with --prototype the production file must equal
  * prototype + overlays, and production with the overlays reverted must equal the prototype and docs/04.
  * Overlay shape: changed.{both,light,dark,stage}[name] = { prototype, tuned } (prototype null = the token itself was
  * added by an earlier overlay), added.{both,light,dark,stage}[name] = value; `both` is the light and dark theme alike.
+ * An optional `ja` key holds the Japanese UI values (the :lang(ja) rule), applied after the theme values.
  */
-export const TUNING_FILES = ["tuning-2026-11-18.json", "tuning-2026-11-27.json"].map((f) => join(here, "spec", f));
+export const TUNING_FILES = ["tuning-2026-11-18.json", "tuning-2026-11-27.json", "tuning-2026-11-27-type.json"].map((f) => join(here, "spec", f));
 export const TUNINGS = TUNING_FILES.map((f) => JSON.parse(readFileSync(f, "utf8")));
 export const TUNING_FILE = TUNING_FILES[0];
 export const TUNING = TUNINGS[0];
@@ -43,6 +45,7 @@ export function prototypeTuningCss(ts = TUNINGS) {
       (t) => `:root[data-brand='teal']:not([data-theme='dark']) { ${decls(themed(t, "light"))} }
 :root[data-brand='teal'][data-theme='dark'] { ${decls(themed(t, "dark"))} }
 :root[data-brand='teal'] .stage { ${decls({ ...tuned(t, "stage"), ...part(t, "added", "stage") })} }
+:root[data-brand='teal']:lang(ja) { ${decls({ ...tuned(t, "ja"), ...part(t, "added", "ja") })} }
 `
     )
     .join("");
@@ -56,16 +59,18 @@ export function productionRevertCss(ts = TUNINGS) {
       (t) => `html.ds-preview:not([data-theme="dark"]) { ${back(t, ["both", "light"])} }
 html.ds-preview[data-theme="dark"] { ${back(t, ["both", "dark"])} }
 html.ds-preview .stage { ${back(t, ["stage"])} }
+html.ds-preview:lang(ja) { ${back(t, ["ja"])} }
 `
     )
     .join("");
 }
+const OVERLAY_KEYS = ["both", "light", "dark", "stage", "ja"];
 const addedBy = (t) => [
-  ...["both", "light", "dark", "stage"].flatMap((key) => Object.keys(part(t, "added", key))),
-  ...["both", "light", "dark", "stage"].flatMap((key) => Object.entries(part(t, "changed", key)).filter(([, v]) => v.prototype == null).map(([k]) => k))
+  ...OVERLAY_KEYS.flatMap((key) => Object.keys(part(t, "added", key))),
+  ...OVERLAY_KEYS.flatMap((key) => Object.entries(part(t, "changed", key)).filter(([, v]) => v.prototype == null).map(([k]) => k))
 ];
 export const TUNING_ADDED = Object.fromEntries(TUNINGS.flatMap(addedBy).map((k) => [k, "added by a colour tuning overlay"]));
-const tuningCount = (key) => TUNINGS.reduce((s, t) => s + ["both", "light", "dark", "stage"].reduce((n, k) => n + Object.keys(part(t, key, k)).length, 0), 0);
+const tuningCount = (key) => TUNINGS.reduce((s, t) => s + OVERLAY_KEYS.reduce((n, k) => n + Object.keys(part(t, key, k)).length, 0), 0);
 
 /** Prototype-only tokens that intentionally do not exist in production (name -> reason). */
 export const PROTOTYPE_ONLY = {

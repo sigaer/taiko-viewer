@@ -34,7 +34,10 @@ test("thread detail uses an article flow with an explicit reply boundary", () =>
   assert.match(source, /class="thread-content"[\s\S]*<ReworkCommunityThreadActions[\s\S]*<ReworkCommunityReplies/);
   assert.match(read("components/rework/community/ThreadActions.vue"), /class="ta thread-actions"/);
   assert.match(replies, /class="cr reply-section"/);
-  assert.match(replies, /\.cr \{[\s\S]*border-top: 1px solid var\(--line-strong\)/, "one boundary before the replies");
+  // Redesign (2026-11-27): the thread body and its actions are one card, each floor is a card; the card edges are the
+  // boundary between the article and the replies (was one rule above the reply section).
+  assert.match(source, /<ReworkCommunityCard class="thread-card">\s*<section class="thread-content"[\s\S]*<ReworkCommunityThreadActions[\s\S]*<\/ReworkCommunityCard>\s*<ReworkCommunityReplies/);
+  assert.match(replies, /\.cr \{[\s\S]*margin-top: var\(--sp-8\)/, "space between the article card and the replies");
   assert.match(replies, /id="replies-title"/);
   for (const lang of ["zh", "ja"]) assert.doesNotMatch(get(locale(lang), "rework.forum.thread.replyThread"), /回复主题|テーマに返信/);
 });
@@ -159,7 +162,7 @@ test("reply list keeps internal rhythm and a bottom inset above fixed composer",
   const source = read("pages/forum/thread/[id].vue");
   const floor = read("components/rework/community/Floor.vue");
   assert.match(floor, /\.cf__replies \{[\s\S]*border-left: 2px solid var\(--line-strong\)/, "replies inside a floor sit on a left rule");
-  assert.match(floor, /\.cf \{[\s\S]*border-bottom: 1px solid var\(--line\)/);
+  assert.match(floor, /\.cf \{[\s\S]*border: 1px solid var\(--line\);\s*border-radius: var\(--r-panel\)/, "each floor is a card (redesign 2026-11-27)");
   assert.match(source, /@media \(max-width: 767px\) \{\s*\.forum-thread-page \{\s*padding-bottom: 72px;/, "room for the fixed reply box");
 });
 

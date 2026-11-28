@@ -7,6 +7,7 @@ import type { ForumSection } from "~/types/forum";
 import type { SongCatalogItem, SongCatalogPagePayload, SongDetailPayload } from "~/types/content";
 import { FORUM_IMAGE_MAX_BYTES, resolveForumSectionTranslation } from "~/utils/forum";
 import { catalogRequestFor } from "~/utils/rework/catalog";
+import { browserDraftStorage, cleanThreadDraft, readDraft, removeDraft, threadDraftKey, writeDraft } from "~/utils/rework/communityDraft";
 
 type UploadedImage = {
   imageUrl: string;
@@ -133,6 +134,10 @@ watch(() => accountUser.value?.id, () => {
   navigationFailed.value = false;
   submitting.value = false;
   uploadCount.value = 0;
+  // Drafts are per account: stop saving, then load the new account's draft.
+  threadDraftReady = false;
+  draftRestored.value = false;
+  void nextTick(restoreThreadDraft);
 }, { flush: 'sync' });
 
 const contextualSongId = Number(route.query.songId || 0);
@@ -154,6 +159,55 @@ if (Number.isInteger(contextualSongId) && contextualSongId > 0) {
   } catch {}
 }
 const getSectionLabel = (section: ForumSection) => resolveForumSectionTranslation(t, section.slug, section.name);
+
+// Draft (localStorage, read only after mount): text fields, paragraphs and the URLs of already uploaded images.
+// Removed when the thread is accepted or the draft is discarded. Nothing storage-dependent renders on the server.
+let threadDraftReady = false;
+let composerMounted = false;
+const draftRestored = ref(false);
+const draftSnapshot = () => ({
+  sectionSlug: form.sectionSlug, threadType: form.threadType, title: form.title, summary: form.summary, tagsInput: form.tagsInput,
+  paragraphDraft: form.paragraphDraft, paragraphs: paragraphBlocks.value, images: imageBlocks.value
+});
+function restoreThreadDraft() {
+  threadDraftReady = false;
+  if (!composerMounted) return;
+  const draft = readDraft(browserDraftStorage(), threadDraftKey(accountUser.value?.id), cleanThreadDraft);
+  const untouched = !form.title && !form.summary && !form.tagsInput && !form.paragraphDraft && !paragraphBlocks.value.length && !imageBlocks.value.length;
+  if (draft && untouched && publishedThreadId.value === null) {
+    if (draft.sectionSlug && !route.query.section) form.sectionSlug = draft.sectionSlug;
+    if (threadTypeOptions.value.some((option) => option.value === draft.threadType)) form.threadType = draft.threadType;
+    form.title = draft.title;
+    form.summary = draft.summary;
+    form.tagsInput = draft.tagsInput;
+    form.paragraphDraft = draft.paragraphDraft;
+    paragraphBlocks.value = [...draft.paragraphs];
+    imageBlocks.value = draft.images.map((image) => ({ ...image }));
+    draftRestored.value = true;
+  }
+  threadDraftReady = true;
+}
+watch(() => JSON.stringify(draftSnapshot()), () => {
+  if (!threadDraftReady || publishedThreadId.value !== null) return;
+  writeDraft(browserDraftStorage(), threadDraftKey(accountUser.value?.id), draftSnapshot(), cleanThreadDraft);
+});
+const discardDraft = () => {
+  if (submitting.value || publishedThreadId.value !== null) return;
+  removeDraft(browserDraftStorage(), threadDraftKey(accountUser.value?.id));
+  threadDraftReady = false;
+  form.title = "";
+  form.summary = "";
+  form.tagsInput = "";
+  form.paragraphDraft = "";
+  paragraphBlocks.value = [];
+  imageBlocks.value = [];
+  draftRestored.value = false;
+  threadDraftReady = true;
+};
+onMounted(() => {
+  composerMounted = true;
+  restoreThreadDraft();
+});
 
 const searchSongs = async () => {
   if (editorDisabled.value || !viewActive) return;
@@ -302,6 +356,7 @@ const submit = async () => {
     ElMessage.error(copy.value.contentRequired);
     return;
   }
+  const draftKey = threadDraftKey(accountUser.value?.id);
   submitting.value = true;
   try {
     const thread = await apiFetch<{ id: number }>("/api/forum/threads", {
@@ -323,8 +378,11 @@ const submit = async () => {
         contentBlocks
       }
     });
+    // The accepted thread retires the stored draft of the account that posted it.
+    removeDraft(browserDraftStorage(), draftKey);
     if (!requestGuard.current(request)) return;
     publishedThreadId.value = thread.id;
+    draftRestored.value = false;
     if (viewActive) ElMessage.success(copy.value.publishSuccess);
   } catch (error: any) {
     if (requestGuard.current(request) && viewActive) {
@@ -354,6 +412,10 @@ const submit = async () => {
         <p>{{ navigationFailed ? copy.navigationFailed : copy.publishSuccess }}</p>
         <button type="button" class="rw-btn rw-btn--primary" :disabled="submitting" :aria-busy="submitting || undefined" @click="viewPublishedThread">{{ copy.viewPublished }}</button>
         <button type="button" class="rw-btn" :disabled="submitting" @click="startAnotherThread">{{ copy.newPost }}</button>
+      </section>
+      <section v-if="draftRestored && publishedThreadId === null" class="composer-draft rw-note" role="status">
+        <p>{{ t("rework.forum.tools.draftRestored") }}</p>
+        <button type="button" class="rw-btn rw-btn--sm rw-btn--ghost" :disabled="submitting" @click="discardDraft">{{ t("rework.forum.tools.discardDraft") }}</button>
       </section>
       <form class="composer-form" novalidate @submit.prevent>
         <fieldset class="composer-fieldset" :disabled="editorDisabled">
@@ -458,6 +520,17 @@ const submit = async () => {
 }
 .composer-published p {
   flex: 1 1 100%;
+  margin: 0;
+}
+.composer-draft {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+  margin-bottom: 20px;
+}
+.composer-draft p {
   margin: 0;
 }
 .composer-form {

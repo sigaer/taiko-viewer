@@ -1,11 +1,13 @@
 <script setup lang="ts">
-// ReworkCommunityFloor — one floor of a thread (its post and the replies inside it, 楼中楼 with a left rule).
+// ReworkCommunityFloor — one floor of a thread (its post and the replies inside it, 楼中楼 with a left rule), as a card.
 // Ids stay `reply-<post id>` with tabindex=-1 so `#reply-<id>` links land on them (scroll, focus, highlight are the
-// page's). A blocked author's post is folded until revealed. Like and reply only emit; the page does the request.
+// page's). A blocked author's post is folded until revealed. Like, reply, copy link, and — on one's own posts while
+// the thread is open — edit and delete only emit; the page does the requests (the server checks ownership again).
 // `entry.head` is false when the floor's own post is mounted in the previous reply window (only its replies here).
 import type { PropType } from "vue";
+import type { ForumContentBlock } from "~/types/forum";
 import type { WindowFloor } from "~/utils/rework/community";
-import { replyTargetName } from "~/utils/rework/community";
+import { ownsItem, replyTargetName } from "~/utils/rework/community";
 
 const props = defineProps({
   entry: { type: Object as PropType<WindowFloor>, required: true },
@@ -14,7 +16,14 @@ const props = defineProps({
   highlightedId: { type: Number as PropType<number | null>, default: null },
   revealedIds: { type: Array as PropType<number[]>, default: () => [] },
   activeLikeId: { type: Number as PropType<number | null>, default: null },
-  viewerLabel: { type: String, required: true }
+  viewerLabel: { type: String, required: true },
+  /** the signed-in member (own posts get edit / delete) */
+  viewerId: { type: Number as PropType<number | null>, default: null },
+  /** the thread is locked: no edit / delete */
+  locked: { type: Boolean, default: false },
+  editingId: { type: Number as PropType<number | null>, default: null },
+  /** a post edit or delete is in flight */
+  ownBusy: { type: Boolean, default: false }
 });
 const emit = defineEmits<{
   like: [id: number, event: MouseEvent];
@@ -22,14 +31,20 @@ const emit = defineEmits<{
   reveal: [id: number];
   open: [url: string, event: MouseEvent];
   failed: [url: string];
+  copy: [id: number];
+  edit: [id: number];
+  cancelEdit: [];
+  save: [id: number, payload: { bodyText: string; images: string[] }];
+  remove: [id: number, isFloor: boolean];
 }>();
 const { t } = useI18n();
 const floor = computed(() => props.entry.floor);
 const folded = (id: number, blocked: boolean) => blocked && !props.revealedIds.includes(id);
 const blocksOf = (post: { contentBlocks?: unknown[]; bodyText: string }) =>
-  (post.contentBlocks?.length ? post.contentBlocks : post.bodyText ? [{ type: "paragraph", text: post.bodyText }] : []) as never[];
+  (post.contentBlocks?.length ? post.contentBlocks : post.bodyText ? [{ type: "paragraph", text: post.bodyText }] : []) as ForumContentBlock[];
 const likeBusy = (id: number) => props.activeLikeId === id;
 const likeDisabled = (id: number) => props.activeLikeId !== null && props.activeLikeId !== id;
+const mine = (authorId: number) => ownsItem(authorId, props.viewerId, props.locked);
 </script>
 
 <template>
@@ -42,17 +57,25 @@ const likeDisabled = (id: number) => props.activeLikeId !== null && props.active
       tabindex="-1"
     >
       <header class="cf__head">
-        <ReworkCommunityAuthor :user="floor.author" :size="32" titles="text" :op="floor.author.id === opId">
+        <ReworkCommunityAuthor :user="floor.author" :size="32" titles="text" :op="floor.author.id === opId" link>
           <ReworkCommunityTime class="cf__time" :value="floor.createdAt" />
         </ReworkCommunityAuthor>
         <span class="cf__no num">#{{ floor.floorNo }}</span>
       </header>
-      <div v-if="folded(floor.id, floor.isBlockedAuthor)" class="cf__blocked">
+      <ReworkCommunityPostEditor
+        v-if="editingId === floor.id"
+        class="cf__body"
+        :blocks="blocksOf(floor)"
+        :saving="ownBusy"
+        @save="(payload) => emit('save', floor.id, payload)"
+        @cancel="emit('cancelEdit')"
+      />
+      <div v-else-if="folded(floor.id, floor.isBlockedAuthor)" class="cf__blocked">
         <p>{{ t("rework.forum.thread.blockedFloor") }}</p>
         <button type="button" class="rw-btn rw-btn--sm rw-btn--ghost" @click="emit('reveal', floor.id)">{{ t("rework.forum.thread.expand") }}</button>
       </div>
       <ReworkCommunityBlocks v-else class="cf__body" :blocks="blocksOf(floor)" :viewer-label="viewerLabel" :fallback-alt="t('rework.forum.thread.reply')" @open="(url, event) => emit('open', url, event)" @failed="(url) => emit('failed', url)" />
-      <div class="cf__acts">
+      <div v-if="editingId !== floor.id" class="cf__acts">
         <button
           type="button"
           class="cf__act"
@@ -67,6 +90,17 @@ const likeDisabled = (id: number) => props.activeLikeId !== null && props.active
         <button type="button" class="cf__act" @click="emit('reply', floor.id, t('rework.forum.thread.floorReply', { username: floor.author.username }))">
           <ReworkIcon name="reply" /><span>{{ t("rework.forum.thread.replyToFloor") }}</span>
         </button>
+        <button type="button" class="cf__act cf__icon" :aria-label="t('rework.forum.tools.copyFloorLink')" :title="t('rework.forum.tools.copyFloorLink')" @click="emit('copy', floor.id)">
+          <ReworkIcon name="link" />
+        </button>
+        <template v-if="mine(floor.author.id)">
+          <button type="button" class="cf__act cf__icon" :aria-label="t('rework.forum.tools.edit')" :title="t('rework.forum.tools.edit')" :disabled="ownBusy" @click="emit('edit', floor.id)">
+            <ReworkIcon name="edit" />
+          </button>
+          <button type="button" class="cf__act cf__icon is-danger" :aria-label="t('rework.forum.tools.delete')" :title="t('rework.forum.tools.delete')" :disabled="ownBusy" @click="emit('remove', floor.id, true)">
+            <ReworkIcon name="trash" />
+          </button>
+        </template>
       </div>
     </article>
     <div v-else class="cf__cont">
@@ -82,17 +116,24 @@ const likeDisabled = (id: number) => props.activeLikeId !== null && props.active
         tabindex="-1"
       >
         <header class="cf__head">
-          <ReworkCommunityAuthor :user="reply.author" :size="24" titles="none" :op="reply.author.id === opId">
+          <ReworkCommunityAuthor :user="reply.author" :size="24" titles="none" :op="reply.author.id === opId" link>
             <ReworkCommunityTime class="cf__time" :value="reply.createdAt" />
           </ReworkCommunityAuthor>
         </header>
         <p v-if="replyTargetName(reply, floor)" class="cf__target">{{ t("rework.forum.thread.replyToUser", { username: replyTargetName(reply, floor) }) }}</p>
-        <div v-if="folded(reply.id, reply.isBlockedAuthor)" class="cf__blocked">
+        <ReworkCommunityPostEditor
+          v-if="editingId === reply.id"
+          :blocks="blocksOf(reply)"
+          :saving="ownBusy"
+          @save="(payload) => emit('save', reply.id, payload)"
+          @cancel="emit('cancelEdit')"
+        />
+        <div v-else-if="folded(reply.id, reply.isBlockedAuthor)" class="cf__blocked">
           <p>{{ t("rework.forum.thread.blockedReply") }}</p>
           <button type="button" class="rw-btn rw-btn--sm rw-btn--ghost" @click="emit('reveal', reply.id)">{{ t("rework.forum.thread.expand") }}</button>
         </div>
         <ReworkCommunityBlocks v-else :blocks="blocksOf(reply)" :viewer-label="viewerLabel" :fallback-alt="t('rework.forum.thread.reply')" @open="(url, event) => emit('open', url, event)" @failed="(url) => emit('failed', url)" />
-        <div class="cf__acts">
+        <div v-if="editingId !== reply.id" class="cf__acts">
           <button
             type="button"
             class="cf__act"
@@ -107,6 +148,17 @@ const likeDisabled = (id: number) => props.activeLikeId !== null && props.active
           <button type="button" class="cf__act" @click="emit('reply', reply.id, t('rework.forum.thread.replyToUser', { username: reply.author.username }))">
             <ReworkIcon name="reply" /><span>{{ t("rework.forum.thread.reply") }}</span>
           </button>
+          <button type="button" class="cf__act cf__icon" :aria-label="t('rework.forum.tools.copyFloorLink')" :title="t('rework.forum.tools.copyFloorLink')" @click="emit('copy', reply.id)">
+            <ReworkIcon name="link" />
+          </button>
+          <template v-if="mine(reply.author.id)">
+            <button type="button" class="cf__act cf__icon" :aria-label="t('rework.forum.tools.edit')" :title="t('rework.forum.tools.edit')" :disabled="ownBusy" @click="emit('edit', reply.id)">
+              <ReworkIcon name="edit" />
+            </button>
+            <button type="button" class="cf__act cf__icon is-danger" :aria-label="t('rework.forum.tools.delete')" :title="t('rework.forum.tools.delete')" :disabled="ownBusy" @click="emit('remove', reply.id, false)">
+              <ReworkIcon name="trash" />
+            </button>
+          </template>
         </div>
       </li>
     </ol>
@@ -116,9 +168,15 @@ const likeDisabled = (id: number) => props.activeLikeId !== null && props.active
 <style scoped>
 .cf {
   list-style: none;
-  border-bottom: 1px solid var(--line);
+  padding: var(--sp-2) var(--sp-4) var(--sp-1);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
   font-family: var(--font-ui);
   color: var(--ink);
+}
+.cf.is-continued {
+  padding-top: 0;
 }
 .cf__post,
 .cf__reply {
@@ -130,7 +188,7 @@ const likeDisabled = (id: number) => props.activeLikeId !== null && props.active
 .cf__post {
   display: grid;
   gap: var(--sp-3);
-  padding: var(--sp-4) var(--sp-2) var(--sp-2);
+  padding: var(--sp-3) var(--sp-2) var(--sp-1);
   margin: 0 calc(var(--sp-2) * -1);
 }
 .cf__post:focus,
@@ -159,8 +217,14 @@ const likeDisabled = (id: number) => props.activeLikeId !== null && props.active
 }
 .cf__no {
   flex: none;
+  display: inline-flex;
+  align-items: center;
+  height: 24px;
+  padding: 0 var(--sp-2);
+  border-radius: var(--tag-radius);
+  background: var(--bg-sunk);
   font-size: var(--fs-12);
-  color: var(--ink-3);
+  color: var(--ink-2);
 }
 .cf__body {
   padding-left: 40px;
@@ -204,6 +268,11 @@ const likeDisabled = (id: number) => props.activeLikeId !== null && props.active
   font-weight: 600;
   cursor: pointer;
 }
+.cf__icon {
+  justify-content: center;
+  min-width: var(--hit);
+  padding: 0;
+}
 .cf__act :deep(svg) {
   width: 16px;
   height: 16px;
@@ -221,6 +290,10 @@ const likeDisabled = (id: number) => props.activeLikeId !== null && props.active
 }
 .cf__act.is-on {
   color: var(--selected-ink);
+}
+.cf__act.is-danger:hover {
+  color: var(--danger);
+  background: var(--danger-wash);
 }
 .cf__act:disabled {
   cursor: default;
@@ -262,6 +335,9 @@ const likeDisabled = (id: number) => props.activeLikeId !== null && props.active
   color: var(--link);
 }
 @media (max-width: 767px) {
+  .cf {
+    padding-inline: var(--sp-3);
+  }
   .cf__body,
   .cf__post > .cf__blocked {
     padding-left: 0;

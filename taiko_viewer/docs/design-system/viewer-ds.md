@@ -59,6 +59,11 @@
 - 首屏自托管字体预算：≤150 KiB、≤12 个请求。Barlow / Barlow Condensed 按需加载；首次集成正式页面时重新验证字体加载与 FOUT。
 
 - 自托管 Barlow（400 / 500 / 600 / 700）与 Barlow Condensed（500 / 600 / 700），latin + latin-ext 两个 unicode-range 分片，woff2，`font-display: swap`。文件原样取自 `@fontsource/barlow` 5.3.0 与 `@fontsource/barlow-condensed` 5.3.0（npm），SIL Open Font License 1.1，许可文本 `assets/font/ds/OFL-Barlow.txt`、`OFL-Barlow-Condensed.txt`。没有加 npm 依赖。
+- **2026-11-27 改版起**：界面拉丁字母与数字改用 **Outfit**（400 / 500 / 600 / 700 / 800），Barlow（非窄体）的 8 个文件、`@font-face` 与 `OFL-Barlow.txt` 已删除（没有测试或检查固定这些文件；它只剩 `--font-num` 的回落位，改为 Outfit）。
+  Outfit 文件原样取自 `@fontsource/outfit` **5.3.0**（npm，`npm pack` 到仓库外的临时目录后复制，没有加 npm 依赖、没有改 `package-lock.json`）：
+  `outfit-latin-{400,500,600,700,800}-normal.woff2` 与 `outfit-latin-ext-{400,500,600,700,800}-normal.woff2`，共 10 个、约 102 KB（latin 每个约 14 KB，latin-ext 约 6 KB）；
+  unicode-range 与 Barlow 的两个分片相同（取自包内 `unicode.json`）；SIL Open Font License 1.1，许可文本 `assets/font/ds/OFL-Outfit.txt`（包内 `LICENSE` 原样）。
+  Barlow Condensed 不变，仍用于表格里的密集数字（`--font-num`，七位成绩也排得下）。一屏常见用到 Outfit 400 / 600 / 700 / 800 的 latin 分片与 Barlow Condensed 一两个字重，仍在 ≤150 KiB、≤12 个请求的预算内（未实测，浏览器验收时复核）。
 - 中日文用系统字体。token 的字体栈保持规格原样，`'Noto Sans SC Variable'` / `'Noto Sans JP Variable'` 排在系统字体前面；方案 B 不声明这两个字体，浏览器直接落到系统字体。
 - 只有 `ds-samples/_shared/DsSampleShell.vue` 导入 `fonts.css`；正常生产构建里没有这些字体文件，现有页面也不请求它们。
 - P0-10 的 A / B 对比页是 `/_ds/fonts`（`?fonts=a` 为方案 A）。方案 A 的 Noto Sans SC / JP 可变字体约 10 MB，没有加依赖、也没有放进仓库：页面在 `?fonts=a` 时链接 `/_ds-fonts-a/fonts-cjk.css`，这个地址应用本身不提供，由 `scripts/ds/font-measure.mjs` 在测量时用请求拦截从仓库外的 `@fontsource-variable` 安装目录应答。不经测量脚本打开时方案 A 退回方案 B。token 不用改。该对照仅保留历史测量用途；本轮正式裁定不引入完整自托管 Noto Sans SC / JP。
@@ -232,3 +237,33 @@ Role 层的指向规则（品牌色变成红色后不再一律指向 `--brand-pr
 对比度（`contrast-check.mjs`，456 对全部通过）新增的配对：`--brand-ink` 在 `--surface` / `--bg` / `--bg-sunk` / `--surface-2` / `--brand-soft` / `--chrome-bg` 与舞台面上（≥ 4.5）；`--side-ink` / `-2` / `-strong` 在 `--side-bg` / `--side-surface` 上（≥ 4.5）；焦点环与 `--action-bg` 在侧栏底上（≥ 3）；舞台的 `--action-ink` 在悬停、按下底上（≥ 4.5）。
 
 范围外、仍是青绿的：`assets/css/tokens.css`（`--viewer-*`，以及由它决定的 `theme-color`）、管理后台、年度报告；`components/rework/Shell.vue` 的范围外页面仍以 `--chrome-bg` 作页面底，调色后浅色下是白色，外壳重做时一并处理。
+
+## 改版字体与形状（2026-11-27）
+
+按已批准的改版设计（`Foundations` 设计稿）换字体与形状语言。只改 token 的值、新增少量 token，并改共用基础件（`rework.css`、`element-plus.css`、`ReworkPanel`、`ReworkPageHeader`），所有页面一起继承；颜色不变。
+差异记录在 `scripts/ds/spec/tuning-2026-11-27-type.json`，叠在前两份调整之上（`check-tokens.mjs` 的 `TUNING_FILES`）。这份调整第一次用到日文界面的值，所以调整文件新增了 `ja` 键（对应 `:lang(ja)` 规则，在主题值之后应用；`--prototype` 时同样还原核对）。快照 `tokens-v1.3-cplus.json` 按「原型级联 + 三份调整」重新生成，`commit` 仍记原型的 `b4bd45b`。
+
+| token | 原值 | 新值 | 说明 |
+|---|---|---|---|
+| `--font-ui` | `'Barlow', <CJK>` | `'Outfit', <CJK>` | 中文 / 日文界面各自的 CJK 栈不变 |
+| `--font-num` | `'Barlow Condensed', 'Barlow', <CJK>` | `'Barlow Condensed', 'Outfit', <CJK>` | 表格里的密集数字仍是窄体 |
+| `--font-display`（新增） | — | `'Outfit', <CJK>` | 页面标题与大数字（800，字距收紧） |
+| `--fs-30`（新增） | — | `1.875rem` | 页面标题 30 |
+| `--r-ctl` | `8px` | `12px` | 按钮、输入框、选择框（`--ctl-radius`、`--el-border-radius-base` 跟随） |
+| `--r-panel` | `14px` | `20px` | 卡片、面板、对话框（`--overlay-radius` 跟随） |
+| `--tag-radius` | `var(--r-xs)` | `var(--r-note)` | 标签与胶囊全圆 |
+| `--shadow-thumb`（新增） | — | 浅 `0 1px 2px rgb(21 24 42 / 0.12)`；深 `0 1px 2px rgb(0 0 0 / 0.5), 0 0 0 1px #3a3f62` | 分段控件凸起的滑块 |
+
+共用基础件（`html.viewer-rework` 作用域；Element Plus 在两个作用域下镜像）：
+
+- 字号层级：页面标题 30 / 800（`ReworkPageHeader`，`--font-display`，窄屏收到 22）；卡片标题 16 / 700（`ReworkPanel` 的 h2 与 h3）；正文 14；标签 12 / 700（`.rw-label`）；大数字 `.rw-display`（`--font-display` 800、字距 −0.02em）。
+- 按钮 `.rw-btn`：高 ≥ 44、圆角 12、字重 700、1.5px `--ctl-border` 描边（≥ 3:1，没有按设计稿用更浅的 `--line-strong`）。主按钮朱红实心（`--action-*`）；新增 `--ink`（墨色实心，强次要）与 `--quiet`（下沉底，无描边）；`--ghost`、`--danger`、禁用态不变。
+- 输入框与选择框：圆角 12、1.5px `--ctl-border`。
+- 分段控件 `.rw-seg` 与 `el-segmented`：下沉轨道（`--bg-sunk`）上凸起的表面滑块（`--surface` + `--shadow-thumb`，墨色字 700），不再是品牌浅底加描边。
+- 筛选胶囊 `.rw-chip`（新增，`aria-pressed`）：全圆、`--ctl-border` 描边；选中为墨色实心。视觉高 36，触控区透明扩展到 44。`.rw-chips` 是一行胶囊。
+- 卡片内的列表 `.rw-rows`：行与行之间一条 `--line` 发丝线，行本身不再带边框。
+- Element Plus：按钮字重 700；对话框与消息框圆角取 `--overlay-radius`；`el-tag` 圆角取 `--tag-radius`。
+
+不变：颜色 token（包括 `--ctl-border` 的 3:1）、`--r-xs`（6，小号内嵌元素与焦点环）、`--r-sheet`、音符与素材组件。
+范围外：`theme-color`（浏览器地址栏颜色）仍由 `nuxt.config.ts` 从旧的 `assets/css/tokens.css`（`--viewer-bg`）读取，这一轮没有改。
+

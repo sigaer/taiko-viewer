@@ -349,14 +349,17 @@ useViewerSeo(() => ({
     :back-href="songListReturn"
     panel-id="song-chart-workspace"
     :tab-id="`song-chart-workspace-tab-${selectedDifficultyCode}`"
-    :side-narrow="Boolean(accountUser)"
     @retry="refreshSongDetail()"
   >
     <template #head>
-      <ReworkSongDetailHead v-if="song" :song="song" />
+      <ReworkSongDetailHead v-if="song" :song="song">
+        <template #actions>
+          <ReworkSongActions :song-id="songId" :difficulty="selectedDifficultyCode" :side="selectedSide" :tja-bundle-url="tjaBundleUrl" />
+        </template>
+      </ReworkSongDetailHead>
     </template>
     <template #tabs>
-      <DsDiffTabs :charts="difficultyTabs" :model-value="selectedDifficultyCode" controls="song-chart-workspace" @update:model-value="selectDifficulty" />
+      <DsDiffTabs :charts="difficultyTabs" :model-value="selectedDifficultyCode" controls="song-chart-workspace" size="lg" @update:model-value="selectDifficulty" />
     </template>
     <template #side>
       <ReworkSongMyScore
@@ -391,15 +394,7 @@ useViewerSeo(() => ({
       :label="selectedFumen?.label || ''"
       :star-label="getTrackStarLabel(selectedTrack)"
       :combo-label="selectedFumen ? getFumenComboLabel(selectedFumen.key) : '—'"
-      :tja-bundle-url="tjaBundleUrl"
       :branch-variants="branchAudioVariants"
-    />
-    <ReworkSongMyScore
-      placement="inline"
-      :items="[]"
-      :difficulty="selectedDifficultyCode"
-      :signed-in="Boolean(accountUser)"
-      :redirect="loginRedirect"
     />
     <ReworkSongDataSection
       v-if="song"
@@ -415,33 +410,38 @@ useViewerSeo(() => ({
       :shape-level="selectedRating?.level ?? null"
       @retry="refreshV2Constants()"
     />
-    <ReworkSongChartUgc
-      v-if="chartUgcSummary"
-      :summary="chartUgcSummary"
-      :viewer-state="chartUgcViewerState"
-      :authenticated="Boolean(accountUser)"
-      :interaction-pending="chartUgcInteractionPending"
-      :interaction-unavailable="chartUgcInteractionUnavailable"
-      :difficulty-saving="chartUgcDifficultySaving"
-      :tag-saving="chartUgcTagSaving"
-      :difficulty-error-key="chartUgcDifficultyError"
-      :tag-error-key="chartUgcTagError"
-      :tip-saving="chartUgcTipSaving"
-      :tip-error-key="chartUgcTipError"
-      :helpful-saving-by-id="chartUgcHelpfulSavingById"
-      :helpful-error-by-id="chartUgcHelpfulErrorById"
-      :report-saving-by-id="chartUgcReportSavingById"
-      :report-error-by-id="chartUgcReportErrorById"
-      :report-success-by-id="chartUgcReportSuccessById"
-      :difficulty-label="t(`difficulty.${selectedDifficultyCode}`)"
-      @difficulty-change="setChartUgcDifficultyVote"
-      @tags-change="setChartUgcTagSlugs"
-      @tip-save="saveChartUgcTip"
-      @tip-delete="deleteChartUgcTip"
-      @helpful-change="setChartUgcHelpful"
-      @report="reportChartUgcTip"
-      @login="goToChartUgcLogin"
-    />
-    <ReworkSongDiscussions :key="`${songId}-${selectedDifficultyCode}`" :song-id="songId" :difficulty-type="selectedDifficultyCode" />
+    <template #aside>
+      <ReworkSongChartUgc
+        v-if="chartUgcSummary"
+        :summary="chartUgcSummary"
+        :viewer-state="chartUgcViewerState"
+        :authenticated="Boolean(accountUser)"
+        :interaction-pending="chartUgcInteractionPending"
+        :interaction-unavailable="chartUgcInteractionUnavailable"
+        :difficulty-saving="chartUgcDifficultySaving"
+        :tag-saving="chartUgcTagSaving"
+        :difficulty-error-key="chartUgcDifficultyError"
+        :tag-error-key="chartUgcTagError"
+        :tip-saving="chartUgcTipSaving"
+        :tip-error-key="chartUgcTipError"
+        :helpful-saving-by-id="chartUgcHelpfulSavingById"
+        :helpful-error-by-id="chartUgcHelpfulErrorById"
+        :report-saving-by-id="chartUgcReportSavingById"
+        :report-error-by-id="chartUgcReportErrorById"
+        :report-success-by-id="chartUgcReportSuccessById"
+        :difficulty-label="t(`difficulty.${selectedDifficultyCode}`)"
+        @difficulty-change="setChartUgcDifficultyVote"
+        @tags-change="setChartUgcTagSlugs"
+        @tip-save="saveChartUgcTip"
+        @tip-delete="deleteChartUgcTip"
+        @helpful-change="setChartUgcHelpful"
+        @report="reportChartUgcTip"
+        @login="goToChartUgcLogin"
+      />
+      <ReworkSongDiscussions :key="`${songId}-${selectedDifficultyCode}`" :song-id="songId" :difficulty-type="selectedDifficultyCode" />
+    </template>
+    <template v-if="song" #dock>
+      <ReworkSongActions variant="dock" :song-id="songId" :difficulty="selectedDifficultyCode" :side="selectedSide" :tja-bundle-url="tjaBundleUrl" />
+    </template>
   </ReworkSongDetailFrame>
 </template>

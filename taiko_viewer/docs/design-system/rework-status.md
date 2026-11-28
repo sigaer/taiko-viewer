@@ -111,10 +111,12 @@
 **曲库与搜索**
 - 列表 API 无定数、个人王冠 / 成绩 / 进度、分类 / 星级 / 难度筛选、按星级 / 定数 / BPM / 曲名排序、别名显示、各上架状态的数量。
 - 搜索不支持别名、艺术家、谱面配置；没有相关度排序；服务端最小分页 12，前端截断为 8。
+- 改版 v2（2026-11-27）曲库稿里没有做的：分类筛选条、魔王星级筛选条、「只看有里谱面」、「我的魔王成绩」列（列表 API 没有这些参数与字段；排序保持两个链接选项，不做下拉）。
 
 **歌曲详情与定数表**
 - 详情：每小节音符密度、小节定位、分歧谱面图、连打时间与气球数、别名、收藏、准确率、单曲 RT、最好成绩变化曲线、「设为这次想练」、讨论的帖子类型 / 作者。
 - 定数表：星级、日文曲名、别名 / 艺术家搜索、定数区间筛选、个人王冠与评价列、CSV 导出、无定数谱面数量。
+- 改版 v2（2026-11-27）详情稿里没有做的：成绩卡的「编辑」（没有修改单曲成绩的入口）、试听的单一进度条播放器（保留现有三种音源的原生播放器与鼓点音量）、六维的横条形式（保留现有雷达）、「数据来源」以外的说明文字。
 
 **成绩**
 - B30 行（单曲 RT、准确率、入围线）、Rating 与六维历史序列、每张谱的王冠 / 评价（点灯格子）只有图片，没有 JSON。
@@ -243,6 +245,7 @@
 | `tests/fixtures/forumDiscoveryBrowserRuntime.mjs`（再记一次） | 切片 G 删了 `ForumSafeImage.vue` 并去掉它的导入与注册；其余失效导入见 D 一行 | G |
 | `scripts/ds/browser-check.mjs` | 切片 G：所有重做页面都有映射，「现有页面」参照只剩 `/annual`，要用 `--existing /annual` 与手机 UA（`DS_USER_AGENT`）；其中两条「离开后样式相同」会因 Element Plus 按需样式表失败（与作用域无关），Linux 一侧需决定是否改判据 | G |
 | 各切片 `*-scenarios.mjs` 的 EP 开关场景 | 切片 G 已改用 `/annual` 并以手机 UA 打开；Linux 版本直接复用 | G |
+| `scripts/rework/detail-scenarios.mjs`、`firefox-android-scenarios.mjs` | 改版 v2 已改：未登录卡在所有宽度都在右栏第一张（`.mine-guest` 已删）、雷达按卡片宽度并排、版本标签改为 `.sd-headcard .versions li`、手机操作条 `.sa-dock`；Firefox 的「难度条吸顶」检查改为 `#viewer-shell-dock > .sa-dock` 位于滚动区与底栏之间（难度块不再吸顶）。需在 Linux 跑 | 曲库 / 详情 v2 |
 | `forumCoreSqlHttp`、`forumCommunitySqlHttp`、`oidcSqlHttp`、`accountTitlesSql`、`botScoreTokenSql`、`developerApiV1Sql`、`developerApiV1ManageabilitySql`、`accountSyncCanonicalSql` | 不用改；本机由环境守卫拒绝，需在 Linux 隔离测试库上跑 | D、E1、E2 |
 
 ## 历史待决事项（地址、版本、发布顺序与真机门槛已由 2026-11-19 裁定覆盖）

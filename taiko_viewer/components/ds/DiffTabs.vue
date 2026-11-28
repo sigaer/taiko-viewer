@@ -57,7 +57,10 @@ const props = defineProps({
   /** Selected difficulty 1–5 */
   modelValue: { type: [Number, String] as PropType<number | string | null>, default: null },
   /** id of the controlled tab panel */
-  controls: { type: String, default: "" }
+  controls: { type: String, default: "" },
+  /** "lg": tiles that share the row (song detail, redesign v2): 38 px icon, name over ★star, constant on the right;
+   *  on phones icon over ★star only (the name and constant stay in the accessible name). No sideways scrolling. */
+  size: { type: String as PropType<"md" | "lg">, default: "md" }
 });
 const emit = defineEmits<{ "update:modelValue": [difficulty: DifficultyType] }>();
 
@@ -74,6 +77,8 @@ const label = (item: DsDiffTabItem) =>
   ]
     .filter(Boolean)
     .join(" ");
+/** Caption over the constant on a large tile: the existing "定数 {value}" message without its value. */
+const constantCaption = computed(() => t("ds.diff.constant", { value: "" }).trim());
 
 const scroller = ref<HTMLElement | null>(null);
 const tabs = ref<HTMLElement[]>([]);
@@ -129,7 +134,7 @@ watch(selected, () => nextTick(() => reveal(true)));
 </script>
 
 <template>
-  <div class="ds-difftabs" :class="{ 'has-fade-start': fadeStart, 'has-fade-end': fadeEnd }">
+  <div class="ds-difftabs" :class="[`ds-difftabs--${size}`, { 'has-fade-start': fadeStart, 'has-fade-end': fadeEnd }]">
     <div ref="scroller" class="ds-difftabs__bar" role="tablist" :aria-label="t('ds.diff.tabs')" @scroll.passive="updateFades">
       <button
         v-for="(item, index) in items"
@@ -149,11 +154,24 @@ watch(selected, () => nextTick(() => reveal(true)));
         <span class="ds-difftab__icon" aria-hidden="true">
           <img class="ds-difftab__img" :src="item.icon" alt="" width="26" height="26" decoding="async" />
         </span>
-        <span class="ds-difftab__name" aria-hidden="true">{{ t(`difficulty.${item.difficulty}`) }}</span>
-        <span class="ds-difftab__short" aria-hidden="true">{{ t(`ds.diff.short.${item.difficulty}`) }}</span>
-        <span v-if="item.star !== null" class="ds-difftab__star num" aria-hidden="true">★{{ item.star }}</span>
-        <span v-if="item.constant !== null" class="ds-difftab__constant num" aria-hidden="true">{{ item.constant }}</span>
-        <span v-else class="ds-difftab__constant is-missing" aria-hidden="true">—</span>
+        <template v-if="size === 'lg'">
+          <span class="ds-difftab__main" aria-hidden="true">
+            <span class="ds-difftab__name">{{ t(`difficulty.${item.difficulty}`) }}</span>
+            <span v-if="item.star !== null" class="ds-difftab__star num">★{{ item.star }}</span>
+          </span>
+          <span class="ds-difftab__const" aria-hidden="true">
+            <span class="ds-difftab__cap">{{ constantCaption }}</span>
+            <span v-if="item.constant !== null" class="ds-difftab__constant num">{{ item.constant }}</span>
+            <span v-else class="ds-difftab__constant is-missing">—</span>
+          </span>
+        </template>
+        <template v-else>
+          <span class="ds-difftab__name" aria-hidden="true">{{ t(`difficulty.${item.difficulty}`) }}</span>
+          <span class="ds-difftab__short" aria-hidden="true">{{ t(`ds.diff.short.${item.difficulty}`) }}</span>
+          <span v-if="item.star !== null" class="ds-difftab__star num" aria-hidden="true">★{{ item.star }}</span>
+          <span v-if="item.constant !== null" class="ds-difftab__constant num" aria-hidden="true">{{ item.constant }}</span>
+          <span v-else class="ds-difftab__constant is-missing" aria-hidden="true">—</span>
+        </template>
         <span class="ds-difftab__sr">{{ label(item) }}</span>
       </button>
     </div>
@@ -301,6 +319,99 @@ watch(selected, () => nextTick(() => reveal(true)));
   }
   .ds-difftab:not([aria-selected="true"]) .ds-difftab__short {
     display: inline;
+  }
+}
+/* ---------- lg: tiles sharing the row ---------- */
+.ds-difftabs--lg .ds-difftabs__bar {
+  flex-wrap: wrap;
+  gap: 12px;
+  overflow: visible;
+}
+.ds-difftabs--lg .ds-difftab {
+  flex: 1 1 170px;
+  gap: 12px;
+  min-width: 0;
+  height: 72px;
+  padding: 0 16px;
+  border-radius: var(--r-panel);
+  text-align: left;
+}
+.ds-difftabs--lg .ds-difftab[aria-selected="true"] {
+  border-width: 2px;
+  box-shadow: none;
+}
+.ds-difftabs--lg .ds-difftab[aria-selected="true"]:focus-visible {
+  box-shadow: var(--focus);
+}
+.ds-difftabs--lg .ds-difftab[aria-selected="true"]::after {
+  display: none;
+}
+.ds-difftabs--lg .ds-difftab__icon {
+  width: 38px;
+  height: 38px;
+}
+.ds-difftab__main,
+.ds-difftab__const {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  line-height: 1.25;
+}
+.ds-difftab__const {
+  align-items: flex-end;
+  margin-left: auto;
+}
+.ds-difftabs--lg .ds-difftab__name {
+  color: var(--ink-2);
+}
+.ds-difftabs--lg .ds-difftab[aria-selected="true"] .ds-difftab__name {
+  color: var(--selected-ink);
+}
+.ds-difftabs--lg .ds-difftab__star {
+  font-family: var(--font-display, var(--font-ui));
+  font-size: var(--fs-22);
+  font-weight: 800;
+}
+.ds-difftab__cap {
+  font-size: var(--fs-12);
+  color: var(--ink-3);
+}
+.ds-difftabs--lg .ds-difftab__constant {
+  font-family: var(--font-display, var(--font-ui));
+  font-size: var(--fs-16);
+  font-weight: 800;
+  color: var(--ink);
+}
+.ds-difftabs--lg .ds-difftab__constant.is-missing {
+  color: var(--ink-3);
+}
+@media (max-width: 767px) {
+  .ds-difftabs--lg .ds-difftabs__bar {
+    flex-wrap: nowrap;
+    gap: 8px;
+  }
+  .ds-difftabs--lg .ds-difftab {
+    flex: 1 1 0;
+    flex-direction: column;
+    justify-content: center;
+    gap: 1px;
+    height: 68px;
+    padding: 0 4px;
+    text-align: center;
+  }
+  .ds-difftabs--lg .ds-difftab__icon {
+    width: 26px;
+    height: 26px;
+  }
+  .ds-difftabs--lg .ds-difftab__main {
+    align-items: center;
+  }
+  .ds-difftabs--lg .ds-difftab__name,
+  .ds-difftabs--lg .ds-difftab__const {
+    display: none;
+  }
+  .ds-difftabs--lg .ds-difftab__star {
+    font-size: var(--fs-16);
   }
 }
 </style>

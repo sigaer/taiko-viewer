@@ -3,6 +3,7 @@ import type { SongCatalogItem, SongCatalogPagePayload } from "~/types/content";
 import { catalogLocation, searchAllState, songSearchRequest, songTitle } from "~/utils/rework/catalog";
 import { COMMON_FEATURES, FEATURES } from "~/utils/rework/navigation";
 import { searchSelection } from "~/utils/rework/search";
+import { constantQueryVocabulary, constantRangeText, constantsLocation, parseConstantQuery } from "~/utils/rework/constantQuery";
 const props = defineProps<{ open: boolean }>();
 const emit = defineEmits<{ close: [navigate?: string] }>();
 const { t, locale } = useI18n();
@@ -39,6 +40,24 @@ const actions = computed(() => {
     }))
     .filter((x) => !q || normalize(x.label).includes(q));
 });
+// A range query ("定数 10-10.5", "手速 11+", "体力 <8") adds one row that opens the constants table filtered.
+const rangeVocabulary = computed(() => constantQueryVocabulary((key) => t(key)));
+const rangeAction = computed(() => {
+  const range = parseConstantQuery(query.value, rangeVocabulary.value);
+  if (!range) return [];
+  const text = constantRangeText(range);
+  return [
+    {
+      id: "constants-range",
+      label: t(text.key, { column: t(text.columnKey), min: text.min, max: text.max }),
+      to: localePath(constantsLocation(range)),
+      kind: "page",
+      icon: "table",
+      group: t("rework.constants"),
+      song: null,
+    },
+  ];
+});
 const shownSongs = computed(() => songs.value.slice(0, 8));
 // Last option: every match in the library, only when the panel shows fewer songs than the API found.
 const viewAll = computed(() =>
@@ -57,6 +76,7 @@ const viewAll = computed(() =>
     : [],
 );
 const results = computed(() => [
+  ...rangeAction.value,
   ...shownSongs.value.map((song) => ({
     id: "song-" + song.id,
     label: songTitle(song, locale.value),
@@ -229,7 +249,8 @@ onBeforeUnmount(() => {
             /><span v-else class="result-icon" :class="{ 'is-primary': result.id === 'page-syncScores' }"><ReworkIcon :name="result.icon" /></span><span
               class="result-label"
               >{{ result.label
-              }}<small v-if="result.group">{{ result.group }}</small></span
+              }}<small v-if="result.group">{{ result.group
+                }}<template v-if="result.song?.matchedAlias"> · {{ t("rework.aliasMatch") }} <span class="result-alias">{{ result.song.matchedAlias }}</span></template></small></span
             ><span aria-hidden="true">↵</span>
           </li>
         </ul>
@@ -367,6 +388,9 @@ li.selected {
   display: block;
   font-size: 12px;
   color: var(--ink-3);
+}
+.result-alias {
+  color: var(--ink-2);
 }
 .search-examples {
   display: flex;

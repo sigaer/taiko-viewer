@@ -20,10 +20,10 @@ html.ds-preview .ds-root :lang(ja) {
 }
 /* A Japanese title inside a Chinese page keeps Japanese glyphs (04 §11 → V1.2 §4.2) */
 html.ds-preview .ds-root [lang="ja"] {
-  font-family: "Barlow", var(--font-cjk-jp);
+  font-family: "Outfit", var(--font-cjk-jp);
 }
 html.ds-preview .ds-root [lang="zh-CN"] {
-  font-family: "Barlow", var(--font-cjk-sc);
+  font-family: "Outfit", var(--font-cjk-sc);
 }
 /* main.css sets these Element Plus parts to the production font; the sample pages use the V1.3 stack */
 html.ds-preview .ds-root :is(.el-input__inner, .el-textarea__inner, .el-select__placeholder, .el-form-item__label),

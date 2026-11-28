@@ -2,9 +2,8 @@
 // "My score" panel of the song detail page. Shows the signed-in player's records from /api/account/songs/:id
 // (fetched by the page) for the selected difficulty: crown with its name, rank with its name, score, judge bar and
 // the counts the API returns; the other difficulties with a record are listed below and select that difficulty.
-// Signed out → ReworkGate: the card with the prompt in the right column from 1100 px (placement "side"), and below
-// 1100 px a single row after the chart section instead (placement "inline"; the page renders it there). Signed in,
-// "inline" renders nothing and "side" is the panel at every width. Accuracy, per-song RT and score history are not in the API and are not shown.
+// Signed out → the sign-in prompt (ReworkGate) in the same card, first in the right column (first after the difficulty
+// tiles below 1100 px). Accuracy, per-song RT and score history are not in the API and are not shown.
 import type { PropType } from "vue";
 import type { AccountSongScore } from "~/types/account-song";
 import { crownFromCounts } from "~/utils/ds/crown";
@@ -18,8 +17,7 @@ const props = defineProps({
   pending: { type: Boolean, default: false },
   unavailable: { type: Boolean, default: false },
   /** login redirect for the sign-in prompt */
-  redirect: { type: String, default: "" },
-  placement: { type: String as PropType<"side" | "inline">, default: "side" }
+  redirect: { type: String, default: "" }
 });
 const emit = defineEmits<{ select: [difficulty: number] }>();
 const { t, locale } = useI18n();
@@ -38,10 +36,7 @@ const formatDate = (value: string) => {
 </script>
 
 <template>
-  <template v-if="placement === 'inline'">
-    <ReworkGate v-if="!signedIn" class="mine-guest" need="login" variant="row" :title="t('rework.songDetail.mine.signIn')" :redirect="redirect" :register="false" />
-  </template>
-  <ReworkPanel v-else class="mine" :class="{ 'is-guest': !signedIn }" :title="t('rework.songDetail.mine.title')">
+  <ReworkPanel class="mine" :class="{ 'is-guest': !signedIn }" :title="t('rework.songDetail.mine.title')">
     <template #actions>
       <DsDiff :difficulty="difficulty" :star="star" :constant="constant" />
     </template>
@@ -58,10 +53,14 @@ const formatDate = (value: string) => {
           <span class="rw-vh">{{ t("rework.songDetail.mine.score") }}</span><b class="num">{{ formatNumber(item.highScore) }}</b>
         </p>
         <DsJudgeBar :good="item.goodCnt" :ok="item.okCnt" :ng="item.ngCnt" />
+        <dl class="tiles">
+          <div><dt>{{ t("rework.songDetail.mine.plays") }}</dt><dd class="num">{{ formatNumber(item.stageCnt) }}</dd></div>
+          <div><dt>{{ t("rework.songDetail.mine.clears") }}</dt><dd class="num">{{ formatNumber(item.clearCnt) }}</dd></div>
+          <div><dt>{{ t("rework.songDetail.mine.fullCombos") }}</dt><dd class="num">{{ formatNumber(item.fullComboCnt) }}</dd></div>
+        </dl>
         <dl class="facts">
           <div><dt>{{ t("rework.songDetail.mine.combo") }}</dt><dd class="num">{{ formatNumber(item.comboCnt) }}</dd></div>
           <div><dt>{{ t("rework.songDetail.mine.drumroll") }}</dt><dd class="num">{{ formatNumber(item.poundCnt) }}</dd></div>
-          <div><dt>{{ t("rework.songDetail.mine.plays") }}</dt><dd class="num">{{ formatNumber(item.stageCnt) }}</dd></div>
           <div><dt>{{ t("rework.songDetail.mine.updated") }}</dt><dd class="num">{{ formatDate(item.highscoreDatetime || item.updateDatetime) }}</dd></div>
         </dl>
       </article>
@@ -82,21 +81,6 @@ const formatDate = (value: string) => {
 </template>
 
 <style scoped>
-/* Guests: the side card only where the right column exists; the inline row only where it does not */
-.mine.is-guest {
-  display: none;
-}
-.mine-guest {
-  display: flex;
-}
-@media (min-width: 1100px) {
-  .mine.is-guest {
-    display: block;
-  }
-  .mine-guest {
-    display: none;
-  }
-}
 .record {
   display: grid;
   gap: var(--sp-3);
@@ -122,15 +106,41 @@ const formatDate = (value: string) => {
 .score {
   margin: 0;
 }
-.score b {
-  font-size: 40px;
-  line-height: 1;
-  font-weight: 700;
+.record .score b {
+  font-family: var(--font-display, var(--font-ui));
+  font-size: var(--fs-36);
+  line-height: 1.1;
+  font-weight: 800;
   color: var(--emph-num);
+}
+.tiles {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--sp-2);
+  margin: 0;
+  text-align: center;
+}
+.tiles > div {
+  display: flex;
+  flex-direction: column-reverse;
+  min-width: 0;
+  padding: 9px 4px;
+  border-radius: var(--r-ctl);
+  background: var(--bg-sunk);
+}
+.tiles dt {
+  font-size: var(--fs-12);
+  color: var(--ink-2);
+}
+.tiles dd {
+  margin: 0;
+  font-size: var(--fs-18);
+  font-weight: 800;
+  color: var(--ink);
 }
 .facts {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(96px, 1fr));
   gap: var(--sp-3) var(--sp-4);
   margin: 0;
   padding-top: var(--sp-3);

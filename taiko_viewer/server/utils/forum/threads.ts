@@ -1,6 +1,7 @@
 import type { H3Event } from "h3";
 import { createError } from "h3";
 import { generateForumThreadTitle } from "./thread-title";
+import { decideAuthorWrite, decideFloorDelete, FORUM_DELETED_STATUS, threadVisibleTo, type AuthorWriteDecision } from "./ownership";
 import type { ResultSetHeader } from "mysql2/promise";
 import type { ForumContentBlock, ForumThreadDetail, ForumThreadSort, ForumThreadType } from "~/types/forum";
 import { DbRow, getAccountDb } from "~/server/utils/account-db";
@@ -202,7 +203,7 @@ export const getForumThreadDetail = async (event: H3Event, threadIdInput: unknow
   if (!row) {
     throw createError({ statusCode: 404, statusMessage: "帖子不存在" });
   }
-  if (row.status !== "published" && !viewerProfile?.role.match(/admin|moderator/)) {
+  if (!threadVisibleTo(row.status, viewerProfile?.role)) {
     throw createError({ statusCode: 404, statusMessage: "帖子不存在" });
   }
 
@@ -691,7 +692,8 @@ export const moderateForumThread = async (event: H3Event, payload: Record<string
   const enabled = payload.enabled === undefined ? true : Boolean(payload.enabled);
   const reason = clipText(String(payload.reason || "").trim(), 255);
   const thread = await getThreadRowById(threadId);
-  if (!thread) {
+  // An author-deleted thread is gone; moderation never brings it back.
+  if (!thread || thread.status === FORUM_DELETED_STATUS) {
     throw createError({ statusCode: 404, statusMessage: "帖子不存在" });
   }
 
@@ -729,4 +731,164 @@ export const moderateForumThread = async (event: H3Event, payload: Record<string
     });
   }
   return { ok: true };
+};
+
+// ---- Author edit / delete of one's own thread and reply ----------------------------------------------------------
+// Same auth (requireAccountUser + forum profile), sanitising (normalizeContentBlocks / normalizeReplyContentBlocks,
+// clipText, normalizeTags) and response shapes as the create paths: edits return the thread detail like
+// threads.post / replies.post, a thread deletion returns { ok: true } like moderation/action. The forum write paths
+// have no rate limiter today, so none is added here either. Ownership: ./ownership.ts; the UPDATE repeats the
+// conditions (author, published, unlocked) so nothing changes between the check and the write.
+
+const assertAuthorWrite = (decision: AuthorWriteDecision) => {
+  if (!decision.ok) throw createError({ statusCode: decision.statusCode, statusMessage: decision.statusMessage });
+};
+
+const loadAuthorThread = async (event: H3Event, threadIdInput: unknown) => {
+  await ensureForumSchema();
+  const user = await requireAccountUser(event);
+  await ensureForumProfile(user.id);
+  const threadId = sanitizeInt(threadIdInput, 0);
+  const thread = threadId > 0 ? await getThreadRowById(threadId) : null;
+  assertAuthorWrite(
+    decideAuthorWrite(
+      thread ? { authorUserId: Number(thread.author_user_id), status: thread.status, isLocked: Boolean(thread.is_locked) } : null,
+      user.id,
+      "thread"
+    )
+  );
+  return { user, threadId, thread: thread! };
+};
+
+type AuthorPostRow = PostRow & { thread_status: string; thread_is_locked: number };
+
+const loadAuthorPost = async (event: H3Event, postIdInput: unknown) => {
+  await ensureForumSchema();
+  const user = await requireAccountUser(event);
+  await ensureForumProfile(user.id);
+  const postId = sanitizeInt(postIdInput, 0);
+  let post: AuthorPostRow | null = null;
+  if (postId > 0) {
+    const [rows] = await getAccountDb().execute<DbRow<AuthorPostRow>[]>(
+      `SELECT p.*, t.status AS thread_status, t.is_locked AS thread_is_locked
+       FROM forum_posts p
+       INNER JOIN forum_threads t ON t.id = p.thread_id
+       WHERE p.id = ?
+       LIMIT 1`,
+      [postId]
+    );
+    post = rows[0] || null;
+  }
+  assertAuthorWrite(
+    decideAuthorWrite(
+      post
+        ? {
+            authorUserId: Number(post.author_user_id),
+            status: post.status,
+            threadStatus: post.thread_status,
+            isLocked: Boolean(post.thread_is_locked)
+          }
+        : null,
+      user.id,
+      "post"
+    )
+  );
+  return { user, postId, post: post! };
+};
+
+export const updateForumThreadByAuthor = async (event: H3Event, threadIdInput: unknown, payload: Record<string, unknown>) => {
+  const { user, threadId, thread } = await loadAuthorThread(event, threadIdInput);
+  const contentBlocks = normalizeContentBlocks(payload.contentBlocks);
+  // As on create: an empty title is generated from the body; an explicit title keeps the 4-character minimum,
+  // except when it is the thread's current title (an older short title can be kept while the body is edited).
+  const generated = !String(payload.title || "").trim();
+  const title = generated
+    ? generateForumThreadTitle(contentBlocks, payload.locale === "ja" ? "ja" : "zh")
+    : clipText(String(payload.title || ""), 120);
+  if (!title) {
+    throw createError({ statusCode: 400, statusMessage: "请输入标题" });
+  }
+  const minLength = FORUM_THREAD_TITLE_MIN_LENGTH.normal;
+  if (!generated && title !== thread.title && title.length < minLength) {
+    throw createError({ statusCode: 400, statusMessage: `标题至少需要 ${minLength} 个字符` });
+  }
+  const summary = clipText(String(payload.summary || "").trim(), 280) || buildSummaryFromBlocks(contentBlocks);
+  const tags = normalizeTags(payload.tags);
+  const derivedCover = contentBlocks.find((block) => block.type === "image")?.imageUrl || "";
+  const coverImageUrl = clipText(String(payload.coverImageUrl || derivedCover || "").trim(), 1024);
+  const [result] = await getAccountDb().execute<ResultSetHeader>(
+    `UPDATE forum_threads
+     SET title = ?, summary = ?, content_blocks_json = ?, cover_image_url = ?, tags_json = ?, updated_at = NOW()
+     WHERE id = ? AND author_user_id = ? AND status = 'published' AND is_locked = 0`,
+    [title, summary, JSON.stringify(contentBlocks), coverImageUrl || null, JSON.stringify(tags), threadId, user.id]
+  );
+  if (!result.affectedRows) {
+    throw createError({ statusCode: 404, statusMessage: "帖子不存在" });
+  }
+  return await getForumThreadDetail(event, threadId);
+};
+
+export const deleteForumThreadByAuthor = async (event: H3Event, threadIdInput: unknown) => {
+  const { user, threadId } = await loadAuthorThread(event, threadIdInput);
+  const [result] = await getAccountDb().execute<ResultSetHeader>(
+    `UPDATE forum_threads SET status = ?, updated_at = NOW()
+     WHERE id = ? AND author_user_id = ? AND status = 'published' AND is_locked = 0`,
+    [FORUM_DELETED_STATUS, threadId, user.id]
+  );
+  if (!result.affectedRows) {
+    throw createError({ statusCode: 404, statusMessage: "帖子不存在" });
+  }
+  return { ok: true };
+};
+
+export const updateForumPostByAuthor = async (event: H3Event, postIdInput: unknown, payload: Record<string, unknown>) => {
+  const { user, postId, post } = await loadAuthorPost(event, postIdInput);
+  const contentBlocks = normalizeReplyContentBlocks(payload);
+  const bodyText = contentBlocks
+    .filter((block) => block.type === "paragraph")
+    .map((block) => block.text.trim())
+    .filter(Boolean)
+    .join("\n")
+    .trim();
+  const [result] = await getAccountDb().execute<ResultSetHeader>(
+    `UPDATE forum_posts p
+     INNER JOIN forum_threads t ON t.id = p.thread_id
+     SET p.body_text = ?, p.content_blocks_json = ?
+     WHERE p.id = ? AND p.author_user_id = ? AND p.status = 'published' AND t.status = 'published' AND t.is_locked = 0`,
+    [bodyText, JSON.stringify(contentBlocks), postId, user.id]
+  );
+  if (!result.affectedRows) {
+    throw createError({ statusCode: 404, statusMessage: "回复不存在" });
+  }
+  return await getForumThreadDetail(event, post.thread_id);
+};
+
+export const deleteForumPostByAuthor = async (event: H3Event, postIdInput: unknown) => {
+  const { user, postId, post } = await loadAuthorPost(event, postIdInput);
+  const db = getAccountDb();
+  const isFloor = post.parent_post_id === null;
+  let liveChildren = 0;
+  if (isFloor) {
+    const [rows] = await db.execute<DbRow<{ total: number }>[]>(
+      "SELECT COUNT(*) AS total FROM forum_posts WHERE (root_post_id = ? OR parent_post_id = ?) AND id <> ? AND status = 'published'",
+      [postId, postId, postId]
+    );
+    liveChildren = sanitizeInt(rows[0]?.total);
+  }
+  assertAuthorWrite(decideFloorDelete(isFloor, liveChildren));
+  const [result] = await db.execute<ResultSetHeader>(
+    `UPDATE forum_posts p
+     INNER JOIN forum_threads t ON t.id = p.thread_id
+     SET p.status = ?
+     WHERE p.id = ? AND p.author_user_id = ? AND p.status = 'published' AND t.status = 'published' AND t.is_locked = 0`,
+    [FORUM_DELETED_STATUS, postId, user.id]
+  );
+  if (!result.affectedRows) {
+    throw createError({ statusCode: 404, statusMessage: "回复不存在" });
+  }
+  await db.execute(
+    "UPDATE forum_threads SET reply_count = GREATEST(reply_count - 1, 0), updated_at = NOW() WHERE id = ?",
+    [post.thread_id]
+  );
+  return await getForumThreadDetail(event, post.thread_id);
 };

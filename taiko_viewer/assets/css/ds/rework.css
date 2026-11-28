@@ -3,8 +3,11 @@
  * new shell (components/rework/Shell.vue) puts on <html>, so nothing here reaches the sample pages or old layouts.
  *
  * .num            digits in the number font (same rule as base.css for the sample pages; DS components use it)
- * .rw-btn         a button or link styled as a button: secondary by default, --primary for the one main action,
- *                 --ghost for a quiet action, --sm for dense rows. Always at least 44 px tall (touch target).
+ * .rw-btn         a button or link styled as a button: secondary by default (surface + control border), --primary for
+ *                 the one main action (vermilion fill), --ink for a strong secondary action (ink fill), --quiet for a
+ *                 low-emphasis action (sunk fill), --ghost for a link-like action, --sm for dense rows.
+ *                 Always at least 44 px tall (touch target). Shape language (redesign 2026-11-27): controls --r-ctl (12),
+ *                 cards --r-panel (20), chips and tags fully round.
  * .rw-link        an inline text link (--link, blue)
  * .rw-vh          visually hidden, still read by screen readers
  */
@@ -30,14 +33,14 @@ html.viewer-rework .rw-btn {
   justify-content: center;
   gap: var(--sp-2);
   min-height: var(--hit);
-  padding: 0 var(--btn-pad-x);
-  border: 1px solid var(--ctl-border);
+  padding: 0 var(--sp-4);
+  border: 1.5px solid var(--ctl-border);
   border-radius: var(--r-ctl);
   background: var(--surface);
   color: var(--ink);
   font: inherit;
   font-size: var(--fs-14);
-  font-weight: 500;
+  font-weight: 700;
   line-height: 1.2;
   text-decoration: none;
   white-space: nowrap;
@@ -60,6 +63,23 @@ html.viewer-rework .rw-btn--primary:hover {
   border-color: var(--action-bg-hover);
   background: var(--action-bg-hover);
 }
+html.viewer-rework .rw-btn--ink {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ink-inv);
+}
+html.viewer-rework .rw-btn--ink:hover {
+  border-color: var(--ink-2);
+  background: var(--ink-2);
+}
+html.viewer-rework .rw-btn--quiet {
+  border-color: transparent;
+  background: var(--bg-sunk);
+  color: var(--ink);
+}
+html.viewer-rework .rw-btn--quiet:hover {
+  background: var(--line);
+}
 html.viewer-rework .rw-btn--ghost {
   border-color: transparent;
   background: transparent;
@@ -69,7 +89,7 @@ html.viewer-rework .rw-btn--ghost:hover {
   background: var(--bg-sunk);
 }
 html.viewer-rework .rw-btn--sm {
-  padding: 0 var(--btn-pad-x-sm);
+  padding: 0 var(--ctl-pad-x);
   font-size: var(--fs-13);
 }
 html.viewer-rework .rw-btn:disabled,
@@ -147,8 +167,8 @@ html.viewer-rework .rw-input,
 html.viewer-rework .rw-select {
   min-height: var(--hit);
   max-width: 100%;
-  padding: 0 var(--sp-3);
-  border: 1px solid var(--ctl-border);
+  padding: 0 14px;
+  border: 1.5px solid var(--ctl-border);
   border-radius: var(--r-ctl);
   background: var(--surface);
   color: var(--ink);
@@ -173,12 +193,13 @@ html.viewer-rework .rw-select:disabled {
   background: var(--bg-sunk);
   color: var(--ink-3);
 }
+/* segmented control: a sunk track with a raised surface thumb on the pressed button */
 html.viewer-rework .rw-seg {
   display: inline-flex;
   justify-self: start;
   flex-wrap: wrap;
   max-width: 100%;
-  padding: 2px;
+  padding: 3px;
   border-radius: var(--r-ctl);
   background: var(--bg-sunk);
 }
@@ -187,20 +208,21 @@ html.viewer-rework .rw-seg > button {
   align-items: center;
   gap: 6px;
   min-height: var(--hit);
-  padding: 0 var(--sp-3);
+  padding: 0 var(--sp-4);
   border: 0;
-  border-radius: calc(var(--r-ctl) - 2px);
+  border-radius: calc(var(--r-ctl) - 3px);
   background: transparent;
   color: var(--ink-2);
   font: inherit;
   font-size: var(--fs-13);
+  font-weight: 600;
   cursor: pointer;
 }
 html.viewer-rework .rw-seg > button[aria-pressed="true"] {
-  background: var(--seg-on-bg);
-  color: var(--seg-on-ink);
+  background: var(--surface);
+  color: var(--ink);
   font-weight: 700;
-  box-shadow: 0 0 0 1px var(--seg-on-ring);
+  box-shadow: var(--shadow-thumb);
 }
 html.viewer-rework .rw-seg > button:focus-visible {
   outline: 2px solid var(--focus-ring);
@@ -550,4 +572,91 @@ html.viewer-rework .rw-alert--warn {
 html.viewer-rework .rw-alert--info {
   border-color: var(--info-line);
   background: var(--info-wash);
+}
+/*
+ * Redesign 2026-11-27 (Foundations): shared shapes every page can use.
+ * .rw-chip        a filter chip (button, aria-pressed): outlined pill; pressed = ink fill. 36 px tall, 44 px touch target.
+ * .rw-chips       a wrapping row of chips
+ * .rw-rows        a list inside a card whose rows are separated by hairlines (no row borders of their own)
+ * .rw-display     a large numeral: display font, 800, tight tracking (size from the caller)
+ * .rw-label       a small label above a value or a group: 12 / 700, slight tracking
+ */
+html.viewer-rework .rw-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  min-width: 0;
+}
+html.viewer-rework .rw-chip {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 36px;
+  padding: 0 14px;
+  border: 1.5px solid var(--ctl-border);
+  border-radius: var(--r-note);
+  background: var(--surface);
+  color: var(--ink);
+  font: inherit;
+  font-size: var(--fs-13);
+  font-weight: 600;
+  line-height: 1.2;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+html.viewer-rework .rw-chip::after {
+  content: "";
+  position: absolute;
+  inset: -4px 0;
+}
+html.viewer-rework .rw-chip:hover {
+  background: var(--bg-sunk);
+}
+html.viewer-rework .rw-chip[aria-pressed="true"],
+html.viewer-rework .rw-chip[aria-current="page"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ink-inv);
+  font-weight: 700;
+}
+html.viewer-rework .rw-chip:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+html.viewer-rework .rw-chip:disabled {
+  border-color: var(--disabled-line);
+  background: var(--disabled-bg);
+  color: var(--disabled-ink);
+  cursor: not-allowed;
+}
+html.viewer-rework .rw-rows {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  min-width: 0;
+}
+html.viewer-rework .rw-rows > * + * {
+  border-top: 1px solid var(--line);
+}
+html.viewer-rework .rw-display {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+}
+html.viewer-rework .rw-label {
+  font-size: var(--fs-12);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--ink-2);
+}
+@media (prefers-reduced-motion: no-preference) {
+  html.viewer-rework .rw-chip,
+  html.viewer-rework .rw-seg > button {
+    transition: background-color var(--dur-1), border-color var(--dur-1), color var(--dur-1);
+  }
 }

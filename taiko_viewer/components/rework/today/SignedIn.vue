@@ -90,7 +90,7 @@ const trackClick = (event: string, source: string) => {
       :acknowledge-recent="acknowledgeRecent"
     >
       <template #latest>
-        <ReworkTodayLatestSongs :songs="latestSongs" :pending="contentPending" :failed="contentFailed" />
+        <ReworkTodayLatestSongs tiles :limit="6" :songs="latestSongs" :pending="contentPending" :failed="contentFailed" />
       </template>
       <template #events><ReworkTodayEvents :events="events" /></template>
     </HomePlayerGrowthSurface>
@@ -107,7 +107,7 @@ const trackClick = (event: string, source: string) => {
 <style scoped>
 .tsi {
   display: grid;
-  gap: var(--sp-10);
+  gap: var(--sp-6);
   min-width: 0;
   color: var(--ink);
   font-family: var(--font-ui);
@@ -118,12 +118,14 @@ const trackClick = (event: string, source: string) => {
   flex-wrap: wrap;
   gap: var(--sp-2) var(--sp-3);
   min-width: 0;
-  margin-bottom: calc(var(--sp-6) * -1);
+  margin-bottom: calc(var(--sp-2) * -1);
 }
 .tsi-name {
   min-width: 0;
-  font-size: var(--fs-18);
+  font-family: var(--font-display);
+  font-size: var(--fs-22);
   font-weight: 800;
+  letter-spacing: -0.01em;
   overflow-wrap: anywhere;
 }
 .tsi-gate {
@@ -134,7 +136,7 @@ const trackClick = (event: string, source: string) => {
 .tsi-more {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-  gap: var(--sp-8);
+  gap: var(--sp-5);
   align-items: start;
 }
 @media (max-width: 1099px) {
@@ -144,10 +146,10 @@ const trackClick = (event: string, source: string) => {
 }
 @media (max-width: 767px) {
   .tsi {
-    gap: var(--sp-8);
+    gap: var(--sp-4);
   }
   .tsi-who {
-    margin-bottom: calc(var(--sp-4) * -1);
+    margin-bottom: 0;
   }
 }
 </style>

@@ -1,26 +1,31 @@
 <script setup lang="ts">
-// The home container controls the two columns using its available content width.
-// On narrow screens the wrappers dissolve, restoring the original section order.
+// Layout of the signed-in home with data (redesign 2026-11-27, Main / Mobile-Today): greeting, notices, a deck of the
+// vermilion Rating card, the six dimensions and the goal; the phone's 常用 grid; then two columns from a 1000 px
+// container: recent changes and the recommendations on the left, today's progress and current events on the right;
+// latest songs across the width. Below 1000 px the columns stack; on phones the wrappers dissolve so the Rating card
+// comes first and the 常用 grid right after it. Every block is a card (--r-panel) with hairline rows.
 // RecentGrowth and DailyProgress retain their data, interactions and test hooks.
 </script>
 
 <template>
   <div class="tb">
+    <div class="tb-hello"><slot name="hello" /></div>
+    <div class="tb-notice"><slot name="notice" /></div>
+    <div class="tb-deck" :class="{ 'has-goal': !!$slots.goal }">
+      <div v-if="$slots.hero" class="tb-hero"><slot name="hero" /></div>
+      <div v-if="$slots.profile" class="tb-profile"><slot name="profile" /></div>
+      <div v-if="$slots.goal" class="tb-goal"><slot name="goal" /></div>
+    </div>
+    <div v-if="$slots.quick" class="tb-quick"><slot name="quick" /></div>
     <div class="tb-main">
-      <div class="tb-hello"><slot name="hello" /></div>
-      <div class="tb-notice"><slot name="notice" /></div>
-      <div v-if="$slots.profile || $slots.goal" class="tb-deck">
-        <div v-if="$slots.profile" class="tb-profile"><slot name="profile" /></div>
-        <div v-if="$slots.goal" class="tb-goal"><slot name="goal" /></div>
-      </div>
       <div v-if="$slots.recent" class="tb-recent"><slot name="recent" /></div>
       <div v-if="$slots.plan" class="tb-plan"><slot name="plan" /></div>
-      <div v-if="$slots.latest" class="tb-latest"><slot name="latest" /></div>
     </div>
     <aside class="tb-side">
       <div v-if="$slots.daily" class="tb-daily"><slot name="daily" /></div>
       <div v-if="$slots.events" class="tb-events"><slot name="events" /></div>
     </aside>
+    <div v-if="$slots.latest" class="tb-latest"><slot name="latest" /></div>
     <slot />
   </div>
 </template>
@@ -28,27 +33,18 @@
 <style scoped>
 .tb {
   display: grid;
-  gap: var(--sp-8);
+  grid-template-columns: minmax(0, 1fr);
+  gap: var(--sp-5);
   min-width: 0;
   color: var(--ink);
   font-family: var(--font-ui);
 }
-.tb-main,
-.tb-side {
-  display: contents;
-}
+.tb > div,
 .tb-main > div,
-.tb-side > div {
+.tb-side > div,
+.tb-deck > div {
   min-width: 0;
 }
-.tb-hello { order: 0; }
-.tb-notice { order: 1; }
-.tb-deck { order: 2; }
-.tb-recent { order: 3; }
-.tb-daily { order: 4; }
-.tb-plan { order: 5; }
-.tb-latest { order: 6; }
-.tb-events { order: 7; }
 .tb-notice:has(> :not(:empty)) {
   display: grid;
   gap: var(--sp-3);
@@ -58,50 +54,84 @@
 }
 .tb-deck {
   display: grid;
-  grid-template-columns: minmax(0, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
   gap: var(--sp-5);
   align-items: stretch;
 }
+.tb-hero,
 .tb-profile,
 .tb-goal {
-  min-width: 0;
   display: grid;
 }
-/* The goal card keeps its natural height: song, goal line and actions stay together at the top. */
-.tb-goal {
-  align-self: start;
+.tb-quick {
+  display: none;
 }
-.tb-recent,
-.tb-daily {
+.tb-main,
+.tb-side {
+  display: grid;
+  gap: var(--sp-5);
+  align-content: start;
   min-width: 0;
 }
 @container home-layout (min-width: 1000px) {
   .tb {
-    grid-template-columns: minmax(0, 7fr) minmax(0, 3fr);
-    gap: 24px;
+    grid-template-columns: minmax(0, 1.8fr) minmax(0, 1fr);
     align-items: start;
   }
-  .tb-main,
-  .tb-side {
-    display: grid;
-    gap: 24px;
-    min-width: 0;
-    align-content: start;
+  .tb-hello,
+  .tb-notice,
+  .tb-deck,
+  .tb-latest {
+    grid-column: 1 / -1;
+  }
+  .tb-deck {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  }
+  .tb-deck.has-goal {
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr) minmax(0, 1fr);
   }
   .tb-main {
     container: home-main / inline-size;
-  }
-  .tb-main > div,
-  .tb-side > div {
-    order: initial;
   }
   .tb-side :deep(.te-list) {
     grid-template-columns: minmax(0, 1fr);
   }
 }
+/* Phones: one column in reading order, the Rating card first and the 常用 grid right after it. */
 @media (max-width: 767px) {
   .tb {
-    gap: var(--sp-6);
+    gap: var(--sp-4);
+  }
+  .tb-deck,
+  .tb-main,
+  .tb-side {
+    display: contents;
+  }
+  .tb-hello { order: 0; }
+  .tb-notice { order: 1; }
+  .tb-hero { order: 2; }
+  .tb-quick { order: 3; display: block; }
+  .tb-goal { order: 4; }
+  .tb-recent { order: 5; }
+  .tb-daily { order: 6; }
+  .tb-plan { order: 7; }
+  .tb-profile { order: 8; }
+  .tb-latest { order: 9; }
+  .tb-events { order: 10; }
+}
+
+/* ---------- cards: recent changes and today's progress ---------- */
+.tb :deep(.recent-growth),
+.tb :deep(.growth-progress) {
+  padding: var(--sp-4) var(--sp-5) var(--sp-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  background: var(--surface);
+}
+@media (max-width: 767px) {
+  .tb :deep(.recent-growth),
+  .tb :deep(.growth-progress) {
+    padding: var(--sp-3) var(--sp-4) var(--sp-2);
   }
 }
 
@@ -119,7 +149,7 @@
 .tb :deep(.growth-progress h2) {
   margin: 0;
   margin-right: auto;
-  font-size: var(--fs-18);
+  font-size: var(--fs-16);
   font-weight: 700;
   line-height: var(--lh-snug);
 }
@@ -137,7 +167,6 @@
 }
 .tb :deep(.recent-growth__list) {
   display: grid;
-  border-top: 1px solid var(--line-strong);
 }
 .tb :deep(.recent-growth__fact) {
   display: grid;
@@ -146,7 +175,7 @@
   gap: var(--sp-3);
   min-height: 56px;
   padding: var(--sp-2) 0;
-  border-bottom: 1px solid var(--line);
+  border-top: 1px solid var(--line);
   color: var(--ink);
   text-decoration: none;
 }
@@ -194,10 +223,7 @@
   line-height: var(--lh-body);
 }
 .tb :deep(.recent-growth--quiet .recent-growth__empty) {
-  margin: 0;
-  padding: var(--sp-3) var(--sp-4);
-  border-radius: var(--r-panel);
-  background: var(--surface-2);
+  margin: 0 0 var(--sp-1);
 }
 .tb :deep(.recent-growth__state) {
   display: flex;
@@ -205,10 +231,7 @@
   justify-content: space-between;
   flex-wrap: wrap;
   gap: var(--sp-2) var(--sp-4);
-  padding: var(--sp-3) var(--sp-4);
-  border: 1px solid var(--line);
-  border-radius: var(--r-panel);
-  background: var(--surface);
+  padding: var(--sp-2) 0 var(--sp-3);
   color: var(--ink-2);
   font-size: var(--fs-14);
 }
@@ -228,10 +251,7 @@
   min-width: 0;
 }
 .tb :deep(.growth-progress__state) {
-  margin: 0;
-  padding: var(--sp-3) var(--sp-4);
-  border-radius: var(--r-panel);
-  background: var(--surface-2);
+  margin: 0 0 var(--sp-2);
   color: var(--ink-2);
   font-size: var(--fs-14);
   line-height: var(--lh-body);
@@ -241,7 +261,6 @@
   margin: 0;
   padding: 0;
   list-style: none;
-  border-top: 1px solid var(--line-strong);
 }
 .tb :deep(.growth-progress__state + .growth-progress__events) {
   margin-top: var(--sp-3);
@@ -250,7 +269,7 @@
   display: grid;
   gap: var(--sp-2);
   padding: var(--sp-3) 0;
-  border-bottom: 1px solid var(--line);
+  border-top: 1px solid var(--line);
 }
 .tb :deep(.growth-event__identity) {
   display: grid;
@@ -301,7 +320,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 2px 6px;
-  font-family: var(--font-num);
+  font-family: var(--font-display);
   font-variant-numeric: tabular-nums;
   overflow-wrap: anywhere;
 }

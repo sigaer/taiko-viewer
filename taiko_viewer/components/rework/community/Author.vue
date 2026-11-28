@@ -19,9 +19,13 @@ const props = defineProps({
   detail: { type: Boolean, default: false },
   op: { type: Boolean, default: false },
   /** heading level for the name (my community uses the name as the page <h1>) */
-  as: { type: String, default: "span" }
+  as: { type: String, default: "span" },
+  /** the name links to the member's page (/forum/user/:id) */
+  link: { type: Boolean, default: false }
 });
 const { t } = useI18n();
+const localePath = useLocalePath();
+const userPath = computed(() => localePath(`/forum/user/${props.user.id}`));
 const role = computed(() => roleTag(props.user));
 const roleText = computed(() => (role.value === "admin" ? t("forum.roles.admin") : role.value === "moderator" ? t("forum.roles.moderator") : ""));
 const taikoId = computed(() => (props.user.taikoIdMasked === FORUM_UNBOUND_TAIKO_ID ? t("forum.unboundTaikoId") : props.user.taikoIdMasked));
@@ -33,7 +37,8 @@ const hasTitles = computed(() => props.titles !== "none" && (Boolean(props.user.
     <DsPlayerAvatar :src="user.avatarUrl" :size="size" />
     <span class="ca__text">
       <span class="ca__line">
-        <component :is="as" class="ca__name" :title="user.username">{{ user.username }}</component>
+        <NuxtLink v-if="link && user.id > 0" :to="userPath" class="ca__name ca__link" :title="user.username">{{ user.username }}</NuxtLink>
+        <component :is="as" v-else class="ca__name" :title="user.username">{{ user.username }}</component>
         <span v-if="role" class="ca__role" :class="`is-${role}`">{{ roleText }}</span>
         <span v-if="op" class="ca__op">{{ t("rework.forum.op") }}</span>
         <slot />
@@ -86,6 +91,18 @@ const hasTitles = computed(() => props.titles !== "none" && (Boolean(props.user.
   font-size: var(--fs-13);
   font-weight: 700;
   line-height: var(--lh-snug);
+}
+.ca__link {
+  color: inherit;
+  text-decoration: none;
+  border-radius: var(--r-xs);
+}
+.ca__link:hover {
+  color: var(--link);
+}
+.ca__link:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
 }
 .ca--44 .ca__name {
   font-size: var(--fs-14);

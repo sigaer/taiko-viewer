@@ -2183,6 +2183,7 @@
       "pickEmpty": "現在のおすすめに、ほかに目標を設定できる楽曲はありません。",
       "pickMore": "ほかのおすすめを見る",
       "bestScore": "自己ベスト",
+      "quick": "よく使う",
       "daily": {
         "title": "今日の進捗",
         "count": "{count}譜面をプレイ",
@@ -2216,6 +2217,25 @@
     "nextLanguage": "中",
     "exampleSong": "千本桜",
     "exampleCategory": "ナムコ",
+    "aliasMatch": "別名",
+    "constantRange": {
+      "between": "{column} {min}–{max}",
+      "atLeast": "{column} ≥ {min}",
+      "atMost": "{column} ≤ {max}",
+      "words": {
+        "mainConstant": "定数,95%定数,主定数",
+        "subConstant1": "75%定数",
+        "subConstant2": "99%定数",
+        "stamina": "体力",
+        "handspeed": "手速",
+        "burst": "爆发,爆發,瞬発,瞬发",
+        "complex": "复合,複合",
+        "rhythm": "节奏,節奏,リズム",
+        "to": "到,至",
+        "atLeast": "以上",
+        "atMost": "以下"
+      }
+    },
     "today": "今日",
     "songs": "楽曲",
     "play": "成績",
@@ -2258,6 +2278,7 @@
     "viewAll": "{count} 曲の結果をすべて表示",
     "library": {
       "search": "楽曲を検索",
+      "filters": "絞り込み",
       "searchPlaceholder": "曲名・分類・ID",
       "clearKeyword": "キーワードをクリア",
       "shelfLabel": "収録状況",
@@ -2330,7 +2351,8 @@
       "facts": {
         "artists": "作曲 / 歌唱",
         "openDay": "収録日",
-        "subtitle": "サブタイトル"
+        "subtitle": "サブタイトル",
+        "versions": "収録バージョン"
       },
       "side": {
         "label": "プレイヤー側",
@@ -2343,6 +2365,7 @@
         "open": "譜面全体",
         "openNew": "譜面全体を新しいタブで開く",
         "download": "TJA+OGG をダウンロード",
+        "actions": "譜面の操作",
         "excerpt": "譜面の一部",
         "expand": "表示を広げる",
         "collapse": "表示を戻す",
@@ -2404,6 +2427,8 @@
         "combo": "最大コンボ",
         "drumroll": "連打",
         "plays": "プレイ回数",
+        "clears": "クリア",
+        "fullCombos": "フルコンボ",
         "updated": "達成日",
         "others": "他の難易度",
         "all": "すべての成績 →"
@@ -2433,7 +2458,11 @@
       "inspector": "譜面の定数",
       "scale": "精度帯ごとの定数",
       "select": "{title} {difficulty} の定数を見る",
-      "close": "閉じる"
+      "close": "閉じる",
+      "range": "値の範囲",
+      "rangeColumn": "範囲の列",
+      "rangeMin": "最小",
+      "rangeMax": "最大"
     },
     "b30": "B30 表",
     "trend": "Rating 推移",
@@ -2743,6 +2772,94 @@
         "keyword": "キーワード",
         "type": "種類",
         "sort": "並び順"
+      },
+      "search": {
+        "label": "スレッドを検索",
+        "placeholder": "スレッドのタイトルで検索",
+        "submit": "検索"
+      },
+      "tools": {
+        "favorite": "お気に入り",
+        "favorited": "お気に入り済み",
+        "favoriteAdded": "お気に入りに追加しました",
+        "favoriteRemoved": "お気に入りから外しました",
+        "favoriteFailed": "お気に入りの更新に失敗しました",
+        "loginForFavorite": "ログイン後にお気に入りに追加してください",
+        "copyLink": "リンクをコピー",
+        "copyFloorLink": "リンクをコピー",
+        "copied": "リンクをコピーしました",
+        "copyFailed": "コピーできませんでした",
+        "onlyOp": "スレ主のみ",
+        "onlyOpEmpty": "スレ主の返信はまだありません",
+        "jumpFloor": "階",
+        "jump": "移動",
+        "floorMissing": "その階はありません",
+        "edit": "編集",
+        "delete": "削除",
+        "deleteThreadTitle": "スレッドを削除",
+        "deleteThreadConfirm": "削除するとスレッドと返信は表示されなくなり、元に戻せません。",
+        "deleteReplyTitle": "返信を削除",
+        "deleteReplyConfirm": "削除するとこの返信は表示されなくなり、元に戻せません。",
+        "deleted": "削除しました",
+        "deleteFailed": "削除に失敗しました",
+        "save": "保存",
+        "saving": "保存中…",
+        "saved": "保存しました",
+        "saveFailed": "保存に失敗しました",
+        "editReply": "返信を編集",
+        "draftRestored": "未投稿の下書きを復元しました",
+        "discardDraft": "下書きを破棄"
+      },
+      "editor": {
+        "heading": "スレッドを編集",
+        "back": "スレッドへ戻る",
+        "notOwner": "自分のスレッドのみ編集できます"
+      },
+      "user": {
+        "title": "ユーザー",
+        "follow": "フォロー",
+        "following": "フォロー中",
+        "unfollow": "フォロー解除",
+        "followBack": "フォローバック",
+        "block": "ブロック",
+        "unblock": "ブロック解除",
+        "blockTitle": "ユーザーをブロック",
+        "blockConfirm": "ブロックするとこのユーザーの投稿と通知が表示されなくなり、相互のフォローも解除されます。",
+        "followsYou": "フォローされています",
+        "mutual": "相互フォロー",
+        "blockedNote": "このユーザーをブロックしています",
+        "threads": "投稿",
+        "followers": "フォロワー",
+        "followingCount": "フォロー",
+        "latest": "最近の投稿",
+        "noThreads": "まだ投稿がありません",
+        "updated": "更新しました",
+        "login": "ログインしてフォロー"
+      },
+      "mine": {
+        "tabsLabel": "マイコミュニティの内容",
+        "replied": "返信した",
+        "favorites": "お気に入り",
+        "history": "閲覧履歴",
+        "following": "フォロー",
+        "followers": "フォロワー",
+        "blocked": "ブロック中",
+        "emptyReplied": "まだ返信したスレッドはありません",
+        "emptyFavorites": "お気に入りはまだありません",
+        "emptyHistory": "閲覧履歴はありません",
+        "emptyFollowing": "まだ誰もフォローしていません",
+        "emptyFollowers": "フォロワーはまだいません",
+        "emptyBlocked": "ブロック中のユーザーはいません",
+        "recordHistory": "閲覧履歴を記録する",
+        "clearHistory": "閲覧履歴を消去",
+        "clearHistoryConfirm": "消去すると元に戻せません。",
+        "historyCleared": "閲覧履歴を消去しました"
+      },
+      "notify": {
+        "markRead": "既読にする",
+        "filterLabel": "通知の種類",
+        "all": "すべて",
+        "filteredEmpty": "このページにはこの種類の通知はありません"
       }
     },
     "account": {

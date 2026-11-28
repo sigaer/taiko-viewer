@@ -1,6 +1,6 @@
 <script setup lang="ts">
-// "Chart data" section of the song detail page: the V2 constants of the selected chart (ChartData) as the lead, then
-// the five-ability radar and the six-dimension radar side by side from 1100 px — the six-dimension one from the rating file (shown unless the song is "other" and has no values, as before).
+// "Chart data" card of the song detail page: the V2 constants of the selected chart (ChartData) as the lead, as stat tiles, then
+// the five-ability radar and the six-dimension radar side by side where they fit — the six-dimension one from the rating file (shown unless the song is "other" and has no values, as before).
 // The page computes the radar values (its data keys are the rating file's field names); this only draws them.
 import type { PropType } from "vue";
 import type { V2ConstantsItem } from "~/types/content";
@@ -22,7 +22,7 @@ const { t } = useI18n();
 </script>
 
 <template>
-  <ReworkPanel plain :title="t('rework.songDetail.data.title')">
+  <ReworkPanel class="data" :title="t('rework.songDetail.data.title')">
     <template #actions>
       <NuxtLink class="rw-link more" :to="rtTo">{{ t("tools.rtCalculator") }} →</NuxtLink>
     </template>

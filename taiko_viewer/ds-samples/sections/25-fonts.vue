@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// P0-10 font comparison page. `?fonts=b` (default) renders with Barlow + system CJK (D0-4 = B).
+// P0-10 font comparison page. `?fonts=b` (default) renders with Outfit + system CJK (D0-4 = B).
 // `?fonts=a` additionally links /_ds-fonts-a/fonts-cjk.css, which declares the self-hosted 'Noto Sans SC Variable' /
 // 'Noto Sans JP Variable' families the token stacks already name first. That URL is NOT served by the app and its
 // font files are not in the repository: scripts/ds/font-measure.mjs answers it from a local @fontsource-variable
@@ -92,7 +92,7 @@ useHead(() => ({
 }
 .ds-fonts__screen[lang="ja"],
 .ds-fonts__list[lang="ja"] {
-  font-family: "Barlow", var(--font-cjk-jp);
+  font-family: "Outfit", var(--font-cjk-jp);
 }
 .ds-fonts__screen p {
   margin: 0 0 var(--sp-2);

@@ -11,6 +11,8 @@ const route = useRoute();
 const router = useRouter();
 const activeFilter = computed(() => ['hot', 'guide', 'featured'].includes(String(route.query.filter)) ? String(route.query.filter) : 'latest');
 const selectFilter = (filter: string) => router.push({ query: { ...route.query, filter: filter === 'latest' ? undefined : filter } });
+// Thread search: the all-discussions list with the existing title keyword filter.
+const searchThreads = (keyword: string) => router.push(localePath({ path: '/forum/discussions', query: keyword ? { keyword } : {} }));
 const allDiscussionsPath = computed(() => ({ path: '/forum/discussions', query: {
   ...(activeFilter.value === 'hot' || activeFilter.value === 'featured' ? { sort: activeFilter.value } : {}),
   ...(activeFilter.value === 'guide' ? { threadType: 'guide' } : {})
@@ -76,6 +78,7 @@ onBeforeUnmount(() => {
         <ReworkCommunityBoards :sections="home?.sections || []" />
       </template>
       <div class="community-feed-column">
+        <ReworkCommunitySearch class="community-search" @search="searchThreads" />
         <div class="community-filters rw-seg" role="group" :aria-label="t('page.forum.index.filtersLabel')">
           <button v-for="filter in filters" :key="filter.key" type="button" :aria-pressed="activeFilter === filter.key" @click="selectFilter(filter.key)">{{ filter.label }}</button>
         </div>

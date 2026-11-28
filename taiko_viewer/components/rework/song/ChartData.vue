@@ -3,7 +3,7 @@
 // page (same /api/content/songs/:id/v2 call and key), so the difficulty tabs can show the constants too; this
 // component only presents one chart: the main constant first and largest, 75% / 99% and notes beside it (the lead of
 // the section), then a row of radars — the five ability values here, plus whatever the default slot adds (the page's
-// six-dimension radar); side by side from 1100 px, stacked below. Hard / oni / ura oni only (the source has no other difficulties).
+// six-dimension radar); side by side where the column fits two, stacked otherwise. Hard / oni / ura oni only (the source has no other difficulties).
 import type { V2ConstantsItem } from "~/types/content";
 import { Comment, useSlots } from "vue";
 import DsRadar from "~/components/ds/charts/Radar.vue";
@@ -75,36 +75,40 @@ const domain = computed<[number, number]>(() => [0, Math.max(10, Math.ceil(Math.
 
 <style scoped>
 .stats {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  gap: var(--sp-4) var(--sp-8);
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: var(--sp-3);
   margin: 0;
 }
 .stat {
   display: flex;
   flex-direction: column-reverse;
+  justify-content: flex-end;
   gap: 2px;
   min-width: 0;
+  padding: 14px var(--sp-4);
+  border-radius: var(--r-ctl);
+  background: var(--bg-sunk);
 }
 .stat dt {
   font-size: var(--fs-12);
-  color: var(--ink-3);
+  font-weight: 700;
+  color: var(--ink-2);
 }
-.stat dd {
+.stats .stat dd {
   margin: 0;
-  font-size: var(--fs-22);
-  line-height: 1.1;
+  font-family: var(--font-display, var(--font-ui));
+  font-size: var(--fs-30);
+  font-weight: 800;
+  line-height: 1.2;
   color: var(--ink);
 }
 .stat.is-main dd {
-  font-size: var(--fs-48);
-  font-weight: 700;
   color: var(--emph-num);
 }
 .radars {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(248px, 1fr));
   gap: var(--sp-6);
   margin-top: var(--sp-6);
   padding-top: var(--sp-4);
@@ -138,17 +142,16 @@ figcaption {
   font-size: var(--fs-12);
   color: var(--ink-3);
 }
-@media (max-width: 1099px) {
-  .radars {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
 @media (max-width: 767px) {
-  .stat.is-main dd {
-    font-size: var(--fs-36);
-  }
   .stats {
-    gap: var(--sp-3) var(--sp-5);
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .stat {
+    padding: 10px 14px;
+  }
+  .stats .stat dd {
+    font-size: var(--fs-22);
   }
 }
 </style>

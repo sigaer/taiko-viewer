@@ -45,6 +45,22 @@ test("diff tabs SSR: one tablist, one selected tab in the tab order, names for s
   assert.deepEqual(none.map((b) => b.tabindex), ["0", "-1", "-1", "-1"], "without a selection the first tab is focusable");
 });
 
+test("diff tabs lg (song detail tiles): same tablist and names; name over star, constant with its caption, — when missing", async () => {
+  for (const locale of ["zh", "ja"]) {
+    const html = await render("DiffTabs", { charts: FIVE, modelValue: 4, size: "lg" }, { locale });
+    assert.match(html, /class="ds-difftabs ds-difftabs--lg/);
+    const tabs = attrs(html, "button");
+    assert.deepEqual(tabs.map((b) => b["aria-selected"]), ["false", "false", "false", "true", "false"]);
+    assert.ok(tabs.every((b) => b.role === "tab"));
+    assert.doesNotMatch(html, /ds-difftab__short/, "no one-character names on tiles");
+    for (let d = 1; d <= 5; d++) assert.ok(html.includes(`ds-difftab__sr" data-v-ds-difftabs>${t(locale, `difficulty.${d}`)} `), `full name ${d}`);
+    const caption = t(locale, "ds.diff.constant").replace("{value}", "").trim();
+    assert.equal((html.match(new RegExp(`ds-difftab__cap" data-v-ds-difftabs>${caption}<`, "g")) || []).length, 5);
+    assert.ok(html.includes(">6.50<") && html.includes(">10.50<"));
+    assert.equal((html.match(/ds-difftab__constant is-missing" data-v-ds-difftabs>—</g) || []).length, 2, "easy / normal have no constant");
+  }
+});
+
 test("diff tabs: emits the difficulty only; no router or URL access", () => {
   const source = readFileSync(new URL("../components/ds/DiffTabs.vue", import.meta.url), "utf8");
   assert.doesNotMatch(source, /useRoute|useRouter|navigateTo|location\.|history\.|searchParams|\$route/);

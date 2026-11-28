@@ -3,6 +3,8 @@
 // Today.vue (guest): the product line, the song search and the sign-in action on the left, real content on the right
 // (latest songs; under the search on phones, so the first screen shows songs and not only a prompt), then the public
 // tools, current events with the Bilibili feed, the 段位 summary and what an account adds.
+// Redesign 2026-11-27: the public tools are the feature grid of the navigation model (today/Tools.vue), so a first
+// visit shows what the site offers; latest songs is a card with hairline rows.
 // Every block of the old guest home is kept; analytics events unchanged.
 import type { SongCatalogItem } from "~/types/content";
 import { trackViewerEvent } from "~/utils/analytics";
@@ -63,7 +65,7 @@ onMounted(() => {
 <style scoped>
 .tg {
   display: grid;
-  gap: var(--sp-10);
+  gap: var(--sp-6);
   min-width: 0;
   color: var(--ink);
   font-family: var(--font-ui);
@@ -71,7 +73,7 @@ onMounted(() => {
 .tg-top {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
-  gap: var(--sp-12);
+  gap: var(--sp-10);
   align-items: start;
   padding-top: var(--sp-4);
 }
@@ -90,8 +92,10 @@ onMounted(() => {
 }
 .tg-title {
   margin: 0;
+  font-family: var(--font-display);
   font-size: clamp(1.75rem, 3.2vw, 2.75rem);
-  font-weight: 900;
+  font-weight: 800;
+  letter-spacing: -0.02em;
   line-height: var(--lh-tight);
   text-wrap: balance;
 }
@@ -123,7 +127,7 @@ onMounted(() => {
 .tg-duo {
   display: grid;
   grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
-  gap: var(--sp-8);
+  gap: var(--sp-5);
   align-items: start;
 }
 @media (max-width: 1239px) {
@@ -139,7 +143,7 @@ onMounted(() => {
 }
 @media (max-width: 767px) {
   .tg {
-    gap: var(--sp-8);
+    gap: var(--sp-5);
   }
   .tg-top {
     padding-top: 0;

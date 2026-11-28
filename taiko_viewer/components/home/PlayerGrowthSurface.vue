@@ -3,6 +3,7 @@
 // cancel, evaluation and the refresh after evaluation, the voice copy, the feedback composition. The presentation is in
 // components/rework/today/* (Board, Hello, Profile, Goal, GoalPicker, Plan); RecentGrowth and DailyProgress keep their
 // own logic. Classes such as growth-goal, goal-evaluate, growth-plan__choose stay as hooks of the browser checks.
+// Redesign 2026-11-27: the overall Rating is the numeral of the vermilion card (Hero); phones get the 常用 grid.
 import { composeRecommendationCopy, composeGoalCopy, composeDailyFactCopy, type GrowthVoiceContext } from "~/utils/growthVoice";
 import { composeHomeGrowthFeedback } from "~/utils/homeGrowthFeedback";
 import { formatScoreRank } from "~/utils/scoreRank";
@@ -184,6 +185,12 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
         <p v-if="evaluationNotice" class="rw-note" role="status">{{ evaluationNotice }}</p>
         <p v-if="goalError && !selected" class="rw-note goal-error" role="alert">{{ goalError }}</p>
       </template>
+      <template #hero>
+        <ReworkTodayHero :rating="pending || failed ? null : overview.playerState.overallRating" />
+      </template>
+      <template #quick>
+        <ReworkTodayTools quick :title="t('rework.home.quick')" />
+      </template>
       <template v-if="pending" #profile>
         <ReworkState kind="loading" class="growth-loading" :lines="4" />
       </template>
@@ -191,7 +198,7 @@ const trackPlanClick = (songId: number) => trackViewerEvent("home_growth_plan_cl
         <ReworkState kind="failed" :title="t('home.growth.loadFailed')" :retry-label="t('home.growth.recent.retry')" @retry="refreshGrowth(identity)" />
       </template>
       <template v-else #profile>
-        <ReworkTodayProfile :rating="overview.playerState.overallRating" :skills="overview.playerState.skills" :focus="profileFocus" :observation="t(recommendationCopy.observation.key)" />
+        <ReworkTodayProfile :skills="overview.playerState.skills" :focus="profileFocus" :observation="t(recommendationCopy.observation.key)" />
       </template>
       <template v-if="!pending && !failed && (activeGoal || recentCompletedGoal)" #goal>
         <ReworkTodayGoal

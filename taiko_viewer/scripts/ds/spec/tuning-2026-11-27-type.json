@@ -1,0 +1,65 @@
+{
+ "title": "Redesign typeface and shape language (approved 2026-11-27): Outfit for UI text, titles and large numerals, Barlow Condensed kept for dense tabular numbers; cards 20, controls 12, tags fully round, a raised thumb shadow for segmented controls. Applied on top of tuning-2026-11-27.json.",
+ "doc": "docs/design-system/viewer-ds.md §改版字体与形状（2026-11-27）",
+ "note": "changed.*.prototype is the frozen prototype value (null when the token was added by an earlier tuning), previous the value before this tuning. 'both' applies to the light and dark themes alike; 'ja' is the Japanese UI rule (:lang(ja)).",
+ "changed": {
+  "both": {
+   "--font-ui": {
+    "prototype": "'Barlow', var(--font-cjk-sc)",
+    "previous": "'Barlow', var(--font-cjk-sc)",
+    "tuned": "'Outfit', var(--font-cjk-sc)"
+   },
+   "--font-num": {
+    "prototype": "'Barlow Condensed', 'Barlow', var(--font-cjk-sc)",
+    "previous": "'Barlow Condensed', 'Barlow', var(--font-cjk-sc)",
+    "tuned": "'Barlow Condensed', 'Outfit', var(--font-cjk-sc)"
+   },
+   "--r-ctl": {
+    "prototype": "8px",
+    "previous": "8px",
+    "tuned": "12px"
+   },
+   "--r-panel": {
+    "prototype": "14px",
+    "previous": "14px",
+    "tuned": "20px"
+   },
+   "--tag-radius": {
+    "prototype": "var(--r-xs)",
+    "previous": "var(--r-xs)",
+    "tuned": "var(--r-note)"
+   }
+  },
+  "light": {},
+  "dark": {},
+  "stage": {},
+  "ja": {
+   "--font-ui": {
+    "prototype": "'Barlow', var(--font-cjk-jp)",
+    "previous": "'Barlow', var(--font-cjk-jp)",
+    "tuned": "'Outfit', var(--font-cjk-jp)"
+   },
+   "--font-num": {
+    "prototype": "'Barlow Condensed', 'Barlow', var(--font-cjk-jp)",
+    "previous": "'Barlow Condensed', 'Barlow', var(--font-cjk-jp)",
+    "tuned": "'Barlow Condensed', 'Outfit', var(--font-cjk-jp)"
+   }
+  }
+ },
+ "added": {
+  "both": {
+   "--font-display": "'Outfit', var(--font-cjk-sc)",
+   "--fs-30": "1.875rem"
+  },
+  "light": {
+   "--shadow-thumb": "0 1px 2px rgb(21 24 42 / 0.12)"
+  },
+  "dark": {
+   "--shadow-thumb": "0 1px 2px rgb(0 0 0 / 0.5), 0 0 0 1px #3a3f62"
+  },
+  "stage": {},
+  "ja": {
+   "--font-display": "'Outfit', var(--font-cjk-jp)"
+  }
+ }
+}

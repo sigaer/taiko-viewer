@@ -43,7 +43,7 @@ const dot = (slug: string) => ({ color: `var(--section-${slug}, var(--ink-3))` }
   display: flex;
   gap: var(--sp-2);
   margin: 0;
-  padding: 0 0 var(--sp-1);
+  padding: 4px 4px var(--sp-1);
   list-style: none;
   overflow-x: auto;
   scrollbar-width: none;
@@ -55,12 +55,14 @@ const dot = (slug: string) => ({ color: `var(--section-${slug}, var(--ink-3))` }
   display: inline-flex;
   align-items: center;
   gap: var(--sp-2);
-  min-height: 40px;
-  padding: 0 var(--sp-3);
+  min-height: var(--hit);
+  padding: 0 var(--sp-4);
   border: 1px solid var(--line-strong);
   border-radius: var(--r-note);
+  background: var(--surface);
   color: var(--ink-2);
-  font-size: var(--fs-13);
+  font-size: var(--fs-14);
+  font-weight: 600;
   text-decoration: none;
   white-space: nowrap;
 }
@@ -96,6 +98,10 @@ const dot = (slug: string) => ({ color: `var(--section-${slug}, var(--ink-3))` }
   .cbd__list {
     display: grid;
     gap: 2px;
+    padding: var(--sp-2);
+    border: 1px solid var(--line);
+    border-radius: var(--r-panel);
+    background: var(--surface);
     overflow: visible;
   }
   .cbd__item {

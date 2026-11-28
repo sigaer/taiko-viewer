@@ -18,7 +18,7 @@ const localePath = useLocalePath();
 </script>
 
 <template>
-  <ReworkPanel class="tpl growth-plan" plain :title="title">
+  <ReworkPanel class="tpl growth-plan" :title="title">
     <template #actions>
       <NuxtLink class="rw-link tpl-more" :to="localePath('/tools/recommend')">{{ t("rework.home.allRecommendations") }}</NuxtLink>
     </template>
@@ -51,20 +51,18 @@ const localePath = useLocalePath();
 </template>
 
 <style scoped>
+/* a card with hairline rows (redesign 2026-11-27) */
 .tpl-more {
   display: inline-flex;
   align-items: center;
   min-height: var(--hit);
   font-size: var(--fs-13);
+  font-weight: 600;
 }
 .tpl-list {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  column-gap: var(--sp-8);
   margin: 0;
   padding: 0;
   list-style: none;
-  border-top: 1px solid var(--line-strong);
 }
 .tpl-row {
   display: flex;
@@ -72,8 +70,8 @@ const localePath = useLocalePath();
   gap: var(--sp-3);
   min-width: 0;
   min-height: var(--hit);
-  padding: var(--sp-2) 0;
-  border-bottom: 1px solid var(--line);
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
 }
 .tpl-song {
   flex: 1;
@@ -97,19 +95,15 @@ const localePath = useLocalePath();
   flex: none;
   color: var(--ink-2);
   font-size: var(--fs-13);
+  font-variant-numeric: tabular-nums;
 }
 .tpl-choose {
   flex: none;
 }
 .tpl-choose.is-selected {
-  border-color: var(--selected-line);
-  background: var(--selected-bg);
-  color: var(--selected-ink);
-}
-@media (max-width: 1099px) {
-  .tpl-list {
-    grid-template-columns: minmax(0, 1fr);
-  }
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--ink-inv);
 }
 @media (max-width: 767px) {
   .tpl-row {
@@ -123,35 +117,6 @@ const localePath = useLocalePath();
   }
   .tpl-choose {
     margin-left: auto;
-  }
-}
-@container home-main (min-width: 680px) {
-  .tpl-list {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--sp-4);
-    border-top: 0;
-  }
-  .tpl-row {
-    display: grid;
-    grid-template-rows: auto 1fr auto;
-    align-items: start;
-    gap: var(--sp-3);
-    padding: var(--sp-3);
-    border: 1px solid var(--line);
-    border-radius: var(--r-panel);
-    background: var(--surface);
-  }
-  .tpl-best {
-    flex-wrap: wrap;
-    font-size: var(--fs-14);
-    font-variant-numeric: tabular-nums;
-  }
-  .tpl-choose {
-    grid-row: 3;
-    align-self: end;
-    width: 100%;
-    min-height: var(--hit);
-    margin: 0;
   }
 }
 </style>

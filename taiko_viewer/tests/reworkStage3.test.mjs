@@ -28,7 +28,7 @@ const code = async (path) => (await read(path)).replace(/\/\*[\s\S]*?\*\//g, "")
 const locale = async (lang) => JSON.parse(await read(`locales/${lang}.json`));
 const get = (obj, key) => key.split(".").reduce((o, k) => o?.[k], obj);
 const COMMUNITY = "components/rework/community";
-const PAGES = ["pages/forum/index.vue", "pages/forum/discussions.vue", "pages/forum/section/[slug].vue", "pages/forum/thread/[id].vue", "pages/forum/new.vue", "pages/forum/me.vue", "pages/forum/notifications.vue"];
+const PAGES = ["pages/forum/index.vue", "pages/forum/discussions.vue", "pages/forum/section/[slug].vue", "pages/forum/thread/[id].vue", "pages/forum/new.vue", "pages/forum/me.vue", "pages/forum/notifications.vue", "pages/forum/edit/[id].vue", "pages/forum/user/[id].vue"];
 
 const floor = (id, floorNo, replies = 0, author = 1) => ({
   id,
@@ -165,6 +165,8 @@ test("every community page uses the rework frame and the Element Plus mapping", 
     if (!path.endsWith("new.vue")) assert.match(source, /hidePageHeader: true/, path);
   }
   assert.match(await read("pages/forum/new.vue"), /composerHeader: true/);
+  assert.match(await read("pages/forum/edit/[id].vue"), /composerHeader: true/);
+  for (const path of ["pages/forum/edit/[id].vue", "pages/forum/user/[id].vue"]) assert.match(await read(path), /useForumHydratedState\(/, path);
   for (const path of ["pages/forum/index.vue", "pages/forum/thread/[id].vue", `${COMMUNITY}/ListPage.vue`]) assert.match(await read(path), /useForumHydratedState\(/, path);
 });
 
@@ -217,4 +219,26 @@ test("forum copy lives in locales: rework.forum in both languages, the same keys
     assert.doesNotMatch(await read(path), /locale\.value === ["']ja["']\s*\?/, `${path}: no inline zh / ja table`);
   }
   assert.equal(get(zh, "rework.forum.thread.replyToUser").replace("{'@'}", "@"), "回复 @{username}");
+});
+
+test("community completion: search on the home and list pages, cards and section chips on tokens, new copy in rework.forum", async () => {
+  const index = await read("pages/forum/index.vue");
+  assert.match(index, /<ReworkCommunitySearch class="community-search" @search="searchThreads" \/>/);
+  assert.match(index, /path: '\/forum\/discussions', query: keyword \? \{ keyword \} : \{\}/, "the home search lands on all discussions with the existing keyword filter");
+  const list = await read(`${COMMUNITY}/ListPage.vue`);
+  assert.match(list, /<ReworkCommunitySearch :model-value="applied\.keyword" @search="\(keyword\) => pushFilters\(1, \{ \.\.\.applied, keyword \}\)" \/>/);
+  for (const file of ["Card.vue", "ThreadList.vue", "Floor.vue", "UserHead.vue"]) assert.match(await code(`${COMMUNITY}/${file}`), /border-radius: var\(--r-panel\)/, file);
+  for (const file of ["ThreadRow.vue", "ThreadHead.vue"]) {
+    const source = await code(`${COMMUNITY}/${file}`);
+    assert.match(source, /background: var\(--info-wash\);\s*color: var\(--info-ink\);/, `${file}: the section is a blue chip`);
+    assert.doesNotMatch(source, /__dot/, `${file}: no section dot`);
+  }
+  for (const file of (await readdir(new URL(`../${COMMUNITY}`, import.meta.url))).filter((f) => f.endsWith(".vue"))) {
+    assert.doesNotMatch(await code(`${COMMUNITY}/${file}`), /#[0-9a-fA-F]{3,8}(?![\w-])(?=[^{}]*;)/, `${file}: colours through tokens only`);
+  }
+  const [zh, ja] = await Promise.all([locale("zh"), locale("ja")]);
+  for (const key of ["search.label", "tools.favorite", "tools.onlyOp", "tools.deleteThreadConfirm", "editor.heading", "user.follow", "mine.history", "notify.markRead"]) {
+    assert.equal(typeof get(zh, `rework.forum.${key}`), "string", key);
+    assert.equal(typeof get(ja, `rework.forum.${key}`), "string", key);
+  }
 });

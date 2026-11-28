@@ -82,7 +82,8 @@ export function catalogRequestFor(state: CatalogState, pageSize = CATALOG_PAGE_S
 export const catalogRequest = (query: RouteQuery, pageSize = CATALOG_PAGE_SIZE) => catalogRequestFor(catalogState(query), pageSize);
 
 // Search and the unified catalog share the existing server-paginated contract.
-// Alias, artist and chart configuration search are not supported by the list API.
+// The list API also matches song aliases (alias-only hits carry `matchedAlias`); artist and chart configuration
+// search are not supported.
 export function songSearchRequest(keyword: string) {
   return catalogRequest({ q: keyword, shelf: 'all' }, 8);
 }

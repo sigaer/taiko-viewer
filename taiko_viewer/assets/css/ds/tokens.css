@@ -55,11 +55,13 @@ html.viewer-rework {
   --yamabuki-500: #f2b51d;
   --yamabuki-400: #ffcb45;
   --yamabuki-100: #fdf0c8;
-  /* ---------- Typography (D0-4 B: Barlow / Barlow Condensed self-hosted on the sample pages; CJK falls through to system fonts) ---------- */
+  /* ---------- Typography (D0-4 B, redesign 2026-11-27: Outfit for UI, titles and large numerals, Barlow Condensed for
+     dense tabular numbers; self-hosted; CJK falls through to system fonts) ---------- */
   --font-cjk-sc: 'Noto Sans SC Variable', 'PingFang SC', 'HarmonyOS Sans SC', 'Microsoft YaHei UI', 'Microsoft YaHei', sans-serif;
   --font-cjk-jp: 'Noto Sans JP Variable', 'Hiragino Sans', 'Yu Gothic UI', 'Meiryo', sans-serif;
-  --font-ui: 'Barlow', var(--font-cjk-sc);
-  --font-num: 'Barlow Condensed', 'Barlow', var(--font-cjk-sc);
+  --font-ui: 'Outfit', var(--font-cjk-sc);
+  --font-display: 'Outfit', var(--font-cjk-sc);
+  --font-num: 'Barlow Condensed', 'Outfit', var(--font-cjk-sc);
   --fs-11: 0.6875rem;
   --fs-12: 0.75rem;
   --fs-13: 0.8125rem;
@@ -68,6 +70,7 @@ html.viewer-rework {
   --fs-18: 1.125rem;
   --fs-22: 1.375rem;
   --fs-28: 1.75rem;
+  --fs-30: 1.875rem;
   --fs-36: 2.25rem;
   --fs-48: 3rem;
   --fs-64: 4rem;
@@ -86,8 +89,9 @@ html.viewer-rework {
   --sp-12: 48px;
   --sp-16: 64px;
   /* ---------- Radius ---------- */
-  --r-ctl: 8px;
-  --r-panel: 14px;
+  /* redesign 2026-11-27: cards 20, controls 12, chips and tags fully round */
+  --r-ctl: 12px;
+  --r-panel: 20px;
   --r-sheet: 22px;
   --r-note: 999px;
   --r-xs: 6px;
@@ -126,7 +130,7 @@ html.viewer-rework {
   --btn-pad-x-sm: 10px;
   --btn-pad-x-lg: 20px;
   --tag-h: 20px;
-  --tag-radius: var(--r-xs);
+  --tag-radius: var(--r-note);
   --plate-h: 22px;
   /* ---------- Overlays ---------- */
   --overlay-radius: var(--r-panel);
@@ -324,6 +328,7 @@ html.viewer-rework:not([data-theme="dark"]) {
   --lane: #1b1e33;
   --shadow-pop: 0 18px 50px -12px rgb(21 24 42 / 0.28), 0 2px 6px rgb(21 24 42 / 0.08);
   --shadow-lift: 0 6px 18px -8px rgb(21 24 42 / 0.22);
+  --shadow-thumb: 0 1px 2px rgb(21 24 42 / 0.12);
   --scrim: rgb(21 24 42 / 0.46);
   /* Role */
   /* links, info and focus are blue, never the brand */
@@ -414,6 +419,7 @@ html.viewer-rework[data-theme="dark"] {
   --lane: #0a0c18;
   --shadow-pop: 0 24px 60px -12px rgb(0 0 0 / 0.6), 0 0 0 1px #3a3f62;
   --shadow-lift: 0 8px 22px -8px rgb(0 0 0 / 0.5);
+  --shadow-thumb: 0 1px 2px rgb(0 0 0 / 0.5), 0 0 0 1px #3a3f62;
   --scrim: rgb(5 6 14 / 0.62);
   /* Role */
   --link: #7cc4f0;
@@ -455,13 +461,14 @@ html.viewer-rework[data-theme="dark"] {
   --rank-miyabi3-ink: #b98ffc;
 }
 
-/* ============ Japanese UI: Latin and digits stay Barlow, CJK falls back to the Japanese stack ============ */
+/* ============ Japanese UI: Latin and digits stay Outfit / Barlow Condensed, CJK falls back to the Japanese stack ============ */
 html.ds-preview:lang(ja),
 html.viewer-rework:lang(ja),
 html.ds-preview :lang(ja),
 html.viewer-rework :lang(ja) {
-  --font-ui: 'Barlow', var(--font-cjk-jp);
-  --font-num: 'Barlow Condensed', 'Barlow', var(--font-cjk-jp);
+  --font-ui: 'Outfit', var(--font-cjk-jp);
+  --font-display: 'Outfit', var(--font-cjk-jp);
+  --font-num: 'Barlow Condensed', 'Outfit', var(--font-cjk-jp);
 }
 
 /* ============ Narrow screens (breakpoint 767, utils/ds/breakpoints.ts) ============ */

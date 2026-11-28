@@ -1,7 +1,7 @@
 // Slice D (社区) presentation helpers. Pure functions only: no Nuxt imports, used by the reworked community
 // components and by node tests. Nothing here reads or writes forum data or decides a permission: it only turns what
 // /api/forum/* returned into what a component draws (tabs, reply windows, identity pieces, notification marks).
-import type { ForumPostFloor, ForumPostReply, ForumThreadCard, ForumUserBadge } from "../../types/forum";
+import type { ForumContentBlock, ForumPostFloor, ForumPostReply, ForumThreadCard, ForumUserBadge } from "../../types/forum";
 
 /** Secondary tabs of the 社区 destination; each label equals the page's own <h1>. */
 export const COMMUNITY_TABS = [
@@ -138,3 +138,99 @@ export function forumTimeText(value: unknown, kind: "datetime" | "date", locale:
   if (timeZone) options.timeZone = timeZone;
   return new Intl.DateTimeFormat(locale === "ja" ? "ja-JP" : "zh-CN", options).format(date);
 }
+
+/** 只看楼主: the floors posted by the thread author (each with all of its replies), in the server order. */
+export function onlyAuthorFloors(floors: readonly ForumPostFloor[], authorId: number): ForumPostFloor[] {
+  return floors.filter((floor) => floor.author.id === authorId);
+}
+
+/**
+ * Jump to floor: the id of the floor with that number, or of the first later floor when that one no longer exists
+ * (removed floors leave gaps); null for a number that is not a positive integer or lies after the last floor.
+ */
+export function floorIdForNumber(floors: readonly ForumPostFloor[], value: unknown): number | null {
+  const n = Number(String(value ?? "").trim());
+  if (!Number.isSafeInteger(n) || n <= 0) return null;
+  let best: ForumPostFloor | null = null;
+  for (const floor of floors) {
+    if (floor.floorNo >= n && (!best || floor.floorNo < best.floorNo)) best = floor;
+  }
+  return best ? best.id : null;
+}
+
+/** Whether the signed-in member may offer edit / delete on an item: their own, and the thread is not locked. */
+export const ownsItem = (authorId: number | null | undefined, viewerId: number | null | undefined, locked = false) =>
+  !locked && typeof viewerId === "number" && viewerId > 0 && authorId === viewerId;
+
+/** Absolute link to a thread, or to one post of it (`#reply-<id>`, the page's deep-link format). */
+export function threadLink(origin: string, threadPath: string, postId?: number | null): string {
+  const base = `${String(origin || "").replace(/\/+$/, "")}${threadPath.startsWith("/") ? threadPath : `/${threadPath}`}`;
+  return postId ? `${base}#reply-${postId}` : base;
+}
+
+/** Notification types the type filter offers ("all" first); the API returns `type` on each item. */
+export const NOTIFICATION_FILTERS = ["all", "reply", "mention", "like", "system"] as const;
+export type NotificationFilter = (typeof NOTIFICATION_FILTERS)[number];
+export function filterNotifications<T extends { type: string }>(items: readonly T[], filter: NotificationFilter): T[] {
+  return filter === "all" ? [...items] : items.filter((item) => item.type === filter);
+}
+
+/** A block of a thread being edited (the edit page): its stored order is kept; `key` is a stable list key. */
+export type EditableBlock =
+  | { key: string; type: "paragraph"; text: string }
+  | { key: string; type: "image"; imageUrl: string; caption: string };
+
+/** Stored content blocks → editable blocks (same order; image alt is not edited and is dropped like on create). */
+export function toEditableBlocks(blocks: readonly ForumContentBlock[]): EditableBlock[] {
+  return blocks.map((block, index) =>
+    block.type === "paragraph"
+      ? { key: `b${index}`, type: "paragraph", text: block.text }
+      : { key: `b${index}`, type: "image", imageUrl: block.imageUrl, caption: block.caption || "" }
+  );
+}
+
+/** Editable blocks → the request's contentBlocks (empty paragraphs dropped, text trimmed; the server sanitises again). */
+export function fromEditableBlocks(blocks: readonly EditableBlock[]): ForumContentBlock[] {
+  const out: ForumContentBlock[] = [];
+  for (const block of blocks) {
+    if (block.type === "paragraph") {
+      if (block.text.trim()) out.push({ type: "paragraph", text: block.text.trim() });
+    } else if (block.imageUrl) {
+      out.push(block.caption.trim() ? { type: "image", imageUrl: block.imageUrl, caption: block.caption.trim() } : { type: "image", imageUrl: block.imageUrl });
+    }
+  }
+  return out;
+}
+
+/**
+ * Whether a stored summary is the one the server derived from the first paragraph (clipText(…, 120), as on create
+ * when the summary field was left empty). The edit page then leaves the field empty so it is derived again from the
+ * edited body instead of keeping the old first paragraph.
+ */
+export function isDerivedSummary(summary: string, blocks: readonly ForumContentBlock[]): boolean {
+  const first = blocks.find((block): block is Extract<ForumContentBlock, { type: "paragraph" }> => block.type === "paragraph" && Boolean(block.text.trim()));
+  if (!first) return false;
+  const normalized = first.text.trim().replace(/\s+/g, " ");
+  const derived = normalized.length <= 120 ? normalized : `${normalized.slice(0, 119)}…`;
+  return summary === derived;
+}
+
+/** Tags of a thread → the composer's tag field text (space separated; the request splits it as on create). */
+export const tagsInputOf = (tags: readonly string[]) => tags.join(" ");
+/** The composer's tag split (the same expression as pages/forum/new.vue). */
+export const splitTags = (input: string) => input.split(/[\s,，#]+/).map((item) => item.trim()).filter(Boolean);
+
+/** Sections of /forum/me (the `tab` query; `threads` is the default and not written). */
+export const ME_TABS = ["threads", "replied", "favorites", "history", "following", "followers", "blocked"] as const;
+export type MeTab = (typeof ME_TABS)[number];
+export const meTab = (value: unknown): MeTab => {
+  const raw = String(Array.isArray(value) ? value[0] : value);
+  return (ME_TABS as readonly string[]).includes(raw) ? (raw as MeTab) : "threads";
+};
+/** The read behind a tab: threads.get `scope` for thread tabs, relationships.get `scope` for people tabs. */
+export const meTabRequest = (tab: MeTab): { kind: "threads" | "people"; scope: string } =>
+  tab === "threads"
+    ? { kind: "threads", scope: "mine" }
+    : tab === "following" || tab === "followers" || tab === "blocked"
+      ? { kind: "people", scope: tab }
+      : { kind: "threads", scope: tab };

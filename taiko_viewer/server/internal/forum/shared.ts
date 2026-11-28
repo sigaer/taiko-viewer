@@ -93,7 +93,8 @@ export type ThreadRow = {
   song_id: number | null;
   difficulty_type: number | null;
   level: number | null;
-  status: "published" | "hidden";
+  /** "deleted": removed by its author (forum/ownership.ts); never listed, 404 for everyone */
+  status: "published" | "hidden" | "deleted";
   is_pinned: number;
   is_featured: number;
   is_locked: number;
@@ -119,7 +120,7 @@ export type PostRow = {
   body_text: string;
   content_blocks_json: string | null;
   like_count: number;
-  status: "published" | "hidden";
+  status: "published" | "hidden" | "deleted";
   created_at: Date | string;
 };
 
@@ -602,7 +603,8 @@ export const sanitizeThreadCard = async (
     difficultyType: row.difficulty_type,
     level: row.level
   }),
-  status: row.status,
+  // deleted rows never reach a card (every read filters them out)
+  status: row.status === "hidden" ? "hidden" : "published",
   isPinned: Boolean(row.is_pinned),
   isFeatured: Boolean(row.is_featured),
   isLocked: Boolean(row.is_locked),

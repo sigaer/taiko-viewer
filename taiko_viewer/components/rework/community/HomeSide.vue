@@ -35,7 +35,7 @@ const localePath = useLocalePath();
       <ol class="chs__top">
         <li v-for="(entry, index) in leaderboard" :key="entry.author.id">
           <span class="chs__pos num">{{ index + 1 }}</span>
-          <ReworkCommunityAuthor :user="entry.author" :size="32" titles="none" class="chs__who" />
+          <ReworkCommunityAuthor :user="entry.author" :size="32" titles="none" class="chs__who" link />
           <span class="chs__counts">
             <span>{{ t("page.forum.index.postStat", { count: entry.threadCount }) }}</span>
             <span>{{ t("page.forum.index.likeStat", { count: entry.likeCount }) }}</span>

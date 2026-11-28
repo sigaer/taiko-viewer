@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // ReworkPanel — a titled section of a reworked page.
-//   surface (default)  a raised panel: --surface, 1px --line, --r-panel
+//   surface (default)  a card: --surface, 1px --line, --r-panel (20); title 16 / 700 (redesign 2026-11-27)
 //   plain              no surface: a section of the main column, separated from the previous one by spacing
 // Title (h2 by default, `level` 3 inside another section), optional `actions` slot on the right of the title.
 // The section is labelled by its title; without a title pass `label` for the accessible name.
@@ -35,6 +35,7 @@ const headingTag = computed(() => (props.level === 3 ? "h3" : "h2"));
 .rw-panel {
   min-width: 0;
   padding: var(--sp-4) var(--sp-5) var(--sp-5);
+  box-sizing: border-box;
   border: 1px solid var(--line);
   border-radius: var(--r-panel);
   background: var(--surface);
@@ -62,7 +63,7 @@ const headingTag = computed(() => (props.level === 3 ? "h3" : "h2"));
   color: var(--ink);
 }
 .rw-panel__title.is-h2 {
-  font-size: var(--fs-18);
+  font-size: var(--fs-16);
   font-weight: 700;
 }
 .rw-panel__title.is-h3 {

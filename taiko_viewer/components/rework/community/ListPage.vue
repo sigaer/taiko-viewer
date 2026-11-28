@@ -1,8 +1,8 @@
 <script setup lang="ts">
 // ReworkCommunityListPage — /forum/section/:slug and /forum/discussions (moved from components/forum/ThreadListPage.vue;
 // the script is unchanged: the committed URL drives every read, filter edits stay a draft until applied, the page
-// number is corrected into range by replace). Presentation: sections, the sort row, an inline filter panel instead of
-// the dialog, the thread list with its states, and the pager.
+// number is corrected into range by replace). Presentation: sections, the title search (the `keyword` filter, applied
+// on submit), the sort row, an inline filter panel instead of the dialog, the thread list with its states, the pager.
 import type { ForumSection, ForumThreadCard, ForumThreadType } from "~/types/forum";
 import { parseForumListQuery, forumListLocationQuery, forumPageInRange } from "~/utils/forumListQuery";
 import { buildPageDescription } from "~/utils/seo";
@@ -124,6 +124,7 @@ watch(filterOpen, open => { if (open) Object.assign(filterState, applied.value);
         <ReworkCommunityBoards v-else :sections="sectionsData?.items || []" :current="boardsCurrent" />
       </template>
       <div class="cl-main">
+        <ReworkCommunitySearch :model-value="applied.keyword" @search="(keyword) => pushFilters(1, { ...applied, keyword })" />
         <div class="cl-bar filter-panel">
           <div class="rw-seg sort-chips" role="group" :aria-label="t('page.forum.section.sortLabel')">
             <button v-for="option in sortOptions.slice(0, 2)" :key="option.value" type="button" :aria-pressed="applied.sort === option.value" @click="pushFilters(1, { ...applied, sort: option.value })">{{ option.label }}</button>
@@ -134,10 +135,6 @@ watch(filterOpen, open => { if (open) Object.assign(filterState, applied.value);
           </button>
         </div>
         <form v-if="filterOpen" :id="filterPanelId" class="rw-form cl-filters" @submit.prevent="pushFilters()">
-          <label class="rw-field rw-field--grow">
-            <span class="rw-field__label">{{ t("rework.forum.list.keyword") }}</span>
-            <input v-model="filterState.keyword" class="rw-input" type="search" enterkeyhint="search" :placeholder="t('page.forum.section.keywordPlaceholder')" />
-          </label>
           <label v-if="!fixedSectionSlug" class="rw-field">
             <span class="rw-field__label">{{ t("page.forum.section.sectionLabel") }}</span>
             <select v-model="filterState.sectionSlug" class="rw-select">

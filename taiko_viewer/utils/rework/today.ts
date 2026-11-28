@@ -2,6 +2,8 @@
 // reworked components and by node tests. Nothing here decides a business fact (home state, growth facts, goal
 // evaluation, weekly aggregation): it only turns what the API returned into what a component draws.
 
+import { FEATURES, type Feature } from "./navigation.ts";
+
 /** Secondary tabs of the 成长 destination; each tab label equals the page's own <h1>. */
 export const GROWTH_TABS = [
   { key: "passport", to: "/my/growth" },
@@ -121,3 +123,22 @@ export const WEEKLY_REASON_KEYS = keys("weekly.measurement", ["insufficient", "l
 export const WEEKLY_METHOD_KEYS = keys("weekly.measurementReasons", ["algorithm-mismatch", "model-mismatch", "measurement-version-mismatch"] as const);
 /** Key for a value of one of the tables above, or `fallback` when the API sent something the table does not know. */
 export const keyOf = (table: Record<string, string>, value: string | null | undefined, fallback = "") => (value && table[value]) || fallback;
+
+/**
+ * Feature grids of the home page, built from the navigation model (utils/rework/navigation.ts) so the names, icons and
+ * addresses are the shell's own. QUICK: the phone's 常用 grid of a player with data; PUBLIC: what the site offers, for
+ * visitors and players without data (it replaced the four hand-written public tools; their destinations are in it).
+ */
+export const QUICK_FEATURE_KEYS = ["b30", "recommend", "progress", "trend", "grade", "guide", "constants", "rtCalculator"] as const;
+export const PUBLIC_FEATURE_KEYS = ["catalog", "constants", "grade", "guide", "community", "rtCalculator", "chartConfig", "noteCount"] as const;
+/** Icon wash of a feature tile: the score pages brand, the library info, everything else neutral. */
+export type FeatureTint = "brand" | "info" | "plain";
+export type HomeFeature = Feature & { tint: FeatureTint };
+export function homeFeatures(keys: readonly string[]): HomeFeature[] {
+  return keys.flatMap((key) => {
+    const feature = FEATURES.find((f) => f.key === key);
+    if (!feature) return [];
+    const tint: FeatureTint = feature.groupKey === "rework.shell.myScores" ? "brand" : feature.groupKey === "rework.songs" ? "info" : "plain";
+    return [{ ...feature, tint }];
+  });
+}

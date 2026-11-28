@@ -41,7 +41,7 @@ const { t } = useI18n();
 <style scoped>
 .tp {
   display: grid;
-  gap: var(--sp-8);
+  gap: var(--sp-6);
   min-width: 0;
 }
 .tp-status {
@@ -52,7 +52,7 @@ const { t } = useI18n();
 .tp-grid {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
-  gap: var(--sp-8);
+  gap: var(--sp-5);
   align-items: start;
 }
 @media (max-width: 1099px) {

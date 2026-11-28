@@ -207,19 +207,21 @@ export async function runDetailScenarios({ browser, base, out, web = webRoot, la
           assert.ok(await noOverflow(page), "no horizontal overflow");
           assert.equal(await page.locator("#song-chart-workspace[role=tabpanel]").getAttribute("aria-labelledby"), "song-chart-workspace-tab-4");
           await page.waitForFunction(() => document.querySelector(".sheet img")?.naturalWidth > 0, null, { timeout: 15000 });
-          // guest prompt: the side card from 1100 px; below, one row after the chart section and before the data
-          assert.equal(await page.locator(".mine").isVisible(), width >= 1100, "side card only where the right column exists");
-          assert.equal(await page.locator(".mine-guest").isVisible(), width < 1100, "guest row only below 1100 px");
-          if (width < 1100) {
-            const order = await page.evaluate(() => {
-              const [chart, guest, data] = [".chart", ".mine-guest", ".v2"].map((q) => document.querySelector(q));
-              return Boolean(chart.compareDocumentPosition(guest) & 4) && Boolean(guest.compareDocumentPosition(data) & 4);
-            });
-            assert.ok(order, "chart → guest row → data");
-          }
-          // the two radars share a row from 1100 px, stacked below
+          // guest prompt (redesign v2): the sign-in card is the first card of the right column at every width; below
+          // 1100 px that column comes first, so it sits right after the difficulty tiles and before the chart card
+          assert.ok(await page.locator(".mine.is-guest").isVisible(), "guest card at every width");
+          const order = await page.evaluate(() => {
+            const [tabs, guest, chart] = ["[role=tablist]", ".mine.is-guest", ".chart"].map((q) => document.querySelector(q));
+            return Boolean(tabs.compareDocumentPosition(guest) & 4) && Boolean(guest.compareDocumentPosition(chart) & 4);
+          });
+          assert.ok(order, "tiles → guest card → chart");
+          // the two radars share a row where the data card fits two 248 px charts, stacked otherwise
           const [r1, r2] = await page.$$eval(".radars > figure", (els) => els.map((el) => el.getBoundingClientRect().top));
-          assert.equal(Math.abs(r1 - r2) < 2, width >= 1100, `radars side by side from 1100 px (${r1}/${r2})`);
+          const fits = await page.$eval(".radars", (el) => el.clientWidth >= 2 * 248 + 24);
+          assert.equal(Math.abs(r1 - r2) < 2, fits, `radars side by side when they fit (${r1}/${r2})`);
+          // phones: the action bar sits above the bottom navigation; larger screens: the actions are in the header card
+          assert.equal(await page.locator(".sa-dock").isVisible(), width < 768, "phone action bar only below 768 px");
+          assert.equal(await page.locator(".sd-headcard .chart-actions").isVisible(), width >= 768, "header actions from 768 px");
           const key = `${lang}-${width}-${theme}`;
           if (detailShots.has(key)) await shot(page, `detail-${key}`, width >= 1440 || key === "zh-390-dark");
         });
@@ -264,7 +266,8 @@ export async function runDetailScenarios({ browser, base, out, web = webRoot, la
     const facts = (await page.locator(".facts").textContent()).replace(/\s+/g, " ");
     for (const part of [full.artists.join(" / "), "BPM", full.bpm, "2024-02-02", "ID", "1", full.subtitle]) assert.ok(facts.includes(part), `fact ${part}: ${facts}`);
     assert.equal((await page.locator(".other-name").getAttribute("lang")), "ja");
-    assert.deepEqual(await page.$$eval(".rw-head__eyebrow .tag", (els) => els.map((e) => e.textContent.trim())), [msg(copy.zh, "rework.library.shelf.available"), "v1", "nijiiro"]);
+    assert.deepEqual(await page.$$eval(".rw-head__eyebrow .tag", (els) => els.map((e) => e.textContent.trim())), [msg(copy.zh, "rework.library.shelf.available")]);
+    assert.deepEqual(await page.$$eval(".sd-headcard .versions li", (els) => els.map((e) => e.textContent.trim())), ["v1", "nijiiro"], "version tags under the facts (redesign v2)");
     // the shell's back button is the only way back (no remembered library location → by list=); no in-page link
     assert.equal(await page.locator(".back-link").count(), 0);
     assert.equal(await page.locator(".rework-bar a.back").getAttribute("href"), "/songs");

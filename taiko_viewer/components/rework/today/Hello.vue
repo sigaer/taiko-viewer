@@ -47,8 +47,10 @@ const banner = inject<Ref<boolean> | null>("rework-home-banner", null);
 }
 .th-title {
   margin: 0;
-  font-size: var(--fs-28);
-  font-weight: 900;
+  font-family: var(--font-display);
+  font-size: var(--fs-30);
+  font-weight: 800;
+  letter-spacing: -0.01em;
   line-height: var(--lh-tight);
   overflow-wrap: anywhere;
 }

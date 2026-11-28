@@ -114,6 +114,7 @@ html.rework-ep:root {
 html.ds-preview:root .el-button,
 html.rework-ep:root .el-button {
   font-family: var(--font-ui);
+  font-weight: 700;
 }
 html.ds-preview:root .el-button.el-button--primary,
 html.rework-ep:root .el-button.el-button--primary {
@@ -244,6 +245,8 @@ html.rework-ep:root .el-dropdown-menu,
 html.rework-ep:root .el-popper.is-light,
 html.rework-ep:root .el-popper.is-dark {
   --el-dialog-bg-color: var(--overlay-bg);
+  --el-dialog-border-radius: var(--overlay-radius);
+  --el-messagebox-border-radius: var(--overlay-radius);
   --el-drawer-bg-color: var(--overlay-bg);
   --el-messagebox-title-color: var(--ink);
   --el-messagebox-content-color: var(--ink);
@@ -330,11 +333,22 @@ html.rework-ep:root .el-switch {
 }
 html.ds-preview:root .el-segmented,
 html.rework-ep:root .el-segmented {
+  /* a sunk track with a raised surface thumb (redesign 2026-11-27), as .rw-seg */
   --el-segmented-bg-color: var(--bg-sunk);
-  --el-segmented-item-selected-bg-color: var(--seg-on-bg);
-  --el-segmented-item-selected-color: var(--seg-on-ink);
+  --el-segmented-item-selected-bg-color: var(--surface);
+  --el-segmented-item-selected-color: var(--ink);
   --el-segmented-item-hover-bg-color: var(--surface-2);
   --el-segmented-color: var(--ink-2);
+  --el-border-radius-base: var(--r-ctl);
+}
+html.ds-preview:root .el-segmented__item-selected,
+html.rework-ep:root .el-segmented__item-selected {
+  box-shadow: var(--shadow-thumb);
+}
+html.ds-preview:root .el-tag,
+html.rework-ep:root .el-tag {
+  --el-tag-border-radius: var(--tag-radius);
+  --el-tag-border-radius-rounded: var(--r-note);
 }
 html.ds-preview:root .el-table,
 html.rework-ep:root .el-table {

@@ -2237,6 +2237,7 @@
       "pickEmpty": "当前推荐中没有其他可设为目标的歌曲。",
       "pickMore": "查看更多推荐",
       "bestScore": "最好成绩",
+      "quick": "常用",
       "daily": {
         "title": "今日进展",
         "count": "游玩 {count} 张谱面",
@@ -2270,6 +2271,25 @@
     "nextLanguage": "日",
     "exampleSong": "千本桜",
     "exampleCategory": "ナムコ",
+    "aliasMatch": "别名",
+    "constantRange": {
+      "between": "{column} {min}–{max}",
+      "atLeast": "{column} ≥ {min}",
+      "atMost": "{column} ≤ {max}",
+      "words": {
+        "mainConstant": "定数,95%定数,主定数",
+        "subConstant1": "75%定数",
+        "subConstant2": "99%定数",
+        "stamina": "体力",
+        "handspeed": "手速",
+        "burst": "爆发,爆發,瞬発,瞬发",
+        "complex": "复合,複合",
+        "rhythm": "节奏,節奏,リズム",
+        "to": "到,至",
+        "atLeast": "以上",
+        "atMost": "以下"
+      }
+    },
     "today": "今日",
     "songs": "曲库",
     "play": "成绩",
@@ -2312,6 +2332,7 @@
     "viewAll": "查看全部 {count} 首结果",
     "library": {
       "search": "搜索曲库",
+      "filters": "筛选",
       "searchPlaceholder": "曲名、分类或 ID",
       "clearKeyword": "清空关键词",
       "shelfLabel": "上架状态",
@@ -2384,7 +2405,8 @@
       "facts": {
         "artists": "作曲 / 演唱",
         "openDay": "上架",
-        "subtitle": "副标题"
+        "subtitle": "副标题",
+        "versions": "收录版本"
       },
       "side": {
         "label": "谱面类型",
@@ -2397,6 +2419,7 @@
         "open": "完整谱面",
         "openNew": "在新标签页打开完整谱面",
         "download": "下载 TJA+OGG",
+        "actions": "谱面操作",
         "excerpt": "谱面节选",
         "expand": "展开",
         "collapse": "收起",
@@ -2458,6 +2481,8 @@
         "combo": "最大连击",
         "drumroll": "连打",
         "plays": "游玩次数",
+        "clears": "过关",
+        "fullCombos": "全连",
         "updated": "最好成绩于",
         "others": "其他难度",
         "all": "全部成绩 →"
@@ -2487,7 +2512,11 @@
       "inspector": "谱面定数",
       "scale": "按准确率区分的定数",
       "select": "查看 {title} {difficulty} 的定数",
-      "close": "关闭"
+      "close": "关闭",
+      "range": "数值范围",
+      "rangeColumn": "范围列",
+      "rangeMin": "最小",
+      "rangeMax": "最大"
     },
     "b30": "B30 表",
     "trend": "Rating 走势",
@@ -2797,6 +2826,94 @@
         "keyword": "关键词",
         "type": "类型",
         "sort": "排序"
+      },
+      "search": {
+        "label": "搜索帖子",
+        "placeholder": "搜索帖子标题",
+        "submit": "搜索"
+      },
+      "tools": {
+        "favorite": "收藏",
+        "favorited": "已收藏",
+        "favoriteAdded": "已收藏",
+        "favoriteRemoved": "已取消收藏",
+        "favoriteFailed": "收藏失败",
+        "loginForFavorite": "请先登录后再收藏",
+        "copyLink": "复制链接",
+        "copyFloorLink": "复制链接",
+        "copied": "链接已复制",
+        "copyFailed": "复制失败",
+        "onlyOp": "只看楼主",
+        "onlyOpEmpty": "楼主还没有回复",
+        "jumpFloor": "楼层",
+        "jump": "跳转",
+        "floorMissing": "没有这一楼",
+        "edit": "编辑",
+        "delete": "删除",
+        "deleteThreadTitle": "删除帖子",
+        "deleteThreadConfirm": "删除后帖子和其中的回复将不再显示，无法恢复。",
+        "deleteReplyTitle": "删除回复",
+        "deleteReplyConfirm": "删除后这条回复将不再显示，无法恢复。",
+        "deleted": "已删除",
+        "deleteFailed": "删除失败",
+        "save": "保存",
+        "saving": "保存中…",
+        "saved": "已保存",
+        "saveFailed": "保存失败",
+        "editReply": "编辑回复",
+        "draftRestored": "已恢复未发布的草稿",
+        "discardDraft": "丢弃草稿"
+      },
+      "editor": {
+        "heading": "编辑帖子",
+        "back": "返回帖子",
+        "notOwner": "只能编辑自己发布的帖子"
+      },
+      "user": {
+        "title": "鼓友",
+        "follow": "关注",
+        "following": "已关注",
+        "unfollow": "取消关注",
+        "followBack": "回关",
+        "block": "屏蔽",
+        "unblock": "取消屏蔽",
+        "blockTitle": "屏蔽用户",
+        "blockConfirm": "屏蔽后不再看到 TA 的帖子和通知，并解除相互关注。",
+        "followsYou": "关注了你",
+        "mutual": "互相关注",
+        "blockedNote": "你已屏蔽该用户",
+        "threads": "发帖",
+        "followers": "粉丝",
+        "followingCount": "关注",
+        "latest": "最近的帖子",
+        "noThreads": "还没有帖子",
+        "updated": "已更新",
+        "login": "登录后关注"
+      },
+      "mine": {
+        "tabsLabel": "我的社区内容",
+        "replied": "回复过",
+        "favorites": "收藏",
+        "history": "浏览记录",
+        "following": "关注",
+        "followers": "粉丝",
+        "blocked": "已屏蔽",
+        "emptyReplied": "还没有回复过帖子",
+        "emptyFavorites": "还没有收藏",
+        "emptyHistory": "没有浏览记录",
+        "emptyFollowing": "还没有关注任何人",
+        "emptyFollowers": "还没有粉丝",
+        "emptyBlocked": "没有屏蔽的用户",
+        "recordHistory": "记录浏览历史",
+        "clearHistory": "清空浏览记录",
+        "clearHistoryConfirm": "清空后无法恢复。",
+        "historyCleared": "浏览记录已清空"
+      },
+      "notify": {
+        "markRead": "标为已读",
+        "filterLabel": "通知类型",
+        "all": "全部",
+        "filteredEmpty": "这一页没有此类通知"
       }
     },
     "account": {
